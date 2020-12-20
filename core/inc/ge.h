@@ -23,4 +23,9 @@
 	SOFTWARE.
 */
 
-#include <ge.h>
+#ifndef K_GAME_ENGINE_H
+#define K_GAME_ENGINE_H
+
+int test();
+
+#endif

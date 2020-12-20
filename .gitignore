@@ -1,0 +1,7 @@
+# Ignoring Microsoft Visual Studio Stuff
+.vs
+out/
+
+# Ignoring build stuff
+!build/.keep
+build/

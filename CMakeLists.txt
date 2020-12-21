@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19.1)
+cmake_minimum_required(VERSION 3.18)
 
 # -----------------------------------------------------------------------------
 #  P R O J E C T   N A M E
@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.19.1)
 project(k-engine)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # -----------------------------------------------------------------------------
 #  G A M E   N A M E

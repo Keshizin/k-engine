@@ -3,5 +3,5 @@
 out/
 
 # Ignoring build stuff
-!build/.keep
-build/
+build/*
+!build/*.keep

@@ -4,4 +4,4 @@ out/
 
 # Ignoring build stuff
 build/*
-!build/*.keep
+!build/build-msvc-x64.bat

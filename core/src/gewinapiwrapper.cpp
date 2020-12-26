@@ -86,7 +86,7 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 			dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU;
 			break;
 
-		case K_WINDOW_DEFAULT_NO_SYS:
+		case K_WINDOW_NO_SYS:
 			dwStyle = WS_POPUP | WS_BORDER | WS_CAPTION;
 			break;
 

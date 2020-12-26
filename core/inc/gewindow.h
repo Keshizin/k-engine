@@ -33,7 +33,7 @@
 // ****************************************************************************
 #define K_WINDOW_SPLASH              0x01
 #define K_WINDOW_DEFAULT             0x02
-#define K_WINDOW_DEFAULT_NO_SYS      0x03
+#define K_WINDOW_NO_SYS              0x03
 #define K_WINDOW_WINDOWED_FULLSCREEN 0x04
 #define K_WINDOW_COMPLETE            0x05
 

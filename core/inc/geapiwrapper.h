@@ -42,9 +42,9 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructor and Destructor
 	// ------------------------------------------------------------------------
-	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style) { return 1; }
+	virtual int createWindow(int, int, int, int, std::string, unsigned int) { return 1; }
 	virtual int destroyWindow() { return 1; }
-	virtual int showWindow(int showType) { return 1; }
+	virtual int showWindow(int) { return 1; }
 };
 
 #endif

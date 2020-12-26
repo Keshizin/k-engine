@@ -96,9 +96,9 @@ int GEWindow::show(int showType)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-void GEWindow::setApiWrapper(GEAPIWrapper *apiWrapper)
+void GEWindow::setApiWrapper(GEAPIWrapper *apiWrapperParam)
 {
-	this->apiWrapper = apiWrapper;
+	this->apiWrapper = apiWrapperParam;
 }
 
 GEAPIWrapper *GEWindow::getApiWrapper()
@@ -106,9 +106,9 @@ GEAPIWrapper *GEWindow::getApiWrapper()
 	return apiWrapper;
 }
 
-void GEWindow::setX(int x)
+void GEWindow::setX(int xParam)
 {
-	this->x = x;
+	this->x = xParam;
 }
 
 int GEWindow::getX()
@@ -116,9 +116,9 @@ int GEWindow::getX()
 	return x;
 }
 
-void GEWindow::setY(int y)
+void GEWindow::setY(int yParam)
 {
-	this->y = y;
+	this->y = yParam;
 }
 
 int GEWindow::getY()
@@ -126,9 +126,9 @@ int GEWindow::getY()
 	return y;
 }
 
-void GEWindow::setWidth(int width)
+void GEWindow::setWidth(int widthParam)
 {
-	this->width = width;
+	this->width = widthParam;
 }
 
 int GEWindow::getWidth()
@@ -136,9 +136,9 @@ int GEWindow::getWidth()
 	return width;
 }
 
-void GEWindow::setHeight(int height)
+void GEWindow::setHeight(int heightParam)
 {
-	this->height = height;
+	this->height = heightParam;
 }
 
 int GEWindow::getHeight()
@@ -146,9 +146,9 @@ int GEWindow::getHeight()
 	return height;
 }
 
-void GEWindow::setName(std::string name)
+void GEWindow::setName(std::string nameParam)
 {
-	this->name = name;
+	this->name = nameParam;
 }
 
 std::string GEWindow::getName()
@@ -156,9 +156,9 @@ std::string GEWindow::getName()
 	return name;
 }
 
-void GEWindow::setStyle(unsigned int style)
+void GEWindow::setStyle(unsigned int styleParam)
 {
-	this->style = style;
+	this->style = styleParam;
 }
 
 unsigned int GEWindow::getStyle()

@@ -5,7 +5,14 @@ cmake_minimum_required(VERSION 3.18)
 # -----------------------------------------------------------------------------
 project(k-engine)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3")
+if(MSVC)
+	set (CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /GR /EHs -Wall /wd4710 /wd4711 /wd4820")
+endif(MSVC)
+
+if(MINGW)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif(MINGW)
+
 message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # -----------------------------------------------------------------------------

@@ -27,9 +27,38 @@
 #include <windows.h>
 
 #include <iostream>
-#include <ge.h>
+#include <gewindow.h>
+#include <gewinapiwrapper.h>
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+// int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int main()
 {
+	GEAPIWrapper *apiWrapper = new GEWINAPIWrapper();
+	GEWindow window(apiWrapper);
+
+	window.create();
+	window.show(K_WINDOW_SHOW);
+
+	MSG msg;
+	bool isDone = false;
+
+	std::cout << "> START GAME LOOP" << std::endl;
+
+	while(!isDone)
+	{
+		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			if(msg.message == WM_QUIT)
+			{
+				isDone = TRUE;
+			}
+
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	std::cout << "> EXIT GAME LOOP" << std::endl;
+	
 	return 1;
 }

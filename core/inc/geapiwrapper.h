@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	Game Engine API Wrapper
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
 
@@ -23,9 +23,28 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_H
-#define K_ENGINE_H
+#ifndef K_ENGINE_API_WRAPPER_CLASS_H
+#define K_ENGINE_API_WRAPPER_CLASS_H
 
-int test();
+#include <string>
+
+// ****************************************************************************
+//  Game Engine API Wrapper Class
+// ****************************************************************************
+class GEAPIWrapper
+{
+public:
+	// ------------------------------------------------------------------------
+	//  Constructor and Destructor
+	// ------------------------------------------------------------------------
+	virtual ~GEAPIWrapper() {}
+
+	// ------------------------------------------------------------------------
+	//  Constructor and Destructor
+	// ------------------------------------------------------------------------
+	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style) { return 1; }
+	virtual int destroyWindow() { return 1; }
+	virtual int showWindow(int showType) { return 1; }
+};
 
 #endif

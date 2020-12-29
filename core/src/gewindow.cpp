@@ -55,7 +55,7 @@ GEWindow::GEWindow(GEAPIWrapper *apiWrapper)
 //  Public Methods
 // ****************************************************************************
 int GEWindow::create()
-{
+{	
 	if(!apiWrapper)
 	{
 		std::cout << "(!) ERROR - It was not possible create a window: no apiwrapper.\n" << std::endl;

@@ -110,7 +110,7 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 
 	hWindow = CreateWindowEx(
 		dwExStyle,
-		LPCSTR(WINDOWCLASSNAME),
+		WINDOWCLASSNAME,
 		LPCSTR(name.c_str()),
 		dwStyle,
 		x,

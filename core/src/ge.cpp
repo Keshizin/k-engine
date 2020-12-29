@@ -29,14 +29,16 @@
 KEngine::KEngine(GEEventHandler *eventHandler)
 {
 	this->apiWrapper = new GEWINAPIWrapper();
-	this->eventHandler = eventHandler;
 	this->gameWindow = new GEWindow(this->apiWrapper);
+	setEventHandler(eventHandler);
 
+	// (!) only in debug mode!
 	this->apiWrapper->createDebugConsole();
 }
 
 KEngine::~KEngine()
 {
+	// (!) only in debug mode!
 	this->apiWrapper->closeDebugConsole();
 
 	delete apiWrapper;

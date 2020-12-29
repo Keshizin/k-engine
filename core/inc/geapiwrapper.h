@@ -41,18 +41,27 @@ public:
 	virtual ~GEAPIWrapper() {}
 
 	// ------------------------------------------------------------------------
-	//  Public Methods
+	//  Window System's stuff
 	// ------------------------------------------------------------------------
-	virtual void setGlobalEventHandler(GEEventHandler *eventHandler) {}
-	
 	virtual int createWindow(int, int, int, int, std::string, unsigned int) { return 1; }
 	virtual int destroyWindow() { return 1; }
 	virtual int showWindow(int) { return 1; }
 	
 	// ------------------------------------------------------------------------
-	// Message Events Handling (Message Pump)
+	//  Message Events Handling (Message Pump) for Win32
 	// ------------------------------------------------------------------------
 	virtual void handleSystemMessages() {}
+
+	// ------------------------------------------------------------------------
+	//  Creating new Console for Debug
+	// ------------------------------------------------------------------------
+	virtual int createDebugConsole() { return 1; }
+	virtual int closeDebugConsole() { return 1; }
+
+	// ------------------------------------------------------------------------
+	//  Set Global Event Handler
+	// ------------------------------------------------------------------------
+	virtual void setGlobalEventHandler(GEEventHandler *) {}
 };
 
 #endif

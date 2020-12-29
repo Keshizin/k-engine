@@ -43,7 +43,7 @@
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // ****************************************************************************
-//  Game Engine Win32 API Wrapper
+//  Game Engine Win32 API Wrapper Class
 // ****************************************************************************
 class GEWINAPIWrapper : public GEAPIWrapper
 {
@@ -62,10 +62,19 @@ public:
 	int showWindow(int showType);
 
 	// ------------------------------------------------------------------------
-	// Message Events Handling (Message Pump)
+	//  Message Events Handling (Message Pump)
 	// ------------------------------------------------------------------------
 	void handleSystemMessages();
 	
+	// ------------------------------------------------------------------------
+	//  Creating new Console for Debug
+	// ------------------------------------------------------------------------
+	int createDebugConsole();
+	int closeDebugConsole();
+
+	// ------------------------------------------------------------------------
+	//  Set Global Event Handler
+	// ------------------------------------------------------------------------
 	void setGlobalEventHandler(GEEventHandler *eventHandler);
 
 private:

@@ -31,10 +31,14 @@ KEngine::KEngine(GEEventHandler *eventHandler)
 	this->apiWrapper = new GEWINAPIWrapper();
 	this->eventHandler = eventHandler;
 	this->gameWindow = new GEWindow(this->apiWrapper);
+
+	this->apiWrapper->createDebugConsole();
 }
 
 KEngine::~KEngine()
 {
+	this->apiWrapper->closeDebugConsole();
+
 	delete apiWrapper;
 	delete gameWindow;
 }
@@ -59,8 +63,8 @@ GEWindow *KEngine::getGameWindow()
 	return gameWindow;
 }
 
-void KEngine::setEventHandler(GEEventHandler *eventHandler)
+void KEngine::setEventHandler(GEEventHandler *eventHandlerParam)
 {
-	this->eventHandler = eventHandler;
-	this->apiWrapper->setGlobalEventHandler(eventHandler);
+	this->eventHandler = eventHandlerParam;
+	this->apiWrapper->setGlobalEventHandler(this->eventHandler);
 }

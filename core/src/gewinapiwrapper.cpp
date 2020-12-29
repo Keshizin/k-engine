@@ -26,6 +26,7 @@
 #include <gewinapiwrapper.h>
 #include <gewindow.h>
 #include <iostream>
+#include <tchar.h>
 
 GEEventHandler *globalEventHandler = 0;
 
@@ -43,7 +44,7 @@ GEWINAPIWrapper::~GEWINAPIWrapper()
 }
 
 // ****************************************************************************
-//  GEWINAPIWrapper Class - Public Methods
+//  Window System's stuff
 // ****************************************************************************
 int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
 {
@@ -179,8 +180,10 @@ int GEWINAPIWrapper::showWindow(int showType)
 	return ShowWindow(hWindow, showType);
 }
 
-
-// (!) Dont include's I/O's stuff here!
+// ****************************************************************************
+//  Message Events Handling (Message Pump)
+// ****************************************************************************
+// (!) DONT INCLUDE I/O's stuff here!
 void GEWINAPIWrapper::handleSystemMessages()
 {
 	MSG msg;
@@ -198,6 +201,45 @@ void GEWINAPIWrapper::handleSystemMessages()
 	}
 }
 
+// ****************************************************************************
+//  Creating new Console for Debug
+// ****************************************************************************
+int GEWINAPIWrapper::createDebugConsole()
+{
+	if(!AllocConsole())
+	{
+		return 0;
+	}
+
+	FILE* fp;
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+	freopen_s(&fp, "CONOUT$", "w", stderr);
+	freopen_s(&fp, "CONIN$", "r", stdin);
+	std::cout.clear();
+	std::clog.clear();
+	std::cerr.clear();
+	std::cin.clear();
+	HANDLE hConOut = CreateFile(_T("CONOUT$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hConIn = CreateFile(_T("CONIN$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
+	SetStdHandle(STD_ERROR_HANDLE, hConOut);
+	SetStdHandle(STD_INPUT_HANDLE, hConIn);
+	std::wcout.clear();
+	std::wclog.clear();
+	std::wcerr.clear();
+	std::wcin.clear();
+
+	return 1;
+}
+
+int GEWINAPIWrapper::closeDebugConsole()
+{
+	return FreeConsole();
+}
+
+// ****************************************************************************
+//  Set Global Event Handler
+// ****************************************************************************
 void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
 {
 	globalEventHandler = eventHandler;

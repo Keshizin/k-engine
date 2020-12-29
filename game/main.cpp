@@ -25,13 +25,11 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
 #include <iostream>
-
 #include <ge.h>
 
-#define GAME_WINDOW_WIDTH 640
-#define GAME_WINDOW_HEIGHT 480
+// #define GAME_WINDOW_WIDTH 640
+// #define GAME_WINDOW_HEIGHT 480
 
 class GameEventHandler : public GEEventHandler
 {
@@ -50,27 +48,29 @@ class GameEventHandler : public GEEventHandler
 
 KEngine *engine = 0;
 
-// int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-int main()
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	GameEventHandler gameEvents;
 	engine = new KEngine(&gameEvents);
 
-	engine->getGameWindow()->setName("Game Engine - BOUNDING COLLISION TEST!");
-	engine->getGameWindow()->setWidth(GAME_WINDOW_WIDTH);
-	engine->getGameWindow()->setHeight(GAME_WINDOW_HEIGHT);
-	engine->getGameWindow()->setX(960 - (GAME_WINDOW_WIDTH / 2));
-	engine->getGameWindow()->setY(540 - (GAME_WINDOW_HEIGHT / 2));
-	engine->getGameWindow()->setStyle(K_WINDOW_DEFAULT);
-	engine->getGameWindow()->create();
+	// engine->getGameWindow()->setName("Game Engine - BOUNDING COLLISION TEST!");
+	// engine->getGameWindow()->setWidth(GAME_WINDOW_WIDTH);
+	// engine->getGameWindow()->setHeight(GAME_WINDOW_HEIGHT);
+	// engine->getGameWindow()->setX(960 - (GAME_WINDOW_WIDTH / 2));
+	// engine->getGameWindow()->setY(540 - (GAME_WINDOW_HEIGHT / 2));
+	// engine->getGameWindow()->setStyle(K_WINDOW_DEFAULT);
+	// engine->getGameWindow()->create();
 	// engine->getGameWindow()->show(K_WINDOW_SHOW);
 
 	std::cout << "> START GAME LOOP" << std::endl;
 
 	// engine->startMainLoop();
 
+	while(1);
+
 	std::cout << "> EXIT GAME LOOP" << std::endl;
-	
+
+	FreeConsole();
 	return 1;
 }
 

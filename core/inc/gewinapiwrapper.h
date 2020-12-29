@@ -26,7 +26,11 @@
 #ifndef K_ENGINE_WIN_API_WRAPPER_CLASS_H
 #define K_ENGINE_WIN_API_WRAPPER_CLASS_H
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include <geapiwrapper.h>
+#include <geeventhandler.h>
 
 // ****************************************************************************
 //  Win32 Window Class
@@ -56,6 +60,13 @@ public:
 	int createWindow(int x, int y, int width, int height, std::string name, unsigned int style);
 	int destroyWindow();
 	int showWindow(int showType);
+
+	// ------------------------------------------------------------------------
+	// Message Events Handling (Message Pump)
+	// ------------------------------------------------------------------------
+	void handleSystemMessages();
+	
+	void setGlobalEventHandler(GEEventHandler *eventHandler);
 
 private:
 	HWND hWindow;

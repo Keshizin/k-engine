@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	Game Engine Event Handler
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
 
@@ -23,44 +23,25 @@
 	SOFTWARE.
 */
 
-#include <ge.h>
-#include <gewinapiwrapper.h>
+#ifndef GAME_ENGINE_EVENT_HANDLER_CLASS_H
+#define GAME_ENGINE_EVENT_HANDLER_CLASS_H
 
-KEngine::KEngine(GEEventHandler *eventHandler)
+class GEEventHandler
 {
-	this->apiWrapper = new GEWINAPIWrapper();
-	this->eventHandler = eventHandler;
-	this->gameWindow = new GEWindow(this->apiWrapper);
-}
+public:
+	virtual ~GEEventHandler() {}
 
-KEngine::~KEngine()
-{
-	delete apiWrapper;
-	delete gameWindow;
-}
+	virtual void frameEvent() {}
+	virtual void mouseEvent(int, int, int, int) {}
+	virtual void mouseMotionEvent(int, int) {}
+	virtual void keyboardEvent(unsigned char, int) {}
+	virtual void keyboardSpecialEvent(unsigned char, int) {}
+	virtual void resizeWindowEvent(int, int) {}
+	virtual void finishAfterEvent() {}
+	virtual void finishBeforeEvent() {}
+	virtual void resumeEvent() {}
+	virtual void pauseEvent() {}
+	virtual void beforeMainLoopEvent() {}
+};
 
-void KEngine::startMainLoop()
-{
-	runningStatus = K_RUNNING;
-
-	while(runningStatus != K_STOPPED)
-	{
-		apiWrapper->handleSystemMessages();
-	}
-}
-
-void KEngine::stopMainLoop()
-{
-	runningStatus = K_STOPPED;
-}
-
-GEWindow *KEngine::getGameWindow()
-{
-	return gameWindow;
-}
-
-void KEngine::setEventHandler(GEEventHandler *eventHandler)
-{
-	this->eventHandler = eventHandler;
-	this->apiWrapper->setGlobalEventHandler(eventHandler);
-}
+#endif

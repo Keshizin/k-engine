@@ -27,6 +27,7 @@
 #define K_ENGINE_API_WRAPPER_CLASS_H
 
 #include <string>
+#include <geeventhandler.h>
 
 // ****************************************************************************
 //  Game Engine API Wrapper Class
@@ -40,11 +41,18 @@ public:
 	virtual ~GEAPIWrapper() {}
 
 	// ------------------------------------------------------------------------
-	//  Constructor and Destructor
+	//  Public Methods
 	// ------------------------------------------------------------------------
+	virtual void setGlobalEventHandler(GEEventHandler *eventHandler) {}
+	
 	virtual int createWindow(int, int, int, int, std::string, unsigned int) { return 1; }
 	virtual int destroyWindow() { return 1; }
 	virtual int showWindow(int) { return 1; }
+	
+	// ------------------------------------------------------------------------
+	// Message Events Handling (Message Pump)
+	// ------------------------------------------------------------------------
+	virtual void handleSystemMessages() {}
 };
 
 #endif

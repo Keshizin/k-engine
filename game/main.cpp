@@ -27,38 +27,95 @@
 #include <windows.h>
 
 #include <iostream>
-#include <gewindow.h>
-#include <gewinapiwrapper.h>
+
+#include <ge.h>
+
+#define GAME_WINDOW_WIDTH 640
+#define GAME_WINDOW_HEIGHT 480
+
+class GameEventHandler : public GEEventHandler
+{
+	void frameEvent();
+	void mouseEvent(int button, int state, int x, int y);
+	void mouseMotionEvent(int x, int y);
+	void keyboardEvent(unsigned char key, int state);
+	void keyboardSpecialEvent(unsigned char key, int state);
+	void resizeWindowEvent(int width, int height);
+	void finishAfterEvent();
+	void finishBeforeEvent();
+	void resumeEvent();
+	void pauseEvent();
+	void beforeMainLoopEvent();
+};
+
+KEngine *engine = 0;
 
 // int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 int main()
 {
-	GEAPIWrapper *apiWrapper = new GEWINAPIWrapper();
-	GEWindow window(apiWrapper);
+	GameEventHandler gameEvents;
+	engine = new KEngine(&gameEvents);
 
-	window.create();
-	window.show(K_WINDOW_SHOW);
-
-	MSG msg;
-	bool isDone = false;
+	engine->getGameWindow()->setName("Game Engine - BOUNDING COLLISION TEST!");
+	engine->getGameWindow()->setWidth(GAME_WINDOW_WIDTH);
+	engine->getGameWindow()->setHeight(GAME_WINDOW_HEIGHT);
+	engine->getGameWindow()->setX(960 - (GAME_WINDOW_WIDTH / 2));
+	engine->getGameWindow()->setY(540 - (GAME_WINDOW_HEIGHT / 2));
+	engine->getGameWindow()->setStyle(K_WINDOW_DEFAULT);
+	engine->getGameWindow()->create();
+	// engine->getGameWindow()->show(K_WINDOW_SHOW);
 
 	std::cout << "> START GAME LOOP" << std::endl;
 
-	while(!isDone)
-	{
-		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if(msg.message == WM_QUIT)
-			{
-				isDone = TRUE;
-			}
-
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+	// engine->startMainLoop();
 
 	std::cout << "> EXIT GAME LOOP" << std::endl;
 	
 	return 1;
+}
+
+void GameEventHandler::frameEvent()
+{
+}
+
+void GameEventHandler::mouseEvent(int button, int state, int x, int y)
+{
+}
+
+void GameEventHandler::mouseMotionEvent(int x, int y)
+{
+}
+
+void GameEventHandler::keyboardEvent(unsigned char key, int state)
+{
+}
+
+void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)
+{
+}
+
+void GameEventHandler::resizeWindowEvent(int width, int height)
+{
+}
+
+void GameEventHandler::finishAfterEvent()
+{
+	engine->stopMainLoop();
+}
+
+void GameEventHandler::finishBeforeEvent()
+{
+	engine->getGameWindow()->destroy();
+}
+
+void GameEventHandler::resumeEvent()
+{
+}
+
+void GameEventHandler::pauseEvent()
+{
+}
+
+void GameEventHandler::beforeMainLoopEvent()
+{
 }

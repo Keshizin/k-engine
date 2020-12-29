@@ -26,6 +26,45 @@
 #ifndef K_ENGINE_H
 #define K_ENGINE_H
 
-int test();
+#include <gewindow.h>
+#include <geeventhandler.h>
+
+// ****************************************************************************
+//  K-Engine Runtime Status
+// ****************************************************************************
+#define K_RUNNING 0x01
+#define K_STOPPED 0x02
+#define K_PAUSED  0x03
+
+// ****************************************************************************
+//  K-Engine Class
+// ****************************************************************************
+class KEngine
+{
+public:
+	// ------------------------------------------------------------------------
+	//  Constructors and Destructors
+	// ------------------------------------------------------------------------
+	KEngine(GEEventHandler *eventHandler);
+	~KEngine();
+
+	// ------------------------------------------------------------------------
+	//  Public Methods
+	// ------------------------------------------------------------------------
+	void startMainLoop();
+	void stopMainLoop();
+
+	// ------------------------------------------------------------------------
+	//  Getters and Setters
+	// ------------------------------------------------------------------------
+	GEWindow *getGameWindow();
+	void setEventHandler(GEEventHandler *eventHandler);
+
+private:
+	int runningStatus;
+	GEAPIWrapper *apiWrapper;
+	GEWindow *gameWindow;
+	GEEventHandler *eventHandler;
+};
 
 #endif

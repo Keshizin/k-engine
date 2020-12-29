@@ -23,12 +23,11 @@
 	SOFTWARE.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <iostream>
-
 #include <gewinapiwrapper.h>
 #include <gewindow.h>
+#include <iostream>
+
+GEEventHandler *globalEventHandler = 0;
 
 // ****************************************************************************
 //  GEWINAPIWrapper Class - Constructors and Destructor
@@ -40,6 +39,7 @@ GEWINAPIWrapper::GEWINAPIWrapper()
 
 GEWINAPIWrapper::~GEWINAPIWrapper()
 {
+	globalEventHandler = 0;
 }
 
 // ****************************************************************************
@@ -179,15 +179,122 @@ int GEWINAPIWrapper::showWindow(int showType)
 	return ShowWindow(hWindow, showType);
 }
 
+
+// (!) Dont include's I/O's stuff here!
+void GEWINAPIWrapper::handleSystemMessages()
+{
+	MSG msg;
+
+	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		if(msg.message == WM_QUIT)
+		{
+			std::cout << "@DEBUG | handleSystemMessages | WM_QUIT\n" << std::endl;
+			globalEventHandler->finishAfterEvent();
+		}
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
+{
+	globalEventHandler = eventHandler;
+}
+
 // ****************************************************************************
 //  Win32 Window Procedure Definition
 // ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	switch(uMsg)
+switch(uMsg)
 	{
+		// ********************************************************************
+		//  WINDOW MESSAGES
+		// ********************************************************************
+		case WM_CREATE:
+			break;
+
 		case WM_DESTROY:
 			PostQuitMessage(0);
+			break;
+
+		case WM_MOVE:
+			break;
+
+		case WM_SIZE:
+			globalEventHandler->resizeWindowEvent(LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_CLOSE:
+			globalEventHandler->finishBeforeEvent();
+			break;
+
+		case WM_ACTIVATE:
+			if(wParam == WA_ACTIVE)
+				globalEventHandler->resumeEvent();
+			else if(wParam == WA_CLICKACTIVE)
+				globalEventHandler->resumeEvent();
+			else if(wParam == WA_INACTIVE)
+				globalEventHandler->pauseEvent();
+
+			break;
+
+		case WM_SHOWWINDOW:
+			break;
+
+		// ********************************************************************
+		//  MOUSE MESSAGES
+		// ********************************************************************
+		case WM_LBUTTONDOWN:
+			globalEventHandler->mouseEvent(0, 1, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_LBUTTONUP:
+			globalEventHandler->mouseEvent(0, 0, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_MBUTTONDOWN:
+			globalEventHandler->mouseEvent(1, 1, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_MBUTTONUP:
+			globalEventHandler->mouseEvent(1, 0, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_RBUTTONDOWN:
+			globalEventHandler->mouseEvent(2, 1, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_RBUTTONUP:
+			globalEventHandler->mouseEvent(2, 0, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_MOUSEMOVE:
+			globalEventHandler->mouseMotionEvent(LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		// ********************************************************************
+		//  KEYBOARD MESSAGES
+		// ********************************************************************
+		case WM_SYSKEYDOWN:
+			globalEventHandler->keyboardSpecialEvent(wParam, 1);
+			break;
+
+		case WM_SYSKEYUP:
+			globalEventHandler->keyboardSpecialEvent(wParam, 0);
+			break;
+
+		case WM_KEYDOWN:
+			globalEventHandler->keyboardEvent(wParam, 1);
+			break;
+
+		case WM_KEYUP:
+			globalEventHandler->keyboardEvent(wParam, 0);
+			break;
+
+		default:
 			break;
 	}
 

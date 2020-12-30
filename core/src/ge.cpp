@@ -26,10 +26,15 @@
 #include <ge.h>
 #include <gewinapiwrapper.h>
 
+// ****************************************************************************
+//  Constructors and Destructors
+// ****************************************************************************
 KEngine::KEngine(GEEventHandler *eventHandler)
 {
 	this->apiWrapper = new GEWINAPIWrapper();
 	this->gameWindow = new GEWindow(this->apiWrapper);
+	this->renderingSystem = new GERenderingSystem(this->apiWrapper);
+
 	setEventHandler(eventHandler);
 
 	// (!) only in debug mode!
@@ -43,8 +48,12 @@ KEngine::~KEngine()
 
 	delete apiWrapper;
 	delete gameWindow;
+	delete renderingSystem;
 }
 
+// ****************************************************************************
+//  Public Methods
+// ****************************************************************************
 void KEngine::startMainLoop()
 {
 	runningStatus = K_RUNNING;
@@ -52,6 +61,8 @@ void KEngine::startMainLoop()
 	while(runningStatus != K_STOPPED)
 	{
 		apiWrapper->handleSystemMessages();
+		eventHandler->frameEvent();
+		renderingSystem->renderFrame();
 	}
 }
 
@@ -60,9 +71,17 @@ void KEngine::stopMainLoop()
 	runningStatus = K_STOPPED;
 }
 
+// ****************************************************************************
+//  Getters and Setters
+// ****************************************************************************
 GEWindow *KEngine::getGameWindow()
 {
 	return gameWindow;
+}
+
+GERenderingSystem *KEngine::getRenderingSystem()
+{
+	return renderingSystem;
 }
 
 void KEngine::setEventHandler(GEEventHandler *eventHandlerParam)

@@ -29,6 +29,8 @@
 #include <ge.h>
 #include <gewinapiwrapper.h>
 
+#include <GL/gl.h>
+
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
@@ -64,19 +66,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->create();
 	engine->getGameWindow()->show(K_WINDOW_SHOW);
 
+	// Setting up Rendering Engine
+	engine->getRenderingSystem()->initialize();
+
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+
 	std::cout << "> START GAME LOOP" << std::endl;
 
 	engine->startMainLoop();
 
 	std::cout << "> END GAME LOOP" << std::endl;
-
+	
 	delete engine;
-	FreeConsole();
 	return 1;
 }
 
 void GameEventHandler::frameEvent()
 {
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -89,6 +96,10 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 
 void GameEventHandler::keyboardEvent(unsigned char key, int state)
 {
+	if(key == '1' && state == 1)
+	{
+		engine->getGameWindow()->destroy();
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)

@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	Game Engine Rendering System
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
 
@@ -23,52 +23,30 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_H
-#define K_ENGINE_H
+#ifndef K_ENGINE_RENDERING_SYSTEM_H
+#define K_ENGINE_RENDERING_SYSTEM_H
 
-#include <gewindow.h>
-#include <geeventhandler.h>
-#include <gerenderingsystem.h>
+#include <geapiwrapper.h>
 
 // ****************************************************************************
-//  K-Engine Runtime Status
+//  Rendering System Class
 // ****************************************************************************
-#define K_RUNNING 0x01
-#define K_STOPPED 0x02
-#define K_PAUSED  0x03
-
-// ****************************************************************************
-//  K-Engine Class
-// ****************************************************************************
-class KEngine
+class GERenderingSystem
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	KEngine(GEEventHandler *eventHandler);
-	~KEngine();
-
+	GERenderingSystem(GEAPIWrapper *apiWrapper);
+	
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
-	void startMainLoop();
-	void stopMainLoop();
-
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	GEWindow *getGameWindow();
-	GERenderingSystem *getRenderingSystem();
-	
-	void setEventHandler(GEEventHandler *eventHandler);
+	int initialize();
+	void renderFrame();
 
 private:
-	int runningStatus;
 	GEAPIWrapper *apiWrapper;
-	GEWindow *gameWindow;
-	GEEventHandler *eventHandler;
-	GERenderingSystem *renderingSystem;
 };
 
 #endif

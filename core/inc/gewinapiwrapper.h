@@ -65,6 +65,12 @@ public:
 	//  Message Events Handling (Message Pump)
 	// ------------------------------------------------------------------------
 	void handleSystemMessages();
+
+	// ------------------------------------------------------------------------
+	//  OPENGL REDENRING's stuff
+	// ------------------------------------------------------------------------
+	int initializeRenderingSystem();
+	int swapBuffers();
 	
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
@@ -79,7 +85,8 @@ public:
 
 private:
 	HWND hWindow;
-
+	HDC hDC;
+	HGLRC hRC;
 };
 
 #endif

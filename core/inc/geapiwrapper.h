@@ -53,10 +53,17 @@ public:
 	virtual void handleSystemMessages() {}
 
 	// ------------------------------------------------------------------------
+	//  OPENGL REDENRING's stuff
+	// ------------------------------------------------------------------------
+	virtual int initializeRenderingSystem() { return 1; }
+	virtual int swapBuffers() { return 1; }
+
+	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
 	// ------------------------------------------------------------------------
 	virtual int createDebugConsole() { return 1; }
 	virtual int closeDebugConsole() { return 1; }
+
 
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler

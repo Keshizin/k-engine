@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	Game Engine Rendering System
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
 
@@ -23,52 +23,48 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_H
-#define K_ENGINE_H
-
-#include <gewindow.h>
-#include <geeventhandler.h>
 #include <gerenderingsystem.h>
+#include <iostream>
 
 // ****************************************************************************
-//  K-Engine Runtime Status
+//  Constructors and Destructors
 // ****************************************************************************
-#define K_RUNNING 0x01
-#define K_STOPPED 0x02
-#define K_PAUSED  0x03
-
-// ****************************************************************************
-//  K-Engine Class
-// ****************************************************************************
-class KEngine
+GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	KEngine(GEEventHandler *eventHandler);
-	~KEngine();
+	this->apiWrapper = apiWrapper;
+}
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void startMainLoop();
-	void stopMainLoop();
+// ****************************************************************************
+//  Public Methods
+// ****************************************************************************
+int GERenderingSystem::initialize()
+{
+	if(!apiWrapper)
+	{
+		std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
+		return 0;
+	}
 
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	GEWindow *getGameWindow();
-	GERenderingSystem *getRenderingSystem();
-	
-	void setEventHandler(GEEventHandler *eventHandler);
+	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
+	// apontando para o objeto. Fazer essa validação!
+	return apiWrapper->initializeRenderingSystem();
+}
 
-private:
-	int runningStatus;
-	GEAPIWrapper *apiWrapper;
-	GEWindow *gameWindow;
-	GEEventHandler *eventHandler;
-	GERenderingSystem *renderingSystem;
-};
+void GERenderingSystem::renderFrame()
+{
+	if(!apiWrapper)
+	{
+		std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
+		return;
+	}
 
-#endif
+	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
+	// apontando para o objeto. Fazer essa validação!
+
+	// UPDATE CAMERA
+	// UPDATE SCENE ELEMENTS
+	// RENDER SCENE
+	// SWAP BUFFERS
+
+	this->apiWrapper->swapBuffers();
+}

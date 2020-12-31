@@ -55,6 +55,13 @@ public:
 	~GEWINAPIWrapper();
 
 	// ------------------------------------------------------------------------
+	//  CPU's stuff
+	// ------------------------------------------------------------------------
+	unsigned long long getHighResolutionTimerCounter();
+	unsigned long long getHighResolutionTimerFrequency();
+
+
+	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
 	int createWindow(int x, int y, int width, int height, std::string name, unsigned int style);

@@ -58,6 +58,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
+	GEAPIWrapper *getAPIWrapper();
 	GEWindow *getGameWindow();
 	GERenderingSystem *getRenderingSystem();
 	

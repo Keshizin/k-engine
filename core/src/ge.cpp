@@ -74,6 +74,11 @@ void KEngine::stopMainLoop()
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
+GEAPIWrapper *KEngine::getAPIWrapper()
+{
+	return apiWrapper;
+}
+
 GEWindow *KEngine::getGameWindow()
 {
 	return gameWindow;

@@ -44,6 +44,23 @@ GEWINAPIWrapper::~GEWINAPIWrapper()
 }
 
 // ****************************************************************************
+//  CPU's stuff
+// ****************************************************************************
+unsigned long long GEWINAPIWrapper:: getHighResolutionTimerCounter()
+{
+	LARGE_INTEGER time;
+	QueryPerformanceCounter(&time);
+	return time.QuadPart;
+}
+
+unsigned long long GEWINAPIWrapper::getHighResolutionTimerFrequency()
+{
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+	return frequency.QuadPart;
+}
+
+// ****************************************************************************
 //  Window System's stuff
 // ****************************************************************************
 int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::string name, unsigned int style)

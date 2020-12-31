@@ -71,6 +71,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
+	std::cout << "getHighResolutionTimerCounter: " << engine->getAPIWrapper()->getHighResolutionTimerCounter() << std::endl;
+	std::cout << "getHighResolutionTimerFrequency: " << engine->getAPIWrapper()->getHighResolutionTimerFrequency() << std::endl;
+
 	std::cout << "> START GAME LOOP" << std::endl;
 
 	engine->startMainLoop();

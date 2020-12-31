@@ -41,6 +41,12 @@ public:
 	virtual ~GEAPIWrapper() {}
 
 	// ------------------------------------------------------------------------
+	//  CPU's stuff
+	// ------------------------------------------------------------------------
+	virtual unsigned long long getHighResolutionTimerCounter() { return 1; }
+	virtual unsigned long long getHighResolutionTimerFrequency() { return 1; }
+
+	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
 	virtual int createWindow(int, int, int, int, std::string, unsigned int) { return 1; }

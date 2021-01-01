@@ -66,6 +66,8 @@ void KEngine::startMainLoop()
 	timeHandler->setInternalTimer(0);
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
+	eventHandler->beforeMainLoopEvent();
+
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
@@ -79,8 +81,11 @@ void KEngine::startMainLoop()
 		// --------------------------------------------------------------------
 		//  Start Game Loop!
 		// --------------------------------------------------------------------
-		eventHandler->frameEvent();
-		renderingSystem->renderFrame();
+		if(runningStatus == K_RUNNING)
+		{
+			eventHandler->frameEvent();
+			renderingSystem->renderFrame();
+		}
 
 		// --------------------------------------------------------------------
 		//  End Game Loop!
@@ -88,6 +93,16 @@ void KEngine::startMainLoop()
 		frameTime = startTime - endTime;
 		endTime = apiWrapper->getHighResolutionTimerCounter();
 		frameTime += (endTime - startTime);
+
+		// --------------------------------------------------------------------
+		//  End Game Loop!
+		// --------------------------------------------------------------------
+		while(frameTime <= timeHandler->getFrameTimeLimit())
+		{
+			startTime = endTime;
+			endTime = apiWrapper->getHighResolutionTimerCounter();
+			frameTime += (endTime - startTime);
+		}
 
 		timeHandler->setFrameTime(frameTime);
 	}

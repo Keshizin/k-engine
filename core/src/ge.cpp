@@ -34,6 +34,7 @@ KEngine::KEngine(GEEventHandler *eventHandler)
 	this->apiWrapper = new GEWINAPIWrapper();
 	this->gameWindow = new GEWindow(this->apiWrapper);
 	this->renderingSystem = new GERenderingSystem(this->apiWrapper);
+	this->timeHandler = new GETimeHandler();
 
 	setEventHandler(eventHandler);
 
@@ -49,6 +50,7 @@ KEngine::~KEngine()
 	delete apiWrapper;
 	delete gameWindow;
 	delete renderingSystem;
+	delete timeHandler;
 }
 
 // ****************************************************************************
@@ -56,19 +58,56 @@ KEngine::~KEngine()
 // ****************************************************************************
 void KEngine::startMainLoop()
 {
+	unsigned long long startTime = 0;
+	unsigned long long endTime = 0;
+	unsigned long long frameTime = 0;
+
 	runningStatus = K_RUNNING;
+	timeHandler->setInternalTimer(0);
+	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
 	while(runningStatus != K_STOPPED)
 	{
+		startTime = apiWrapper->getHighResolutionTimerCounter();
+		timeHandler->updateInternalTimer();
+
+		// --------------------------------------------------------------------
+		//  Win32 Message Pump
+		// --------------------------------------------------------------------
 		apiWrapper->handleSystemMessages();
+
+		// --------------------------------------------------------------------
+		//  Start Game Loop!
+		// --------------------------------------------------------------------
 		eventHandler->frameEvent();
 		renderingSystem->renderFrame();
+
+		// --------------------------------------------------------------------
+		//  End Game Loop!
+		// --------------------------------------------------------------------
+		frameTime = startTime - endTime;
+		endTime = apiWrapper->getHighResolutionTimerCounter();
+		frameTime += (endTime - startTime);
+
+		timeHandler->setFrameTime(frameTime);
 	}
 }
 
 void KEngine::stopMainLoop()
 {
 	runningStatus = K_STOPPED;
+}
+
+void KEngine::setFrameRate(int framePerSecond)
+{
+	if (!framePerSecond)
+	{
+		timeHandler->setFrameTimeLimit(0);
+	}
+	else
+	{
+		timeHandler->setFrameTimeLimit(apiWrapper->getHighResolutionTimerFrequency() / framePerSecond);
+	}	
 }
 
 // ****************************************************************************

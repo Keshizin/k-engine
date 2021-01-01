@@ -29,6 +29,7 @@
 #include <gewindow.h>
 #include <geeventhandler.h>
 #include <gerenderingsystem.h>
+#include <getimehandler.h>
 
 // ****************************************************************************
 //  K-Engine Runtime Status
@@ -55,12 +56,15 @@ public:
 	void startMainLoop();
 	void stopMainLoop();
 
+	void setFrameRate(int framePerSecond);
+
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	GEAPIWrapper *getAPIWrapper();
 	GEWindow *getGameWindow();
 	GERenderingSystem *getRenderingSystem();
+	GETimeHandler *getTimeHandler();
 	
 	void setEventHandler(GEEventHandler *eventHandler);
 
@@ -70,6 +74,7 @@ private:
 	GEWindow *gameWindow;
 	GEEventHandler *eventHandler;
 	GERenderingSystem *renderingSystem;
+	GETimeHandler *timeHandler;
 };
 
 #endif

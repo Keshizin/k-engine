@@ -55,6 +55,8 @@ public:
 	// ------------------------------------------------------------------------
 	void startMainLoop();
 	void stopMainLoop();
+	void pauseGameLoop();
+	void resumeGameLoop();
 
 	void setFrameRate(int framePerSecond);
 

@@ -113,6 +113,16 @@ void KEngine::stopMainLoop()
 	runningStatus = K_STOPPED;
 }
 
+void KEngine::pauseGameLoop()
+{
+	runningStatus = K_PAUSED;
+}
+
+void KEngine::resumeGameLoop()
+{
+	runningStatus = K_RUNNING;
+}
+
 void KEngine::setFrameRate(int framePerSecond)
 {
 	if (!framePerSecond)

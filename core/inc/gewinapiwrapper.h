@@ -23,14 +23,13 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_WIN_API_WRAPPER_CLASS_H
-#define K_ENGINE_WIN_API_WRAPPER_CLASS_H
+#ifndef K_ENGINE_WIN32_API_WRAPPER_CLASS_H
+#define K_ENGINE_WIN32_API_WRAPPER_CLASS_H
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <geapiwrapper.h>
-#include <geeventhandler.h>
 
 // ****************************************************************************
 //  Win32 Window Class
@@ -60,7 +59,6 @@ public:
 	unsigned long long getHighResolutionTimerCounter();
 	unsigned long long getHighResolutionTimerFrequency();
 
-
 	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
@@ -78,6 +76,7 @@ public:
 	// ------------------------------------------------------------------------
 	int initializeRenderingSystem();
 	int swapBuffers();
+	int setVSync(int vsync);
 	
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug

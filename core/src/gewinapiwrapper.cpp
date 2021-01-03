@@ -23,10 +23,12 @@
 	SOFTWARE.
 */
 
+#include <iostream>
 #include <gewinapiwrapper.h>
 #include <gewindow.h>
-#include <iostream>
 #include <tchar.h>
+#include <GL/gl.h>
+#include <GLEXT/wglext.h>
 
 GEEventHandler *globalEventHandler = 0;
 
@@ -36,6 +38,8 @@ GEEventHandler *globalEventHandler = 0;
 GEWINAPIWrapper::GEWINAPIWrapper()
 {
 	hWindow = NULL;
+	hDC = NULL;
+	hRC = NULL;
 }
 
 GEWINAPIWrapper::~GEWINAPIWrapper()
@@ -163,6 +167,43 @@ int GEWINAPIWrapper::destroyWindow()
 	int ret;
 	int err = 1;
 
+	if(hRC != NULL)
+	{
+		ret = wglMakeCurrent(NULL, NULL);
+
+		if(ret == FALSE)
+		{
+			DWORD error = GetLastError();
+			std::cout << "(!) ERROR - It was not possible to release the rendering context: " << error << "\n" << std::endl;
+			error = 0;
+		}
+
+		ret = wglDeleteContext(hRC);
+
+		if(ret == FALSE)
+		{
+			DWORD error = GetLastError();
+			std::cout << "(!) ERROR - It was not possible to delete the rendering context: " << error << "\n" << std::endl;
+			error = 0;
+		}
+
+		hRC = NULL;
+	}
+
+	if(hDC != NULL)
+	{
+		ret = ReleaseDC(hWindow, hDC);
+
+		if(!ret)
+		{
+			DWORD error = GetLastError();
+			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			error = 0;
+		}
+
+		hDC = NULL;
+	}
+
 	ret = DestroyWindow(hWindow);
 
 	if(ret == 0)
@@ -192,6 +233,7 @@ int GEWINAPIWrapper::showWindow(int showType)
 	if(hWindow == NULL)
 	{
 		std::cout << "(!) ERROR - It was not possible to show the window: window handle is NULL\n" << std::endl;
+		return 0;
 	}
 
 	return ShowWindow(hWindow, showType);
@@ -200,16 +242,16 @@ int GEWINAPIWrapper::showWindow(int showType)
 // ****************************************************************************
 //  Message Events Handling (Message Pump)
 // ****************************************************************************
-// (!) DONT INCLUDE I/O's stuff here!
 void GEWINAPIWrapper::handleSystemMessages()
 {
+	// (!) DONT INCLUDE I/O's stuff here!
+
 	MSG msg;
 
 	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		if(msg.message == WM_QUIT)
 		{
-			std::cout << "@DEBUG | handleSystemMessages | WM_QUIT\n" << std::endl;
 			globalEventHandler->finishAfterEvent();
 		}
 
@@ -430,6 +472,16 @@ int GEWINAPIWrapper::swapBuffers()
 	return 0;
 }
 
+int GEWINAPIWrapper::setVSync(int vsync)
+{
+	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
+
+	if (wglSwapIntervalEXT)
+		return wglSwapIntervalEXT(vsync);
+	else
+		return 0;
+}
+
 // ****************************************************************************
 //  Creating new Console for Debug
 // ****************************************************************************
@@ -479,11 +531,11 @@ void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
 // ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-switch(uMsg)
+	switch(uMsg)
 	{
-		// ********************************************************************
+		// --------------------------------------------------------------------
 		//  WINDOW MESSAGES
-		// ********************************************************************
+		// --------------------------------------------------------------------
 		// case WM_CREATE:
 		// 	break;
 

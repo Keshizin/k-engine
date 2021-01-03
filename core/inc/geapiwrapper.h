@@ -49,7 +49,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
-	virtual int createWindow(int, int, int, int, std::string, unsigned int) { return 1; }
+	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style) { return 1; }
 	virtual int destroyWindow() { return 1; }
 	virtual int showWindow(int) { return 1; }
 	
@@ -63,6 +63,7 @@ public:
 	// ------------------------------------------------------------------------
 	virtual int initializeRenderingSystem() { return 1; }
 	virtual int swapBuffers() { return 1; }
+	virtual int setVSync(int vsync) { return 1; }
 
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
@@ -74,7 +75,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler
 	// ------------------------------------------------------------------------
-	virtual void setGlobalEventHandler(GEEventHandler *) {}
+	virtual void setGlobalEventHandler(GEEventHandler *eventHandler) {}
 };
 
 #endif

@@ -44,6 +44,7 @@ public:
 	// ------------------------------------------------------------------------
 	int initialize();
 	void renderFrame();
+	int setVSync(int vsync);
 
 private:
 	GEAPIWrapper *apiWrapper;

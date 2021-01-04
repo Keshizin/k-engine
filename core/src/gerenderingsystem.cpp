@@ -68,3 +68,8 @@ void GERenderingSystem::renderFrame()
 
 	this->apiWrapper->swapBuffers();
 }
+
+int GERenderingSystem::setVSync(int vsync)
+{
+	return apiWrapper->setVSync(vsync);
+}

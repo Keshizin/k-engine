@@ -51,6 +51,8 @@ class GameEventHandler : public GEEventHandler
 };
 
 KEngine *engine = 0;
+GLfloat spin = 0;
+bool isSpin = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -70,14 +72,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Setting up Rendering Engine
 	engine->getRenderingSystem()->initialize();
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glViewport(0, 0, (GLsizei) GAME_WINDOW_WIDTH, (GLsizei) GAME_WINDOW_HEIGHT);
 	glMatrixMode(GL_PROJECTION);
-	gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+	glLoadIdentity();
+	glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glShadeModel(GL_FLAT);
 
 	std::cout << "> START GAME LOOP" << std::endl;
 
-	engine->setFrameRate(60);
+	engine->getRenderingSystem()->setVSync(0);
+	engine->setFrameRate(220);
 	engine->startMainLoop();
 
 	std::cout << "> END GAME LOOP" << std::endl;
@@ -88,21 +97,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void GameEventHandler::frameEvent()
 {
+	if(::isSpin)
+	{
+		::spin = ::spin + 2.0;
+
+		if(::spin > 360.0)
+		{
+			::spin -= 360.0;
+		}
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glColor3f(1.0f, 0.0f, 0.0f);
-
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-0.5f, -0.5f);
-	glVertex2f( 0.0f,  0.5f);
-	glVertex2f( 0.5f, -0.5f);
-	glEnd();
-
+	glPushMatrix();
+	glRotatef(::spin, 0.0f, 0.0f, 1.0f);
+	glColor3f(1.0, 1.0, 1.0);
+	glRectf(-25.0, -25.0, 25.0, 25.0);
+	glPopMatrix();
 	glFlush();
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
+	if(button == 0 && state == 1)
+	{
+		isSpin = true;
+	}
+
+	if(button == 1 && state == 1)
+	{
+		isSpin = false;
+	}
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
@@ -115,6 +140,11 @@ void GameEventHandler::keyboardEvent(unsigned char key, int state)
 	{
 		engine->getGameWindow()->destroy();
 	}
+
+	if(key == '1' && state == 1)
+	{
+		engine->getRenderingSystem()->setVSync(1);
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)
@@ -123,6 +153,12 @@ void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
+	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void GameEventHandler::finishAfterEvent()

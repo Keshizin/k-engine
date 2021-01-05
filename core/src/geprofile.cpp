@@ -30,6 +30,6 @@ GEProfile::GEProfile()
 	framesPerSecond = 0;
 }
 
-GEProfile::~GEProfile();
+GEProfile::~GEProfile()
 {
 }

@@ -26,6 +26,8 @@
 #include <ge.h>
 #include <gewinapiwrapper.h>
 
+#include <iostream>
+
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
@@ -93,7 +95,7 @@ void KEngine::startMainLoop()
 		frameTime = startTime - endTime;
 		endTime = apiWrapper->getHighResolutionTimerCounter();
 		frameTime += (endTime - startTime);
-
+	
 		// --------------------------------------------------------------------
 		//  End Game Loop!
 		// --------------------------------------------------------------------
@@ -104,6 +106,7 @@ void KEngine::startMainLoop()
 			frameTime += (endTime - startTime);
 		}
 
+		std::cout << "@debug | frameTime: " << frameTime << "\n" << std::endl;
 		timeHandler->setFrameTime(frameTime);
 	}
 }

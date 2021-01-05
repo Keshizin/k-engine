@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	Game Engine Profile
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
 
@@ -23,60 +23,23 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_H
-#define K_ENGINE_H
-
-#include <gewindow.h>
-#include <geeventhandler.h>
-#include <gerenderingsystem.h>
-#include <getimehandler.h>
+#ifndef K_ENGINE_PROFILE_H
+#define K_ENGINE_PROFILE_H
 
 // ****************************************************************************
-//  K-Engine Runtime States
+//  Game Engine Profile Class
 // ****************************************************************************
-#define K_RUNNING 0x01
-#define K_STOPPED 0x02
-#define K_PAUSED  0x03
-
-// ****************************************************************************
-//  K-Engine Class
-// ****************************************************************************
-class KEngine
+class GEProfile
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	KEngine(GEEventHandler *eventHandler);
-	~KEngine();
-
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void startMainLoop();
-	void stopMainLoop();
-	void pauseGameLoop();
-	void resumeGameLoop();
-
-	void setFrameRate(int framePerSecond);
-
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	GEAPIWrapper *getAPIWrapper();
-	GEWindow *getGameWindow();
-	GERenderingSystem *getRenderingSystem();
-	GETimeHandler *getTimeHandler();
+	GEProfile();
+	~GEProfile();
 	
-	void setEventHandler(GEEventHandler *eventHandler);
-
 private:
-	int runningStatus;
-	GEAPIWrapper *apiWrapper;
-	GEWindow *gameWindow;
-	GEEventHandler *eventHandler;
-	GERenderingSystem *renderingSystem;
-	GETimeHandler *timeHandler;
+	unsigned long long framesPerSecond;
 };
 
 #endif

@@ -24,7 +24,6 @@
 */
 
 #include <getimehandler.h>
-#include <iostream>
 
 // ----------------------------------------------------------------------------
 //  GETimeHandler CLASS METHODS DEFINITION

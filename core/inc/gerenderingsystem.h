@@ -29,6 +29,12 @@
 #include <geapiwrapper.h>
 
 // ****************************************************************************
+//  Rendering System Context (2D or 3D)
+// ****************************************************************************
+#define K_CONTEXT_2D 0x01
+#define K_CONTEXT_3D 0x02
+
+// ****************************************************************************
 //  Rendering System Class
 // ****************************************************************************
 class GERenderingSystem
@@ -46,8 +52,15 @@ public:
 	void renderFrame();
 	int setVSync(int vsync);
 
+	// ------------------------------------------------------------------------
+	//  Getters and Setters
+	// ------------------------------------------------------------------------
+	void setRenderingContext(int renderingContext);
+	int getRenderingContext();
+
 private:
 	GEAPIWrapper *apiWrapper;
+	int renderingContext;
 };
 
 #endif

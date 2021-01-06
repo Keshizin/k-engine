@@ -73,3 +73,16 @@ int GERenderingSystem::setVSync(int vsync)
 {
 	return apiWrapper->setVSync(vsync);
 }
+
+// ****************************************************************************
+//  Getters and Setters
+// ****************************************************************************
+void GERenderingSystem::setRenderingContext(int renderingContext)
+{
+	this->renderingContext = renderingContext;
+}
+
+int GERenderingSystem::getRenderingContext()
+{
+	return renderingContext;
+}

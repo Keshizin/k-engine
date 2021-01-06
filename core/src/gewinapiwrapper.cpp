@@ -536,8 +536,9 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		// --------------------------------------------------------------------
 		//  WINDOW MESSAGES
 		// --------------------------------------------------------------------
-		// case WM_CREATE:
-		// 	break;
+		case WM_CREATE:
+			globalEventHandler->createWindowEvent();
+			break;
 
 		// sent when a window is being destroyed after the window is removed
 		// from the screen.

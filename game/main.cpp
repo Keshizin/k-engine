@@ -48,6 +48,7 @@ class GameEventHandler : public GEEventHandler
 	void resumeEvent();
 	void pauseEvent();
 	void beforeMainLoopEvent();
+	void createWindowEvent();
 };
 
 KEngine *engine = 0;
@@ -67,9 +68,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->setY(540 - (GAME_WINDOW_HEIGHT / 2));
 	engine->getGameWindow()->setStyle(K_WINDOW_DEFAULT);
 	engine->getGameWindow()->create();
-	engine->getGameWindow()->show(K_WINDOW_SHOW);
 
 	// Setting up Rendering Engine
+	// If you want to set before the resize window event, use the createWindowEvent to initialize render system
 	engine->getRenderingSystem()->initialize();
 
 	glViewport(0, 0, (GLsizei) GAME_WINDOW_WIDTH, (GLsizei) GAME_WINDOW_HEIGHT);
@@ -79,17 +80,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glShadeModel(GL_FLAT);
-
 	std::cout << "> START GAME LOOP" << std::endl;
 
-	engine->getRenderingSystem()->setVSync(0);
-	engine->setFrameRate(0);
+	engine->getRenderingSystem()->setVSync(1);
+	engine->setFrameRate(120);
+
+	engine->getGameWindow()->show(nCmdShow);
 	engine->startMainLoop();
 
 	std::cout << "> END GAME LOOP" << std::endl;
+
+	while(1);
 	
 	delete engine;
 	return 1;
@@ -181,4 +182,11 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glShadeModel(GL_FLAT);
+}
+
+void GameEventHandler::createWindowEvent()
+{
+	// engine->getRenderingSystem()->initialize();
 }

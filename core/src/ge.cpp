@@ -25,6 +25,7 @@
 
 #include <ge.h>
 #include <gewinapiwrapper.h>
+#include <getimer.h>
 
 #include <iostream>
 
@@ -70,6 +71,11 @@ void KEngine::startMainLoop()
 
 	eventHandler->beforeMainLoopEvent();
 
+	GETimer timer(timeHandler);
+
+	// timer.setTimer(apiWrapper->getHighResolutionTimerFrequency());
+	// timer.start();
+
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
@@ -89,6 +95,12 @@ void KEngine::startMainLoop()
 			renderingSystem->renderFrame();
 		}
 
+		// if(timer.isDone())
+		// {
+		// 	std::cout << "@debug | timer is done!" << std::endl;
+		// 	timer.start();
+		// }
+
 		// --------------------------------------------------------------------
 		//  End Game Loop!
 		// --------------------------------------------------------------------
@@ -97,7 +109,7 @@ void KEngine::startMainLoop()
 		frameTime += (endTime - startTime);
 	
 		// --------------------------------------------------------------------
-		//  End Game Loop!
+		//  Frame Rate Governing
 		// --------------------------------------------------------------------
 		while(frameTime <= timeHandler->getFrameTimeLimit())
 		{
@@ -106,7 +118,7 @@ void KEngine::startMainLoop()
 			frameTime += (endTime - startTime);
 		}
 
-		std::cout << "@debug | frameTime: " << frameTime << "\n" << std::endl;
+		// std::cout << "@debug | frameTime: " << frameTime << std::endl;
 		timeHandler->setFrameTime(frameTime);
 	}
 }

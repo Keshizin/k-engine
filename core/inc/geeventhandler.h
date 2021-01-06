@@ -42,6 +42,7 @@ public:
 	virtual void resumeEvent() {}
 	virtual void pauseEvent() {}
 	virtual void beforeMainLoopEvent() {}
+	virtual void createWindowEvent() {}
 };
 
 #endif

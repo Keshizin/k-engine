@@ -24,6 +24,7 @@
 */
 
 #include <getimer.h>
+#include <iostream>
 
 // ****************************************************************************
 //  GETimer constructor and destructor
@@ -47,14 +48,18 @@ void GETimer::setTimer(unsigned long long stopTime)
 void GETimer::start()
 {
 	startTimer = timeHandler->getInternalTimer();
+	std::cout << "@debug | GETimer::start() | start : " << startTimer << std::endl;
+	// std::cout << "@debug | GETimer::start() | stopTime : " << stopTime << std::endl;
 }
 
 int GETimer::isDone()
 {
+	unsigned long long internalTimer = timeHandler->getInternalTimer();
+
 	// retornar o tempo excedente do timer
-	if(startTimer && timeHandler->getInternalTimer() - startTimer >= stopTime)
+	if(startTimer && internalTimer - startTimer >= stopTime)
 	{
-		startTimer = 0;
+		std::cout << "@debug | GETimer::isDone() | internalTimer : " << internalTimer << std::endl;
 		return 1;
 	}
 	else

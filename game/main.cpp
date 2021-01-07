@@ -82,8 +82,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	std::cout << "> START GAME LOOP" << std::endl;
 
-	engine->getRenderingSystem()->setVSync(1);
-	engine->setFrameRate(120);
+	engine->getRenderingSystem()->setVSync(0);
+	engine->setFrameRate(0);
 
 	engine->getGameWindow()->show(nCmdShow);
 	engine->startMainLoop();

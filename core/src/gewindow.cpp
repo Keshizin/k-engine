@@ -34,9 +34,8 @@ GEWindow::GEWindow(GEAPIWrapper *apiWrapper)
 	this->apiWrapper = apiWrapper;
 	width = 640;
 	height = 480;
-	x = 50;
-	y = 50;
-	name = "test";
+	x = 0;
+	y = 0;
 	style = K_WINDOW_DEFAULT;
 }
 

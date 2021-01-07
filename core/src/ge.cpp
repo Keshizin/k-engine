@@ -66,15 +66,16 @@ void KEngine::startMainLoop()
 	unsigned long long frameTime = 0;
 
 	runningStatus = K_RUNNING;
-	timeHandler->setInternalTimer(0);
+	timeHandler->setInternalTimer(1);
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
 	eventHandler->beforeMainLoopEvent();
 
 	GETimer timer(timeHandler);
+	timer.setTimer(1000);
+	timer.start();
 
-	// timer.setTimer(apiWrapper->getHighResolutionTimerFrequency());
-	// timer.start();
+	endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
 	{
@@ -95,11 +96,11 @@ void KEngine::startMainLoop()
 			renderingSystem->renderFrame();
 		}
 
-		// if(timer.isDone())
-		// {
-		// 	std::cout << "@debug | timer is done!" << std::endl;
-		// 	timer.start();
-		// }
+		if(timer.isDone())
+		{
+			std::cout << "@debug | timer is done!" << std::endl;
+			timer.start();
+		}
 
 		// --------------------------------------------------------------------
 		//  End Game Loop!

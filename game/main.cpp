@@ -1,5 +1,5 @@
 /*
-	Game Engine Template
+	Game Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
@@ -70,7 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->create();
 
 	// Setting up Rendering Engine
-	// If you want to set before the resize window event, use the createWindowEvent to initialize render system
+	// If you want to set before the resize window event, use the createWindowEvent to initialize the render system
 	engine->getRenderingSystem()->initialize();
 
 	glViewport(0, 0, (GLsizei) GAME_WINDOW_WIDTH, (GLsizei) GAME_WINDOW_HEIGHT);
@@ -80,14 +80,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	std::cout << "> START GAME LOOP" << std::endl;
-
 	engine->getRenderingSystem()->setVSync(0);
 	engine->setFrameRate(0);
 
 	engine->getGameWindow()->show(nCmdShow);
+	
+	std::cout << "> START GAME LOOP" << std::endl;
 	engine->startMainLoop();
-
 	std::cout << "> END GAME LOOP" << std::endl;
 
 	while(1);

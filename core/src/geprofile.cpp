@@ -24,12 +24,49 @@
 */
 
 #include <geprofile.h>
+#include <iostream>
 
-GEProfile::GEProfile()
+// ****************************************************************************
+//  Constructors and Destructors
+// ****************************************************************************
+GEProfile::GEProfile(GETimeHandler *timeHandler)
 {
 	framesPerSecond = 0;
+	timer = new GETimer(timeHandler);
 }
 
 GEProfile::~GEProfile()
 {
+	delete timer;
+}
+
+// ****************************************************************************
+//  Public Methods
+// ****************************************************************************
+void GEProfile::start()
+{
+	framesPerSecond = 0;
+	framesCounter = 0;
+	timer->setTimerInMs(1000); // 1000 milliseconds
+	timer->startLoop(0);
+}
+
+void GEProfile::update()
+{
+	framesCounter++;
+
+	if(timer->isDoneLoop())
+	{
+		framesPerSecond = framesCounter;
+		framesCounter = 0;
+		std::cout << "@debug | FPS: " << framesPerSecond << std::endl;
+	}
+}
+
+// ****************************************************************************
+//  Getters and Setters
+// ****************************************************************************
+unsigned long long GEProfile::getFramesPerSecond()
+{
+	return framesPerSecond;
 }

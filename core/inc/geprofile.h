@@ -26,6 +26,9 @@
 #ifndef K_ENGINE_PROFILE_H
 #define K_ENGINE_PROFILE_H
 
+#include <getimehandler.h>
+#include <getimer.h>
+
 // ****************************************************************************
 //  Game Engine Profile Class
 // ****************************************************************************
@@ -35,11 +38,24 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GEProfile();
+	GEProfile(GETimeHandler *timeHandler);
 	~GEProfile();
-	
+
+	// ------------------------------------------------------------------------
+	//  Public Methods
+	// ------------------------------------------------------------------------
+	void start();
+	void update();
+
+	// ------------------------------------------------------------------------
+	//  Getters and Setters
+	// ------------------------------------------------------------------------
+	unsigned long long getFramesPerSecond();
+
 private:
+	GETimer *timer;
 	unsigned long long framesPerSecond;
+	unsigned long long framesCounter;
 };
 
 #endif

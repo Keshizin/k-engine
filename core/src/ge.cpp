@@ -38,6 +38,7 @@ KEngine::KEngine(GEEventHandler *eventHandler)
 	this->gameWindow = new GEWindow(this->apiWrapper);
 	this->renderingSystem = new GERenderingSystem(this->apiWrapper);
 	this->timeHandler = new GETimeHandler();
+	this->profile = new GEProfile(this->timeHandler);
 
 	setEventHandler(eventHandler);
 
@@ -54,6 +55,7 @@ KEngine::~KEngine()
 	delete gameWindow;
 	delete renderingSystem;
 	delete timeHandler;
+	delete profile;
 }
 
 // ****************************************************************************
@@ -71,17 +73,14 @@ void KEngine::startMainLoop()
 
 	eventHandler->beforeMainLoopEvent();
 
-	GETimer timer(timeHandler);
-	timer.setTimerInMs(1000);
-	timer.startLoop(0);
-
-	int seconds = 1;
+	profile->start();
 	endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
 		timeHandler->updateInternalTimer();
+		profile->update();
 
 		// --------------------------------------------------------------------
 		//  Win32 Message Pump
@@ -95,11 +94,6 @@ void KEngine::startMainLoop()
 		{
 			eventHandler->frameEvent();
 			renderingSystem->renderFrame();
-		}
-
-		if(timer.isDoneLoop())
-		{
-			seconds++;
 		}
 
 		// --------------------------------------------------------------------

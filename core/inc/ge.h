@@ -30,6 +30,7 @@
 #include <geeventhandler.h>
 #include <gerenderingsystem.h>
 #include <getimehandler.h>
+#include <geprofile.h>
 
 // ****************************************************************************
 //  K-Engine Runtime States
@@ -71,12 +72,14 @@ public:
 	void setEventHandler(GEEventHandler *eventHandler);
 
 private:
-	int runningStatus;
 	GEAPIWrapper *apiWrapper;
 	GEWindow *gameWindow;
 	GEEventHandler *eventHandler;
 	GERenderingSystem *renderingSystem;
 	GETimeHandler *timeHandler;
+	GEProfile *profile;
+	
+	int runningStatus;
 };
 
 #endif

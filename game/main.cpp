@@ -73,6 +73,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getRenderingSystem()->initialize();
 
 	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
+	engine->getRenderingSystem()->setWindow(-50.0, 50.0, -50.0, 50.0);
+
 	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 	engine->getRenderingSystem()->setProjection();
 

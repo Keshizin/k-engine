@@ -61,9 +61,41 @@ public:
 	void setRenderingContext(int renderingContext);
 	int getRenderingContext();
 
+	void setWindow(double left, double right, double bottom, double top);
+
+	void setProjectionZNear(double projectionZNear);
+	double getProjectionZNear();
+	
+	void setProjectionZFar(double projectionZFar);
+	double getProjectionZFar();
+	
+	void setProjectionFOVY(double fovy);
+	double getProjectionFOVY();
+
+	void setWindowAspectCorrection(double windowAspectCorrection);
+	double getWindowAspectCorrection();
+
+	void setWindowAspectCorrectionState(bool state);
+	bool getWindowAspectCorrectionState();
+
 private:
 	GEAPIWrapper *apiWrapper;
 	int renderingContext;
+
+	int viewportWidth;
+	int viewportHeight;
+
+	double windowLeft;
+	double windowRight;
+	double windowTop;
+	double windowBottom;
+
+	double projectionZNear;
+	double projectionZFar;
+	double projectionFOVY;
+
+	double windowAspectCorrection;
+	bool windowAspectCorrectionState;
 };
 
 #endif

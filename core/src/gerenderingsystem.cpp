@@ -84,6 +84,8 @@ int GERenderingSystem::setVSync(int vsync)
 void GERenderingSystem::setViewport(int x, int y, int width, int height)
 {
 	glViewport(x, y, (GLsizei) width, (GLsizei) height);
+	viewportWidth = width;
+	viewportHeight = height;
 }
 
 void GERenderingSystem::setProjection()
@@ -93,15 +95,37 @@ void GERenderingSystem::setProjection()
 
 	if(renderingContext == K_CONTEXT_2D)
 	{
-		glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+		GLdouble left = windowLeft;
+		GLdouble right = windowRight;
+		GLdouble bottom = windowBottom;
+		GLdouble top = windowTop;
+
+		if(windowAspectCorrectionState)
+		{
+			if(viewportWidth <= viewportHeight)
+			{
+				windowAspectCorrection = static_cast<GLdouble>(viewportHeight) / static_cast<double>(viewportWidth);
+				bottom *= windowAspectCorrection;
+				top *= windowAspectCorrection;
+			}
+			else
+			{
+				windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
+				left *= windowAspectCorrection;
+				right *= windowAspectCorrection;
+			}
+		}
+
+		glOrtho(left, right, bottom, top, -1.0, 1.0);
 	}
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
-		gluPerspective(45, 1, 1, 100);
+		windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
+		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
 	}
 	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
 	{
-		glOrtho(-50, 50, -50, 50, 1, 100);
+		glOrtho(windowLeft, windowRight, windowBottom, windowTop, projectionZNear, projectionZFar);
 	}
 }
 
@@ -116,4 +140,62 @@ void GERenderingSystem::setRenderingContext(int renderingContext)
 int GERenderingSystem::getRenderingContext()
 {
 	return renderingContext;
+}
+
+void GERenderingSystem::setWindow(double left, double right, double bottom, double top)
+{
+	this->windowLeft = left;
+	this->windowRight = right;
+	this->windowTop = top;
+	this->windowBottom = bottom;
+}
+
+void GERenderingSystem::setProjectionZNear(double projectionZNear)
+{
+	this->projectionZNear = projectionZNear;
+}
+
+double GERenderingSystem::getProjectionZNear()
+{
+	return projectionZNear;
+}
+
+void GERenderingSystem::setProjectionZFar(double projectionZFar)
+{
+	this->projectionZFar = projectionZFar;
+}
+
+double GERenderingSystem::getProjectionZFar()
+{
+	return projectionZFar;
+}
+
+void GERenderingSystem::setProjectionFOVY(double fovy)
+{
+	this->projectionFOVY;
+}
+
+double GERenderingSystem::getProjectionFOVY()
+{
+	return projectionFOVY;
+}
+
+void GERenderingSystem::setWindowAspectCorrection(double windowAspectCorrection)
+{
+	this->windowAspectCorrection = windowAspectCorrection;
+}
+
+double GERenderingSystem::getWindowAspectCorrection()
+{
+	return windowAspectCorrection;
+}
+
+void GERenderingSystem::setWindowAspectCorrectionState(bool state)
+{
+	this->windowAspectCorrectionState = state;
+}
+
+bool GERenderingSystem::getWindowAspectCorrectionState()
+{
+	return windowAspectCorrectionState;
 }

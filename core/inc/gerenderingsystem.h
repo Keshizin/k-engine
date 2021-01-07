@@ -32,7 +32,8 @@
 //  Rendering System Context (2D or 3D)
 // ****************************************************************************
 #define K_CONTEXT_2D 0x01
-#define K_CONTEXT_3D 0x02
+#define K_CONTEXT_3D_PERSPECTIVE 0x02
+#define K_CONTEXT_3D_ORTOGRAPHIC 0x03
 
 // ****************************************************************************
 //  Rendering System Class
@@ -51,6 +52,8 @@ public:
 	int initialize();
 	void renderFrame();
 	int setVSync(int vsync);
+	void setViewport(int x, int y, int width, int height);
+	void setProjection();
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters

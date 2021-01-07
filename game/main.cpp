@@ -27,7 +27,6 @@
 #include <windows.h>
 #include <iostream>
 #include <ge.h>
-#include <gewinapiwrapper.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -66,17 +65,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->setHeight(GAME_WINDOW_HEIGHT);
 	engine->getGameWindow()->setX(960 - (GAME_WINDOW_WIDTH / 2));
 	engine->getGameWindow()->setY(540 - (GAME_WINDOW_HEIGHT / 2));
-	engine->getGameWindow()->setStyle(K_WINDOW_DEFAULT);
+	engine->getGameWindow()->setStyle(K_WINDOW_COMPLETE);
 	engine->getGameWindow()->create();
 
 	// Setting up Rendering Engine
 	// If you want to set before the resize window event, use the createWindowEvent to initialize the render system
 	engine->getRenderingSystem()->initialize();
 
-	glViewport(0, 0, (GLsizei) GAME_WINDOW_WIDTH, (GLsizei) GAME_WINDOW_HEIGHT);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
+	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+	engine->getRenderingSystem()->setProjection();
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -153,10 +152,9 @@ void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
-	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+	engine->getRenderingSystem()->setViewport(0, 0, width, height);
+	engine->getRenderingSystem()->setProjection();
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

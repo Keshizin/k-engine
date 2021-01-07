@@ -26,12 +26,19 @@
 #include <gerenderingsystem.h>
 #include <iostream>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
 GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 {
 	this->apiWrapper = apiWrapper;
+	this->renderingContext = K_CONTEXT_2D;
 }
 
 // ****************************************************************************
@@ -72,6 +79,30 @@ void GERenderingSystem::renderFrame()
 int GERenderingSystem::setVSync(int vsync)
 {
 	return apiWrapper->setVSync(vsync);
+}
+
+void GERenderingSystem::setViewport(int x, int y, int width, int height)
+{
+	glViewport(x, y, (GLsizei) width, (GLsizei) height);
+}
+
+void GERenderingSystem::setProjection()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	if(renderingContext == K_CONTEXT_2D)
+	{
+		glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+	}
+	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
+	{
+		gluPerspective(45, 1, 1, 100);
+	}
+	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
+	{
+		glOrtho(-50, 50, -50, 50, 1, 100);
+	}
 }
 
 // ****************************************************************************

@@ -81,7 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	glLoadIdentity();
 
 	engine->getRenderingSystem()->setVSync(0);
-	engine->setFrameRate(0);
+	engine->setFrameRate(120);
 
 	engine->getGameWindow()->show(nCmdShow);
 	

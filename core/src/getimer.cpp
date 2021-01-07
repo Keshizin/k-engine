@@ -24,7 +24,6 @@
 */
 
 #include <getimer.h>
-#include <iostream>
 
 // ****************************************************************************
 //  GETimer constructor and destructor
@@ -37,7 +36,7 @@ GETimer::GETimer(GETimeHandler *timeHandler)
 // ****************************************************************************
 //  GETimer public methods
 // ****************************************************************************
-void GETimer::setTimer(unsigned long long stopTime)
+void GETimer::setTimerInMs(unsigned long long stopTime)
 {
 	if (stopTime < 1000)
 		this->stopTime = stopTime * timeHandler->getPerfomanceFrequency();
@@ -48,18 +47,30 @@ void GETimer::setTimer(unsigned long long stopTime)
 void GETimer::start()
 {
 	startTimer = timeHandler->getInternalTimer();
-	std::cout << "@debug | GETimer::start() | start : " << startTimer << std::endl;
-	// std::cout << "@debug | GETimer::start() | stopTime : " << stopTime << std::endl;
+}
+
+void GETimer::startLoop(unsigned long long remainTime)
+{
+	startTimer = timeHandler->getInternalTimer() + remainTime;
 }
 
 int GETimer::isDone()
 {
+	if(startTimer && timeHandler->getInternalTimer() - startTimer >= stopTime)
+	{
+		return 1;
+	}
+	else
+		return 0;
+}
+
+int GETimer::isDoneLoop()
+{
 	unsigned long long internalTimer = timeHandler->getInternalTimer();
 
-	// retornar o tempo excedente do timer
 	if(startTimer && internalTimer - startTimer >= stopTime)
 	{
-		std::cout << "@debug | GETimer::isDone() | internalTimer : " << internalTimer << std::endl;
+		startLoop(internalTimer - startTimer - stopTime);
 		return 1;
 	}
 	else

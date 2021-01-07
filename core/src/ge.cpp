@@ -72,9 +72,10 @@ void KEngine::startMainLoop()
 	eventHandler->beforeMainLoopEvent();
 
 	GETimer timer(timeHandler);
-	timer.setTimer(1000);
-	timer.start();
+	timer.setTimerInMs(1000);
+	timer.startLoop(0);
 
+	int seconds = 1;
 	endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
@@ -96,10 +97,9 @@ void KEngine::startMainLoop()
 			renderingSystem->renderFrame();
 		}
 
-		if(timer.isDone())
+		if(timer.isDoneLoop())
 		{
-			std::cout << "@debug | timer is done!" << std::endl;
-			timer.start();
+			seconds++;
 		}
 
 		// --------------------------------------------------------------------

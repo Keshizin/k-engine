@@ -36,9 +36,11 @@ class GETimer
 public:
 	GETimer(GETimeHandler *timeHandler);
 
-	void setTimer(unsigned long long stopTime);
+	void setTimerInMs(unsigned long long stopTime);
 	void start();
+	void startLoop(unsigned long long remainTime);
 	int isDone();
+	int isDoneLoop();
 
 private:
 	unsigned long long stopTime;

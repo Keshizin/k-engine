@@ -1,5 +1,5 @@
 /*
-	Game Engine Profile
+	Game Engine Mathmatics Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
@@ -23,38 +23,9 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_PROFILE_H
-#define K_ENGINE_PROFILE_H
+#ifndef GAME_ENGINE_MATH_H
+#define GAME_ENGINE_MATH_H
 
-#include <getimer.h>
-
-// ****************************************************************************
-//  Game Engine Profile Class
-// ****************************************************************************
-class GEProfile
-{
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	GEProfile(GETimeHandler *timeHandler);
-	~GEProfile();
-
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void start();
-	void update();
-
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	unsigned long long getFramesPerSecond();
-
-private:
-	GETimer *timer;
-	unsigned long long framesPerSecond;
-	unsigned long long framesCounter;
-};
+#define K_PI 3.141592653589793
 
 #endif

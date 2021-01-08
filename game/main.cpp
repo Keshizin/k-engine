@@ -24,12 +24,14 @@
 */
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <iostream>
 #include <ge.h>
-
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+#include <gemath.h>
 
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
@@ -56,6 +58,8 @@ bool isSpin = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+
+
 	GameEventHandler gameEvents;
 	engine = new KEngine(&gameEvents);
 
@@ -86,6 +90,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	engine->getGameWindow()->show(nCmdShow);
 	
+	std::cout << K_PI << std::endl;
 	std::cout << "> START GAME LOOP" << std::endl;
 	engine->startMainLoop();
 	std::cout << "> END GAME LOOP" << std::endl;
@@ -115,6 +120,20 @@ void GameEventHandler::frameEvent()
 	glColor3f(1.0, 1.0, 1.0);
 	glRectf(-25.0, -25.0, 25.0, 25.0);
 	glPopMatrix();
+
+	double PI = 3.1459;
+
+	glBegin(GL_POINTS);
+
+	glColor3f(1.0f, 0.0f, 0.0);
+
+	for(double ang = 0.0; ang < 2.0 * PI; ang += PI / 49.0)
+	{
+		glVertex2f(20 * cos(ang), 20 * sin(ang));
+	}
+
+	glEnd();
+
 	glFlush();
 }
 

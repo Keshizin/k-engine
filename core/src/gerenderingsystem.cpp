@@ -129,6 +129,18 @@ void GERenderingSystem::setProjection()
 	}
 }
 
+void GERenderingSystem::drawWorldAxis()
+{
+	glBegin(GL_LINES);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(windowLeft, 0.0f, 0.0f);
+	glVertex3f(windowRight, 0.0f, 0.0f);
+	glColor3f(0.0, 1.0f, 0.0f);
+	glVertex3f(0.0f, windowTop, 0.0f);
+	glVertex3f(0.0f, windowBottom, 0.0f);
+	glEnd();	
+}
+
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************

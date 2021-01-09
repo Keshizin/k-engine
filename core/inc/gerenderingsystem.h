@@ -54,6 +54,7 @@ public:
 	int setVSync(int vsync);
 	void setViewport(int x, int y, int width, int height);
 	void setProjection();
+	void drawWorldAxis();
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters

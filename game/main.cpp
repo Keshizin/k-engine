@@ -113,6 +113,8 @@ void GameEventHandler::frameEvent()
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	engine->getRenderingSystem()->drawWorldAxis();
+
 	glPushMatrix();
 	glRotatef(::spin, 0.0f, 0.0f, 1.0f);
 	glColor3f(1.0, 1.0, 1.0);

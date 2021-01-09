@@ -58,8 +58,6 @@ bool isSpin = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-
-
 	GameEventHandler gameEvents;
 	engine = new KEngine(&gameEvents);
 
@@ -120,19 +118,6 @@ void GameEventHandler::frameEvent()
 	glColor3f(1.0, 1.0, 1.0);
 	glRectf(-25.0, -25.0, 25.0, 25.0);
 	glPopMatrix();
-
-	double PI = 3.1459;
-
-	glBegin(GL_POINTS);
-
-	glColor3f(1.0f, 0.0f, 0.0);
-
-	for(double ang = 0.0; ang < 2.0 * PI; ang += PI / 49.0)
-	{
-		glVertex2f(20 * cos(ang), 20 * sin(ang));
-	}
-
-	glEnd();
 
 	glFlush();
 }

@@ -23,11 +23,18 @@
 	SOFTWARE.
 */
 
-#ifndef GAME_ENGINE_MATH_H
-#define GAME_ENGINE_MATH_H
+#include <gemath.h>
+#include <cmath>
 
-#define K_PI 3.141592653589793
+void getCirclePoints(double **vector, int numberOfPoints)
+{
+	double radAngle = 0.0;
 
-void getCirclePoints(double **vector, int numberOfPoints);
+	for (int points = 0; points < numberOfPoints; points++)
+	{
+		radAngle = 2 * K_PI * points / numberOfPoints;
 
-#endif
+		vector[points][0] = cos(cos(radAngle));
+		vector[points][1] = sin(cos(radAngle));
+	}
+}

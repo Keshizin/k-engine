@@ -1,5 +1,5 @@
 /*
-	Game Engine Event Handler
+	Game Engine Auxiliary
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
@@ -23,38 +23,9 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_EVENT_HANDLER_CLASS_H
-#define K_ENGINE_EVENT_HANDLER_CLASS_H
+#ifndef K_ENGINE_AUXILIARY_H
+#define K_ENGINE_AUXILIARY_H
 
-#include <geaux.h>
-
-// ****************************************************************************
-//  Game Engine Events Class
-// ****************************************************************************
-class GEEventHandler
-{
-public:
-	virtual ~GEEventHandler() {}
-	virtual void frameEvent() {}
-
-	virtual void mouseEvent(int button, int state, int x, int y)
-	{
-		UNREFERENCED_PARAMETER(button);
-		UNREFERENCED_PARAMETER(state);
-		UNREFERENCED_PARAMETER(x);
-		UNREFERENCED_PARAMETER(y);
-	}
-	
-	virtual void mouseMotionEvent(int x, int y) {}
-	virtual void keyboardEvent(unsigned char key, int state) {}
-	virtual void keyboardSpecialEvent(unsigned char key, int state) {}
-	virtual void resizeWindowEvent(int width, int height) {}
-	virtual void finishAfterEvent() {}
-	virtual void finishBeforeEvent() {}
-	virtual void resumeEvent() {}
-	virtual void pauseEvent() {}
-	virtual void beforeMainLoopEvent() {}
-	virtual void createWindowEvent() {}
-};
+#define UNREFERENCED_PARAMETER(p) p
 
 #endif

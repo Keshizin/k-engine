@@ -145,7 +145,7 @@ void GERenderingSystem::drawGlobaldAxis()
 {
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrix();
+	glLoadIdentity();
 
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.0f);

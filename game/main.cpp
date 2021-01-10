@@ -33,6 +33,7 @@
 
 #include <gemath.h>
 
+
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
@@ -56,6 +57,14 @@ KEngine *engine = 0;
 GLfloat spin = 0;
 bool isSpin = false;
 
+#define TOTAL 3
+
+GLfloat pontos[TOTAL][3] = {
+	{ -2.0, 0.0, 0.0},
+	{  0.0, 1.5, 0.0},
+	{  2.0, 0.0, 0.0}
+};
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	GameEventHandler gameEvents;
@@ -75,7 +84,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getRenderingSystem()->initialize();
 
 	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
-	engine->getRenderingSystem()->setWindow(-50.0, 50.0, -50.0, 50.0);
+	engine->getRenderingSystem()->setWindow(-2.5, 2.5, -2.5, 2.5);
 
 	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 	engine->getRenderingSystem()->setProjection();
@@ -87,8 +96,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->setFrameRate(120);
 
 	engine->getGameWindow()->show(nCmdShow);
-	
-	std::cout << K_PI << std::endl;
+
 	std::cout << "> START GAME LOOP" << std::endl;
 	engine->startMainLoop();
 	std::cout << "> END GAME LOOP" << std::endl;
@@ -101,24 +109,69 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void GameEventHandler::frameEvent()
 {
-	if(::isSpin)
-	{
-		::spin = ::spin + 2.0;
+	// if(::isSpin)
+	// {
+	// 	::spin = ::spin + 2.0;
 
-		if(::spin > 360.0)
-		{
-			::spin -= 360.0;
-		}
-	}
+	// 	if(::spin > 360.0)
+	// 	{
+	// 		::spin -= 360.0;
+	// 	}
+	// }
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	engine->getRenderingSystem()->drawWorldAxis();
+	// engine->getRenderingSystem()->drawWorldAxis();
+
+	// glPushMatrix();
+	// glRotatef(::spin, 0.0f, 0.0f, 1.0f);
+
+	// glBegin(GL_QUADS);
+	
+	// glColor3f(1.0f, 0.0f, 0.0f);
+	// glVertex2f(-25.0f,  25.0f);
+	
+	// glColor3f(0.0f, 1.0f, 0.0f);
+	// glVertex2f( 25.0f,  25.0f);
+	
+	// glColor3f(0.0f, 0.0f, 1.0f);
+	// glVertex2f( 25.0f, -25.0f);
+
+	// glColor3f(0.0f, 0.0f, 0.0f);
+	// glVertex2f(-25.0f, -25.0f);
+
+	// glEnd();
+
+	// glPopMatrix();
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	// float delta = 1.0 / 100.0f;
+
+	glBegin(GL_LINE_STRIP);
+
+	for(int i = 0; i < 10; i++)
+	{
+		GLfloat points = i / 10.0f;
+		glEvalCoord1f(points);
+	}
+
+	glEnd();
 
 	glPushMatrix();
-	glRotatef(::spin, 0.0f, 0.0f, 1.0f);
-	glColor3f(1.0, 1.0, 1.0);
-	glRectf(-25.0, -25.0, 25.0, 25.0);
+
+	glPointSize(5);
+
+	glBegin(GL_POINTS);
+	glColor3f(1.0f, 0.0f, 0.0f);
+
+	for(int i = 0; i < TOTAL; i++)
+	{
+		glVertex3fv(pontos[i]);
+	}
+
+	glEnd();
+
 	glPopMatrix();
 
 	glFlush();
@@ -150,7 +203,14 @@ void GameEventHandler::keyboardEvent(unsigned char key, int state)
 
 	if(key == '1' && state == 1)
 	{
-		engine->getRenderingSystem()->setVSync(1);
+		pontos[1][0] -= 0.1;
+		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
+	}
+
+	if(key == '2' && state == 1)
+	{
+		pontos[1][0] += 0.1;
+		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
 	}
 }
 
@@ -188,7 +248,10 @@ void GameEventHandler::pauseEvent()
 void GameEventHandler::beforeMainLoopEvent()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glShadeModel(GL_FLAT);
+	// glShadeModel(GL_FLAT);
+
+	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
+	glEnable(GL_MAP1_VERTEX_3);
 }
 
 void GameEventHandler::createWindowEvent()

@@ -24,18 +24,22 @@
 */
 
 #define WIN32_LEAN_AND_MEAN
-
 #include <windows.h>
-#include <iostream>
-#include <ge.h>
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#include <gemath.h>
+#include <ge.h>
 
+#include <iostream>
 
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
+
+#define WINDOW_LEFT   -50.0
+#define WINDOW_RIGHT   50.0
+#define WINDOW_BOTTOM -50.0
+#define WINDOW_TOP     50.0
 
 class GameEventHandler : public GEEventHandler
 {
@@ -54,17 +58,10 @@ class GameEventHandler : public GEEventHandler
 };
 
 KEngine *engine = 0;
-GLfloat spin = 0;
-bool isSpin = false;
 
-#define TOTAL 3
-
-GLfloat pontos[TOTAL][3] = {
-	{ -2.0, 0.0, 0.0},
-	{  0.0, 1.5, 0.0},
-	{  2.0, 0.0, 0.0}
-};
-
+// ****************************************************************************
+//  Point Entry Execution
+// ****************************************************************************
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	GameEventHandler gameEvents;
@@ -80,114 +77,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->create();
 
 	// Setting up Rendering Engine
-	// If you want to set before the resize window event, use the createWindowEvent to initialize the render system
 	engine->getRenderingSystem()->initialize();
-
 	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
-	engine->getRenderingSystem()->setWindow(-2.5, 2.5, -2.5, 2.5);
-
+	engine->getRenderingSystem()->setWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
 	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 	engine->getRenderingSystem()->setProjection();
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
 	engine->getRenderingSystem()->setVSync(0);
+
 	engine->setFrameRate(120);
 
 	engine->getGameWindow()->show(nCmdShow);
 
-	std::cout << "> START GAME LOOP" << std::endl;
 	engine->startMainLoop();
-	std::cout << "> END GAME LOOP" << std::endl;
 
-	while(1);
-	
 	delete engine;
 	return 1;
 }
 
 void GameEventHandler::frameEvent()
 {
-	// if(::isSpin)
-	// {
-	// 	::spin = ::spin + 2.0;
-
-	// 	if(::spin > 360.0)
-	// 	{
-	// 		::spin -= 360.0;
-	// 	}
-	// }
-
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	// engine->getRenderingSystem()->drawWorldAxis();
-
-	// glPushMatrix();
-	// glRotatef(::spin, 0.0f, 0.0f, 1.0f);
-
-	// glBegin(GL_QUADS);
-	
-	// glColor3f(1.0f, 0.0f, 0.0f);
-	// glVertex2f(-25.0f,  25.0f);
-	
-	// glColor3f(0.0f, 1.0f, 0.0f);
-	// glVertex2f( 25.0f,  25.0f);
-	
-	// glColor3f(0.0f, 0.0f, 1.0f);
-	// glVertex2f( 25.0f, -25.0f);
-
-	// glColor3f(0.0f, 0.0f, 0.0f);
-	// glVertex2f(-25.0f, -25.0f);
-
-	// glEnd();
-
-	// glPopMatrix();
-
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	// float delta = 1.0 / 100.0f;
-
-	glBegin(GL_LINE_STRIP);
-
-	for(int i = 0; i < 10; i++)
-	{
-		GLfloat points = i / 10.0f;
-		glEvalCoord1f(points);
-	}
-
-	glEnd();
-
-	glPushMatrix();
-
-	glPointSize(5);
-
-	glBegin(GL_POINTS);
-	glColor3f(1.0f, 0.0f, 0.0f);
-
-	for(int i = 0; i < TOTAL; i++)
-	{
-		glVertex3fv(pontos[i]);
-	}
-
-	glEnd();
-
-	glPopMatrix();
-
 	glFlush();
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
-	if(button == 0 && state == 1)
-	{
-		isSpin = true;
-	}
-
-	if(button == 1 && state == 1)
-	{
-		isSpin = false;
-	}
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
@@ -199,18 +113,6 @@ void GameEventHandler::keyboardEvent(unsigned char key, int state)
 	if(key == 27 && state == 1)
 	{
 		engine->getGameWindow()->destroy();
-	}
-
-	if(key == '1' && state == 1)
-	{
-		pontos[1][0] -= 0.1;
-		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
-	}
-
-	if(key == '2' && state == 1)
-	{
-		pontos[1][0] += 0.1;
-		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
 	}
 }
 
@@ -247,14 +149,11 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	// glShadeModel(GL_FLAT);
-
-	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, TOTAL, &pontos[0][0]);
-	glEnable(GL_MAP1_VERTEX_3);
+	glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void GameEventHandler::createWindowEvent()
 {
-	// engine->getRenderingSystem()->initialize();
 }

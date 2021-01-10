@@ -24,7 +24,6 @@
 */
 
 #include <geprofile.h>
-#include <iostream>
 
 // ****************************************************************************
 //  Constructors and Destructors
@@ -59,7 +58,6 @@ void GEProfile::update()
 	{
 		framesPerSecond = framesCounter;
 		framesCounter = 0;
-		std::cout << "@debug | FPS: " << framesPerSecond << std::endl;
 	}
 }
 

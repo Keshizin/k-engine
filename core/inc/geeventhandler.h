@@ -26,6 +26,9 @@
 #ifndef GAME_ENGINE_EVENT_HANDLER_CLASS_H
 #define GAME_ENGINE_EVENT_HANDLER_CLASS_H
 
+// ****************************************************************************
+//  Game Engine Events Class
+// ****************************************************************************
 class GEEventHandler
 {
 public:

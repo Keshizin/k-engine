@@ -32,7 +32,7 @@
 //  Major - releaseing number
 //  Minor - adding new features
 //  Patch - bug fixes
-// ****************************************************************************
+
 #define K_ENGINE_VERSION "1.0.0"
 
 #endif

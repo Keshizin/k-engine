@@ -34,8 +34,14 @@
 class GETimer
 {
 public:
+	// ------------------------------------------------------------------------
+	//  Constructors and Destructors
+	// ------------------------------------------------------------------------
 	GETimer(GETimeHandler *timeHandler);
 
+	// ------------------------------------------------------------------------
+	//  Public Methods
+	// ------------------------------------------------------------------------
 	void setTimerInMs(unsigned long long stopTime);
 	void start();
 	void startLoop(unsigned long long remainTime);

@@ -26,17 +26,26 @@
 #ifndef K_ENGINE_TIME_HANDLER_H
 #define K_ENGINE_TIME_HANDLER_H
 
+// ****************************************************************************
+//  Game Engine Time Handler Class
+// ****************************************************************************
 class GETimeHandler
 {
 public:
+	// ------------------------------------------------------------------------
+	//  Public Methods
+	// ------------------------------------------------------------------------
 	double getFrameTimeInSeconds();
+	void updateInternalTimer();
 
+	// ------------------------------------------------------------------------
+	//  Getters and Setters
+	// ------------------------------------------------------------------------
 	void setFrameTime(unsigned long long frameTime);
 	unsigned long long getFrameTime();
 
 	void setInternalTimer(unsigned long long internalTimer);
 	unsigned long long getInternalTimer();
-	void updateInternalTimer();
 
 	void setFrameTimeLimit(unsigned long long frameTimeLimit);
 	unsigned long long getFrameTimeLimit();

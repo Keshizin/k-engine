@@ -71,7 +71,6 @@ public:
 	virtual int createDebugConsole() { return 1; }
 	virtual int closeDebugConsole() { return 1; }
 
-
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler
 	// ------------------------------------------------------------------------

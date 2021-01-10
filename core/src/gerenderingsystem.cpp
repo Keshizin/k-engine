@@ -39,6 +39,18 @@ GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 {
 	this->apiWrapper = apiWrapper;
 	this->renderingContext = K_CONTEXT_2D;
+	this->viewportWidth = 0;
+	this->viewportHeight = 0;
+	this->windowLeft = 0.0;
+	this->windowRight = 0.0;
+	this->windowTop = 0.0;
+	this->windowBottom = 0.0;
+	this->projectionZNear = 0.0;
+	this->projectionZFar = 0.0;
+	this->projectionFOVY = 0.0;
+	this->windowAspectCorrection = 0.0;
+	bool windowAspectCorrectionState = false;
+	bool globalAxisState = false;
 }
 
 // ****************************************************************************
@@ -129,8 +141,12 @@ void GERenderingSystem::setProjection()
 	}
 }
 
-void GERenderingSystem::drawWorldAxis()
+void GERenderingSystem::drawGlobaldAxis()
 {
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrix();
+
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.0f);
 	glVertex3f(windowLeft, 0.0f, 0.0f);
@@ -138,7 +154,9 @@ void GERenderingSystem::drawWorldAxis()
 	glColor3f(0.0, 1.0f, 0.0f);
 	glVertex3f(0.0f, windowTop, 0.0f);
 	glVertex3f(0.0f, windowBottom, 0.0f);
-	glEnd();	
+	glEnd();
+
+	glPopMatrix();
 }
 
 // ****************************************************************************
@@ -210,4 +228,9 @@ void GERenderingSystem::setWindowAspectCorrectionState(bool state)
 bool GERenderingSystem::getWindowAspectCorrectionState()
 {
 	return windowAspectCorrectionState;
+}
+
+void GERenderingSystem::setGlobalAxisState(bool state)
+{
+	globalAxisState = state;
 }

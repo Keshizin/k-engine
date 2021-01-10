@@ -1,5 +1,5 @@
 /*
-	Game Engine Mathmatics Library
+	Game Engine Object
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020 Fabio Takeshi Ishikawa
@@ -23,19 +23,14 @@
 	SOFTWARE.
 */
 
-#ifndef GAME_ENGINE_MATH_H
-#define GAME_ENGINE_MATH_H
+#ifndef K_ENGINE_OBJECT_H
+#define K_ENGINE_OBJECT_H
 
-// ****************************************************************************
-//  Constant Symbolic for PI
-// ****************************************************************************
-#define K_PI 3.141592653589793
-
-// ****************************************************************************
-//  Function to calculate points of circle
-// ****************************************************************************
-void getCirclePoints(double **vector, int numberOfPoints);
-
-int center(int a, int b);
+class GEObject
+{
+public:
+	virtual void update() {}
+	virtual void draw() {}
+};
 
 #endif

@@ -25,7 +25,6 @@
 
 #include <ge.h>
 #include <gewinapiwrapper.h>
-#include <getimer.h>
 
 // ****************************************************************************
 //  Constructors and Destructors
@@ -68,9 +67,7 @@ void KEngine::startMainLoop()
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(1);
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
-
 	eventHandler->beforeMainLoopEvent();
-
 	profile->start();
 	endTime = apiWrapper->getHighResolutionTimerCounter();
 
@@ -159,6 +156,16 @@ GEWindow *KEngine::getGameWindow()
 GERenderingSystem *KEngine::getRenderingSystem()
 {
 	return renderingSystem;
+}
+
+GETimeHandler *KEngine::getTimeHandler()
+{
+	return timeHandler;
+}
+
+GEProfile *KEngine::getProfile()
+{
+	return profile;
 }
 
 void KEngine::setEventHandler(GEEventHandler *eventHandlerParam)

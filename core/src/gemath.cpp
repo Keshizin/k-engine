@@ -38,3 +38,8 @@ void getCirclePoints(double **vector, int numberOfPoints)
 		vector[points][1] = sin(cos(radAngle));
 	}
 }
+
+int center(int a, int b)
+{
+	return (a - b) / 2;
+}

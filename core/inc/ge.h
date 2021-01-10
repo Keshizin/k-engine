@@ -27,11 +27,9 @@
 #define K_ENGINE_H
 
 #include <gewindow.h>
-#include <geeventhandler.h>
-#include <gerenderingsystem.h>
 #include <getimehandler.h>
 #include <geprofile.h>
-
+#include <gerenderingsystem.h>
 #include <geversion.h>
 
 // ****************************************************************************
@@ -60,7 +58,6 @@ public:
 	void stopMainLoop();
 	void pauseGameLoop();
 	void resumeGameLoop();
-
 	void setFrameRate(int framePerSecond);
 
 	// ------------------------------------------------------------------------
@@ -68,8 +65,9 @@ public:
 	// ------------------------------------------------------------------------
 	GEAPIWrapper *getAPIWrapper();
 	GEWindow *getGameWindow();
-	GERenderingSystem *getRenderingSystem();
 	GETimeHandler *getTimeHandler();
+	GEProfile *getProfile();
+	GERenderingSystem *getRenderingSystem();
 	
 	void setEventHandler(GEEventHandler *eventHandler);
 

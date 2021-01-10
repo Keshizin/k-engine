@@ -23,8 +23,8 @@
 	SOFTWARE.
 */
 
-#ifndef GAME_ENGINE_EVENT_HANDLER_CLASS_H
-#define GAME_ENGINE_EVENT_HANDLER_CLASS_H
+#ifndef K_ENGINE_EVENT_HANDLER_CLASS_H
+#define K_ENGINE_EVENT_HANDLER_CLASS_H
 
 // ****************************************************************************
 //  Game Engine Events Class
@@ -33,13 +33,12 @@ class GEEventHandler
 {
 public:
 	virtual ~GEEventHandler() {}
-
 	virtual void frameEvent() {}
-	virtual void mouseEvent(int, int, int, int) {}
-	virtual void mouseMotionEvent(int, int) {}
-	virtual void keyboardEvent(unsigned char, int) {}
-	virtual void keyboardSpecialEvent(unsigned char, int) {}
-	virtual void resizeWindowEvent(int, int) {}
+	virtual void mouseEvent(int button, int state, int x, int y) {}
+	virtual void mouseMotionEvent(int x, int y) {}
+	virtual void keyboardEvent(unsigned char key, int state) {}
+	virtual void keyboardSpecialEvent(unsigned char key, int state) {}
+	virtual void resizeWindowEvent(int width, int height) {}
 	virtual void finishAfterEvent() {}
 	virtual void finishBeforeEvent() {}
 	virtual void resumeEvent() {}

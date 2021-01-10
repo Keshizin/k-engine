@@ -23,12 +23,13 @@
 	SOFTWARE.
 */
 
-#include <iostream>
 #include <gewinapiwrapper.h>
 #include <gewindow.h>
+
 #include <tchar.h>
 #include <GL/gl.h>
 #include <GLEXT/wglext.h>
+#include <iostream>
 
 GEEventHandler *globalEventHandler = 0;
 
@@ -567,8 +568,8 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			break;
 
-		case WM_SHOWWINDOW:
-			break;
+		// case WM_SHOWWINDOW:
+		// 	break;
 
 		// ********************************************************************
 		//  MOUSE MESSAGES

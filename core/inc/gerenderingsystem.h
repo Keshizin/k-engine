@@ -45,7 +45,7 @@ public:
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
 	GERenderingSystem(GEAPIWrapper *apiWrapper);
-	
+
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
@@ -54,7 +54,7 @@ public:
 	int setVSync(int vsync);
 	void setViewport(int x, int y, int width, int height);
 	void setProjection();
-	void drawWorldAxis();
+	void drawGlobaldAxis();
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
@@ -79,24 +79,25 @@ public:
 	void setWindowAspectCorrectionState(bool state);
 	bool getWindowAspectCorrectionState();
 
+	void setGlobalAxisState(bool state);
+
 private:
 	GEAPIWrapper *apiWrapper;
-	int renderingContext;
 
+	int renderingContext;
 	int viewportWidth;
 	int viewportHeight;
-
 	double windowLeft;
 	double windowRight;
 	double windowTop;
 	double windowBottom;
-
 	double projectionZNear;
 	double projectionZFar;
 	double projectionFOVY;
-
 	double windowAspectCorrection;
+
 	bool windowAspectCorrectionState;
+	bool globalAxisState;
 };
 
 #endif

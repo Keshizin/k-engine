@@ -29,12 +29,12 @@
 //  GETimeHandler CLASS METHODS DEFINITION
 // ----------------------------------------------------------------------------
 
-void GETimeHandler::setFrameTime(unsigned long long frameTime)
+void GETimeHandler::setFrameTime(long long frameTimeParam)
 {
-	this->frameTime = frameTime;
+	this->frameTime = frameTimeParam;
 }
 
-unsigned long long GETimeHandler::getFrameTime()
+long long GETimeHandler::getFrameTime()
 {
 	return frameTime;
 }
@@ -44,9 +44,9 @@ double GETimeHandler::getFrameTimeInSeconds()
 	return static_cast<double>(frameTime) / static_cast<double>(perfomanceFrequency);
 }
 
-void GETimeHandler::setInternalTimer(unsigned long long internalTimer)
+void GETimeHandler::setInternalTimer(long long internalTimerParam)
 {
-	this->internalTimer = internalTimer;
+	this->internalTimer = internalTimerParam;
 }
 
 void GETimeHandler::updateInternalTimer()
@@ -54,27 +54,27 @@ void GETimeHandler::updateInternalTimer()
 	this->internalTimer += frameTime;
 }
 
-unsigned long long GETimeHandler::getInternalTimer()
+long long GETimeHandler::getInternalTimer()
 {
 	return internalTimer;
 }
 
-void GETimeHandler::setFrameTimeLimit(unsigned long long frameTimeLimit)
+void GETimeHandler::setFrameTimeLimit(long long frameTimeLimitParam)
 {
-	this->frameTimeLimit = frameTimeLimit;
+	this->frameTimeLimit = frameTimeLimitParam;
 }
 
-unsigned long long GETimeHandler::getFrameTimeLimit()
+long long GETimeHandler::getFrameTimeLimit()
 {
 	return frameTimeLimit;
 }
 
-void GETimeHandler::setPerfomanceFrequency(unsigned long long perfomanceFrequency)
+void GETimeHandler::setPerfomanceFrequency(long long perfomanceFrequencyParam)
 {
-	this->perfomanceFrequency = perfomanceFrequency;
+	this->perfomanceFrequency = perfomanceFrequencyParam;
 }
 
-unsigned long long GETimeHandler::getPerfomanceFrequency()
+long long GETimeHandler::getPerfomanceFrequency()
 {
 	return this->perfomanceFrequency;
 }

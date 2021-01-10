@@ -26,6 +26,6 @@
 #ifndef K_ENGINE_AUXILIARY_H
 #define K_ENGINE_AUXILIARY_H
 
-#define UNREFERENCED_PARAMETER(p) reinterpret_cast<void*>(&p)
+#define K_UNREFERENCED_PARAMETER(p) reinterpret_cast<void*>(&p)
 
 #endif

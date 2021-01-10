@@ -43,20 +43,20 @@ public:
 	// ------------------------------------------------------------------------
 	//  CPU's stuff
 	// ------------------------------------------------------------------------
-	virtual unsigned long long getHighResolutionTimerCounter() { return 1; }
-	virtual unsigned long long getHighResolutionTimerFrequency() { return 1; }
+	virtual long long getHighResolutionTimerCounter() { return 1; }
+	virtual long long getHighResolutionTimerFrequency() { return 1; }
 
 	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
 	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
 	{
-		UNREFERENCED_PARAMETER(x);
-		UNREFERENCED_PARAMETER(y);
-		UNREFERENCED_PARAMETER(width);
-		UNREFERENCED_PARAMETER(height);
-		UNREFERENCED_PARAMETER(name);
-		UNREFERENCED_PARAMETER(style);
+		K_UNREFERENCED_PARAMETER(x);
+		K_UNREFERENCED_PARAMETER(y);
+		K_UNREFERENCED_PARAMETER(width);
+		K_UNREFERENCED_PARAMETER(height);
+		K_UNREFERENCED_PARAMETER(name);
+		K_UNREFERENCED_PARAMETER(style);
 		return 1;
 	}
 
@@ -64,7 +64,7 @@ public:
 
 	virtual int showWindow(int showType)
 	{
-		UNREFERENCED_PARAMETER(showType);
+		K_UNREFERENCED_PARAMETER(showType);
 		return 1;
 	}
 	
@@ -81,7 +81,7 @@ public:
 
 	virtual int setVSync(int vsync)
 	{
-		UNREFERENCED_PARAMETER(vsync);
+		K_UNREFERENCED_PARAMETER(vsync);
 		return 1;
 	}
 
@@ -96,7 +96,7 @@ public:
 	// ------------------------------------------------------------------------
 	virtual void setGlobalEventHandler(GEEventHandler *eventHandler)
 	{
-		UNREFERENCED_PARAMETER(eventHandler);
+		K_UNREFERENCED_PARAMETER(eventHandler);
 	}
 };
 

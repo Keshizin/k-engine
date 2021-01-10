@@ -39,34 +39,34 @@ public:
 
 	virtual void mouseEvent(int button, int state, int x, int y)
 	{
-		UNREFERENCED_PARAMETER(button);
-		UNREFERENCED_PARAMETER(state);
-		UNREFERENCED_PARAMETER(x);
-		UNREFERENCED_PARAMETER(y);
+		K_UNREFERENCED_PARAMETER(button);
+		K_UNREFERENCED_PARAMETER(state);
+		K_UNREFERENCED_PARAMETER(x);
+		K_UNREFERENCED_PARAMETER(y);
 	}
 	
 	virtual void mouseMotionEvent(int x, int y)
 	{
-		UNREFERENCED_PARAMETER(x);
-		UNREFERENCED_PARAMETER(y);
+		K_UNREFERENCED_PARAMETER(x);
+		K_UNREFERENCED_PARAMETER(y);
 	}
 
 	virtual void keyboardEvent(unsigned char key, int state)
 	{
-		UNREFERENCED_PARAMETER(key);
-		UNREFERENCED_PARAMETER(state);
+		K_UNREFERENCED_PARAMETER(key);
+		K_UNREFERENCED_PARAMETER(state);
 	}
 
 	virtual void keyboardSpecialEvent(unsigned char key, int state)
 	{
-		UNREFERENCED_PARAMETER(key);
-		UNREFERENCED_PARAMETER(state);
+		K_UNREFERENCED_PARAMETER(key);
+		K_UNREFERENCED_PARAMETER(state);
 	}
 
 	virtual void resizeWindowEvent(int width, int height)
 	{
-		UNREFERENCED_PARAMETER(width);
-		UNREFERENCED_PARAMETER(height);
+		K_UNREFERENCED_PARAMETER(width);
+		K_UNREFERENCED_PARAMETER(height);
 	}
 
 	virtual void finishAfterEvent() {}

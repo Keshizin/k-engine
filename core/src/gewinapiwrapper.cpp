@@ -51,14 +51,14 @@ GEWINAPIWrapper::~GEWINAPIWrapper()
 // ****************************************************************************
 //  CPU's stuff
 // ****************************************************************************
-unsigned long long GEWINAPIWrapper:: getHighResolutionTimerCounter()
+long long GEWINAPIWrapper:: getHighResolutionTimerCounter()
 {
 	LARGE_INTEGER time;
 	QueryPerformanceCounter(&time);
 	return time.QuadPart;
 }
 
-unsigned long long GEWINAPIWrapper::getHighResolutionTimerFrequency()
+long long GEWINAPIWrapper::getHighResolutionTimerFrequency()
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -318,7 +318,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(!ret)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
 		}
 
@@ -326,7 +326,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
 		}
 
@@ -334,7 +334,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
 		}
 
@@ -352,7 +352,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(!ret)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
 		}
 
@@ -360,7 +360,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
 		}
 
@@ -368,7 +368,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
 		}
 
@@ -386,7 +386,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(!ret)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
 		}
 
@@ -394,7 +394,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
 		}
 
@@ -402,7 +402,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
 		}
 
@@ -420,7 +420,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == FALSE)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to delete the rendering context: " << error << "\n" << std::endl;
 		}
 
@@ -428,7 +428,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(!ret)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
 		}
 
@@ -436,7 +436,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
 		}
 
@@ -444,7 +444,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 		if(ret == 0)
 		{
-			DWORD error = GetLastError();
+			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
 		}
 

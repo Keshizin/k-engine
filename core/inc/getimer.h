@@ -42,15 +42,15 @@ public:
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
-	void setTimerInMs(unsigned long long stopTime);
+	void setTimerInMs(long long stopTime);
 	void start();
-	void startLoop(unsigned long long remainTime);
+	void startLoop(long long remainTime);
 	int isDone();
 	int isDoneLoop();
 
 private:
-	unsigned long long stopTime;
-	unsigned long long startTimer;
+	long long stopTime;
+	long long startTimer;
 	GETimeHandler *timeHandler;
 };
 

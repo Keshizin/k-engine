@@ -28,20 +28,20 @@
 // ****************************************************************************
 //  GETimer constructor and destructor
 // ****************************************************************************
-GETimer::GETimer(GETimeHandler *timeHandler)
+GETimer::GETimer(GETimeHandler *timeHandlerParam)
 {
-	this->timeHandler = timeHandler;
+	this->timeHandler = timeHandlerParam;
 }
 
 // ****************************************************************************
 //  GETimer public methods
 // ****************************************************************************
-void GETimer::setTimerInMs(unsigned long long stopTime)
+void GETimer::setTimerInMs(long long stopTimeParam)
 {
-	if (stopTime < 1000)
-		this->stopTime = stopTime * timeHandler->getPerfomanceFrequency();
+	if (stopTimeParam < 1000)
+		this->stopTime = stopTimeParam * timeHandler->getPerfomanceFrequency();
 	else
-		this->stopTime = (stopTime / 1000) * timeHandler->getPerfomanceFrequency();
+		this->stopTime = (stopTimeParam / 1000) * timeHandler->getPerfomanceFrequency();
 }
 
 void GETimer::start()
@@ -49,7 +49,7 @@ void GETimer::start()
 	startTimer = timeHandler->getInternalTimer();
 }
 
-void GETimer::startLoop(unsigned long long remainTime)
+void GETimer::startLoop(long long remainTime)
 {
 	startTimer = timeHandler->getInternalTimer() + remainTime;
 }
@@ -66,7 +66,7 @@ int GETimer::isDone()
 
 int GETimer::isDoneLoop()
 {
-	unsigned long long internalTimer = timeHandler->getInternalTimer();
+	long long internalTimer = timeHandler->getInternalTimer();
 
 	if(startTimer && internalTimer - startTimer >= stopTime)
 	{

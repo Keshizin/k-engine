@@ -49,8 +49,8 @@ GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 	this->projectionZFar = 0.0;
 	this->projectionFOVY = 0.0;
 	this->windowAspectCorrection = 0.0;
-	bool windowAspectCorrectionState = false;
-	bool globalAxisState = false;
+	this->windowAspectCorrectionState = false;
+	this->globalAxisState = false;
 }
 
 // ****************************************************************************
@@ -149,11 +149,11 @@ void GERenderingSystem::drawGlobaldAxis()
 
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3f(windowLeft, 0.0f, 0.0f);
-	glVertex3f(windowRight, 0.0f, 0.0f);
+	glVertex3d(windowLeft, 0.0, 0.0);
+	glVertex3d(windowRight, 0.0, 0.0);
 	glColor3f(0.0, 1.0f, 0.0f);
-	glVertex3f(0.0f, windowTop, 0.0f);
-	glVertex3f(0.0f, windowBottom, 0.0f);
+	glVertex3d(0.0, windowTop, 0.0);
+	glVertex3d(0.0, windowBottom, 0.0);
 	glEnd();
 
 	glPopMatrix();
@@ -162,9 +162,9 @@ void GERenderingSystem::drawGlobaldAxis()
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-void GERenderingSystem::setRenderingContext(int renderingContext)
+void GERenderingSystem::setRenderingContext(int renderingContextParam)
 {
-	this->renderingContext = renderingContext;
+	this->renderingContext = renderingContextParam;
 }
 
 int GERenderingSystem::getRenderingContext()
@@ -180,9 +180,9 @@ void GERenderingSystem::setWindow(double left, double right, double bottom, doub
 	this->windowBottom = bottom;
 }
 
-void GERenderingSystem::setProjectionZNear(double projectionZNear)
+void GERenderingSystem::setProjectionZNear(double projectionZNearParam)
 {
-	this->projectionZNear = projectionZNear;
+	this->projectionZNear = projectionZNearParam;
 }
 
 double GERenderingSystem::getProjectionZNear()
@@ -190,9 +190,9 @@ double GERenderingSystem::getProjectionZNear()
 	return projectionZNear;
 }
 
-void GERenderingSystem::setProjectionZFar(double projectionZFar)
+void GERenderingSystem::setProjectionZFar(double projectionZFarParam)
 {
-	this->projectionZFar = projectionZFar;
+	this->projectionZFar = projectionZFarParam;
 }
 
 double GERenderingSystem::getProjectionZFar()
@@ -200,9 +200,9 @@ double GERenderingSystem::getProjectionZFar()
 	return projectionZFar;
 }
 
-void GERenderingSystem::setProjectionFOVY(double fovy)
+void GERenderingSystem::setProjectionFOVY(double fovyParam)
 {
-	this->projectionFOVY;
+	this->projectionFOVY = fovyParam;
 }
 
 double GERenderingSystem::getProjectionFOVY()
@@ -210,9 +210,9 @@ double GERenderingSystem::getProjectionFOVY()
 	return projectionFOVY;
 }
 
-void GERenderingSystem::setWindowAspectCorrection(double windowAspectCorrection)
+void GERenderingSystem::setWindowAspectCorrection(double windowAspectCorrectionParam)
 {
-	this->windowAspectCorrection = windowAspectCorrection;
+	this->windowAspectCorrection = windowAspectCorrectionParam;
 }
 
 double GERenderingSystem::getWindowAspectCorrection()

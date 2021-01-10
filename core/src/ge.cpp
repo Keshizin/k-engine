@@ -60,9 +60,9 @@ KEngine::~KEngine()
 // ****************************************************************************
 void KEngine::startMainLoop()
 {
-	unsigned long long startTime = 0;
-	unsigned long long endTime = 0;
-	unsigned long long frameTime = 0;
+	long long startTime = 0;
+	long long endTime = 0;
+	long long frameTime = 0;
 
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(1);

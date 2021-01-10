@@ -56,8 +56,8 @@ public:
 	// ------------------------------------------------------------------------
 	//  CPU's stuff
 	// ------------------------------------------------------------------------
-	unsigned long long getHighResolutionTimerCounter();
-	unsigned long long getHighResolutionTimerFrequency();
+	long long getHighResolutionTimerCounter();
+	long long getHighResolutionTimerFrequency();
 
 	// ------------------------------------------------------------------------
 	//  Window System's stuff

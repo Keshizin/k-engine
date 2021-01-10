@@ -41,23 +41,23 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	void setFrameTime(unsigned long long frameTime);
-	unsigned long long getFrameTime();
+	void setFrameTime(long long frameTime);
+	long long getFrameTime();
 
-	void setInternalTimer(unsigned long long internalTimer);
-	unsigned long long getInternalTimer();
+	void setInternalTimer(long long internalTimer);
+	long long getInternalTimer();
 
-	void setFrameTimeLimit(unsigned long long frameTimeLimit);
-	unsigned long long getFrameTimeLimit();
+	void setFrameTimeLimit(long long frameTimeLimit);
+	long long getFrameTimeLimit();
 
-	void setPerfomanceFrequency(unsigned long long perfomanceFrequency);
-	unsigned long long getPerfomanceFrequency();
+	void setPerfomanceFrequency(long long perfomanceFrequency);
+	long long getPerfomanceFrequency();
 
 private:
-	unsigned long long frameTime;
-	unsigned long long internalTimer;
-	unsigned long long frameTimeLimit;
-	unsigned long long perfomanceFrequency;
+	long long frameTime;
+	long long internalTimer;
+	long long frameTimeLimit;
+	long long perfomanceFrequency;
 };
 
 #endif

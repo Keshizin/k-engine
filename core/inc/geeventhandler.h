@@ -45,10 +45,30 @@ public:
 		UNREFERENCED_PARAMETER(y);
 	}
 	
-	virtual void mouseMotionEvent(int x, int y) {}
-	virtual void keyboardEvent(unsigned char key, int state) {}
-	virtual void keyboardSpecialEvent(unsigned char key, int state) {}
-	virtual void resizeWindowEvent(int width, int height) {}
+	virtual void mouseMotionEvent(int x, int y)
+	{
+		UNREFERENCED_PARAMETER(x);
+		UNREFERENCED_PARAMETER(y);
+	}
+
+	virtual void keyboardEvent(unsigned char key, int state)
+	{
+		UNREFERENCED_PARAMETER(key);
+		UNREFERENCED_PARAMETER(state);
+	}
+
+	virtual void keyboardSpecialEvent(unsigned char key, int state)
+	{
+		UNREFERENCED_PARAMETER(key);
+		UNREFERENCED_PARAMETER(state);
+	}
+
+	virtual void resizeWindowEvent(int width, int height)
+	{
+		UNREFERENCED_PARAMETER(width);
+		UNREFERENCED_PARAMETER(height);
+	}
+
 	virtual void finishAfterEvent() {}
 	virtual void finishBeforeEvent() {}
 	virtual void resumeEvent() {}

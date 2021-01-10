@@ -49,9 +49,24 @@ public:
 	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
-	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style) { return 1; }
+	virtual int createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
+	{
+		UNREFERENCED_PARAMETER(x);
+		UNREFERENCED_PARAMETER(y);
+		UNREFERENCED_PARAMETER(width);
+		UNREFERENCED_PARAMETER(height);
+		UNREFERENCED_PARAMETER(name);
+		UNREFERENCED_PARAMETER(style);
+		return 1;
+	}
+
 	virtual int destroyWindow() { return 1; }
-	virtual int showWindow(int showType) { return 1; }
+
+	virtual int showWindow(int showType)
+	{
+		UNREFERENCED_PARAMETER(showType);
+		return 1;
+	}
 	
 	// ------------------------------------------------------------------------
 	//  Message Events Handling (Message Pump) for Win32
@@ -63,7 +78,12 @@ public:
 	// ------------------------------------------------------------------------
 	virtual int initializeRenderingSystem() { return 1; }
 	virtual int swapBuffers() { return 1; }
-	virtual int setVSync(int vsync) { return 1; }
+
+	virtual int setVSync(int vsync)
+	{
+		UNREFERENCED_PARAMETER(vsync);
+		return 1;
+	}
 
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
@@ -74,7 +94,10 @@ public:
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler
 	// ------------------------------------------------------------------------
-	virtual void setGlobalEventHandler(GEEventHandler *eventHandler) {}
+	virtual void setGlobalEventHandler(GEEventHandler *eventHandler)
+	{
+		UNREFERENCED_PARAMETER(eventHandler);
+	}
 };
 
 #endif

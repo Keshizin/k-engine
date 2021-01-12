@@ -475,10 +475,10 @@ int GEWINAPIWrapper::swapBuffers()
 
 int GEWINAPIWrapper::setVSync(int vsync)
 {
-	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
+	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXTPROC = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
 
-	if (wglSwapIntervalEXT)
-		return wglSwapIntervalEXT(vsync);
+	if (wglSwapIntervalEXTPROC)
+		return wglSwapIntervalEXTPROC(vsync);
 	else
 		return 0;
 }

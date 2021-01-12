@@ -51,13 +51,13 @@ public:
 		K_UNREFERENCED_PARAMETER(y);
 	}
 
-	virtual void keyboardEvent(unsigned char key, int state)
+	virtual void keyboardEvent(unsigned long long key, int state)
 	{
 		K_UNREFERENCED_PARAMETER(key);
 		K_UNREFERENCED_PARAMETER(state);
 	}
 
-	virtual void keyboardSpecialEvent(unsigned char key, int state)
+	virtual void keyboardSpecialEvent(unsigned long long key, int state)
 	{
 		K_UNREFERENCED_PARAMETER(key);
 		K_UNREFERENCED_PARAMETER(state);

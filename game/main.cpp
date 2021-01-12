@@ -30,6 +30,7 @@
 #include <GL/glu.h>
 
 #include <ge.h>
+#include <geaux.h>
 
 #include <iostream>
 
@@ -46,8 +47,8 @@ class GameEventHandler : public GEEventHandler
 	void frameEvent();
 	void mouseEvent(int button, int state, int x, int y);
 	void mouseMotionEvent(int x, int y);
-	void keyboardEvent(unsigned char key, int state);
-	void keyboardSpecialEvent(unsigned char key, int state);
+	void keyboardEvent(unsigned long long key, int state);
+	void keyboardSpecialEvent(unsigned long long key, int state);
 	void resizeWindowEvent(int width, int height);
 	void finishAfterEvent();
 	void finishBeforeEvent();
@@ -64,6 +65,10 @@ KEngine *engine = 0;
 // ****************************************************************************
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	K_UNREFERENCED_PARAMETER(hInstance);
+	K_UNREFERENCED_PARAMETER(hPrevInstance);
+	K_UNREFERENCED_PARAMETER(lpCmdLine);
+
 	GameEventHandler gameEvents;
 	engine = new KEngine(&gameEvents);
 
@@ -102,13 +107,19 @@ void GameEventHandler::frameEvent()
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(button);
+	K_UNREFERENCED_PARAMETER(state);
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
-void GameEventHandler::keyboardEvent(unsigned char key, int state)
+void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
 	if(key == 27 && state == 1)
 	{
@@ -116,8 +127,10 @@ void GameEventHandler::keyboardEvent(unsigned char key, int state)
 	}
 }
 
-void GameEventHandler::keyboardSpecialEvent(unsigned char key, int state)
+void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 {
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::resizeWindowEvent(int width, int height)

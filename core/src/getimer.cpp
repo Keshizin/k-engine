@@ -31,6 +31,8 @@
 GETimer::GETimer(GETimeHandler *timeHandlerParam)
 {
 	this->timeHandler = timeHandlerParam;
+	this->stopTime = 0;
+	this->startTimer = 0;
 }
 
 // ****************************************************************************
@@ -57,9 +59,7 @@ void GETimer::startLoop(long long remainTime)
 int GETimer::isDone()
 {
 	if(startTimer && timeHandler->getInternalTimer() - startTimer >= stopTime)
-	{
 		return 1;
-	}
 	else
 		return 0;
 }
@@ -70,6 +70,7 @@ int GETimer::isDoneLoop()
 
 	if(startTimer && internalTimer - startTimer >= stopTime)
 	{
+		// (!) dont put code before the next instruction!
 		startLoop(internalTimer - startTimer - stopTime);
 		return 1;
 	}

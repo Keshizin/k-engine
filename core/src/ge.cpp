@@ -34,7 +34,10 @@ KEngine::KEngine(GEEventHandler *eventHandler)
 	this->apiWrapper = new GEWINAPIWrapper();
 	this->gameWindow = new GEWindow(this->apiWrapper);
 	this->renderingSystem = new GERenderingSystem(this->apiWrapper);
+	
 	this->timeHandler = new GETimeHandler();
+	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
+
 	this->profile = new GEProfile(this->timeHandler);
 
 	setEventHandler(eventHandler);
@@ -66,7 +69,6 @@ void KEngine::startMainLoop()
 
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(1);
-	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 	eventHandler->beforeMainLoopEvent();
 	profile->start();
 	endTime = apiWrapper->getHighResolutionTimerCounter();

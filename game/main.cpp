@@ -59,6 +59,8 @@ class GameEventHandler : public GEEventHandler
 };
 
 KEngine *engine = 0;
+GETimer *timer = 0;
+unsigned long long seconds = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -71,6 +73,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GameEventHandler gameEvents;
 	engine = new KEngine(&gameEvents);
+	timer = new GETimer(engine->getTimeHandler());
 
 	// Setting up Game Window
 	engine->getGameWindow()->setName("K-Engine!");
@@ -93,14 +96,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	engine->getGameWindow()->show(nCmdShow);
 
+	timer->setTimerInMs(1000);
 	engine->startMainLoop();
 
 	delete engine;
+	delete timer;
 	return 1;
 }
 
 void GameEventHandler::frameEvent()
 {
+	if (timer->isDoneLoop())
+	{
+		seconds++;
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT);
 	glFlush();
 }
@@ -124,6 +134,11 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	if(key == 27 && state == 1)
 	{
 		engine->getGameWindow()->destroy();
+	}
+
+	if(key == '1' && state == 1)
+	{
+		timer->startLoop(0);
 	}
 }
 

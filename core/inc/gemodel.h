@@ -48,7 +48,7 @@ typedef struct {
 	double bottom;
 } GERECT;
 
-void drawGEModel(MODEL *model);
+// void drawGEModel(MODEL *model);
 
 // ----------------------------------------------------------------------------
 //  BASE MODEL FOR 2D OBJECTS - SPRITES

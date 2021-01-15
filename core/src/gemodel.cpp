@@ -24,27 +24,27 @@
 */
 
 #include <gemodel.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+// #include <GL/gl.h>
+// #include <GL/glu.h>
 
-void drawGEModel(MODEL *model)
-{
-	if(model)
-	{
-		glBegin(GL_LINE_LOOP);
+// void drawGEModel(MODEL *model)
+// {
+// 	if(model)
+// 	{
+// 		glBegin(GL_LINE_LOOP);
 
-		for(int faces = 0; faces < model->total; faces++)
-		{			
-			for(int vertex = 0; vertex < model->faces[faces].total; vertex++)
-			{
-				glVertex3d(
-					model->vertices[model->faces[faces].vertex_index[vertex]].x,
-					model->vertices[model->faces[faces].vertex_index[vertex]].y,
-					model->vertices[model->faces[faces].vertex_index[vertex]].z
-				);
-			}
-		}
+// 		for(int faces = 0; faces < model->total; faces++)
+// 		{			
+// 			for(int vertex = 0; vertex < model->faces[faces].total; vertex++)
+// 			{
+// 				glVertex3d(
+// 					model->vertices[model->faces[faces].vertex_index[vertex]].x,
+// 					model->vertices[model->faces[faces].vertex_index[vertex]].y,
+// 					model->vertices[model->faces[faces].vertex_index[vertex]].z
+// 				);
+// 			}
+// 		}
 
-		glEnd();
-	}
-}
+// 		glEnd();
+// 	}
+// }

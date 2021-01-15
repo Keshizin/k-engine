@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.17)
 
 # -----------------------------------------------------------------------------
 #  P R O J E C T   N A M E

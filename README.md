@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.com/Keshizin/k-engine.svg?branch=main)](https://www.travis-ci.com/Keshizin/k-engine)
+
 <img src="_docs/img/logo.png" alt="K-Engine Logo" align="right" width=100 />
 
 # K-Engine
@@ -9,7 +11,7 @@ K-Engine is a open source game engine written in C++ developed for my undergradu
 This project use cmake to generate makefile for these compilers:
 
 - MSVC 2019 x64
-- MinGW x32
+- MSVC 2017 x64
 
 1. Go to https://github.com/Keshizin/k-engine to clone K-Engine repo.
 

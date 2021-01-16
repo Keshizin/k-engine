@@ -159,6 +159,11 @@ void GERenderingSystem::drawGlobaldAxis()
 	glPopMatrix();
 }
 
+void GERenderingSystem::getSystemVersion()
+{
+	std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
+}
+
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************

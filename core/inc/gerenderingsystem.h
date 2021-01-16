@@ -62,6 +62,7 @@ public:
 	void setViewport(int x, int y, int width, int height);
 	void setProjection();
 	void drawGlobaldAxis();
+	void getSystemVersion();
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters

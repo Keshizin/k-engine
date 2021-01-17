@@ -29,11 +29,28 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GLEXT/wglext.h>
+#include <GLEXT/glext.h>
 
 #include <gerenderingsystem.h>
 #include <iostream>
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
+
+PFNGLGENBUFFERSPROC glGenBuffers;
+PFNGLISBUFFERPROC glIsBuffer;
+PFNGLBINDBUFFERPROC glBindBuffer;
+PFNGLBUFFERDATAPROC glBufferData;
+PFNGLBUFFERSUBDATAPROC glBufferSubData;
+PFNGLMAPBUFFERPROC glMapBuffer;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
+
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 
 // ****************************************************************************
 //  Constructors and Destructors
@@ -74,7 +91,38 @@ int GERenderingSystem::initialize()
 
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
 
-	if(!wglSwapIntervalEXT)
+	glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
+	glIsBuffer = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
+	glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
+	glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
+	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
+	glMapBuffer = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
+	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
+	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
+	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
+	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
+	glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
+	
+	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
+	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
+	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
+
+	if(
+		!wglSwapIntervalEXT &&
+		!glGenBuffers &&
+		!glIsBuffer &&
+		!glBindBuffer &&
+		!glBufferData &&
+		!glBufferSubData &&
+		!glMapBuffer &&
+		!glUnmapBuffer &&
+		!glMapBufferRange &&
+		!glFlushMappedBufferRange &&
+		!glCopyBufferSubData &&
+		!glDeleteBuffers &&
+		!glGenVertexArrays &&
+		!glBindVertexArray &&
+		!glDeleteVertexArrays)
 	{
 		DWORD error = GetLastError();
 		std::cout << "(!) ERROR - It was not possible to load GL extension: " << error << "\n" << std::endl;

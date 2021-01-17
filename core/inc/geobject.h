@@ -29,7 +29,7 @@
 class GEObject
 {
 public:
-	virtual void update() {}
+	virtual void update(long long frameTime) {}
 	virtual void draw() {}
 };
 

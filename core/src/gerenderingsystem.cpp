@@ -35,22 +35,20 @@
 #include <iostream>
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
-
-PFNGLGENBUFFERSPROC glGenBuffers;
-PFNGLISBUFFERPROC glIsBuffer;
-PFNGLBINDBUFFERPROC glBindBuffer;
-PFNGLBUFFERDATAPROC glBufferData;
-PFNGLBUFFERSUBDATAPROC glBufferSubData;
-PFNGLMAPBUFFERPROC glMapBuffer;
-PFNGLUNMAPBUFFERPROC glUnmapBuffer;
-PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
-PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange;
-PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
-
-PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+PFNGLGENBUFFERSPROC glGenBuffers = 0;
+PFNGLISBUFFERPROC glIsBuffer = 0;
+PFNGLBINDBUFFERPROC glBindBuffer = 0;
+PFNGLBUFFERDATAPROC glBufferData = 0;
+PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
+PFNGLMAPBUFFERPROC glMapBuffer = 0;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = 0;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
 
 // ****************************************************************************
 //  Constructors and Destructors
@@ -102,7 +100,6 @@ int GERenderingSystem::initialize()
 	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
 	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
 	glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
-	
 	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
 	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
 	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");

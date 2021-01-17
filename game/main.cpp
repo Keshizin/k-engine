@@ -28,8 +28,11 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GLEXT/wglext.h>
+#include <GLEXT/glext.h>
 
 #include <ge.h>
+#include <gemodel.h>
 #include <geaux.h>
 
 #include <iostream>
@@ -37,10 +40,10 @@
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
-#define WINDOW_LEFT   -50.0
-#define WINDOW_RIGHT   50.0
-#define WINDOW_BOTTOM -50.0
-#define WINDOW_TOP     50.0
+#define WINDOW_LEFT   -1.0
+#define WINDOW_RIGHT   1.0
+#define WINDOW_BOTTOM -1.0
+#define WINDOW_TOP     1.0
 
 class GameEventHandler : public GEEventHandler
 {
@@ -60,7 +63,6 @@ class GameEventHandler : public GEEventHandler
 
 KEngine *engine = 0;
 GETimer *timer = 0;
-unsigned long long seconds = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -87,12 +89,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Setting up Rendering Engine
 	engine->getRenderingSystem()->initialize();
 	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
+	engine->getRenderingSystem()->setWindowAspectCorrectionState(true);
+
 	engine->getRenderingSystem()->setWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
 	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
 	engine->getRenderingSystem()->setProjection();
 	engine->getRenderingSystem()->setVSync(0);
+	engine->getRenderingSystem()->getSystemVersion();
 
-	engine->setFrameRate(120);
+	engine->setFrameRate(0);
 
 	engine->getGameWindow()->show(nCmdShow);
 
@@ -104,15 +109,53 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return 1;
 }
 
+GLfloat angle = 0.0;
+
+float rect_vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	0.5f, -0.5f, 0.0f,
+	-0.5f,  0.5f, 0.0f,
+	0.5f,  0.5f, 0.0f
+};
+
+// float *rect_vertices = 0;
+
+float rect_colors[] = {
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f
+};
+
+unsigned int rect_indices[] = {0, 1, 2, 1, 3, 2};
+
+PFNGLGENBUFFERSPROC glGenBuffers1;
+PFNGLISBUFFERPROC glIsBuffer1;
+PFNGLBINDBUFFERPROC glBindBuffer1;
+PFNGLBUFFERDATAPROC glBufferData1;
+PFNGLBUFFERSUBDATAPROC glBufferSubData1;
+PFNGLMAPBUFFERPROC glMapBuffer1;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer1;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange1;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange1;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData1;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffers1;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays1;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray1;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays1;
+
 void GameEventHandler::frameEvent()
 {
-	if (timer->isDoneLoop())
+	angle++;
+
+	if(angle > 360.0f)
 	{
-		seconds++;
+		angle = 0.0f;
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glFlush();
+	glRotatef(angle, 0.0, 0.0, 1.0);	
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -177,9 +220,61 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
+	// glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
+	glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	// unsigned int vao = engine->getRenderingSystem()->loadModel(rect_vertices, rect_colors, rect_indices);
+
+	glGenBuffers1 = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
+	glIsBuffer1 = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
+	glBindBuffer1 = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
+	glBufferData1 = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
+	glBufferSubData1 = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
+	glMapBuffer1 = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
+	glUnmapBuffer1 = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
+	glMapBufferRange1 = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
+	glFlushMappedBufferRange1 = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
+	glCopyBufferSubData1 = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
+	glDeleteBuffers1 = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
+	glGenVertexArrays1 = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
+	glBindVertexArray1 = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
+	glDeleteVertexArrays1 = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
+
+	GLuint vao;
+	GLuint bo[3] = {0};
+
+	glGenVertexArrays1(1, &vao);
+	glBindVertexArray1(vao);
+
+	if(rect_vertices)
+	{
+		glGenBuffers1(1, &bo[0]);
+		glBindBuffer1(GL_ARRAY_BUFFER, bo[0]);
+		glBufferData1(GL_ARRAY_BUFFER, sizeof(rect_vertices), rect_vertices, GL_STATIC_DRAW);
+
+		glEnableClientState(GL_VERTEX_ARRAY); // (remove)
+		glVertexPointer(3, GL_FLOAT, 0, 0); // (remove)
+	}
+
+	if(rect_colors)
+	{
+		glGenBuffers1(1, &bo[1]);
+		glBindBuffer1(GL_ARRAY_BUFFER, bo[1]);
+		glBufferData1(GL_ARRAY_BUFFER, sizeof(rect_colors), rect_colors, GL_STATIC_DRAW);
+
+		glEnableClientState(GL_COLOR_ARRAY); // (remove)
+		glColorPointer(3, GL_FLOAT, 0, 0); // (remove)
+	}
+
+	if(rect_indices)
+	{
+		glGenBuffers1(1, &bo[2]);
+		glBindBuffer1(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
+		glBufferData1(GL_ELEMENT_ARRAY_BUFFER, sizeof(rect_indices), rect_indices, GL_STATIC_DRAW);
+	}
 }
 
 void GameEventHandler::createWindowEvent()

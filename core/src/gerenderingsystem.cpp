@@ -124,10 +124,11 @@ int GERenderingSystem::initialize()
 		!glBindVertexArray &&
 		!glDeleteVertexArrays)
 	{
-		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to load GL extension: " << error << "\n" << std::endl;
+		std::cout << "(!) ERROR - It was not possible to load GL extension: " << glGetError() << "\n" << std::endl;
 		return 0;
 	}
+
+	return 1;
 }
 
 void GERenderingSystem::renderFrame()

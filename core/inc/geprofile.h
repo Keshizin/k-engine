@@ -44,17 +44,25 @@ public:
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	void start();
-	void update();
+	void update(long long frameTime);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	unsigned long long getFramesPerSecond();
 
+	long long getMaxFrameTime();
+	long long getMinFrameTime();
+	double getMeanFrameTime();
+
 private:
 	GETimer *timer;
 	unsigned long long framesPerSecond;
 	unsigned long long framesCounter;
+	long long maxFrameTime;
+	long long minFrameTime;
+	double meanFrameTime;
+	long long frameTimeCounter;
 };
 
 #endif

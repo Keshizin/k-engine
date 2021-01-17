@@ -26,6 +26,8 @@
 #include <ge.h>
 #include <gewinapiwrapper.h>
 
+// #include <iostream>
+
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
@@ -77,7 +79,7 @@ void KEngine::startMainLoop()
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
 		timeHandler->updateInternalTimer();
-		profile->update();
+		profile->update(timeHandler->getFrameTime());
 
 		// --------------------------------------------------------------------
 		//  Win32 Message Pump

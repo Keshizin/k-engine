@@ -79,12 +79,6 @@ public:
 	virtual int initializeRenderingSystem() { return 1; }
 	virtual int swapBuffers() { return 1; }
 
-	virtual int setVSync(int vsync)
-	{
-		K_UNREFERENCED_PARAMETER(vsync);
-		return 1;
-	}
-
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
 	// ------------------------------------------------------------------------

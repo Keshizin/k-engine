@@ -28,9 +28,12 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GLEXT/wglext.h>
 
 #include <gerenderingsystem.h>
 #include <iostream>
+
+PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
 
 // ****************************************************************************
 //  Constructors and Destructors
@@ -66,7 +69,17 @@ int GERenderingSystem::initialize()
 
 	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
 	// apontando para o objeto. Fazer essa validação!
-	return apiWrapper->initializeRenderingSystem();
+	if(!apiWrapper->initializeRenderingSystem())
+		return 0;
+
+	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
+
+	if(!wglSwapIntervalEXT)
+	{
+		DWORD error = GetLastError();
+		std::cout << "(!) ERROR - It was not possible to load GL extension: " << error << "\n" << std::endl;
+		return 0;
+	}
 }
 
 void GERenderingSystem::renderFrame()
@@ -90,7 +103,7 @@ void GERenderingSystem::renderFrame()
 
 int GERenderingSystem::setVSync(int vsync)
 {
-	return apiWrapper->setVSync(vsync);
+	return wglSwapIntervalEXT(vsync);
 }
 
 void GERenderingSystem::setViewport(int x, int y, int width, int height)
@@ -133,6 +146,12 @@ void GERenderingSystem::setProjection()
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
 		windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
+
+		std::cout << "@debug | projectionFOVY: " << projectionFOVY << std::endl;
+		std::cout << "@debug | windowAspectCorrection: " << windowAspectCorrection << std::endl;
+		std::cout << "@debug | projectionZNear: " << projectionZNear << std::endl;
+		std::cout << "@debug | projectionZFar: " << projectionZFar << std::endl;
+
 		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
 	}
 	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)

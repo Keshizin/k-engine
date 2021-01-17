@@ -28,7 +28,7 @@
 
 #include <tchar.h>
 #include <GL/gl.h>
-#include <GLEXT/wglext.h>
+
 #include <iostream>
 
 GEEventHandler *globalEventHandler = 0;
@@ -274,7 +274,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 		1,
 		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
 		PFD_TYPE_RGBA,
-		32, // cColorBits
+		24, // cColorBits
 		0, // cRedBits
 		0, // cRedShift
 		0, // cGreenBits
@@ -288,7 +288,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 		0, // cAccumGreenBits
 		0, // cAccumBlueBits
 		0, // cAccumAlphaBits
-		32, // cDepthBits
+		24, // cDepthBits
 		0, // cStencilBits
 		0, // cAuxBuffers
 		PFD_MAIN_PLANE, // iLayerType
@@ -471,16 +471,6 @@ int GEWINAPIWrapper::swapBuffers()
 	}
 	
 	return 0;
-}
-
-int GEWINAPIWrapper::setVSync(int vsync)
-{
-	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXTPROC = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
-
-	if (wglSwapIntervalEXTPROC)
-		return wglSwapIntervalEXTPROC(vsync);
-	else
-		return 0;
 }
 
 // ****************************************************************************

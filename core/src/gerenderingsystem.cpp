@@ -34,6 +34,9 @@
 #include <gerenderingsystem.h>
 #include <iostream>
 
+// ----------------------------------------------------------------------------
+//  OpenGL Procedures Extension for Win32
+// ----------------------------------------------------------------------------
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
 PFNGLGENBUFFERSPROC glGenBuffers = 0;
 PFNGLISBUFFERPROC glIsBuffer = 0;
@@ -49,6 +52,33 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
 PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
 PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
+
+// ****************************************************************************
+//  GEModel Class Definition - Constructors and Destructors
+// ****************************************************************************
+GEModel::GEModel()
+{
+}
+
+GEModel::GEModel(MODEL *modelParam)
+{
+	this->model = modelParam;
+}
+
+GEModel::~GEModel()
+{
+	delete model;
+}
+
+void GEModel::loadToMemory()
+{
+}
+
+void GEModel::releaseFromMemory()
+{
+}
+
+
 
 // ****************************************************************************
 //  Constructors and Destructors

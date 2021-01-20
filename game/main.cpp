@@ -32,7 +32,6 @@
 #include <GLEXT/glext.h>
 
 #include <ge.h>
-#include <gemodel.h>
 #include <geaux.h>
 
 #include <iostream>
@@ -44,6 +43,43 @@
 #define WINDOW_RIGHT   1.0
 #define WINDOW_BOTTOM -1.0
 #define WINDOW_TOP     1.0
+
+GLfloat angle = 0.0;
+
+VERTEX v[4] = {
+	-0.5f, -0.5f, 0.0f,
+	0.5f, -0.5f, 0.0f,
+	-0.5f,  0.5f, 0.0f,
+	0.5f,  0.5f, 0.0f
+};
+
+COLOR c[4] = {
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f
+};
+
+FACE f[2] = {
+	3, {0, 1, 2},
+	3, {1, 3, 2}
+};
+
+float rect_vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	0.5f, -0.5f, 0.0f,
+	-0.5f,  0.5f, 0.0f,
+	0.5f,  0.5f, 0.0f
+};
+
+float rect_colors[] = {
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f
+};
+
+unsigned int rect_indices[] = {0, 1, 2, 1, 3, 2};
 
 class GameEventHandler : public GEEventHandler
 {
@@ -60,6 +96,8 @@ class GameEventHandler : public GEEventHandler
 	void beforeMainLoopEvent();
 	void createWindowEvent();
 };
+
+GEModel model;
 
 KEngine *engine = 0;
 GETimer *timer = 0;
@@ -108,26 +146,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	delete timer;
 	return 1;
 }
-
-GLfloat angle = 0.0;
-
-float rect_vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	0.5f, -0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f,
-	0.5f,  0.5f, 0.0f
-};
-
-// float *rect_vertices = 0;
-
-float rect_colors[] = {
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f
-};
-
-unsigned int rect_indices[] = {0, 1, 2, 1, 3, 2};
 
 PFNGLGENBUFFERSPROC glGenBuffers1;
 PFNGLISBUFFERPROC glIsBuffer1;
@@ -220,6 +238,13 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
+	for(int i = 0; i < 4; i++)
+	{
+		std::cout << "x: " << v[i].x << std::endl;
+		std::cout << "y: " << v[i].y << std::endl;
+		std::cout << "z: " << v[i].z << std::endl;
+	}
+
 	// glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
 	glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
 

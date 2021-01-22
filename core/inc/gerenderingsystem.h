@@ -45,7 +45,7 @@
 //  Data Structures for Geometric Models
 // ----------------------------------------------------------------------------
 typedef struct {
-	double x, y, z;
+	double r, g, b;
 } COLOR;
 
 typedef struct {
@@ -54,13 +54,16 @@ typedef struct {
 
 typedef struct {
 	int total;
-	int vertex_index[3];
+	int vertexIndex[3];
 } FACE;
 
 typedef struct {
 	VERTEX *vertices;
-	FACE *faces;
-	int total;
+	COLOR *colors;
+	unsigned int *indices;
+	
+	unsigned int total_indices;
+	unsigned int total_vertex;
 } MODEL;
 
 typedef struct {
@@ -86,6 +89,8 @@ public:
     // ------------------------------------------------------------------------
 	void loadToMemory();
 	void releaseFromMemory();
+	void draw();
+
 private:
 	MODEL *model;
 };

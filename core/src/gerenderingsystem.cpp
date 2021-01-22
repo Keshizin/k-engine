@@ -67,18 +67,56 @@ GEModel::GEModel(MODEL *modelParam)
 
 GEModel::~GEModel()
 {
+	delete model->vertices;
+	delete model->colors;
+	delete model->indices;
 	delete model;
 }
 
 void GEModel::loadToMemory()
 {
+	GLuint vao;
+	GLuint bo[3] = {0};
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	if(model->vertices)
+	{
+		glGenBuffers(1, &bo[0]);
+		glBindBuffer(GL_ARRAY_BUFFER, bo[0]);
+		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(VERTEX), model->vertices, GL_STATIC_DRAW);
+
+		glEnableClientState(GL_VERTEX_ARRAY); // (remove)
+		glVertexPointer(3, GL_FLOAT, 0, 0); // (remove)
+	}
+
+	if(model->colors)
+	{
+		glGenBuffers(1, &bo[1]);
+		glBindBuffer(GL_ARRAY_BUFFER, bo[1]);
+		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(model->colors), model->colors, GL_STATIC_DRAW);
+
+		glEnableClientState(GL_COLOR_ARRAY); // (remove)
+		glColorPointer(3, GL_FLOAT, 0, 0); // (remove)
+	}
+
+	if(model->indices)
+	{
+		glGenBuffers(1, &bo[2]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->total_indices * sizeof(unsigned int), model->indices, GL_STATIC_DRAW);
+	}
 }
 
 void GEModel::releaseFromMemory()
 {
 }
 
-
+void GEModel::draw()
+{
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
 
 // ****************************************************************************
 //  Constructors and Destructors

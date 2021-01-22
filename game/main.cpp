@@ -46,41 +46,6 @@
 
 GLfloat angle = 0.0;
 
-VERTEX v[4] = {
-	-0.5f, -0.5f, 0.0f,
-	0.5f, -0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f,
-	0.5f,  0.5f, 0.0f
-};
-
-COLOR c[4] = {
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f
-};
-
-FACE f[2] = {
-	3, {0, 1, 2},
-	3, {1, 3, 2}
-};
-
-float rect_vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	0.5f, -0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f,
-	0.5f,  0.5f, 0.0f
-};
-
-float rect_colors[] = {
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f
-};
-
-unsigned int rect_indices[] = {0, 1, 2, 1, 3, 2};
-
 class GameEventHandler : public GEEventHandler
 {
 	void frameEvent();
@@ -97,10 +62,9 @@ class GameEventHandler : public GEEventHandler
 	void createWindowEvent();
 };
 
-GEModel model;
-
 KEngine *engine = 0;
 GETimer *timer = 0;
+GEModel *model;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -144,23 +108,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	delete engine;
 	delete timer;
+	delete model;
 	return 1;
 }
 
-PFNGLGENBUFFERSPROC glGenBuffers1;
-PFNGLISBUFFERPROC glIsBuffer1;
-PFNGLBINDBUFFERPROC glBindBuffer1;
-PFNGLBUFFERDATAPROC glBufferData1;
-PFNGLBUFFERSUBDATAPROC glBufferSubData1;
-PFNGLMAPBUFFERPROC glMapBuffer1;
-PFNGLUNMAPBUFFERPROC glUnmapBuffer1;
-PFNGLMAPBUFFERRANGEPROC glMapBufferRange1;
-PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange1;
-PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData1;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffers1;
-PFNGLGENVERTEXARRAYSPROC glGenVertexArrays1;
-PFNGLBINDVERTEXARRAYPROC glBindVertexArray1;
-PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays1;
+// PFNGLGENBUFFERSPROC glGenBuffers1;
+// PFNGLISBUFFERPROC glIsBuffer1;
+// PFNGLBINDBUFFERPROC glBindBuffer1;
+// PFNGLBUFFERDATAPROC glBufferData1;
+// PFNGLBUFFERSUBDATAPROC glBufferSubData1;
+// PFNGLMAPBUFFERPROC glMapBuffer1;
+// PFNGLUNMAPBUFFERPROC glUnmapBuffer1;
+// PFNGLMAPBUFFERRANGEPROC glMapBufferRange1;
+// PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange1;
+// PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData1;
+// PFNGLDELETEBUFFERSARBPROC glDeleteBuffers1;
+// PFNGLGENVERTEXARRAYSPROC glGenVertexArrays1;
+// PFNGLBINDVERTEXARRAYPROC glBindVertexArray1;
+// PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays1;
 
 void GameEventHandler::frameEvent()
 {
@@ -172,8 +137,12 @@ void GameEventHandler::frameEvent()
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glRotatef(angle, 0.0, 0.0, 1.0);	
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	glRotatef(angle, 0.0, 0.0, 1.0);
+
+	model->draw();
+	
+	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -238,68 +207,58 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	for(int i = 0; i < 4; i++)
-	{
-		std::cout << "x: " << v[i].x << std::endl;
-		std::cout << "y: " << v[i].y << std::endl;
-		std::cout << "z: " << v[i].z << std::endl;
-	}
-
 	// glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
 	glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// unsigned int vao = engine->getRenderingSystem()->loadModel(rect_vertices, rect_colors, rect_indices);
+	MODEL *m = new MODEL();
 
-	glGenBuffers1 = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
-	glIsBuffer1 = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
-	glBindBuffer1 = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
-	glBufferData1 = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
-	glBufferSubData1 = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
-	glMapBuffer1 = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
-	glUnmapBuffer1 = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
-	glMapBufferRange1 = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
-	glFlushMappedBufferRange1 = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
-	glCopyBufferSubData1 = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
-	glDeleteBuffers1 = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
-	glGenVertexArrays1 = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
-	glBindVertexArray1 = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
-	glDeleteVertexArrays1 = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
+	m->vertices = new VERTEX[4];
 
-	GLuint vao;
-	GLuint bo[3] = {0};
+	m->vertices[0].x = -0.5f;
+	m->vertices[0].y = -0.5f;
+	m->vertices[0].z =  0.0f;
+	m->vertices[1].x =  0.5f;
+	m->vertices[1].y = -0.5f;
+	m->vertices[1].z =  0.0f;
+	m->vertices[2].x = -0.5f;
+	m->vertices[2].y =  0.5f;
+	m->vertices[2].z =  0.0f;
+	m->vertices[3].x =  0.5f;
+	m->vertices[3].y =  0.5f;
+	m->vertices[3].z =  0.0f;
 
-	glGenVertexArrays1(1, &vao);
-	glBindVertexArray1(vao);
+	m->colors = new COLOR[4];
 
-	if(rect_vertices)
-	{
-		glGenBuffers1(1, &bo[0]);
-		glBindBuffer1(GL_ARRAY_BUFFER, bo[0]);
-		glBufferData1(GL_ARRAY_BUFFER, sizeof(rect_vertices), rect_vertices, GL_STATIC_DRAW);
+	m->colors[0].r = 1.0f;
+	m->colors[0].g = 0.0f;
+	m->colors[0].b = 1.0f;
+	m->colors[1].r = 1.0f;
+	m->colors[1].g = 0.0f;
+	m->colors[1].b = 1.0f;
+	m->colors[2].r = 1.0f;
+	m->colors[2].g = 0.0f;
+	m->colors[2].b = 1.0f;
+	m->colors[3].r = 1.0f;
+	m->colors[3].g = 0.0f;
+	m->colors[3].b = 1.0f;
 
-		glEnableClientState(GL_VERTEX_ARRAY); // (remove)
-		glVertexPointer(3, GL_FLOAT, 0, 0); // (remove)
-	}
+	m->indices = new unsigned int[6];
 
-	if(rect_colors)
-	{
-		glGenBuffers1(1, &bo[1]);
-		glBindBuffer1(GL_ARRAY_BUFFER, bo[1]);
-		glBufferData1(GL_ARRAY_BUFFER, sizeof(rect_colors), rect_colors, GL_STATIC_DRAW);
+	m->indices[0] = 0;
+	m->indices[1] = 1;
+	m->indices[2] = 2;
+	m->indices[3] = 1;
+	m->indices[4] = 3;
+	m->indices[5] = 2;
 
-		glEnableClientState(GL_COLOR_ARRAY); // (remove)
-		glColorPointer(3, GL_FLOAT, 0, 0); // (remove)
-	}
+	m->total_indices = 6;
+	m->total_vertex = 4;
 
-	if(rect_indices)
-	{
-		glGenBuffers1(1, &bo[2]);
-		glBindBuffer1(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
-		glBufferData1(GL_ELEMENT_ARRAY_BUFFER, sizeof(rect_indices), rect_indices, GL_STATIC_DRAW);
-	}
+	model = new GEModel(m);
+	model->loadToMemory();
 }
 
 void GameEventHandler::createWindowEvent()

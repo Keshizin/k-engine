@@ -95,7 +95,7 @@ void GEModel::loadToMemory()
 	{
 		glGenBuffers(1, &bo[1]);
 		glBindBuffer(GL_ARRAY_BUFFER, bo[1]);
-		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(model->colors), model->colors, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(COLOR), model->colors, GL_STATIC_DRAW);
 
 		glEnableClientState(GL_COLOR_ARRAY); // (remove)
 		glColorPointer(3, GL_FLOAT, 0, 0); // (remove)

@@ -45,11 +45,11 @@
 //  Data Structures for Geometric Models
 // ----------------------------------------------------------------------------
 typedef struct {
-	double r, g, b;
+	float r, g, b;
 } COLOR;
 
 typedef struct {
-	double x, y, z;
+	float x, y, z;
 } VERTEX;
 
 typedef struct {
@@ -67,10 +67,10 @@ typedef struct {
 } MODEL;
 
 typedef struct {
-	double left;
-	double right;
-	double top;
-	double bottom;
+	float left;
+	float right;
+	float top;
+	float bottom;
 } GERECT;
 
 // ----------------------------------------------------------------------------

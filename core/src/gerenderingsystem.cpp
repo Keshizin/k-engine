@@ -67,6 +67,8 @@ GEModel::GEModel(MODEL *modelParam)
 
 GEModel::~GEModel()
 {
+	releaseFromMemory();
+
 	delete model->vertices;
 	delete model->colors;
 	delete model->indices;
@@ -115,7 +117,8 @@ void GEModel::releaseFromMemory()
 
 void GEModel::draw()
 {
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 // ****************************************************************************
@@ -196,13 +199,19 @@ int GERenderingSystem::initialize()
 	return 1;
 }
 
+void GERenderingSystem::resetView()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 void GERenderingSystem::renderFrame()
 {
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
-		return;
-	}
+	// if(!apiWrapper)
+	// {
+	// 	std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
+	// 	return;
+	// }
 
 	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
 	// apontando para o objeto. Fazer essa validação!

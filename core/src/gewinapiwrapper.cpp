@@ -456,21 +456,23 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 
 int GEWINAPIWrapper::swapBuffers()
 {
-	if(hDC)
-	{
-		BOOL ret = SwapBuffers(hDC);
+	return SwapBuffers(hDC);
 
-		if(ret != TRUE)
-		{
-			DWORD error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to swap the buffers: " << error << "\n" << std::endl;
-			return 0;
-		}
+	// if(hDC)
+	// {
+	// 	BOOL ret = SwapBuffers(hDC);
 
-		return 1;
-	}
+	// 	// if(ret != TRUE)
+	// 	// {
+	// 	// 	DWORD error = GetLastError();
+	// 	// 	std::cout << "(!) ERROR - It was not possible to swap the buffers: " << error << "\n" << std::endl;
+	// 	// 	return 0;
+	// 	// }
+
+	// 	return 1;
+	// }
 	
-	return 0;
+	// return 0;
 }
 
 // ****************************************************************************

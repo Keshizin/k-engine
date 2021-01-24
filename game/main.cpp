@@ -65,6 +65,7 @@ class GameEventHandler : public GEEventHandler
 KEngine *engine = 0;
 GETimer *timer = 0;
 GEModel *model;
+int seconds = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -112,37 +113,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return 1;
 }
 
-// PFNGLGENBUFFERSPROC glGenBuffers1;
-// PFNGLISBUFFERPROC glIsBuffer1;
-// PFNGLBINDBUFFERPROC glBindBuffer1;
-// PFNGLBUFFERDATAPROC glBufferData1;
-// PFNGLBUFFERSUBDATAPROC glBufferSubData1;
-// PFNGLMAPBUFFERPROC glMapBuffer1;
-// PFNGLUNMAPBUFFERPROC glUnmapBuffer1;
-// PFNGLMAPBUFFERRANGEPROC glMapBufferRange1;
-// PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange1;
-// PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData1;
-// PFNGLDELETEBUFFERSARBPROC glDeleteBuffers1;
-// PFNGLGENVERTEXARRAYSPROC glGenVertexArrays1;
-// PFNGLBINDVERTEXARRAYPROC glBindVertexArray1;
-// PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays1;
-
 void GameEventHandler::frameEvent()
 {
-	angle++;
-
-	if(angle > 360.0f)
+	if(timer->isRestart())
 	{
-		angle = 0.0f;
+		seconds++;
+		std::cout << "seconds: " << seconds << std::endl;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	// angle++;
 
-	glRotatef(angle, 0.0, 0.0, 1.0);
+	// if(angle > 360.0f)
+	// {
+	// 	angle = 0.0f;
+	// }
 
-	model->draw();
-	
-	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	// glClear(GL_COLOR_BUFFER_BIT);
+
+	// glRotatef(angle, 0.0, 0.0, 1.0);
+
+	// for(int i = 0; i < 1000; i++)
+	// {
+	// 	model->draw();
+	// }
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -168,7 +161,7 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 
 	if(key == '1' && state == 1)
 	{
-		timer->startLoop(0);
+		timer->start();
 	}
 }
 
@@ -209,9 +202,7 @@ void GameEventHandler::beforeMainLoopEvent()
 {
 	// glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
 	glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	engine->getRenderingSystem()->resetView();
 
 	MODEL *m = new MODEL();
 
@@ -220,12 +211,15 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->vertices[0].x = -0.5f;
 	m->vertices[0].y = -0.5f;
 	m->vertices[0].z =  0.0f;
+
 	m->vertices[1].x =  0.5f;
 	m->vertices[1].y = -0.5f;
 	m->vertices[1].z =  0.0f;
+
 	m->vertices[2].x = -0.5f;
 	m->vertices[2].y =  0.5f;
 	m->vertices[2].z =  0.0f;
+
 	m->vertices[3].x =  0.5f;
 	m->vertices[3].y =  0.5f;
 	m->vertices[3].z =  0.0f;
@@ -246,13 +240,17 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->colors[3].b = 1.0f;
 
 	m->indices = new unsigned int[6];
+	int k = 0;
 
-	m->indices[0] = 0;
-	m->indices[1] = 1;
-	m->indices[2] = 2;
-	m->indices[3] = 1;
-	m->indices[4] = 3;
-	m->indices[5] = 2;
+	for(int i = 0; i < 1; i++)
+	{
+		m->indices[k++] = 0;
+		m->indices[k++] = 1;
+		m->indices[k++] = 2;
+		m->indices[k++] = 1;
+		m->indices[k++] = 3;
+		m->indices[k++] = 2;
+	}
 
 	m->total_indices = 6;
 	m->total_vertex = 4;

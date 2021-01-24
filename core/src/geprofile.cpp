@@ -24,7 +24,6 @@
 */
 
 #include <geprofile.h>
-
 // #include <iostream>
 
 // ****************************************************************************
@@ -53,7 +52,8 @@ void GEProfile::start()
 	framesPerSecond = 0;
 	framesCounter = 0;
 	timer->setTimerInMs(1000); // 1000 milliseconds
-	timer->startLoop(0);
+	timer->start();
+
 	frameTimeCounter = 0;
 	maxFrameTime = 0;
 	minFrameTime = 0;
@@ -62,30 +62,33 @@ void GEProfile::start()
 
 void GEProfile::update(long long frameTime)
 {
-	framesCounter++;
-
-	if(frameTime > maxFrameTime)
-		maxFrameTime = frameTime;
-
-	if(!minFrameTime || frameTime < minFrameTime)
-		minFrameTime = frameTime;
-
-	frameTimeCounter += frameTime;
-
-	if(timer->isDoneLoop())
+	if(timer->isRestart())
 	{
 		framesPerSecond = framesCounter;
 		meanFrameTime = static_cast<double>(frameTimeCounter) / static_cast<double>(framesPerSecond);
 
-		// std::cout << "fps: " << framesPerSecond << std::endl;
-		// std::cout << "meanFrameTime: " << meanFrameTime << std::endl;
-		// std::cout << "maxFrameTime: " << maxFrameTime << std::endl;
-		// std::cout << "minFrameTime: " << minFrameTime << std::endl << std::endl;
+		// std::cout
+		// 	<< "FPS: " << framesPerSecond
+		// 	<< "\nMEAN FRAME TIME: " << meanFrameTime
+		// 	<< "\nMAX FRAME TIME: " << maxFrameTime
+		// 	<< "\nMIN FRAME TIME: " << minFrameTime
+		// 	<< "\n" << std::endl;
 
 		frameTimeCounter = 0;
 		framesCounter = 0;
 		maxFrameTime = 0;
 		minFrameTime = 0;
+	}
+	else
+	{
+		if(frameTime > maxFrameTime)
+			maxFrameTime = frameTime;
+
+		if(!minFrameTime || frameTime < minFrameTime)
+			minFrameTime = frameTime;
+
+		frameTimeCounter += frameTime;
+		framesCounter++;
 	}
 }
 

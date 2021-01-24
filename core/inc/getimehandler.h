@@ -36,7 +36,7 @@ public:
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	double getFrameTimeInSeconds();
-	void updateInternalTimer();
+	void updateInternalTimer(long long timer);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters

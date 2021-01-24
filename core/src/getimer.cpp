@@ -33,6 +33,7 @@ GETimer::GETimer(GETimeHandler *timeHandlerParam)
 	this->timeHandler = timeHandlerParam;
 	this->stopTime = 0;
 	this->startTimer = 0;
+	this->isStart = false;
 }
 
 // ****************************************************************************
@@ -40,38 +41,43 @@ GETimer::GETimer(GETimeHandler *timeHandlerParam)
 // ****************************************************************************
 void GETimer::setTimerInMs(long long stopTimeParam)
 {
-	if (stopTimeParam < 1000)
-		this->stopTime = stopTimeParam * timeHandler->getPerfomanceFrequency();
-	else
-		this->stopTime = (stopTimeParam / 1000) * timeHandler->getPerfomanceFrequency();
+	this->stopTime = stopTimeParam * (timeHandler->getPerfomanceFrequency() / 1000);
 }
 
 void GETimer::start()
 {
 	startTimer = timeHandler->getInternalTimer();
+	this->isStart = true;
 }
 
-void GETimer::startLoop(long long remainTime)
+void GETimer::restart(long long remainTime)
 {
 	startTimer = timeHandler->getInternalTimer() + remainTime;
 }
 
+void GETimer::stop()
+{
+	this->isStart = false;
+}
+
 int GETimer::isDone()
 {
-	if(startTimer && timeHandler->getInternalTimer() - startTimer >= stopTime)
+	long long internalTimer = timeHandler->getInternalTimer();
+
+	if(this->isStart && internalTimer - startTimer >= stopTime)
 		return 1;
 	else
 		return 0;
 }
 
-int GETimer::isDoneLoop()
+int GETimer::isRestart()
 {
 	long long internalTimer = timeHandler->getInternalTimer();
 
-	if(startTimer && internalTimer - startTimer >= stopTime)
+	if(this->isStart && internalTimer - startTimer >= stopTime)
 	{
 		// (!) dont put code before the next instruction!
-		startLoop(internalTimer - startTimer - stopTime);
+		restart(internalTimer - startTimer - stopTime);
 		return 1;
 	}
 	else

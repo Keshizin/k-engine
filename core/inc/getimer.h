@@ -44,13 +44,16 @@ public:
 	// ------------------------------------------------------------------------
 	void setTimerInMs(long long stopTime);
 	void start();
-	void startLoop(long long remainTime);
+	void restart(long long remainTime);
+	void stop();
 	int isDone();
-	int isDoneLoop();
+	int isRestart();
+
 
 private:
 	long long stopTime;
 	long long startTimer;
+	bool isStart;
 	GETimeHandler *timeHandler;
 };
 

@@ -269,12 +269,6 @@ void GERenderingSystem::setProjection()
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
 		windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
-
-		std::cout << "@debug | projectionFOVY: " << projectionFOVY << std::endl;
-		std::cout << "@debug | windowAspectCorrection: " << windowAspectCorrection << std::endl;
-		std::cout << "@debug | projectionZNear: " << projectionZNear << std::endl;
-		std::cout << "@debug | projectionZFar: " << projectionZFar << std::endl;
-
 		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
 	}
 	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)

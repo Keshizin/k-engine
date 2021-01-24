@@ -28,7 +28,6 @@
 // ----------------------------------------------------------------------------
 //  GETimeHandler CLASS METHODS DEFINITION
 // ----------------------------------------------------------------------------
-
 void GETimeHandler::setFrameTime(long long frameTimeParam)
 {
 	this->frameTime = frameTimeParam;
@@ -49,9 +48,9 @@ void GETimeHandler::setInternalTimer(long long internalTimerParam)
 	this->internalTimer = internalTimerParam;
 }
 
-void GETimeHandler::updateInternalTimer()
+void GETimeHandler::updateInternalTimer(long long timer)
 {
-	this->internalTimer += frameTime;
+	this->internalTimer = timer;
 }
 
 long long GETimeHandler::getInternalTimer()

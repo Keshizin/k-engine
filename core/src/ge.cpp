@@ -26,8 +26,6 @@
 #include <ge.h>
 #include <gewinapiwrapper.h>
 
-// #include <iostream>
-
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
@@ -65,20 +63,21 @@ KEngine::~KEngine()
 // ****************************************************************************
 void KEngine::startMainLoop()
 {
+	long long startloopTime = 0;
 	long long startTime = 0;
 	long long endTime = 0;
 	long long frameTime = 0;
 
 	runningStatus = K_RUNNING;
-	timeHandler->setInternalTimer(1);
+	timeHandler->setInternalTimer(0);
 	eventHandler->beforeMainLoopEvent();
 	profile->start();
-	endTime = apiWrapper->getHighResolutionTimerCounter();
+	startloopTime = endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
-		timeHandler->updateInternalTimer();
+		timeHandler->updateInternalTimer(startTime - startloopTime);
 		profile->update(timeHandler->getFrameTime());
 
 		// --------------------------------------------------------------------
@@ -101,7 +100,7 @@ void KEngine::startMainLoop()
 		frameTime = startTime - endTime;
 		endTime = apiWrapper->getHighResolutionTimerCounter();
 		frameTime += (endTime - startTime);
-	
+
 		// --------------------------------------------------------------------
 		//  Frame Rate Governing
 		// --------------------------------------------------------------------
@@ -112,7 +111,6 @@ void KEngine::startMainLoop()
 			frameTime += (endTime - startTime);
 		}
 
-		// std::cout << "@debug | frameTime: " << frameTime << std::endl;
 		timeHandler->setFrameTime(frameTime);
 	}
 }

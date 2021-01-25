@@ -115,11 +115,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void GameEventHandler::frameEvent()
 {
-	if(timer->isRestart())
-	{
-		seconds++;
-		std::cout << "seconds: " << seconds << std::endl;
-	}
+	// if(timer->isRestart())
+	// {
+	// 	seconds++;
+	// 	std::cout << "seconds: " << seconds << std::endl;
+	// }
 
 	// angle++;
 
@@ -201,62 +201,62 @@ void GameEventHandler::pauseEvent()
 void GameEventHandler::beforeMainLoopEvent()
 {
 	// glClearColor(247.0f / 255.0f, 194.0f / 255.0f, 23.0f / 255.0f, 1.0f);
-	glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
-	engine->getRenderingSystem()->resetView();
+	// glClearColor(44.0f / 255.0f, 0.0f / 255.0f, 30.0f / 255.0f, 1.0f);
+	// engine->getRenderingSystem()->resetView();
 
-	MODEL *m = new MODEL();
+	// MODEL *m = new MODEL();
 
-	m->vertices = new VERTEX[4];
+	// m->vertices = new VERTEX[4];
 
-	m->vertices[0].x = -0.5f;
-	m->vertices[0].y = -0.5f;
-	m->vertices[0].z =  0.0f;
+	// m->vertices[0].x = -0.5f;
+	// m->vertices[0].y = -0.5f;
+	// m->vertices[0].z =  0.0f;
 
-	m->vertices[1].x =  0.5f;
-	m->vertices[1].y = -0.5f;
-	m->vertices[1].z =  0.0f;
+	// m->vertices[1].x =  0.5f;
+	// m->vertices[1].y = -0.5f;
+	// m->vertices[1].z =  0.0f;
 
-	m->vertices[2].x = -0.5f;
-	m->vertices[2].y =  0.5f;
-	m->vertices[2].z =  0.0f;
+	// m->vertices[2].x = -0.5f;
+	// m->vertices[2].y =  0.5f;
+	// m->vertices[2].z =  0.0f;
 
-	m->vertices[3].x =  0.5f;
-	m->vertices[3].y =  0.5f;
-	m->vertices[3].z =  0.0f;
+	// m->vertices[3].x =  0.5f;
+	// m->vertices[3].y =  0.5f;
+	// m->vertices[3].z =  0.0f;
 
-	m->colors = new COLOR[4];
+	// m->colors = new COLOR[4];
 
-	m->colors[0].r = 1.0f;
-	m->colors[0].g = 0.0f;
-	m->colors[0].b = 1.0f;
-	m->colors[1].r = 1.0f;
-	m->colors[1].g = 0.0f;
-	m->colors[1].b = 1.0f;
-	m->colors[2].r = 1.0f;
-	m->colors[2].g = 0.0f;
-	m->colors[2].b = 1.0f;
-	m->colors[3].r = 1.0f;
-	m->colors[3].g = 0.0f;
-	m->colors[3].b = 1.0f;
+	// m->colors[0].r = 1.0f;
+	// m->colors[0].g = 0.0f;
+	// m->colors[0].b = 1.0f;
+	// m->colors[1].r = 1.0f;
+	// m->colors[1].g = 0.0f;
+	// m->colors[1].b = 1.0f;
+	// m->colors[2].r = 1.0f;
+	// m->colors[2].g = 0.0f;
+	// m->colors[2].b = 1.0f;
+	// m->colors[3].r = 1.0f;
+	// m->colors[3].g = 0.0f;
+	// m->colors[3].b = 1.0f;
 
-	m->indices = new unsigned int[6];
-	int k = 0;
+	// m->indices = new unsigned int[6];
+	// int k = 0;
 
-	for(int i = 0; i < 1; i++)
-	{
-		m->indices[k++] = 0;
-		m->indices[k++] = 1;
-		m->indices[k++] = 2;
-		m->indices[k++] = 1;
-		m->indices[k++] = 3;
-		m->indices[k++] = 2;
-	}
+	// for(int i = 0; i < 1; i++)
+	// {
+	// 	m->indices[k++] = 0;
+	// 	m->indices[k++] = 1;
+	// 	m->indices[k++] = 2;
+	// 	m->indices[k++] = 1;
+	// 	m->indices[k++] = 3;
+	// 	m->indices[k++] = 2;
+	// }
 
-	m->total_indices = 6;
-	m->total_vertex = 4;
+	// m->total_indices = 6;
+	// m->total_vertex = 4;
 
-	model = new GEModel(m);
-	model->loadToMemory();
+	// model = new GEModel(m);
+	// model->loadToMemory();
 }
 
 void GameEventHandler::createWindowEvent()

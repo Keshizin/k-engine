@@ -63,6 +63,8 @@ private:
 	long long minFrameTime;
 	double meanFrameTime;
 	long long frameTimeCounter;
+	unsigned long long maxFramePerSecond;
+	unsigned long long minFramePerSecond;
 };
 
 #endif

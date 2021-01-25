@@ -77,38 +77,38 @@ GEModel::~GEModel()
 
 void GEModel::loadToMemory()
 {
-	GLuint vao;
-	GLuint bo[3] = {0};
+	// GLuint vao;
+	// GLuint bo[3] = {0};
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	// glGenVertexArrays(1, &vao);
+	// glBindVertexArray(vao);
 
-	if(model->vertices)
-	{
-		glGenBuffers(1, &bo[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, bo[0]);
-		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(VERTEX), model->vertices, GL_STATIC_DRAW);
+	// if(model->vertices)
+	// {
+	// 	glGenBuffers(1, &bo[0]);
+	// 	glBindBuffer(GL_ARRAY_BUFFER, bo[0]);
+	// 	glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(VERTEX), model->vertices, GL_STATIC_DRAW);
 
-		glEnableClientState(GL_VERTEX_ARRAY); // (remove)
-		glVertexPointer(3, GL_FLOAT, 0, 0); // (remove)
-	}
+	// 	glEnableClientState(GL_VERTEX_ARRAY); // (remove)
+	// 	glVertexPointer(3, GL_FLOAT, 0, 0); // (remove)
+	// }
 
-	if(model->colors)
-	{
-		glGenBuffers(1, &bo[1]);
-		glBindBuffer(GL_ARRAY_BUFFER, bo[1]);
-		glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(COLOR), model->colors, GL_STATIC_DRAW);
+	// if(model->colors)
+	// {
+	// 	glGenBuffers(1, &bo[1]);
+	// 	glBindBuffer(GL_ARRAY_BUFFER, bo[1]);
+	// 	glBufferData(GL_ARRAY_BUFFER, model->total_vertex * sizeof(COLOR), model->colors, GL_STATIC_DRAW);
 
-		glEnableClientState(GL_COLOR_ARRAY); // (remove)
-		glColorPointer(3, GL_FLOAT, 0, 0); // (remove)
-	}
+	// 	glEnableClientState(GL_COLOR_ARRAY); // (remove)
+	// 	glColorPointer(3, GL_FLOAT, 0, 0); // (remove)
+	// }
 
-	if(model->indices)
-	{
-		glGenBuffers(1, &bo[2]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->total_indices * sizeof(unsigned int), model->indices, GL_STATIC_DRAW);
-	}
+	// if(model->indices)
+	// {
+	// 	glGenBuffers(1, &bo[2]);
+	// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
+	// 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->total_indices * sizeof(unsigned int), model->indices, GL_STATIC_DRAW);
+	// }
 }
 
 void GEModel::releaseFromMemory()
@@ -117,8 +117,27 @@ void GEModel::releaseFromMemory()
 
 void GEModel::draw()
 {
+
+	glBegin(GL_TRIANGLES);
+
+	for(int i = 0; i < model->total_indices; i++)
+	{
+		glColor3f(
+			model->colors[ model->indices[i]].r,
+			model->colors[ model->indices[i]].g,
+			model->colors[ model->indices[i]].b);
+
+		glVertex3f(
+			model->vertices[ model->indices[i]].x,
+			model->vertices[ model->indices[i]].y,
+			model->vertices[ model->indices[i]].z);
+	}
+
+	glEnd();
+
+	// ------------------------------------------------------------------------
 	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 // ****************************************************************************

@@ -20,7 +20,7 @@
 - VSYNC: **NO**
 - FRAME-RATE-GOVERNING: **NO**
 - FRAME EVENT: **NO**
-- PROFILE: **NO**
+- PROFILE: **YES**
 - SWAP BUFFERS: **YES**
 - C++ I/O: **YES**
 

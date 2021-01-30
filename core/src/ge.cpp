@@ -71,14 +71,14 @@ void KEngine::startMainLoop()
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(0);
 	eventHandler->beforeMainLoopEvent();
-	profile->start();
+	// profile->start();
 	startloopTime = endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
 		timeHandler->updateInternalTimer(startTime - startloopTime);
-		profile->update(timeHandler->getFrameTime());
+		// profile->update(timeHandler->getFrameTime());
 
 		// --------------------------------------------------------------------
 		//  Win32 Message Pump
@@ -90,7 +90,7 @@ void KEngine::startMainLoop()
 		// --------------------------------------------------------------------
 		if(runningStatus == K_RUNNING)
 		{
-			eventHandler->frameEvent();
+			eventHandler->frameEvent(timeHandler->getFrameTimeInSeconds());
 			renderingSystem->renderFrame();
 		}
 

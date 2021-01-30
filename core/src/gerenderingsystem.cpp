@@ -61,6 +61,15 @@ GEEntity::GEEntity()
 	translate.x = 0.0f;
 	translate.y = 0.0f;
 	translate.z = 0.0f;
+
+	speed.x = 0.0f;
+	speed.y = 0.0f;
+	speed.z = 0.0f;
+
+	bounding.left = 0.0f;
+	bounding.right = 0.0f;
+	bounding.top = 0.0f;
+	bounding.bottom = 0.0f;
 }
 
 GEEntity::GEEntity(MODEL *modelParam)
@@ -69,6 +78,15 @@ GEEntity::GEEntity(MODEL *modelParam)
 	translate.x = 0.0f;
 	translate.y = 0.0f;
 	translate.z = 0.0f;
+
+	speed.x = 0.0f;
+	speed.y = 0.0f;
+	speed.z = 0.0f;
+
+	bounding.left = 0.0f;
+	bounding.right = 0.0f;
+	bounding.top = 0.0f;
+	bounding.bottom = 0.0f;
 }
 
 GEEntity::~GEEntity()
@@ -80,10 +98,22 @@ GEEntity::~GEEntity()
 	delete model;
 }
 
+void GEEntity::update(double frameTime)
+{
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	translate.x += speed.x * frameTime;
+
+	if(translate.x - 0.5f > bounding.right)
+		translate.x = bounding.left - 0.5f;
+
+	glTranslatef(translate.x, translate.y, translate.z);
+}
+
 void GEEntity::draw()
 {
-	glTranslatef(translate.x, translate.y, translate.z);
-
 	// This code will be replaced for VAO, VBO, vertex/fragment shader techniques!
 	glBegin(GL_TRIANGLES);
 
@@ -102,6 +132,8 @@ void GEEntity::draw()
 
 	glEnd();
 
+	glPopMatrix();
+
 	// ------------------------------------------------------------------------
 	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	// glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -112,6 +144,21 @@ void GEEntity::setTranslate(float x, float y, float z)
 	translate.x = x;
 	translate.y = y;
 	translate.z = z;
+}
+
+void GEEntity::setSpeed(float x, float y, float z)
+{
+	speed.x = x;
+	speed.y = y;
+	speed.z = z;
+}
+
+void GEEntity::setBounding(double left, double right, double top, double bottom)
+{
+	bounding.left = left;
+	bounding.right = right;
+	bounding.top = top;
+	bounding.bottom = bottom;
 }
 
 // void GEEntity::loadToMemory()
@@ -163,10 +210,12 @@ GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 	this->renderingContext = K_CONTEXT_2D;
 	this->viewportWidth = 0;
 	this->viewportHeight = 0;
-	this->windowLeft = 0.0;
-	this->windowRight = 0.0;
-	this->windowTop = 0.0;
-	this->windowBottom = 0.0;
+
+	this->window.left = 0.0f;
+	this->window.right = 0.0f;
+	this->window.top = 0.0f;
+	this->window.bottom = 0.0f;
+	
 	this->projectionZNear = 0.0;
 	this->projectionZFar = 0.0;
 	this->projectionFOVY = 0.0;
@@ -276,28 +325,25 @@ void GERenderingSystem::setProjection()
 
 	if(renderingContext == K_CONTEXT_2D)
 	{
-		GLdouble left = windowLeft;
-		GLdouble right = windowRight;
-		GLdouble bottom = windowBottom;
-		GLdouble top = windowTop;
-
 		if(windowAspectCorrectionState)
 		{
 			if(viewportWidth <= viewportHeight)
 			{
 				windowAspectCorrection = static_cast<GLdouble>(viewportHeight) / static_cast<double>(viewportWidth);
-				bottom *= windowAspectCorrection;
-				top *= windowAspectCorrection;
+
+				window.bottom *= windowAspectCorrection;
+				window.top *= windowAspectCorrection;
 			}
 			else
 			{
 				windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
-				left *= windowAspectCorrection;
-				right *= windowAspectCorrection;
+
+				window.left *= windowAspectCorrection;
+				window.right *= windowAspectCorrection;
 			}
 		}
 
-		glOrtho(left, right, bottom, top, -1.0, 1.0);
+		glOrtho(window.left, window.right, window.bottom, window.top, -1.0, 1.0);
 	}
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
@@ -306,7 +352,7 @@ void GERenderingSystem::setProjection()
 	}
 	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
 	{
-		glOrtho(windowLeft, windowRight, windowBottom, windowTop, projectionZNear, projectionZFar);
+		glOrtho(window.left, window.right, window.bottom, window.top, projectionZNear, projectionZFar);
 	}
 }
 
@@ -318,11 +364,11 @@ void GERenderingSystem::drawGlobaldAxis()
 
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3d(windowLeft, 0.0, 0.0);
-	glVertex3d(windowRight, 0.0, 0.0);
+	glVertex3d(window.left, 0.0, 0.0);
+	glVertex3d(window.right, 0.0, 0.0);
 	glColor3f(0.0, 1.0f, 0.0f);
-	glVertex3d(0.0, windowTop, 0.0);
-	glVertex3d(0.0, windowBottom, 0.0);
+	glVertex3d(0.0, window.top, 0.0);
+	glVertex3d(0.0, window.bottom, 0.0);
 	glEnd();
 
 	glPopMatrix();
@@ -348,10 +394,15 @@ int GERenderingSystem::getRenderingContext()
 
 void GERenderingSystem::setWindow(double left, double right, double bottom, double top)
 {
-	this->windowLeft = left;
-	this->windowRight = right;
-	this->windowTop = top;
-	this->windowBottom = bottom;
+	this->window.left = left;
+	this->window.right = right;
+	this->window.top = top;
+	this->window.bottom = bottom;
+}
+
+GERECT GERenderingSystem::getWindow()
+{
+	return window;
 }
 
 void GERenderingSystem::setProjectionZNear(double projectionZNearParam)

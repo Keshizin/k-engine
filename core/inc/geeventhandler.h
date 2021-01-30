@@ -35,7 +35,7 @@ class GEEventHandler
 {
 public:
 	virtual ~GEEventHandler() {}
-	virtual void frameEvent() {}
+	virtual void frameEvent(double frameTime) {}
 
 	virtual void mouseEvent(int button, int state, int x, int y)
 	{

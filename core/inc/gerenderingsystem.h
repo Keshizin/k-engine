@@ -72,6 +72,19 @@ typedef struct {
 	float z;
 } TRANSLATE;
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+} SPEED;
+
+typedef struct {
+	float left;
+	float right;
+	float top;
+	float bottom;
+} GERECT;
+
 // ----------------------------------------------------------------------------
 //  Entity Class
 // ----------------------------------------------------------------------------
@@ -88,12 +101,17 @@ public:
     // ------------------------------------------------------------------------
 	// void loadToMemory();
 	// void releaseFromMemory();
+	void update(double frameTime);
 	void draw();
 	void setTranslate(float x, float y, float z);
+	void setSpeed(float x, float y, float z);
+	void setBounding(double left, double right, double top, double bottom);
 
 private:
 	MODEL *model;
 	TRANSLATE translate;
+	SPEED speed;
+	GERECT bounding;
 };
 
 // ----------------------------------------------------------------------------
@@ -126,6 +144,7 @@ public:
 	int getRenderingContext();
 
 	void setWindow(double left, double right, double bottom, double top);
+	GERECT getWindow();
 
 	void setProjectionZNear(double projectionZNear);
 	double getProjectionZNear();
@@ -150,10 +169,9 @@ private:
 	int renderingContext;
 	int viewportWidth;
 	int viewportHeight;
-	double windowLeft;
-	double windowRight;
-	double windowTop;
-	double windowBottom;
+
+	GERECT window;
+
 	double projectionZNear;
 	double projectionZFar;
 	double projectionFOVY;

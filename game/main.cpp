@@ -39,16 +39,16 @@
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
-#define WINDOW_LEFT   -1.0
-#define WINDOW_RIGHT   1.0
-#define WINDOW_BOTTOM -1.0
-#define WINDOW_TOP     1.0
+#define WINDOW_LEFT    -10.0
+#define WINDOW_RIGHT    10.0
+#define WINDOW_BOTTOM  -10.0
+#define WINDOW_TOP      10.0
 
 GLfloat angle = 0.0;
 
 class GameEventHandler : public GEEventHandler
 {
-	void frameEvent();
+	void frameEvent(double frameTime);
 	void mouseEvent(int button, int state, int x, int y);
 	void mouseMotionEvent(int x, int y);
 	void keyboardEvent(unsigned long long key, int state);
@@ -64,7 +64,7 @@ class GameEventHandler : public GEEventHandler
 
 KEngine *engine = 0;
 GETimer *timer = 0;
-GEEntity *entity;
+GEEntity *entity = 0;
 int seconds = 0;
 
 // ****************************************************************************
@@ -113,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return 1;
 }
 
-void GameEventHandler::frameEvent()
+void GameEventHandler::frameEvent(double frameTime)
 {
 	// if(timer->isRestart())
 	// {
@@ -127,15 +127,12 @@ void GameEventHandler::frameEvent()
 	// {
 	// 	angle = 0.0f;
 	// }
-
-	entity->setTranslate(1.0f, 0.0f, 0.0f);
-
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	engine->getRenderingSystem()->drawGlobaldAxis();
 
 	// glRotatef(angle, 0.0, 0.0, 1.0);
+	entity->update(frameTime);
 	entity->draw();
 }
 
@@ -174,8 +171,15 @@ void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
+	engine->getRenderingSystem()->setWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
 	engine->getRenderingSystem()->setViewport(0, 0, width, height);
 	engine->getRenderingSystem()->setProjection();
+
+	if(entity)
+	{
+		GERECT w = engine->getRenderingSystem()->getWindow();
+		entity->setBounding(w.left, w.right, w.top, w.bottom);
+	}
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -254,6 +258,10 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->total_vertex = 4;
 
 	entity = new GEEntity(m);
+	entity->setSpeed(1.0f, 0.0f, 0.0f);
+
+	GERECT w = engine->getRenderingSystem()->getWindow();
+	entity->setBounding(w.left, w.right, w.top, w.bottom);
 }
 
 void GameEventHandler::createWindowEvent()

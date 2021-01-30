@@ -64,7 +64,7 @@ class GameEventHandler : public GEEventHandler
 
 KEngine *engine = 0;
 GETimer *timer = 0;
-GEModel *model;
+GEEntity *entity;
 int seconds = 0;
 
 // ****************************************************************************
@@ -109,7 +109,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	delete engine;
 	delete timer;
-	delete model;
+	delete entity;
 	return 1;
 }
 
@@ -128,10 +128,15 @@ void GameEventHandler::frameEvent()
 	// 	angle = 0.0f;
 	// }
 
+	entity->setTranslate(1.0f, 0.0f, 0.0f);
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	// glRotatef(angle, 0.0, 0.0, 1.0);
-	model->draw();
+	entity->draw();
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -248,8 +253,7 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->total_indices = 6;
 	m->total_vertex = 4;
 
-	model = new GEModel(m);
-	model->loadToMemory();
+	entity = new GEEntity(m);
 }
 
 void GameEventHandler::createWindowEvent()

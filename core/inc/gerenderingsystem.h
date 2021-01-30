@@ -67,32 +67,33 @@ typedef struct {
 } MODEL;
 
 typedef struct {
-	float left;
-	float right;
-	float top;
-	float bottom;
-} GERECT;
+	float x;
+	float y;
+	float z;
+} TRANSLATE;
 
 // ----------------------------------------------------------------------------
-//  Geometric Model Class
+//  Entity Class
 // ----------------------------------------------------------------------------
-class GEModel
+class GEEntity
 {
 public:
 	// Constructors and Destructors
-	GEModel();
-	GEModel(MODEL *model);
-	~GEModel();
+	GEEntity();
+	GEEntity(MODEL *model);
+	~GEEntity();
 
     // ------------------------------------------------------------------------
 	// Public Methods
     // ------------------------------------------------------------------------
-	void loadToMemory();
-	void releaseFromMemory();
+	// void loadToMemory();
+	// void releaseFromMemory();
 	void draw();
+	void setTranslate(float x, float y, float z);
 
 private:
 	MODEL *model;
+	TRANSLATE translate;
 };
 
 // ----------------------------------------------------------------------------

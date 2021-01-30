@@ -56,27 +56,66 @@ PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
 // ****************************************************************************
 //  GEModel Class Definition - Constructors and Destructors
 // ****************************************************************************
-GEModel::GEModel()
+GEEntity::GEEntity()
 {
+	translate.x = 0.0f;
+	translate.y = 0.0f;
+	translate.z = 0.0f;
 }
 
-GEModel::GEModel(MODEL *modelParam)
+GEEntity::GEEntity(MODEL *modelParam)
 {
 	this->model = modelParam;
+	translate.x = 0.0f;
+	translate.y = 0.0f;
+	translate.z = 0.0f;
 }
 
-GEModel::~GEModel()
+GEEntity::~GEEntity()
 {
-	releaseFromMemory();
-
+	// releaseFromMemory();
 	delete model->vertices;
 	delete model->colors;
 	delete model->indices;
 	delete model;
 }
 
-void GEModel::loadToMemory()
+void GEEntity::draw()
 {
+	glTranslatef(translate.x, translate.y, translate.z);
+
+	// This code will be replaced for VAO, VBO, vertex/fragment shader techniques!
+	glBegin(GL_TRIANGLES);
+
+	for(int i = 0; i < model->total_indices; i++)
+	{
+		glColor3f(
+			model->colors[model->indices[i]].r,
+			model->colors[model->indices[i]].g,
+			model->colors[model->indices[i]].b);
+
+		glVertex3f(
+			model->vertices[model->indices[i]].x,
+			model->vertices[model->indices[i]].y,
+			model->vertices[model->indices[i]].z);
+	}
+
+	glEnd();
+
+	// ------------------------------------------------------------------------
+	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void GEEntity::setTranslate(float x, float y, float z)
+{
+	translate.x = x;
+	translate.y = y;
+	translate.z = z;
+}
+
+// void GEEntity::loadToMemory()
+// {
 	// GLuint vao;
 	// GLuint bo[3] = {0};
 
@@ -109,36 +148,11 @@ void GEModel::loadToMemory()
 	// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bo[2]);
 	// 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->total_indices * sizeof(unsigned int), model->indices, GL_STATIC_DRAW);
 	// }
-}
+// }
 
-void GEModel::releaseFromMemory()
-{
-}
-
-void GEModel::draw()
-{
-
-	glBegin(GL_TRIANGLES);
-
-	for(int i = 0; i < model->total_indices; i++)
-	{
-		glColor3f(
-			model->colors[ model->indices[i]].r,
-			model->colors[ model->indices[i]].g,
-			model->colors[ model->indices[i]].b);
-
-		glVertex3f(
-			model->vertices[ model->indices[i]].x,
-			model->vertices[ model->indices[i]].y,
-			model->vertices[ model->indices[i]].z);
-	}
-
-	glEnd();
-
-	// ------------------------------------------------------------------------
-	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	// glDrawArrays(GL_TRIANGLES, 0, 6);
-}
+// void GEEntity::releaseFromMemory()
+// {
+// }
 
 // ****************************************************************************
 //  Constructors and Destructors

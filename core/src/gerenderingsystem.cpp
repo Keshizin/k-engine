@@ -62,6 +62,11 @@ GEEntity::GEEntity()
 	translate.y = 0.0f;
 	translate.z = 0.0f;
 
+	rotate.angle = 0.0f;
+	rotate.x = 0.0f;
+	rotate.y = 0.0f;
+	rotate.z = 0.0f;
+
 	speed.x = 0.0f;
 	speed.y = 0.0f;
 	speed.z = 0.0f;
@@ -75,9 +80,15 @@ GEEntity::GEEntity()
 GEEntity::GEEntity(MODEL *modelParam)
 {
 	this->model = modelParam;
+	
 	translate.x = 0.0f;
 	translate.y = 0.0f;
 	translate.z = 0.0f;
+
+	rotate.angle = 0.0f;
+	rotate.x = 0.0f;
+	rotate.y = 0.0f;
+	rotate.z = 0.0f;
 
 	speed.x = 0.0f;
 	speed.y = 0.0f;
@@ -110,6 +121,14 @@ void GEEntity::update(double frameTime)
 		translate.x = bounding.left - 0.5f;
 
 	glTranslatef(translate.x, translate.y, translate.z);
+
+	rotate.angle += 500 * speed.x * frameTime;
+
+	if(rotate.angle > 360.0f)
+		rotate.angle = 0.0f;
+
+	glRotatef(rotate.angle, rotate.x, rotate.y, rotate.z);
+
 }
 
 void GEEntity::draw()
@@ -144,6 +163,14 @@ void GEEntity::setTranslate(float x, float y, float z)
 	translate.x = x;
 	translate.y = y;
 	translate.z = z;
+}
+
+void GEEntity::setRotate(float angle, float x, float y, float z)
+{
+	rotate.angle = angle;
+	rotate.x = x;
+	rotate.y = y;
+	rotate.z = z;
 }
 
 void GEEntity::setSpeed(float x, float y, float z)

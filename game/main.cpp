@@ -39,10 +39,10 @@
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
-#define WINDOW_LEFT    -10.0
-#define WINDOW_RIGHT    10.0
-#define WINDOW_BOTTOM  -10.0
-#define WINDOW_TOP      10.0
+#define WINDOW_LEFT    -5.0
+#define WINDOW_RIGHT    5.0
+#define WINDOW_BOTTOM  -5.0
+#define WINDOW_TOP      5.0
 
 GLfloat angle = 0.0;
 
@@ -115,23 +115,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void GameEventHandler::frameEvent(double frameTime)
 {
-	// if(timer->isRestart())
-	// {
-	// 	seconds++;
-	// 	std::cout << "seconds: " << seconds << std::endl;
-	// }
-
-	// angle++;
-
-	// if(angle > 360.0f)
-	// {
-	// 	angle = 0.0f;
-	// }
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	engine->getRenderingSystem()->drawGlobaldAxis();
 
-	// glRotatef(angle, 0.0, 0.0, 1.0);
 	entity->update(frameTime);
 	entity->draw();
 }
@@ -262,6 +249,7 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	GERECT w = engine->getRenderingSystem()->getWindow();
 	entity->setBounding(w.left, w.right, w.top, w.bottom);
+	entity->setRotate(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void GameEventHandler::createWindowEvent()

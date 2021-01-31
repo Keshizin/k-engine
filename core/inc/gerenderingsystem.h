@@ -73,6 +73,13 @@ typedef struct {
 } TRANSLATE;
 
 typedef struct {
+	float angle;
+	float x;
+	float y;
+	float z;
+} ROTATE;
+
+typedef struct {
 	float x;
 	float y;
 	float z;
@@ -104,12 +111,14 @@ public:
 	void update(double frameTime);
 	void draw();
 	void setTranslate(float x, float y, float z);
+	void setRotate(float angle, float x, float y, float z);
 	void setSpeed(float x, float y, float z);
 	void setBounding(double left, double right, double top, double bottom);
 
 private:
 	MODEL *model;
 	TRANSLATE translate;
+	ROTATE rotate;
 	SPEED speed;
 	GERECT bounding;
 };

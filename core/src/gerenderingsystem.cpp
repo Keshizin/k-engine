@@ -67,6 +67,10 @@ GEEntity::GEEntity()
 	rotate.y = 0.0f;
 	rotate.z = 0.0f;
 
+	scale.x  = 1.0f;
+	scale.y  = 1.0f;
+	scale.z  = 1.0f;
+
 	speed.x = 0.0f;
 	speed.y = 0.0f;
 	speed.z = 0.0f;
@@ -89,6 +93,10 @@ GEEntity::GEEntity(MODEL *modelParam)
 	rotate.x = 0.0f;
 	rotate.y = 0.0f;
 	rotate.z = 0.0f;
+
+	scale.x  = 1.0f;
+	scale.y  = 1.0f;
+	scale.z  = 1.0f;
 
 	speed.x = 0.0f;
 	speed.y = 0.0f;
@@ -129,6 +137,7 @@ void GEEntity::update(double frameTime)
 
 	glRotatef(rotate.angle, rotate.x, rotate.y, rotate.z);
 
+	glScalef(scale.x, scale.y, scale.z);
 }
 
 void GEEntity::draw()
@@ -171,6 +180,13 @@ void GEEntity::setRotate(float angle, float x, float y, float z)
 	rotate.x = x;
 	rotate.y = y;
 	rotate.z = z;
+}
+
+void GEEntity::setScale(float x, float y, float z)
+{
+	scale.x = x;
+	scale.y = y;
+	scale.z = z;
 }
 
 void GEEntity::setSpeed(float x, float y, float z)

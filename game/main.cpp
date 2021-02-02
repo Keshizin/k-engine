@@ -245,11 +245,12 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->total_vertex = 4;
 
 	entity = new GEEntity(m);
-	entity->setSpeed(1.0f, 0.0f, 0.0f);
+	entity->setSpeed(10.0f, 0.0f, 0.0f);
 
 	GERECT w = engine->getRenderingSystem()->getWindow();
 	entity->setBounding(w.left, w.right, w.top, w.bottom);
 	entity->setRotate(0.0f, 0.0f, 0.0f, 1.0f);
+	entity->setScale(1.0f, 1.0f, 1.0f);
 }
 
 void GameEventHandler::createWindowEvent()

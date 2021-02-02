@@ -83,6 +83,12 @@ typedef struct {
 	float x;
 	float y;
 	float z;
+} SCALE;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
 } SPEED;
 
 typedef struct {
@@ -112,6 +118,7 @@ public:
 	void draw();
 	void setTranslate(float x, float y, float z);
 	void setRotate(float angle, float x, float y, float z);
+	void setScale(float x, float y, float z);
 	void setSpeed(float x, float y, float z);
 	void setBounding(double left, double right, double top, double bottom);
 
@@ -119,6 +126,7 @@ private:
 	MODEL *model;
 	TRANSLATE translate;
 	ROTATE rotate;
+	SCALE scale;
 	SPEED speed;
 	GERECT bounding;
 };

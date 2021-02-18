@@ -259,7 +259,9 @@ GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 
 	this->renderingWindowOffsetX = 0.0f;
 	this->renderingWindowOffsetY = 0.0f;
-	
+
+	this->zoom = 0.0f;
+
 	this->projectionZNear = 0.0;
 	this->projectionZFar = 0.0;
 	this->projectionFOVY = 0.0;
@@ -395,10 +397,10 @@ void GERenderingSystem::setProjection()
 		}
 
 		glOrtho(
-			window.left + renderingWindowOffsetX,
-			window.right + renderingWindowOffsetX,
-			window.bottom + renderingWindowOffsetY,
-			window.top + renderingWindowOffsetY,
+			window.left + renderingWindowOffsetX + zoom,
+			window.right + renderingWindowOffsetX - zoom,
+			window.bottom + renderingWindowOffsetY + zoom,
+			window.top + renderingWindowOffsetY - zoom,
 			-1.0, 1.0);
 	}
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
@@ -478,6 +480,11 @@ GERECT GERenderingSystem::getRenderingWindow()
 		}
 	}
 
+	window.left += renderingWindowOffsetX + zoom;
+	window.right += renderingWindowOffsetX - zoom;
+	window.top += renderingWindowOffsetX - zoom;
+	window.bottom += renderingWindowOffsetX + zoom;
+
 	return window;
 }
 
@@ -499,6 +506,16 @@ void GERenderingSystem::setRenderingWindowOffsetY(double offset)
 double GERenderingSystem::getRenderingWindowOffsetY()
 {
 	return renderingWindowOffsetY;
+}
+
+void GERenderingSystem::setZoom(double zoom)
+{
+	this->zoom = zoom;
+}
+
+double GERenderingSystem::getZoom()
+{
+	return zoom;
 }
 
 void GERenderingSystem::setProjectionZNear(double projectionZNearParam)

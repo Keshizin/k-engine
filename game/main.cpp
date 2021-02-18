@@ -142,13 +142,24 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 
 	if(key == '1' && state == 1)
 	{
-		timer->start();
+		// zoom in
+		double zoom = engine->getRenderingSystem()->getZoom();
+		engine->getRenderingSystem()->setZoom(zoom + 1.0f);
+		engine->getRenderingSystem()->setProjection();
+	}
+
+	if(key == '2' && state == 1)
+	{
+		// zoom out
+		double zoom = engine->getRenderingSystem()->getZoom();
+		engine->getRenderingSystem()->setZoom(zoom - 1.0f);
+		engine->getRenderingSystem()->setProjection();
 	}
 
 	if(key == 37 && state == 1)
 	{
 		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetX();
-		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset - 0.01);
+		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset - 0.1);
 		engine->getRenderingSystem()->setProjection();
 
 	}
@@ -156,21 +167,21 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	if(key == 38 && state == 1)
 	{
 		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetY();
-		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset + 0.01);
+		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset + 0.1);
 		engine->getRenderingSystem()->setProjection();
 	}
 
 	if(key == 39 && state == 1)
 	{
 		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetX();
-		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset + 0.01);
+		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset + 0.1);
 		engine->getRenderingSystem()->setProjection();
 	}
 
 	if(key == 40 && state == 1)
 	{
 		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetY();
-		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset - 0.01);
+		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset - 0.1);
 		engine->getRenderingSystem()->setProjection();
 	}
 }

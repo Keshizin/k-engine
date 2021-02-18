@@ -168,6 +168,9 @@ public:
 	void setRenderingWindowOffsetY(double offset);
 	double getRenderingWindowOffsetY();
 
+	void setZoom(double zoom);
+	double getZoom();
+
 	void setProjectionZNear(double projectionZNear);
 	double getProjectionZNear();
 	
@@ -195,6 +198,7 @@ private:
 	GERECT renderingWindow;
 	double renderingWindowOffsetX;
 	double renderingWindowOffsetY;
+	double zoom;
 
 	double projectionZNear;
 	double projectionZFar;

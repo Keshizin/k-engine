@@ -44,8 +44,6 @@
 #define WINDOW_BOTTOM  -5.0
 #define WINDOW_TOP      5.0
 
-GLfloat angle = 0.0;
-
 class GameEventHandler : public GEEventHandler
 {
 	void frameEvent(double frameTime);
@@ -65,7 +63,6 @@ class GameEventHandler : public GEEventHandler
 KEngine *engine = 0;
 GETimer *timer = 0;
 GEEntity *entity = 0;
-int seconds = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -94,16 +91,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getRenderingSystem()->setRenderingContext(K_CONTEXT_2D);
 	engine->getRenderingSystem()->setWindowAspectCorrectionState(true);
 
-	engine->getRenderingSystem()->setWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
+	engine->getRenderingSystem()->setRenderingWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
 	engine->getRenderingSystem()->setViewport(0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
+
 	engine->getRenderingSystem()->setProjection();
 	engine->getRenderingSystem()->setVSync(0);
 	engine->getRenderingSystem()->getSystemVersion();
 
 	engine->setFrameRate(0);
-
 	engine->getGameWindow()->show(nCmdShow);
-
 	timer->setTimerInMs(1000);
 	engine->startMainLoop();
 
@@ -116,9 +112,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 void GameEventHandler::frameEvent(double frameTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	engine->getRenderingSystem()->drawGlobaldAxis();
-
 	entity->update(frameTime);
 	entity->draw();
 }
@@ -139,6 +133,8 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
+	std::cout << "@DEBUG | keyboardEvent | key: " << key << " - state: " << state << std::endl;
+
 	if(key == 27 && state == 1)
 	{
 		engine->getGameWindow()->destroy();
@@ -147,6 +143,35 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	if(key == '1' && state == 1)
 	{
 		timer->start();
+	}
+
+	if(key == 37 && state == 1)
+	{
+		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetX();
+		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset - 0.01);
+		engine->getRenderingSystem()->setProjection();
+
+	}
+
+	if(key == 38 && state == 1)
+	{
+		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetY();
+		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset + 0.01);
+		engine->getRenderingSystem()->setProjection();
+	}
+
+	if(key == 39 && state == 1)
+	{
+		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetX();
+		engine->getRenderingSystem()->setRenderingWindowOffsetX(offset + 0.01);
+		engine->getRenderingSystem()->setProjection();
+	}
+
+	if(key == 40 && state == 1)
+	{
+		double offset = engine->getRenderingSystem()->getRenderingWindowOffsetY();
+		engine->getRenderingSystem()->setRenderingWindowOffsetY(offset - 0.01);
+		engine->getRenderingSystem()->setProjection();
 	}
 }
 
@@ -158,13 +183,13 @@ void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
-	engine->getRenderingSystem()->setWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
+	engine->getRenderingSystem()->setRenderingWindow(WINDOW_LEFT, WINDOW_RIGHT, WINDOW_BOTTOM, WINDOW_TOP);
 	engine->getRenderingSystem()->setViewport(0, 0, width, height);
 	engine->getRenderingSystem()->setProjection();
 
 	if(entity)
 	{
-		GERECT w = engine->getRenderingSystem()->getWindow();
+		GERECT w = engine->getRenderingSystem()->getRenderingWindow();
 		entity->setBounding(w.left, w.right, w.top, w.bottom);
 	}
 
@@ -200,32 +225,35 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	m->vertices = new VERTEX[4];
 
-	m->vertices[0].x = -0.5f;
+	m->vertices[0].x = WINDOW_LEFT - 5.0f;
 	m->vertices[0].y = -0.5f;
-	m->vertices[0].z =  0.0f;
-	m->vertices[1].x =  0.5f;
+	m->vertices[0].z = 0.0f;
+
+	m->vertices[1].x = WINDOW_RIGHT + 5.0f;
 	m->vertices[1].y = -0.5f;
-	m->vertices[1].z =  0.0f;
-	m->vertices[2].x = -0.5f;
-	m->vertices[2].y =  0.5f;
-	m->vertices[2].z =  0.0f;
-	m->vertices[3].x =  0.5f;
-	m->vertices[3].y =  0.5f;
-	m->vertices[3].z =  0.0f;
+	m->vertices[1].z = 0.0f;
+
+	m->vertices[2].x = WINDOW_LEFT - 5.0f;
+	m->vertices[2].y = 0.5f;
+	m->vertices[2].z = 0.0f;
+
+	m->vertices[3].x = WINDOW_RIGHT + 5.0f;
+	m->vertices[3].y = 0.5f;
+	m->vertices[3].z = 0.0f;
 
 	m->colors = new COLOR[4];
 
-	m->colors[0].r = 1.0f;
+	m->colors[0].r = 0.0f;
 	m->colors[0].g = 0.0f;
-	m->colors[0].b = 1.0f;
+	m->colors[0].b = 0.0f;
 	m->colors[1].r = 1.0f;
-	m->colors[1].g = 0.0f;
+	m->colors[1].g = 1.0f;
 	m->colors[1].b = 1.0f;
-	m->colors[2].r = 1.0f;
+	m->colors[2].r = 0.0f;
 	m->colors[2].g = 0.0f;
-	m->colors[2].b = 1.0f;
+	m->colors[2].b = 0.0f;
 	m->colors[3].r = 1.0f;
-	m->colors[3].g = 0.0f;
+	m->colors[3].g = 1.0f;
 	m->colors[3].b = 1.0f;
 
 	m->indices = new unsigned int[6];
@@ -245,12 +273,13 @@ void GameEventHandler::beforeMainLoopEvent()
 	m->total_vertex = 4;
 
 	entity = new GEEntity(m);
-	entity->setSpeed(10.0f, 0.0f, 0.0f);
-
-	GERECT w = engine->getRenderingSystem()->getWindow();
+	entity->setSpeed(0.0f, 0.0f, 0.0f);
+	GERECT w = engine->getRenderingSystem()->getRenderingWindow();
 	entity->setBounding(w.left, w.right, w.top, w.bottom);
 	entity->setRotate(0.0f, 0.0f, 0.0f, 1.0f);
 	entity->setScale(1.0f, 1.0f, 1.0f);
+	entity->setTranslate(0.0f, 0.0f, 0.0f);
+	
 }
 
 void GameEventHandler::createWindowEvent()

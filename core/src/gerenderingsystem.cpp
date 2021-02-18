@@ -128,15 +128,13 @@ void GEEntity::update(double frameTime)
 	if(translate.x - 0.5f > bounding.right)
 		translate.x = bounding.left - 0.5f;
 
-	glTranslatef(translate.x, translate.y, translate.z);
-
 	rotate.angle += 500 * speed.x * frameTime;
 
 	if(rotate.angle > 360.0f)
 		rotate.angle = 0.0f;
 
+	glTranslatef(translate.x, translate.y, translate.z);
 	glRotatef(rotate.angle, rotate.x, rotate.y, rotate.z);
-
 	glScalef(scale.x, scale.y, scale.z);
 }
 
@@ -254,10 +252,13 @@ GERenderingSystem::GERenderingSystem(GEAPIWrapper *apiWrapper)
 	this->viewportWidth = 0;
 	this->viewportHeight = 0;
 
-	this->window.left = 0.0f;
-	this->window.right = 0.0f;
-	this->window.top = 0.0f;
-	this->window.bottom = 0.0f;
+	this->renderingWindow.left = 0.0f;
+	this->renderingWindow.right = 0.0f;
+	this->renderingWindow.top = 0.0f;
+	this->renderingWindow.bottom = 0.0f;
+
+	this->renderingWindowOffsetX = 0.0f;
+	this->renderingWindowOffsetY = 0.0f;
 	
 	this->projectionZNear = 0.0;
 	this->projectionZFar = 0.0;
@@ -368,6 +369,13 @@ void GERenderingSystem::setProjection()
 
 	if(renderingContext == K_CONTEXT_2D)
 	{
+		GERECT window;
+
+		window.left = renderingWindow.left;
+		window.right = renderingWindow.right;
+		window.top = renderingWindow.top;
+		window.bottom = renderingWindow.bottom;
+
 		if(windowAspectCorrectionState)
 		{
 			if(viewportWidth <= viewportHeight)
@@ -386,16 +394,22 @@ void GERenderingSystem::setProjection()
 			}
 		}
 
-		glOrtho(window.left, window.right, window.bottom, window.top, -1.0, 1.0);
+		glOrtho(
+			window.left + renderingWindowOffsetX,
+			window.right + renderingWindowOffsetX,
+			window.bottom + renderingWindowOffsetY,
+			window.top + renderingWindowOffsetY,
+			-1.0, 1.0);
 	}
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
 		windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
 		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
+		// o processo de PAN deve ser realizado através do observador
 	}
 	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
 	{
-		glOrtho(window.left, window.right, window.bottom, window.top, projectionZNear, projectionZFar);
+		glOrtho(renderingWindow.left + renderingWindowOffsetX, renderingWindow.right + renderingWindowOffsetY, renderingWindow.bottom + renderingWindowOffsetX, renderingWindow.top + renderingWindowOffsetY, projectionZNear, projectionZFar);
 	}
 }
 
@@ -407,11 +421,11 @@ void GERenderingSystem::drawGlobaldAxis()
 
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3d(window.left, 0.0, 0.0);
-	glVertex3d(window.right, 0.0, 0.0);
+	glVertex3d(renderingWindow.left, 0.0, 0.0);
+	glVertex3d(renderingWindow.right, 0.0, 0.0);
 	glColor3f(0.0, 1.0f, 0.0f);
-	glVertex3d(0.0, window.top, 0.0);
-	glVertex3d(0.0, window.bottom, 0.0);
+	glVertex3d(0.0, renderingWindow.top, 0.0);
+	glVertex3d(0.0, renderingWindow.bottom, 0.0);
 	glEnd();
 
 	glPopMatrix();
@@ -435,17 +449,56 @@ int GERenderingSystem::getRenderingContext()
 	return renderingContext;
 }
 
-void GERenderingSystem::setWindow(double left, double right, double bottom, double top)
+void GERenderingSystem::setRenderingWindow(double left, double right, double bottom, double top)
 {
-	this->window.left = left;
-	this->window.right = right;
-	this->window.top = top;
-	this->window.bottom = bottom;
+	this->renderingWindow.left = left;
+	this->renderingWindow.right = right;
+	this->renderingWindow.top = top;
+	this->renderingWindow.bottom = bottom;
 }
 
-GERECT GERenderingSystem::getWindow()
+GERECT GERenderingSystem::getRenderingWindow()
 {
+	GERECT window;
+
+	if(windowAspectCorrectionState)
+	{
+		if(viewportWidth <= viewportHeight)
+		{
+			windowAspectCorrection = static_cast<GLdouble>(viewportHeight) / static_cast<double>(viewportWidth);
+			window.bottom *= windowAspectCorrection;
+			window.top *= windowAspectCorrection;
+		}
+		else
+		{
+			windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
+
+			window.left *= windowAspectCorrection;
+			window.right *= windowAspectCorrection;
+		}
+	}
+
 	return window;
+}
+
+void GERenderingSystem::setRenderingWindowOffsetX(double offset)
+{
+	renderingWindowOffsetX = offset;
+}
+
+double GERenderingSystem::getRenderingWindowOffsetX()
+{
+	return renderingWindowOffsetX;
+}
+
+void GERenderingSystem::setRenderingWindowOffsetY(double offset)
+{
+	renderingWindowOffsetY = offset;
+}
+
+double GERenderingSystem::getRenderingWindowOffsetY()
+{
+	return renderingWindowOffsetY;
 }
 
 void GERenderingSystem::setProjectionZNear(double projectionZNearParam)

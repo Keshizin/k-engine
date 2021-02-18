@@ -92,10 +92,10 @@ typedef struct {
 } SPEED;
 
 typedef struct {
-	float left;
-	float right;
-	float top;
-	float bottom;
+	double left;
+	double right;
+	double top;
+	double bottom;
 } GERECT;
 
 // ----------------------------------------------------------------------------
@@ -160,8 +160,13 @@ public:
 	void setRenderingContext(int renderingContext);
 	int getRenderingContext();
 
-	void setWindow(double left, double right, double bottom, double top);
-	GERECT getWindow();
+	void setRenderingWindow(double left, double right, double bottom, double top);
+	GERECT getRenderingWindow();
+
+	void setRenderingWindowOffsetX(double offset);
+	double getRenderingWindowOffsetX();
+	void setRenderingWindowOffsetY(double offset);
+	double getRenderingWindowOffsetY();
 
 	void setProjectionZNear(double projectionZNear);
 	double getProjectionZNear();
@@ -187,7 +192,9 @@ private:
 	int viewportWidth;
 	int viewportHeight;
 
-	GERECT window;
+	GERECT renderingWindow;
+	double renderingWindowOffsetX;
+	double renderingWindowOffsetY;
 
 	double projectionZNear;
 	double projectionZFar;

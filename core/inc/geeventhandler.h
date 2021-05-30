@@ -2,7 +2,7 @@
 	Game Engine Event Handler
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@
 #ifndef K_ENGINE_EVENT_HANDLER_CLASS_H
 #define K_ENGINE_EVENT_HANDLER_CLASS_H
 
-#include <geaux.h>
-
 // ****************************************************************************
 //  Game Engine Events Class
 // ****************************************************************************
@@ -35,46 +33,19 @@ class GEEventHandler
 {
 public:
 	virtual ~GEEventHandler() {}
-	virtual void frameEvent(double frameTime) {}
 
-	virtual void mouseEvent(int button, int state, int x, int y)
-	{
-		K_UNREFERENCED_PARAMETER(button);
-		K_UNREFERENCED_PARAMETER(state);
-		K_UNREFERENCED_PARAMETER(x);
-		K_UNREFERENCED_PARAMETER(y);
-	}
-	
-	virtual void mouseMotionEvent(int x, int y)
-	{
-		K_UNREFERENCED_PARAMETER(x);
-		K_UNREFERENCED_PARAMETER(y);
-	}
-
-	virtual void keyboardEvent(unsigned long long key, int state)
-	{
-		K_UNREFERENCED_PARAMETER(key);
-		K_UNREFERENCED_PARAMETER(state);
-	}
-
-	virtual void keyboardSpecialEvent(unsigned long long key, int state)
-	{
-		K_UNREFERENCED_PARAMETER(key);
-		K_UNREFERENCED_PARAMETER(state);
-	}
-
-	virtual void resizeWindowEvent(int width, int height)
-	{
-		K_UNREFERENCED_PARAMETER(width);
-		K_UNREFERENCED_PARAMETER(height);
-	}
-
-	virtual void finishAfterEvent() {}
-	virtual void finishBeforeEvent() {}
-	virtual void resumeEvent() {}
-	virtual void pauseEvent() {}
-	virtual void beforeMainLoopEvent() {}
-	virtual void createWindowEvent() {}
+	virtual void frameEvent(double frameTime) = 0;
+	virtual void mouseEvent(int button, int state, int x, int y) = 0;
+	virtual void mouseMotionEvent(int x, int y) = 0;
+	virtual void keyboardEvent(unsigned long long key, int state) = 0;
+	virtual void keyboardSpecialEvent(unsigned long long key, int state) = 0;
+	virtual void resizeWindowEvent(int width, int height) = 0;
+	virtual void finishAfterEvent() = 0;
+	virtual void finishBeforeEvent() = 0;
+	virtual void resumeEvent() = 0;
+	virtual void pauseEvent() = 0;
+	virtual void beforeMainLoopEvent() = 0;
+	virtual void createWindowEvent() = 0;
 };
 
 #endif

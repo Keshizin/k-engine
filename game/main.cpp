@@ -2,7 +2,7 @@
 	Game Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
+#include <ge.h>
+
+KEngine* engine = 0;
 
 // ****************************************************************************
 //  Point Entry Execution

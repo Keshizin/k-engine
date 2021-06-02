@@ -29,6 +29,7 @@
 #include <iostream>
 #include <geaux.h>
 #include <geimage.h>
+#include <gewinapiwrapper.h>
 
 //KEngine* engine = 0;
 
@@ -42,7 +43,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 	K_UNREFERENCED_PARAMETER(nCmdShow);
 
-	std::cout << "K-ENGINE!" << std::endl;
+	GEWINAPIWrapper apiWrapper;
+	apiWrapper.createDebugConsole();
+
+	std::cout << "Hello K-ENGINE!" << std::endl;
+
+	DIB image;
+	image.loadFile("24bpp_test.bmp", true);
+	image.printDump();
+
+	while (1);
 
 	return 1;
 }

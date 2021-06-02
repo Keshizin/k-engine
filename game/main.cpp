@@ -25,19 +25,24 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <iostream>
-#include <ge.h>
 
-KEngine* engine = 0;
+#include <iostream>
+#include <geaux.h>
+#include <geimage.h>
+
+//KEngine* engine = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
 // ****************************************************************************
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	//K_UNREFERENCED_PARAMETER(hInstance);
-	//K_UNREFERENCED_PARAMETER(hPrevInstance);
-	//K_UNREFERENCED_PARAMETER(lpCmdLine);
+	K_UNREFERENCED_PARAMETER(hInstance);
+	K_UNREFERENCED_PARAMETER(hPrevInstance);
+	K_UNREFERENCED_PARAMETER(lpCmdLine);
+	K_UNREFERENCED_PARAMETER(nCmdShow);
+
+	std::cout << "K-ENGINE!" << std::endl;
 
 	return 1;
 }

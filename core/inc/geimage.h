@@ -40,8 +40,8 @@ namespace DIBLIB
 		unsigned short get() const;
 		void set(unsigned short word);
 		void swap();
-		char getByte1();
-		char getByte2();
+		unsigned char getByte1();
+		unsigned char getByte2();
 	private:
 		unsigned char byte1;
 		unsigned char byte2;
@@ -55,10 +55,10 @@ namespace DIBLIB
 		unsigned long get() const;
 		void set(unsigned long dword);
 		void swap();
-		char getByte1();
-		char getByte2();
-		char getByte3();
-		char getByte4();
+		unsigned char getByte1();
+		unsigned char getByte2();
+		unsigned char getByte3();
+		unsigned char getByte4();
 	private:
 		unsigned char byte1;
 		unsigned char byte2;

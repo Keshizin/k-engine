@@ -24,23 +24,25 @@
 */
 
 #include <geimage.h>
+#include <geaux.h>
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 
 // ----------------------------------------------------------------------------
-//  WORD CLASS METHODS
+//  WORD CLASS METHOD DEFINITIONS
 // ----------------------------------------------------------------------------
 DIBLIB::WORD::WORD() : byte1(0), byte2(0) {}
 
 unsigned short DIBLIB::WORD::get() const
 {
-	return (0 | byte1) << 8 | byte2;
+	return static_cast<unsigned short>((0 | byte1) << 8 | byte2);
 }
 
 void DIBLIB::WORD::set(unsigned short word)
 {
+	K_UNREFERENCED_PARAMETER(word);
 }
 
 void DIBLIB::WORD::swap()
@@ -50,12 +52,12 @@ void DIBLIB::WORD::swap()
 	byte1 = temp;
 }
 
-char DIBLIB::WORD::getByte1()
+unsigned char DIBLIB::WORD::getByte1()
 {
 	return byte1;
 }
 
-char DIBLIB::WORD::getByte2()
+unsigned char DIBLIB::WORD::getByte2()
 {
 	return byte2;
 }
@@ -67,11 +69,12 @@ DIBLIB::DWORD::DWORD() : byte1(0), byte2(0), byte3(0), byte4(0) {}
 
 unsigned long DIBLIB::DWORD::get() const
 {
-	return (((0 | byte1) << 8 | byte2) << 8 | byte3) << 8 | byte4;
+	return static_cast<unsigned long>((((0 | byte1) << 8 | byte2) << 8 | byte3) << 8 | byte4);
 }
 
 void DIBLIB::DWORD::set(unsigned long dword)
 {
+	K_UNREFERENCED_PARAMETER(dword);
 }
 
 void DIBLIB::DWORD::swap()
@@ -84,22 +87,22 @@ void DIBLIB::DWORD::swap()
 	byte3 = temp;
 }
 
-char DIBLIB::DWORD::getByte1()
+unsigned char DIBLIB::DWORD::getByte1()
 {
 	return byte1;
 }
 
-char DIBLIB::DWORD::getByte2()
+unsigned char DIBLIB::DWORD::getByte2()
 {
 	return byte2;
 }
 
-char DIBLIB::DWORD::getByte3()
+unsigned char DIBLIB::DWORD::getByte3()
 {
 	return byte3;
 }
 
-char DIBLIB::DWORD::getByte4()
+unsigned char DIBLIB::DWORD::getByte4()
 {
 	return byte4;
 }
@@ -358,20 +361,20 @@ void DIB::loadFile(std::string filename, int swap)
 	{
 		unsigned long index = 0;
 		unsigned long width;
-		unsigned long height;
+		long height;
 		unsigned long offset;
 
 		switch (bmiHeader.getBiBitCount().get())
 		{
 		case 24:
 			width = bmiHeader.getBiWidth().get();
-			height = bmiHeader.getBiHeight().get();
+			height = static_cast<long>(bmiHeader.getBiHeight().get());
 			offset = (24 * width + 31) / 32 * 4 - width * 3;
 
 			if (height < 0)
 				height *= -1;
 
-			for (unsigned lines = 0; lines < height; lines++)
+			for (long lines = 0; lines < height; lines++)
 			{
 				for (unsigned bytes = 0; bytes < width; bytes++)
 				{
@@ -393,13 +396,13 @@ void DIB::loadFile(std::string filename, int swap)
 			if (bmiHeader.getBiCompression().get() == DIBLIB::DIBLIB_RGB)
 			{
 				width = bmiHeader.getBiWidth().get();
-				height = bmiHeader.getBiHeight().get();
+				height = static_cast<long>(bmiHeader.getBiHeight().get());
 				offset = (32 * width + 31) / 32 * 4 - width * 4;
 
 				if (height < 0)
 					height *= -1;
 
-				for (unsigned lines = 0; lines < height; lines++)
+				for (long lines = 0; lines < height; lines++)
 				{
 					for (unsigned bytes = 0; bytes < width; bytes++)
 					{

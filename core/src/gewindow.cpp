@@ -2,7 +2,7 @@
 	Game Engine Window Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
-GEWindow::GEWindow(GEAPIWrapper *apiWrapper)
+GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper)
 {
 	this->apiWrapper = apiWrapper;
 	width = 640;
@@ -84,12 +84,12 @@ int GEWindow::show(int showType)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-void GEWindow::setApiWrapper(GEAPIWrapper *apiWrapperParam)
+void GEWindow::setApiWrapper(GEWINAPIWrapper* apiWrapperParam)
 {
 	this->apiWrapper = apiWrapperParam;
 }
 
-GEAPIWrapper *GEWindow::getApiWrapper()
+GEWINAPIWrapper* GEWindow::getApiWrapper()
 {
 	return apiWrapper;
 }

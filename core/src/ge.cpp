@@ -145,7 +145,7 @@ void KEngine::setFrameRate(int framePerSecond)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-GEAPIWrapper *KEngine::getAPIWrapper()
+GEWINAPIWrapper* KEngine::getAPIWrapper()
 {
 	return apiWrapper;
 }

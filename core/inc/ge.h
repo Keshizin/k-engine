@@ -63,22 +63,21 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	GEAPIWrapper *getAPIWrapper();
-	GEWindow *getGameWindow();
-	GETimeHandler *getTimeHandler();
-	GEProfile *getProfile();
-	GERenderingSystem *getRenderingSystem();
+	GEWINAPIWrapper* getAPIWrapper();
+	GEWindow* getGameWindow();
+	GETimeHandler* getTimeHandler();
+	GEProfile* getProfile();
+	GERenderingSystem* getRenderingSystem();
 	
 	void setEventHandler(GEEventHandler *eventHandler);
 
 private:
-	GEAPIWrapper *apiWrapper;
-	GEWindow *gameWindow;
-	GEEventHandler *eventHandler;
-	GERenderingSystem *renderingSystem;
-	GETimeHandler *timeHandler;
-	GEProfile *profile;
-	
+	GEWINAPIWrapper* apiWrapper;
+	GEWindow* gameWindow;
+	GEEventHandler* eventHandler;
+	GERenderingSystem* renderingSystem;
+	GETimeHandler* timeHandler;
+	GEProfile* profile;
 	int runningStatus;
 };
 

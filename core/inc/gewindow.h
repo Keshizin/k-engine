@@ -2,7 +2,7 @@
 	Game Engine Window Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_WINDOW_CLASS_H
 #define K_ENGINE_WINDOW_CLASS_H
 
-#include <geapiwrapper.h>
+#include <gewinapiwrapper.h>
 
 // ****************************************************************************
 //  K-Engine Window Style
@@ -52,7 +52,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GEWindow(GEAPIWrapper *apiWrapper);
+	GEWindow(GEWINAPIWrapper* apiWrapper);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -64,8 +64,8 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	void setApiWrapper(GEAPIWrapper *apiWrapper);
-	GEAPIWrapper *getApiWrapper();
+	void setApiWrapper(GEWINAPIWrapper* apiWrapper);
+	GEWINAPIWrapper* getApiWrapper();
 
 	void setX(int x);
 	int getX();
@@ -86,7 +86,7 @@ public:
 	unsigned int getStyle();
 
 private:
-	GEAPIWrapper *apiWrapper;
+	GEWINAPIWrapper* apiWrapper;
 	int x;
 	int y;
 	int width;

@@ -2,7 +2,7 @@
 	Game Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_RENDERING_SYSTEM_H
 #define K_ENGINE_RENDERING_SYSTEM_H
 
-#include <geapiwrapper.h>
+#include <gewinapiwrapper.h>
 
 // ----------------------------------------------------------------------------
 //  Rendering System Context (2D or 3D)
@@ -140,7 +140,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GERenderingSystem(GEAPIWrapper *apiWrapper);
+	GERenderingSystem(GEWINAPIWrapper* apiWrapper);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -189,7 +189,7 @@ public:
 	void setGlobalAxisState(bool state);
 
 private:
-	GEAPIWrapper *apiWrapper;
+	GEWINAPIWrapper* apiWrapper;
 
 	int renderingContext;
 	int viewportWidth;

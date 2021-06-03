@@ -37,10 +37,8 @@ GEEventHandler *globalEventHandler = 0;
 //  GEWINAPIWrapper Class - Constructors and Destructor
 // ****************************************************************************
 GEWINAPIWrapper::GEWINAPIWrapper()
+	: hWindow(NULL), hDC(NULL), hRC(NULL)
 {
-	hWindow = NULL;
-	hDC = NULL;
-	hRC = NULL;
 }
 
 GEWINAPIWrapper::~GEWINAPIWrapper()

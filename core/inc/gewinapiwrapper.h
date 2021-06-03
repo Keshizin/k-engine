@@ -29,7 +29,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include <geapiwrapper.h>
+#include <string>
+#include <geeventhandler.h>
 
 // ****************************************************************************
 //  Win32 Window Class
@@ -44,7 +45,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 // ****************************************************************************
 //  Game Engine Win32 API Wrapper Class
 // ****************************************************************************
-class GEWINAPIWrapper : public GEAPIWrapper
+class GEWINAPIWrapper
 {
 public:
 	// ------------------------------------------------------------------------

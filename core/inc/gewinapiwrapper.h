@@ -81,8 +81,8 @@ public:
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug
 	// ------------------------------------------------------------------------
-	int createDebugConsole();
-	int closeDebugConsole();
+	int createDebugConsole() const;
+	int closeDebugConsole() const;
 
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler

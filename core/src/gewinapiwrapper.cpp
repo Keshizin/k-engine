@@ -31,7 +31,7 @@
 
 #include <iostream>
 
-GEEventHandler *globalEventHandler = 0;
+static GEEventHandler *globalEventHandler = 0;
 
 // ****************************************************************************
 //  GEWINAPIWrapper Class - Constructors and Destructor
@@ -86,9 +86,9 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 	windowClass.lpszMenuName = 0;
 	windowClass.lpszClassName = WINDOWCLASSNAME; // mandatory
 
-	if(!RegisterClassEx(&windowClass))
+	if(RegisterClassEx(&windowClass) == 0)
 	{
-		// (!) Gravar o erro no componente de LOG
+		// (!) Write the error to the LOG Component
 		error = GetLastError();
 		std::cout << "(!) ERROR - It was not possible to register a class window: " << error << "\n" << std::endl;
 		return 0;
@@ -142,14 +142,16 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 		GetModuleHandle(NULL),
 		NULL);
 
+	std::cout << "(!!!) 3" << std::endl;
+
 	if(hWindow == NULL)
 	{
 		error = GetLastError();
 		std::cout << "(!) ERROR - It was not possible to create the window: " << error << "\n" << std::endl;
 
-		int ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
+		BOOL ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
 
-		if(ret == 0)
+		if(!ret)
 		{
 			error = GetLastError();
 			std::cout << "(!) ERROR - It was not possible to unregister a class window: " << error << "\n" << std::endl;
@@ -163,8 +165,9 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 
 int GEWINAPIWrapper::destroyWindow()
 {
-	int ret;
-	int err = 1;
+	std::cout << "(!!!) -- 1" << std::endl;
+	BOOL ret;
+	int isSuccessful = 1;
 
 	if(hRC != NULL)
 	{
@@ -203,28 +206,31 @@ int GEWINAPIWrapper::destroyWindow()
 		hDC = NULL;
 	}
 
+	std::cout << "(!!!) -- 2" << std::endl;
 	ret = DestroyWindow(hWindow);
+	std::cout << "(!!!) -- 3" << std::endl;
 
-	if(ret == 0)
+	if(!ret)
 	{
-		// (!) Gravar o erro no componente de LOG
+		// (!) Write the error to the LOG Component
 		DWORD error = GetLastError();
 		std::cout << "(!) ERROR - It was not possible to destroy a window application: " << error << "\n" << std::endl;
-		err = 0;
+		isSuccessful = 0;
 	}
 
 	hWindow = NULL;
 
 	ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
 
-	if(ret == 0)
+	if(!ret)
 	{
 		DWORD error = GetLastError();
 		std::cout << "(!) ERROR - It was not possible to unregister a class window: " << error << "\n" << std::endl;
-		err = 0;
+		isSuccessful = 0;
 	}
 
-	return err;
+	std::cout << "(!!!) -- 4" << std::endl;
+	return isSuccessful;
 }
 
 int GEWINAPIWrapper::showWindow(int showType)
@@ -476,7 +482,7 @@ int GEWINAPIWrapper::swapBuffers()
 // ****************************************************************************
 //  Creating new Console for Debug
 // ****************************************************************************
-int GEWINAPIWrapper::createDebugConsole()
+int GEWINAPIWrapper::createDebugConsole() const
 {
 	if(!AllocConsole())
 	{
@@ -504,7 +510,7 @@ int GEWINAPIWrapper::createDebugConsole()
 	return 1;
 }
 
-int GEWINAPIWrapper::closeDebugConsole()
+int GEWINAPIWrapper::closeDebugConsole() const
 {
 	return FreeConsole();
 }
@@ -522,44 +528,101 @@ void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
 // ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	std::cout << "@DEBUG@ | windowProcedure | uMsg: " << uMsg << std::endl;
+
 	switch(uMsg)
 	{
-		// --------------------------------------------------------------------
-		//  WINDOW MESSAGES
-		// --------------------------------------------------------------------
-		case WM_CREATE:
-			globalEventHandler->createWindowEvent();
-			break;
+	// --------------------------------------------------------------------
+	//  WINDOW MESSAGES
+	// --------------------------------------------------------------------
+	//case WM_GETMINMAXINFO:
+		// Informações a respeito da janela (importante para múltiplos monitores)
+		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
+		//break;
 
-		// sent when a window is being destroyed after the window is removed
-		// from the screen.
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
+	//case WM_NCCREATE:
+		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
+	//	break;
 
-		// case WM_MOVE:
-		// 	break;
+	//case WM_NCCALCSIZE:
+		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
+	//	break;
 
-		case WM_SIZE:
-			globalEventHandler->resizeWindowEvent(LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_CREATE:
+		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
+		globalEventHandler->createWindowEvent();
+		break;
 
-		case WM_CLOSE:
-			globalEventHandler->finishBeforeEvent();
-			break;
+	case WM_SIZE:
+		// Evento capturado sempre que o tamanho da janela é alterado
+		globalEventHandler->resizeWindowEvent(LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_ACTIVATE:
-			if(wParam == WA_ACTIVE)
-				globalEventHandler->resumeEvent();
-			else if(wParam == WA_CLICKACTIVE)
-				globalEventHandler->resumeEvent();
-			else if(wParam == WA_INACTIVE)
-				globalEventHandler->pauseEvent();
+	//case WM_MOVE:
+		// Evento capturado após a janela ser reposicionada na tela
+		//break;
 
-			break;
+	//case WM_SHOWWINDOW:
+		// Evento capturado quando uma janela está para ser exibida ou ocultada
+		//break;
 
-		// case WM_SHOWWINDOW:
-		// 	break;
+	//case WM_WINDOWPOSCHANGING:
+	//	break;
+
+	//case WM_WINDOWPOSCHANGED:
+	//	break;
+
+	//case WM_ACTIVATEAPP:
+	//	break;
+
+	//case WM_NCACTIVATE:
+	//	break;
+
+	//case WM_GETICON:
+	//	break;
+
+	case WM_ACTIVATE:
+		if (wParam == WA_ACTIVE)
+			globalEventHandler->resumeEvent();
+		else if (wParam == WA_CLICKACTIVE)
+			globalEventHandler->resumeEvent();
+		else if (wParam == WA_INACTIVE)
+			globalEventHandler->pauseEvent();
+
+		break;
+
+	//case WM_IME_SETCONTEXT:
+	//	break;
+
+	//case WM_IME_NOTIFY:
+	//	break;
+
+	//case WM_SETFOCUS:
+	//	break;
+
+	//case WM_NCPAINT:
+	//	break;
+
+	//case WM_ERASEBKGND:
+	//	break;
+
+	//case WM_KILLFOCUS:
+	//	break;
+	
+	case WM_DESTROY:
+		// Evento capturado depois da chamada de DestroyWindow e antes de seu término de execução
+		// Sent when a window is being destroyed after the window is removed from the screen.
+		std::cout << "WM_DESTROY" << std::endl;
+		PostQuitMessage(0);
+		break;
+
+	//case WM_NCDESTROY:
+	//	break;
+	
+	case WM_CLOSE:
+		std::cout << "WM_CLOSE" << std::endl;
+		globalEventHandler->finishBeforeEvent();
+		break;
 
 		// ********************************************************************
 		//  MOUSE MESSAGES

@@ -32,6 +32,26 @@
 #include <gewinapiwrapper.h>
 
 // ****************************************************************************
+//  Game Engine Core Events
+// ****************************************************************************
+class GameEventHandler : public GEEventHandler
+{
+public:
+	void frameEvent(double frameTime);
+	void mouseEvent(int button, int state, int x, int y);
+	void mouseMotionEvent(int x, int y);
+	void keyboardEvent(unsigned long long key, int state) ;
+	void keyboardSpecialEvent(unsigned long long key, int state);
+	void resizeWindowEvent(int width, int height);
+	void finishAfterEvent();
+	void finishBeforeEvent();
+	void resumeEvent();
+	void pauseEvent();
+	void beforeMainLoopEvent();
+	void createWindowEvent();
+};
+
+// ****************************************************************************
 //  Point Entry Execution
 // ****************************************************************************
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -42,6 +62,61 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(nCmdShow);
 
 	GEWINAPIWrapper apiWrapper;
+	GameEventHandler eventHandler;
+
+	apiWrapper.setGlobalEventHandler(&eventHandler);
+	apiWrapper.createDebugConsole();
+	apiWrapper.createWindow(0, 0, 640, 480, "K-ENGINE!", 5);
+	apiWrapper.showWindow(nCmdShow);
+	apiWrapper.destroyWindow();
 
 	return 1;
+}
+
+void GameEventHandler::frameEvent(double frameTime)
+{
+}
+
+void GameEventHandler::mouseEvent(int button, int state, int x, int y)
+{
+}
+
+void GameEventHandler::mouseMotionEvent(int x, int y)
+{
+}
+
+void GameEventHandler::keyboardEvent(unsigned long long key, int state)
+{
+}
+
+void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
+{
+}
+
+void GameEventHandler::resizeWindowEvent(int width, int height)
+{
+}
+
+void GameEventHandler::finishAfterEvent()
+{
+}
+
+void GameEventHandler::finishBeforeEvent()
+{
+}
+
+void GameEventHandler::resumeEvent()
+{
+}
+
+void GameEventHandler::pauseEvent()
+{
+}
+
+void GameEventHandler::beforeMainLoopEvent()
+{
+}
+
+void GameEventHandler::createWindowEvent()
+{
 }

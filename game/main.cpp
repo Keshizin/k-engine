@@ -51,6 +51,9 @@ public:
 	void createWindowEvent();
 };
 
+bool isExit = false;
+GEWINAPIWrapper apiWrapper;
+
 // ****************************************************************************
 //  Point Entry Execution
 // ****************************************************************************
@@ -61,14 +64,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 	K_UNREFERENCED_PARAMETER(nCmdShow);
 
-	GEWINAPIWrapper apiWrapper;
 	GameEventHandler eventHandler;
 
 	apiWrapper.setGlobalEventHandler(&eventHandler);
 	apiWrapper.createDebugConsole();
 	apiWrapper.createWindow(0, 0, 640, 480, "K-ENGINE!", 5);
 	apiWrapper.showWindow(nCmdShow);
-	apiWrapper.destroyWindow();
+
+	while (!isExit)
+	{
+		apiWrapper.handleSystemMessages();
+	}
 
 	return 1;
 }
@@ -99,10 +105,12 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 
 void GameEventHandler::finishAfterEvent()
 {
+	isExit = true;
 }
 
 void GameEventHandler::finishBeforeEvent()
 {
+	int ret = apiWrapper.destroyWindow();
 }
 
 void GameEventHandler::resumeEvent()

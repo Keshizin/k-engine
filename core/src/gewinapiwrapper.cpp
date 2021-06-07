@@ -142,8 +142,6 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 		GetModuleHandle(NULL),
 		NULL);
 
-	std::cout << "(!!!) 3" << std::endl;
-
 	if(hWindow == NULL)
 	{
 		error = GetLastError();
@@ -165,7 +163,6 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 
 int GEWINAPIWrapper::destroyWindow()
 {
-	std::cout << "(!!!) -- 1" << std::endl;
 	BOOL ret;
 	int isSuccessful = 1;
 
@@ -206,9 +203,7 @@ int GEWINAPIWrapper::destroyWindow()
 		hDC = NULL;
 	}
 
-	std::cout << "(!!!) -- 2" << std::endl;
 	ret = DestroyWindow(hWindow);
-	std::cout << "(!!!) -- 3" << std::endl;
 
 	if(!ret)
 	{
@@ -229,7 +224,6 @@ int GEWINAPIWrapper::destroyWindow()
 		isSuccessful = 0;
 	}
 
-	std::cout << "(!!!) -- 4" << std::endl;
 	return isSuccessful;
 }
 
@@ -528,8 +522,6 @@ void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
 // ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	std::cout << "@DEBUG@ | windowProcedure | uMsg: " << uMsg << std::endl;
-
 	switch(uMsg)
 	{
 	// --------------------------------------------------------------------
@@ -612,7 +604,6 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_DESTROY:
 		// Evento capturado depois da chamada de DestroyWindow e antes de seu término de execução
 		// Sent when a window is being destroyed after the window is removed from the screen.
-		std::cout << "WM_DESTROY" << std::endl;
 		PostQuitMessage(0);
 		break;
 
@@ -620,7 +611,6 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	//	break;
 	
 	case WM_CLOSE:
-		std::cout << "WM_CLOSE" << std::endl;
 		globalEventHandler->finishBeforeEvent();
 		break;
 

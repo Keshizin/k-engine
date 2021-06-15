@@ -30,13 +30,13 @@
 //  Constructors and Destructors
 // ****************************************************************************
 GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper)
+	: apiWrapper(apiWrapper), x(0), y(0), width(640), height(640), style(K_WINDOW_DEFAULT)
 {
-	this->apiWrapper = apiWrapper;
-	width = 640;
-	height = 480;
-	x = 0;
-	y = 0;
-	style = K_WINDOW_DEFAULT;
+}
+
+GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style)
+	: apiWrapper(apiWrapper), x(x), y(y), width(width), height(height), name(name), style(style)
+{
 }
 
 // ****************************************************************************
@@ -89,7 +89,7 @@ void GEWindow::setApiWrapper(GEWINAPIWrapper* apiWrapperParam)
 	this->apiWrapper = apiWrapperParam;
 }
 
-GEWINAPIWrapper* GEWindow::getApiWrapper()
+GEWINAPIWrapper* GEWindow::getApiWrapper() const
 {
 	return apiWrapper;
 }
@@ -99,7 +99,7 @@ void GEWindow::setX(int xParam)
 	this->x = xParam;
 }
 
-int GEWindow::getX()
+int GEWindow::getX() const
 {
 	return x;
 }
@@ -109,7 +109,7 @@ void GEWindow::setY(int yParam)
 	this->y = yParam;
 }
 
-int GEWindow::getY()
+int GEWindow::getY() const
 {
 	return y;
 }
@@ -119,7 +119,7 @@ void GEWindow::setWidth(int widthParam)
 	this->width = widthParam;
 }
 
-int GEWindow::getWidth()
+int GEWindow::getWidth() const
 {
 	return width;
 }
@@ -129,7 +129,7 @@ void GEWindow::setHeight(int heightParam)
 	this->height = heightParam;
 }
 
-int GEWindow::getHeight()
+int GEWindow::getHeight() const
 {
 	return height;
 }
@@ -139,7 +139,7 @@ void GEWindow::setName(std::string nameParam)
 	this->name = nameParam;
 }
 
-std::string GEWindow::getName()
+std::string GEWindow::getName() const
 {
 	return name;
 }
@@ -149,7 +149,17 @@ void GEWindow::setStyle(unsigned int styleParam)
 	this->style = styleParam;
 }
 
-unsigned int GEWindow::getStyle()
+unsigned int GEWindow::getStyle() const
 {
 	return style;
+}
+
+void GEWindow::setWindow(int x, int y, int width, int height, std::string name, unsigned int style)
+{
+	this->x = x;
+	this->y = y;
+	this->width = width;
+	this->height = height;
+	this->name = name;
+	this->style = style;
 }

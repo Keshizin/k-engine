@@ -23,13 +23,11 @@
 	SOFTWARE.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include <iostream>
 #include <geaux.h>
+#include <ge.h>
 
-#include <gewinapiwrapper.h>
+#include <gl/gl.h>
 
 // ****************************************************************************
 //  Game Engine Core Events
@@ -51,8 +49,7 @@ public:
 	void createWindowEvent();
 };
 
-bool isDone = false;
-GEWINAPIWrapper apiWrapper;
+KEngine* engine;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -62,59 +59,80 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(hInstance);
 	K_UNREFERENCED_PARAMETER(hPrevInstance);
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
-	K_UNREFERENCED_PARAMETER(nCmdShow);
 
 	GameEventHandler eventHandler;
+	engine = new KEngine(&eventHandler);
 
-	apiWrapper.setGlobalEventHandler(&eventHandler);
-	apiWrapper.createDebugConsole();
+	std::cout << "STARTING K-ENGINE DEMO" << std::endl;
 
-	std::cout << "K-ENGINE! WIN32 DEMO" << std::endl;
-	apiWrapper.createWindow(0, 0, 640, 480, "K-ENGINE! WIN32 DEMO", 5);
-	apiWrapper.showWindow(nCmdShow);
+	// Setting up the window
+	engine->getGameWindow()->setWindow(0, 0, 640, 480, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
 
-	while (!isDone)
-	{
-		apiWrapper.handleSystemMessages();
+	// Create the window
+	engine->getGameWindow()->create();
 
-		// YOUR APP CODE HERE!
-	}
+	// Initializing OpenGL's context
+	engine->getAPIWrapper()->initializeRenderingSystem();
 
+	// Show the window
+	engine->getGameWindow()->show(nCmdShow);
+
+	glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+	// Starting the game loop
+	engine->startMainLoop();
+
+	std::cout << "END K-ENGINE DEMO" << std::endl;
+	delete engine;
 	return 1;
 }
 
 void GameEventHandler::frameEvent(double frameTime)
 {
+	K_UNREFERENCED_PARAMETER(frameTime);
+
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(button);
+	K_UNREFERENCED_PARAMETER(state);
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 {
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
+	K_UNREFERENCED_PARAMETER(width);
+	K_UNREFERENCED_PARAMETER(height);
 }
 
 void GameEventHandler::finishAfterEvent()
 {
-	isDone = true;
+	engine->stopMainLoop();
 }
 
 void GameEventHandler::finishBeforeEvent()
 {
-	apiWrapper.destroyWindow();
 }
 
 void GameEventHandler::resumeEvent()

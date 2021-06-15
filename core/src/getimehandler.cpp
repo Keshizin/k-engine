@@ -2,7 +2,7 @@
 	Game Engine Time Handler
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,27 +25,17 @@
 
 #include <getimehandler.h>
 
-// ----------------------------------------------------------------------------
-//  GETimeHandler CLASS METHODS DEFINITION
-// ----------------------------------------------------------------------------
-void GETimeHandler::setFrameTime(long long frameTimeParam)
+GETimeHandler::GETimeHandler()
+	: frameTime(0), internalTimer(0), frameTimeLimit(0), perfomanceFrequency(0)
 {
-	this->frameTime = frameTimeParam;
 }
 
-long long GETimeHandler::getFrameTime()
-{
-	return frameTime;
-}
-
-double GETimeHandler::getFrameTimeInSeconds()
+// ****************************************************************************
+//  GETimeHandler - Public Methods Definition
+// ****************************************************************************
+double GETimeHandler::getFrameTimeInSeconds() const
 {
 	return static_cast<double>(frameTime) / static_cast<double>(perfomanceFrequency);
-}
-
-void GETimeHandler::setInternalTimer(long long internalTimerParam)
-{
-	this->internalTimer = internalTimerParam;
 }
 
 void GETimeHandler::updateInternalTimer(long long timer)
@@ -53,7 +43,25 @@ void GETimeHandler::updateInternalTimer(long long timer)
 	this->internalTimer = timer;
 }
 
-long long GETimeHandler::getInternalTimer()
+// ****************************************************************************
+//  GETimeHandler - Getters and Setters Definition
+// ****************************************************************************
+void GETimeHandler::setFrameTime(long long frameTimeParam)
+{
+	this->frameTime = frameTimeParam;
+}
+
+long long GETimeHandler::getFrameTime() const
+{
+	return frameTime;
+}
+
+void GETimeHandler::setInternalTimer(long long internalTimerParam)
+{
+	this->internalTimer = internalTimerParam;
+}
+
+long long GETimeHandler::getInternalTimer() const
 {
 	return internalTimer;
 }
@@ -63,7 +71,7 @@ void GETimeHandler::setFrameTimeLimit(long long frameTimeLimitParam)
 	this->frameTimeLimit = frameTimeLimitParam;
 }
 
-long long GETimeHandler::getFrameTimeLimit()
+long long GETimeHandler::getFrameTimeLimit() const
 {
 	return frameTimeLimit;
 }
@@ -73,7 +81,7 @@ void GETimeHandler::setPerfomanceFrequency(long long perfomanceFrequencyParam)
 	this->perfomanceFrequency = perfomanceFrequencyParam;
 }
 
-long long GETimeHandler::getPerfomanceFrequency()
+long long GETimeHandler::getPerfomanceFrequency() const
 {
 	return this->perfomanceFrequency;
 }

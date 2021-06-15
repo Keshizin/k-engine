@@ -26,11 +26,13 @@
 #ifndef K_ENGINE_H
 #define K_ENGINE_H
 
+//#define K_DEBUG 1
+
 #include <gewindow.h>
 #include <getimehandler.h>
-#include <geprofile.h>
-#include <gerenderingsystem.h>
-#include <geversion.h>
+//#include <geprofile.h>
+//#include <gerenderingsystem.h>
+//#include <geversion.h>
 
 // ****************************************************************************
 //  K-Engine Runtime States
@@ -48,7 +50,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	KEngine(GEEventHandler *eventHandler);
+	explicit KEngine(GEEventHandler *eventHandler);
 	~KEngine();
 
 	// ------------------------------------------------------------------------
@@ -63,21 +65,21 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	GEWINAPIWrapper* getAPIWrapper();
-	GEWindow* getGameWindow();
+	GEWINAPIWrapper* getAPIWrapper() const;
+	GEWindow* getGameWindow() const;
 	GETimeHandler* getTimeHandler();
-	GEProfile* getProfile();
-	GERenderingSystem* getRenderingSystem();
-	
+	//GEProfile* getProfile();
+	//GERenderingSystem* getRenderingSystem();
 	void setEventHandler(GEEventHandler *eventHandler);
 
 private:
 	GEWINAPIWrapper* apiWrapper;
-	GEWindow* gameWindow;
 	GEEventHandler* eventHandler;
-	GERenderingSystem* renderingSystem;
+	GEWindow* gameWindow;
 	GETimeHandler* timeHandler;
-	GEProfile* profile;
+
+	//GERenderingSystem* renderingSystem;
+	//GEProfile* profile;
 	int runningStatus;
 };
 

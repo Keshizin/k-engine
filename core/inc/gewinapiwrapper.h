@@ -54,29 +54,37 @@ public:
 	GEWINAPIWrapper();
 	~GEWINAPIWrapper();
 
+	GEWINAPIWrapper(const GEWINAPIWrapper& win)
+		: hWindow(NULL), hDC(NULL), hRC(NULL)
+	{
+		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
+		//     Pode ocorrer problemas se dois objetos apontarem para hWindow,
+		//     hDC e hRC.
+	}
+
 	// ------------------------------------------------------------------------
 	//  CPU's stuff
 	// ------------------------------------------------------------------------
-	long long getHighResolutionTimerCounter();
-	long long getHighResolutionTimerFrequency();
+	long long getHighResolutionTimerCounter() const;
+	long long getHighResolutionTimerFrequency() const;
 
 	// ------------------------------------------------------------------------
 	//  Window System's stuff
 	// ------------------------------------------------------------------------
 	int createWindow(int x, int y, int width, int height, std::string name, unsigned int style);
 	int destroyWindow();
-	int showWindow(int showType);
+	int showWindow(int showType) const;
 
 	// ------------------------------------------------------------------------
 	//  Message Events Handling (Message Pump)
 	// ------------------------------------------------------------------------
-	void handleSystemMessages();
+	void handleSystemMessages() const;
 
 	// ------------------------------------------------------------------------
 	//  OPENGL REDENRING's stuff
 	// ------------------------------------------------------------------------
 	int initializeRenderingSystem();
-	int swapBuffers();
+	int swapBuffers() const;
 
 	// ------------------------------------------------------------------------
 	//  Creating new Console for Debug

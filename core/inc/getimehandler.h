@@ -2,7 +2,7 @@
 	Game Engine Time Handler
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -32,26 +32,28 @@
 class GETimeHandler
 {
 public:
+	GETimeHandler();
+
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
-	double getFrameTimeInSeconds();
+	double getFrameTimeInSeconds() const;
 	void updateInternalTimer(long long timer);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	void setFrameTime(long long frameTime);
-	long long getFrameTime();
+	long long getFrameTime() const;
 
 	void setInternalTimer(long long internalTimer);
-	long long getInternalTimer();
+	long long getInternalTimer() const;
 
 	void setFrameTimeLimit(long long frameTimeLimit);
-	long long getFrameTimeLimit();
+	long long getFrameTimeLimit() const;
 
 	void setPerfomanceFrequency(long long perfomanceFrequency);
-	long long getPerfomanceFrequency();
+	long long getPerfomanceFrequency() const;
 
 private:
 	long long frameTime;

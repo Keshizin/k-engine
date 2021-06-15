@@ -24,38 +24,42 @@
 */
 
 #include <ge.h>
-#include <gewinapiwrapper.h>
 
 // ****************************************************************************
-//  Constructors and Destructors
+//  KEngine - Constructors and Destructors
 // ****************************************************************************
 KEngine::KEngine(GEEventHandler *eventHandler)
+	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
 {
 	this->apiWrapper = new GEWINAPIWrapper();
+	setEventHandler(eventHandler);
+
 	this->gameWindow = new GEWindow(this->apiWrapper);
-	this->renderingSystem = new GERenderingSystem(this->apiWrapper);
-	
+
 	this->timeHandler = new GETimeHandler();
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
-	this->profile = new GEProfile(this->timeHandler);
+	//this->renderingSystem = new GERenderingSystem(this->apiWrapper);
+	//this->profile = new GEProfile(this->timeHandler);
 
-	setEventHandler(eventHandler);
-
+#ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->createDebugConsole();
+#endif
 }
 
 KEngine::~KEngine()
 {
+#ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->closeDebugConsole();
+#endif
 
 	delete apiWrapper;
 	delete gameWindow;
-	delete renderingSystem;
 	delete timeHandler;
-	delete profile;
+	//delete renderingSystem;
+	//delete profile;
 }
 
 // ****************************************************************************
@@ -67,10 +71,11 @@ void KEngine::startMainLoop()
 	long long startTime = 0;
 	long long endTime = 0;
 	long long frameTime = 0;
-
+	
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(0);
 	eventHandler->beforeMainLoopEvent();
+
 	// profile->start();
 	startloopTime = endTime = apiWrapper->getHighResolutionTimerCounter();
 
@@ -91,7 +96,9 @@ void KEngine::startMainLoop()
 		if(runningStatus == K_RUNNING)
 		{
 			eventHandler->frameEvent(timeHandler->getFrameTimeInSeconds());
-			renderingSystem->renderFrame();
+
+			//renderingSystem->renderFrame();
+			apiWrapper->swapBuffers();
 		}
 
 		// --------------------------------------------------------------------
@@ -145,30 +152,30 @@ void KEngine::setFrameRate(int framePerSecond)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-GEWINAPIWrapper* KEngine::getAPIWrapper()
+GEWINAPIWrapper* KEngine::getAPIWrapper() const
 {
 	return apiWrapper;
 }
 
-GEWindow *KEngine::getGameWindow()
+GEWindow *KEngine::getGameWindow() const
 {
 	return gameWindow;
 }
 
-GERenderingSystem *KEngine::getRenderingSystem()
-{
-	return renderingSystem;
-}
+//GERenderingSystem *KEngine::getRenderingSystem()
+//{
+//	return renderingSystem;
+//}
 
 GETimeHandler *KEngine::getTimeHandler()
 {
 	return timeHandler;
 }
 
-GEProfile *KEngine::getProfile()
-{
-	return profile;
-}
+//GEProfile *KEngine::getProfile()
+//{
+//	return profile;
+//}
 
 void KEngine::setEventHandler(GEEventHandler *eventHandlerParam)
 {

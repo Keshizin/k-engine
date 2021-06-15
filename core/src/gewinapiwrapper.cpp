@@ -49,14 +49,14 @@ GEWINAPIWrapper::~GEWINAPIWrapper()
 // ****************************************************************************
 //  CPU's stuff
 // ****************************************************************************
-long long GEWINAPIWrapper:: getHighResolutionTimerCounter()
+long long GEWINAPIWrapper:: getHighResolutionTimerCounter() const
 {
 	LARGE_INTEGER time;
 	QueryPerformanceCounter(&time);
 	return time.QuadPart;
 }
 
-long long GEWINAPIWrapper::getHighResolutionTimerFrequency()
+long long GEWINAPIWrapper::getHighResolutionTimerFrequency() const
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -227,7 +227,7 @@ int GEWINAPIWrapper::destroyWindow()
 	return isSuccessful;
 }
 
-int GEWINAPIWrapper::showWindow(int showType)
+int GEWINAPIWrapper::showWindow(int showType) const
 {
 	if(hWindow == NULL)
 	{
@@ -241,7 +241,7 @@ int GEWINAPIWrapper::showWindow(int showType)
 // ****************************************************************************
 //  Message Events Handling (Message Pump)
 // ****************************************************************************
-void GEWINAPIWrapper::handleSystemMessages()
+void GEWINAPIWrapper::handleSystemMessages() const
 {
 	// (!) DONT INCLUDE I/O's stuff here!
 
@@ -452,7 +452,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 	return 1;
 }
 
-int GEWINAPIWrapper::swapBuffers()
+int GEWINAPIWrapper::swapBuffers() const
 {
 	return SwapBuffers(hDC);
 

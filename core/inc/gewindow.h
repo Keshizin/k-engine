@@ -27,11 +27,11 @@
 #define K_ENGINE_WINDOW_CLASS_H
 
 #include <gewinapiwrapper.h>
+#include <iostream>
 
 // ****************************************************************************
 //  K-Engine Window Style
 // ****************************************************************************
-
 #define K_WINDOW_SPLASH              0x01
 #define K_WINDOW_DEFAULT             0x02
 #define K_WINDOW_NO_SYS              0x03
@@ -53,7 +53,15 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GEWindow(GEWINAPIWrapper* apiWrapper);
+	explicit GEWindow(GEWINAPIWrapper* apiWrapper);
+	GEWindow(GEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style);
+
+	GEWindow(const GEWindow& win)
+		: apiWrapper(0), x(0), y(0), width(0), height(0), name(""), style(K_WINDOW_DEFAULT)
+	{
+		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
+		//     Pode ocorrer problemas se dois objetos apontarem para apiWrapper.
+	}
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -66,25 +74,27 @@ public:
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	void setApiWrapper(GEWINAPIWrapper* apiWrapper);
-	GEWINAPIWrapper* getApiWrapper();
+	GEWINAPIWrapper* getApiWrapper() const;
 
 	void setX(int x);
-	int getX();
+	int getX() const;
 
 	void setY(int y);
-	int getY();
+	int getY() const;
 	
 	void setWidth(int width);
-	int getWidth();
+	int getWidth() const;
 
 	void setHeight(int height);
-	int getHeight();
+	int getHeight() const;
 
 	void setName(std::string name);
-	std::string getName();
+	std::string getName() const;
 
 	void setStyle(unsigned int style);
-	unsigned int getStyle();
+	unsigned int getStyle() const;
+
+	void setWindow(int x, int y, int width, int height, std::string name, unsigned int style);
 
 private:
 	GEWINAPIWrapper* apiWrapper;

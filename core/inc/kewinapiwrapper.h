@@ -30,7 +30,7 @@
 #include <windows.h>
 
 #include <string>
-#include <geeventhandler.h>
+#include <keeventhandler.h>
 
 // ****************************************************************************
 //  Win32 Window Class
@@ -43,18 +43,18 @@
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // ****************************************************************************
-//  Game Engine Win32 API Wrapper Class
+//  K-Engine Win32 API Wrapper Class
 // ****************************************************************************
-class GEWINAPIWrapper
+class KEWINAPIWrapper
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructor
 	// ------------------------------------------------------------------------
-	GEWINAPIWrapper();
-	~GEWINAPIWrapper();
+	KEWINAPIWrapper();
+	~KEWINAPIWrapper();
 
-	GEWINAPIWrapper(const GEWINAPIWrapper& win)
+	KEWINAPIWrapper(const KEWINAPIWrapper& win)
 		: hWindow(NULL), hDC(NULL), hRC(NULL)
 	{
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
@@ -95,7 +95,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Set Global Event Handler
 	// ------------------------------------------------------------------------
-	void setGlobalEventHandler(GEEventHandler *eventHandler);
+	void setGlobalEventHandler(KEEventHandler *eventHandler);
 
 private:
 	HWND hWindow;

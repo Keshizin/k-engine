@@ -1,5 +1,5 @@
 /*
-	K-Engine Auxiliary
+	K-Engine Constants Header
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -23,9 +23,24 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_AUXILIARY_H
-#define K_ENGINE_AUXILIARY_H
+#ifndef K_ENGINE_CONSTANTS_H
+#define K_ENGINE_CONSTANTS_H
 
-#define K_UNREFERENCED_PARAMETER(p) reinterpret_cast<void*>(&p)
+// ****************************************************************************
+//  K-Engine Window Style
+//  Note: This constants were based on Win32 API.
+// ****************************************************************************
+#define K_WINDOW_SPLASH              0x01
+#define K_WINDOW_DEFAULT             0x02
+#define K_WINDOW_NO_SYS              0x03
+#define K_WINDOW_WINDOWED_FULLSCREEN 0x04
+#define K_WINDOW_COMPLETE            0x05
+
+// ****************************************************************************
+//  K-Engine Window Show Types
+//  Note: This constants were based on Win32 API.
+// ****************************************************************************
+#define K_WINDOW_SHOW 0x05
+#define K_WINDOW_FORCEMINIMIZE 0x0B
 
 #endif

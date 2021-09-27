@@ -1,5 +1,5 @@
 /*
-	Game Engine Window Class
+	K-Engine Window Class
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -23,18 +23,18 @@
 	SOFTWARE.
 */
 
-#include <gewindow.h>
+#include <kewindow.h>
 #include <iostream>
 
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
-GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper)
-	: apiWrapper(apiWrapper), x(0), y(0), width(640), height(640), style(K_WINDOW_DEFAULT)
+KEWindow::KEWindow(KEWINAPIWrapper* apiWrapper)
+	: apiWrapper(apiWrapper), x(0), y(0), width(640), height(640), name("K-ENGINE DEFAULT NAME!"), style(K_WINDOW_DEFAULT)
 {
 }
 
-GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style)
+KEWindow::KEWindow(KEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style)
 	: apiWrapper(apiWrapper), x(x), y(y), width(width), height(height), name(name), style(style)
 {
 }
@@ -42,7 +42,7 @@ GEWindow::GEWindow(GEWINAPIWrapper* apiWrapper, int x, int y, int width, int hei
 // ****************************************************************************
 //  Public Methods
 // ****************************************************************************
-int GEWindow::create()
+int KEWindow::create()
 {	
 	if(!apiWrapper)
 	{
@@ -55,7 +55,7 @@ int GEWindow::create()
 	return apiWrapper->createWindow(x, y, width, height, name, style);
 }
 
-int GEWindow::destroy()
+int KEWindow::destroy()
 {
 	if(!apiWrapper)
 	{
@@ -68,7 +68,7 @@ int GEWindow::destroy()
 	return apiWrapper->destroyWindow();
 }
 
-int GEWindow::show(int showType)
+int KEWindow::show(int showType)
 {
 	if(!apiWrapper)
 	{
@@ -84,77 +84,77 @@ int GEWindow::show(int showType)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-void GEWindow::setApiWrapper(GEWINAPIWrapper* apiWrapperParam)
+void KEWindow::setApiWrapper(KEWINAPIWrapper* apiWrapperParam)
 {
 	this->apiWrapper = apiWrapperParam;
 }
 
-GEWINAPIWrapper* GEWindow::getApiWrapper() const
+KEWINAPIWrapper* KEWindow::getApiWrapper() const
 {
 	return apiWrapper;
 }
 
-void GEWindow::setX(int xParam)
+void KEWindow::setX(int xParam)
 {
 	this->x = xParam;
 }
 
-int GEWindow::getX() const
+int KEWindow::getX() const
 {
 	return x;
 }
 
-void GEWindow::setY(int yParam)
+void KEWindow::setY(int yParam)
 {
 	this->y = yParam;
 }
 
-int GEWindow::getY() const
+int KEWindow::getY() const
 {
 	return y;
 }
 
-void GEWindow::setWidth(int widthParam)
+void KEWindow::setWidth(int widthParam)
 {
 	this->width = widthParam;
 }
 
-int GEWindow::getWidth() const
+int KEWindow::getWidth() const
 {
 	return width;
 }
 
-void GEWindow::setHeight(int heightParam)
+void KEWindow::setHeight(int heightParam)
 {
 	this->height = heightParam;
 }
 
-int GEWindow::getHeight() const
+int KEWindow::getHeight() const
 {
 	return height;
 }
 
-void GEWindow::setName(std::string nameParam)
+void KEWindow::setName(std::string nameParam)
 {
 	this->name = nameParam;
 }
 
-std::string GEWindow::getName() const
+std::string KEWindow::getName() const
 {
 	return name;
 }
 
-void GEWindow::setStyle(unsigned int styleParam)
+void KEWindow::setStyle(unsigned int styleParam)
 {
 	this->style = styleParam;
 }
 
-unsigned int GEWindow::getStyle() const
+unsigned int KEWindow::getStyle() const
 {
 	return style;
 }
 
-void GEWindow::setWindow(int x, int y, int width, int height, std::string name, unsigned int style)
+void KEWindow::setWindow(int x, int y, int width, int height, std::string name, unsigned int style)
 {
 	this->x = x;
 	this->y = y;

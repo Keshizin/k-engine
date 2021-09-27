@@ -23,25 +23,24 @@
 	SOFTWARE.
 */
 
-#include <gewinapiwrapper.h>
-#include <gewindow.h>
+#include <kewinapiwrapper.h>
+#include <keconstants.h>
 
 #include <tchar.h>
 #include <GL/gl.h>
-
 #include <iostream>
 
-static GEEventHandler *globalEventHandler = 0;
+static KEEventHandler *globalEventHandler = 0;
 
 // ****************************************************************************
-//  GEWINAPIWrapper Class - Constructors and Destructor
+//  KEWINAPIWrapper Class - Constructors and Destructor
 // ****************************************************************************
-GEWINAPIWrapper::GEWINAPIWrapper()
+KEWINAPIWrapper::KEWINAPIWrapper()
 	: hWindow(NULL), hDC(NULL), hRC(NULL)
 {
 }
 
-GEWINAPIWrapper::~GEWINAPIWrapper()
+KEWINAPIWrapper::~KEWINAPIWrapper()
 {
 	globalEventHandler = 0;
 }
@@ -49,14 +48,14 @@ GEWINAPIWrapper::~GEWINAPIWrapper()
 // ****************************************************************************
 //  CPU's stuff
 // ****************************************************************************
-long long GEWINAPIWrapper:: getHighResolutionTimerCounter() const
+long long KEWINAPIWrapper:: getHighResolutionTimerCounter() const
 {
 	LARGE_INTEGER time;
 	QueryPerformanceCounter(&time);
 	return time.QuadPart;
 }
 
-long long GEWINAPIWrapper::getHighResolutionTimerFrequency() const
+long long KEWINAPIWrapper::getHighResolutionTimerFrequency() const
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -66,7 +65,7 @@ long long GEWINAPIWrapper::getHighResolutionTimerFrequency() const
 // ****************************************************************************
 //  Window System's stuff
 // ****************************************************************************
-int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
+int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
 {
 	DWORD error;
 	WNDCLASSEX windowClass;
@@ -161,7 +160,7 @@ int GEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 	return 1;
 }
 
-int GEWINAPIWrapper::destroyWindow()
+int KEWINAPIWrapper::destroyWindow()
 {
 	BOOL ret;
 	int isSuccessful = 1;
@@ -227,7 +226,7 @@ int GEWINAPIWrapper::destroyWindow()
 	return isSuccessful;
 }
 
-int GEWINAPIWrapper::showWindow(int showType) const
+int KEWINAPIWrapper::showWindow(int showType) const
 {
 	if(hWindow == NULL)
 	{
@@ -241,9 +240,9 @@ int GEWINAPIWrapper::showWindow(int showType) const
 // ****************************************************************************
 //  Message Events Handling (Message Pump)
 // ****************************************************************************
-void GEWINAPIWrapper::handleSystemMessages() const
+void KEWINAPIWrapper::handleSystemMessages() const
 {
-	// (!) DONT INCLUDE I/O's stuff here!
+	// (!) PLEASE DONT INCLUDE I/O's stuff here!
 
 	MSG msg;
 
@@ -262,7 +261,7 @@ void GEWINAPIWrapper::handleSystemMessages() const
 // ****************************************************************************
 //  OPENGL REDENRING's stuff
 // ****************************************************************************
-int GEWINAPIWrapper::initializeRenderingSystem()
+int KEWINAPIWrapper::initializeRenderingSystem()
 {
 	int ret;
 
@@ -452,7 +451,7 @@ int GEWINAPIWrapper::initializeRenderingSystem()
 	return 1;
 }
 
-int GEWINAPIWrapper::swapBuffers() const
+int KEWINAPIWrapper::swapBuffers() const
 {
 	return SwapBuffers(hDC);
 
@@ -476,7 +475,7 @@ int GEWINAPIWrapper::swapBuffers() const
 // ****************************************************************************
 //  Creating new Console for Debug
 // ****************************************************************************
-int GEWINAPIWrapper::createDebugConsole() const
+int KEWINAPIWrapper::createDebugConsole() const
 {
 	if(!AllocConsole())
 	{
@@ -504,7 +503,7 @@ int GEWINAPIWrapper::createDebugConsole() const
 	return 1;
 }
 
-int GEWINAPIWrapper::closeDebugConsole() const
+int KEWINAPIWrapper::closeDebugConsole() const
 {
 	return FreeConsole();
 }
@@ -512,7 +511,7 @@ int GEWINAPIWrapper::closeDebugConsole() const
 // ****************************************************************************
 //  Set Global Event Handler
 // ****************************************************************************
-void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
+void KEWINAPIWrapper::setGlobalEventHandler(KEEventHandler *eventHandler)
 {
 	globalEventHandler = eventHandler;
 }
@@ -522,6 +521,10 @@ void GEWINAPIWrapper::setGlobalEventHandler(GEEventHandler *eventHandler)
 // ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	// prevent the null pointer exception!
+	if(!globalEventHandler)
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
 	switch(uMsg)
 	{
 	// --------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-	Game Engine Event Handler
+	K-Engine Event Handler
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -27,12 +27,12 @@
 #define K_ENGINE_EVENT_HANDLER_CLASS_H
 
 // ****************************************************************************
-//  Game Engine Events Class
+//  K-Engine Events Class
 // ****************************************************************************
-class GEEventHandler
+class KEEventHandler
 {
 public:
-	virtual ~GEEventHandler() {}
+	virtual ~KEEventHandler() {}
 
 	virtual void frameEvent(double frameTime) = 0;
 	virtual void mouseEvent(int button, int state, int x, int y) = 0;

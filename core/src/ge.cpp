@@ -28,13 +28,13 @@
 // ****************************************************************************
 //  KEngine - Constructors and Destructors
 // ****************************************************************************
-KEngine::KEngine(GEEventHandler *eventHandler)
+KEngine::KEngine(KEEventHandler *eventHandler)
 	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
 {
-	this->apiWrapper = new GEWINAPIWrapper();
+	this->apiWrapper = new KEWINAPIWrapper();
 	setEventHandler(eventHandler);
 
-	this->gameWindow = new GEWindow(this->apiWrapper);
+	this->gameWindow = new KEWindow(this->apiWrapper);
 
 	this->timeHandler = new GETimeHandler();
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
@@ -42,18 +42,18 @@ KEngine::KEngine(GEEventHandler *eventHandler)
 	//this->renderingSystem = new GERenderingSystem(this->apiWrapper);
 	//this->profile = new GEProfile(this->timeHandler);
 
-#ifdef K_DEBUG
+// #ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->createDebugConsole();
-#endif
+// #endif
 }
 
 KEngine::~KEngine()
 {
-#ifdef K_DEBUG
+// #ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->closeDebugConsole();
-#endif
+// #endif
 
 	delete apiWrapper;
 	delete gameWindow;
@@ -152,12 +152,12 @@ void KEngine::setFrameRate(int framePerSecond)
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-GEWINAPIWrapper* KEngine::getAPIWrapper() const
+KEWINAPIWrapper* KEngine::getAPIWrapper() const
 {
 	return apiWrapper;
 }
 
-GEWindow *KEngine::getGameWindow() const
+KEWindow *KEngine::getGameWindow() const
 {
 	return gameWindow;
 }
@@ -177,7 +177,7 @@ GETimeHandler *KEngine::getTimeHandler()
 //	return profile;
 //}
 
-void KEngine::setEventHandler(GEEventHandler *eventHandlerParam)
+void KEngine::setEventHandler(KEEventHandler *eventHandlerParam)
 {
 	this->eventHandler = eventHandlerParam;
 	this->apiWrapper->setGlobalEventHandler(this->eventHandler);

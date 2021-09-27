@@ -23,16 +23,26 @@
 	SOFTWARE.
 */
 
-#include <iostream>
-#include <geaux.h>
-#include <ge.h>
+// (ok compile lib)
+// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp /Icore/inc
+// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/ge.cpp core/src/getimehandler.cpp /Icore/inc
+// lib kewindow.obj kewinapiwrapper.obj /OUT:kengine.lib
+// lib kewindow.obj kewinapiwrapper.obj ge.obj getimehandler.obj /OUT:kengine.lib
+// CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib user32.lib /OUT:game.exe
 
+#include <kewindow.h>
+#include <geaux.h>
+// #define K_DEBUG 1
+
+// #include <ge.h>
 #include <gl/gl.h>
+
+#include <iostream>
 
 // ****************************************************************************
 //  Game Engine Core Events
 // ****************************************************************************
-class GameEventHandler : public GEEventHandler
+class GameEventHandler : public KEEventHandler
 {
 public:
 	void frameEvent(double frameTime);
@@ -49,7 +59,9 @@ public:
 	void createWindowEvent();
 };
 
-KEngine* engine;
+// KEngine* engine;
+
+bool isLoop = true;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -61,36 +73,56 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 
 	GameEventHandler eventHandler;
-	engine = new KEngine(&eventHandler);
 
-	std::cout << "STARTING K-ENGINE DEMO" << std::endl;
+	KEWINAPIWrapper winapiWrapper;
+	winapiWrapper.setGlobalEventHandler(&eventHandler);
+	winapiWrapper.createDebugConsole();
 
-	// Setting up the window
-	engine->getGameWindow()->setWindow(0, 0, 640, 480, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
+	KEWindow gameWindow(&winapiWrapper);
 
-	// Create the window
-	engine->getGameWindow()->create();
+	gameWindow.setWindow(0, 0, 640, 480, "K-ENGINE TEST", K_WINDOW_COMPLETE);
+	gameWindow.create();
+	gameWindow.show(nCmdShow);
 
-	// Initializing OpenGL's context
-	engine->getAPIWrapper()->initializeRenderingSystem();
+	while(isLoop)
+	{
+		winapiWrapper.handleSystemMessages();
+	}
 
-	// Show the window
-	engine->getGameWindow()->show(nCmdShow);
+	winapiWrapper.closeDebugConsole();
 
-	glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+	// engine = new KEngine(&eventHandler);
 
-	// Starting the game loop
-	engine->startMainLoop();
+	// std::cout << "STARTING K-ENGINE DEMO" << std::endl;
 
-	std::cout << "END K-ENGINE DEMO" << std::endl;
-	delete engine;
+	// // Setting up the window
+	// engine->getGameWindow()->setWindow(20, 20, 800, 800, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
+
+	// // Create the window
+	// engine->getGameWindow()->create();
+
+	// // // Initializing OpenGL's context
+	// // engine->getAPIWrapper()->initializeRenderingSystem();
+
+	// // Show the window
+	// engine->getGameWindow()->show(nCmdShow);
+
+	// // glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+	// // // Starting the game loop
+	// // engine->startMainLoop();
+
+	// std::cout << "END K-ENGINE DEMO" << std::endl;
+	// delete engine;
+
+	// while(1);
+
 	return 1;
 }
 
 void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
-
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -128,7 +160,8 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 
 void GameEventHandler::finishAfterEvent()
 {
-	engine->stopMainLoop();
+	// engine->stopMainLoop();
+	isLoop = false;
 }
 
 void GameEventHandler::finishBeforeEvent()

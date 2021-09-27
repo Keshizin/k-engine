@@ -1,5 +1,5 @@
 /*
-	Game Engine Window Class
+	K-Engine Window Class
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -26,41 +26,27 @@
 #ifndef K_ENGINE_WINDOW_CLASS_H
 #define K_ENGINE_WINDOW_CLASS_H
 
-#include <gewinapiwrapper.h>
-#include <iostream>
+#include <kewinapiwrapper.h>
+#include <keconstants.h>
 
 // ****************************************************************************
-//  K-Engine Window Style
+//  K-Engine Window Class
 // ****************************************************************************
-#define K_WINDOW_SPLASH              0x01
-#define K_WINDOW_DEFAULT             0x02
-#define K_WINDOW_NO_SYS              0x03
-#define K_WINDOW_WINDOWED_FULLSCREEN 0x04
-#define K_WINDOW_COMPLETE            0x05
-
-// ****************************************************************************
-//  K-Engine Window Show Types
-// ****************************************************************************
-#define K_WINDOW_SHOW 0x05
-#define K_WINDOW_FORCEMINIMIZE 0x0B
-
-// ****************************************************************************
-//  Game Engine Window Class
-// ****************************************************************************
-class GEWindow
+class KEWindow
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	explicit GEWindow(GEWINAPIWrapper* apiWrapper);
-	GEWindow(GEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style);
+	explicit KEWindow(KEWINAPIWrapper* apiWrapper);
+	
+	KEWindow(KEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style);
 
-	GEWindow(const GEWindow& win)
+	KEWindow(const KEWindow& win)
 		: apiWrapper(0), x(0), y(0), width(0), height(0), name(""), style(K_WINDOW_DEFAULT)
 	{
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		//     Pode ocorrer problemas se dois objetos apontarem para apiWrapper.
+		//     Pode ocorrer problemas se dois objetos apontarem para o mesmo apiWrapper.
 	}
 
 	// ------------------------------------------------------------------------
@@ -73,8 +59,8 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	void setApiWrapper(GEWINAPIWrapper* apiWrapper);
-	GEWINAPIWrapper* getApiWrapper() const;
+	void setApiWrapper(KEWINAPIWrapper* apiWrapper);
+	KEWINAPIWrapper* getApiWrapper() const;
 
 	void setX(int x);
 	int getX() const;
@@ -97,7 +83,8 @@ public:
 	void setWindow(int x, int y, int width, int height, std::string name, unsigned int style);
 
 private:
-	GEWINAPIWrapper* apiWrapper;
+	KEWINAPIWrapper* apiWrapper;
+
 	int x;
 	int y;
 	int width;

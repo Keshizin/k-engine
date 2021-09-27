@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_RENDERING_SYSTEM_H
 #define K_ENGINE_RENDERING_SYSTEM_H
 
-#include <gewinapiwrapper.h>
+#include <kewinapiwrapper.h>
 
 // ----------------------------------------------------------------------------
 //  Rendering System Context (2D or 3D)
@@ -140,7 +140,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GERenderingSystem(GEWINAPIWrapper* apiWrapper);
+	GERenderingSystem(KEWINAPIWrapper* apiWrapper);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -189,7 +189,7 @@ public:
 	void setGlobalAxisState(bool state);
 
 private:
-	GEWINAPIWrapper* apiWrapper;
+	KEWINAPIWrapper* apiWrapper;
 
 	int renderingContext;
 	int viewportWidth;

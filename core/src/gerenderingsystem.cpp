@@ -245,7 +245,7 @@ void GEEntity::setBounding(double left, double right, double top, double bottom)
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
-GERenderingSystem::GERenderingSystem(GEWINAPIWrapper* apiWrapper)
+GERenderingSystem::GERenderingSystem(KEWINAPIWrapper* apiWrapper)
 {
 	this->apiWrapper = apiWrapper;
 	this->renderingContext = K_CONTEXT_2D;

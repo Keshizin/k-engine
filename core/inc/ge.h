@@ -28,7 +28,7 @@
 
 //#define K_DEBUG 1
 
-#include <gewindow.h>
+#include <kewindow.h>
 #include <getimehandler.h>
 //#include <geprofile.h>
 //#include <gerenderingsystem.h>
@@ -50,7 +50,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	explicit KEngine(GEEventHandler *eventHandler);
+	explicit KEngine(KEEventHandler *eventHandler);
 	~KEngine();
 
 	// ------------------------------------------------------------------------
@@ -65,17 +65,17 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	GEWINAPIWrapper* getAPIWrapper() const;
-	GEWindow* getGameWindow() const;
+	KEWINAPIWrapper* getAPIWrapper() const;
+	KEWindow* getGameWindow() const;
 	GETimeHandler* getTimeHandler();
 	//GEProfile* getProfile();
 	//GERenderingSystem* getRenderingSystem();
-	void setEventHandler(GEEventHandler *eventHandler);
+	void setEventHandler(KEEventHandler *eventHandler);
 
 private:
-	GEWINAPIWrapper* apiWrapper;
-	GEEventHandler* eventHandler;
-	GEWindow* gameWindow;
+	KEWINAPIWrapper* apiWrapper;
+	KEEventHandler* eventHandler;
+	KEWindow* gameWindow;
 	GETimeHandler* timeHandler;
 
 	//GERenderingSystem* renderingSystem;

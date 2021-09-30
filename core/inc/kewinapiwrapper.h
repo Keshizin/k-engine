@@ -1,5 +1,5 @@
 /*
-	Game Engine Win32 API Wrapper
+	K-Engine Win32 API Wrapper
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa

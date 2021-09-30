@@ -40,7 +40,7 @@
 //  K-Engine Window Show Types
 //  Note: This constants were based on Win32 API.
 // ****************************************************************************
-#define K_WINDOW_SHOW 0x05
+#define K_WINDOW_SHOW          0x05
 #define K_WINDOW_FORCEMINIMIZE 0x0B
 
 #endif

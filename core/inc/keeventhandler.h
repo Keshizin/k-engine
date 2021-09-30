@@ -40,6 +40,7 @@ public:
 	virtual void keyboardEvent(unsigned long long key, int state) = 0;
 	virtual void keyboardSpecialEvent(unsigned long long key, int state) = 0;
 	virtual void resizeWindowEvent(int width, int height) = 0;
+	virtual void moveWindowEvent(int x, int y) = 0;
 	virtual void finishAfterEvent() = 0;
 	virtual void finishBeforeEvent() = 0;
 	virtual void resumeEvent() = 0;

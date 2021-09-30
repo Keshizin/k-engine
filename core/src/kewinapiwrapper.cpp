@@ -1,5 +1,5 @@
 /*
-	Game Engine Win32 API Wrapper
+	K-Engine Win32 API Wrapper
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -27,7 +27,7 @@
 #include <keconstants.h>
 
 #include <tchar.h>
-#include <GL/gl.h>
+// #include <GL/gl.h>
 #include <iostream>
 
 static KEEventHandler *globalEventHandler = 0;
@@ -156,7 +156,7 @@ int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 
 		return 0;
 	}
-	
+
 	return 1;
 }
 
@@ -459,12 +459,12 @@ int KEWINAPIWrapper::swapBuffers() const
 	// {
 	// 	BOOL ret = SwapBuffers(hDC);
 
-	// 	// if(ret != TRUE)
-	// 	// {
-	// 	// 	DWORD error = GetLastError();
-	// 	// 	std::cout << "(!) ERROR - It was not possible to swap the buffers: " << error << "\n" << std::endl;
-	// 	// 	return 0;
-	// 	// }
+	// if(ret != TRUE)
+	// {
+	// 	DWORD error = GetLastError();
+	// 	std::cout << "(!) ERROR - It was not possible to swap the buffers: " << error << "\n" << std::endl;
+	// 	return 0;
+	// }
 
 	// 	return 1;
 	// }
@@ -530,52 +530,66 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	// --------------------------------------------------------------------
 	//  WINDOW MESSAGES
 	// --------------------------------------------------------------------
-	//case WM_GETMINMAXINFO:
+	// case WM_GETMINMAXINFO:
 		// Informações a respeito da janela (importante para múltiplos monitores)
-		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
-		//break;
+		// break;
 
-	//case WM_NCCREATE:
-		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
-	//	break;
+	// case WM_NCCREATE:
+		// break;
 
-	//case WM_NCCALCSIZE:
-		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
-	//	break;
+	// case WM_NCCALCSIZE:
+		// break;
 
 	case WM_CREATE:
-		// Evento capturado depois da chamada de CreateWindowEx e antes de seu término de execução
 		globalEventHandler->createWindowEvent();
 		break;
 
 	case WM_SIZE:
-		// Evento capturado sempre que o tamanho da janela é alterado
 		globalEventHandler->resizeWindowEvent(LOWORD(lParam), HIWORD(lParam));
 		break;
 
-	//case WM_MOVE:
-		// Evento capturado após a janela ser reposicionada na tela
-		//break;
+	case WM_MOVE:
+		globalEventHandler->moveWindowEvent(LOWORD(lParam), HIWORD(lParam));
+		break;
 
-	//case WM_SHOWWINDOW:
-		// Evento capturado quando uma janela está para ser exibida ou ocultada
-		//break;
+	// case WM_SHOWWINDOW:
+		// break;
 
 	//case WM_WINDOWPOSCHANGING:
-	//	break;
+		// break;
 
-	//case WM_WINDOWPOSCHANGED:
-	//	break;
+	// case WM_ACTIVATEAPP:
+		// Enviado quando uma janela pertencente a um aplicativo diferente da
+		// janela ativa está prestes a ser ativada. A mensagem é enviada para
+		// o aplicativo cuja janela está sendo ativada e para o aplicativo
+		// cuja janela está sendo desativada.
+		// break;
 
-	//case WM_ACTIVATEAPP:
-	//	break;
+	// case WM_NCACTIVATE:
+		// break;
 
-	//case WM_NCACTIVATE:
-	//	break;
+	// case WM_GETICON:
+		// break;
 
-	//case WM_GETICON:
-	//	break;
+	// case WM_WINDOWPOSCHANGED:
+		// break;
 
+	case WM_CLOSE:
+		globalEventHandler->finishBeforeEvent();
+		break;
+
+	case WM_DESTROY:
+		// Evento capturado depois da chamada de DestroyWindow e antes de seu término de execução
+		// Ela é enviada após a janela ser removida da tela.
+		PostQuitMessage(0);
+		break;
+
+	//case WM_NCDESTROY:
+		// break;
+
+	// --------------------------------------------------------------------
+	//  INPUT QUEUE MESSAGES
+	// --------------------------------------------------------------------
 	case WM_ACTIVATE:
 		if (wParam == WA_ACTIVE)
 			globalEventHandler->resumeEvent();
@@ -586,89 +600,115 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		break;
 
-	//case WM_IME_SETCONTEXT:
-	//	break;
+	// case WM_IME_SETCONTEXT:
+		// break;
 
-	//case WM_IME_NOTIFY:
-	//	break;
+	// case WM_IME_NOTIFY:
+		// break;
 
-	//case WM_SETFOCUS:
-	//	break;
+	// case WM_SETFOCUS:
+		// break;
 
-	//case WM_NCPAINT:
-	//	break;
+	// case WM_KILLFOCUS:
+		// break;
 
-	//case WM_ERASEBKGND:
-	//	break;
+	// ********************************************************************
+	//  MOUSE MESSAGES
+	// ********************************************************************
+	// case WM_NCHITTEST:
+		// break;
 
-	//case WM_KILLFOCUS:
-	//	break;
-	
-	case WM_DESTROY:
-		// Evento capturado depois da chamada de DestroyWindow e antes de seu término de execução
-		// Sent when a window is being destroyed after the window is removed from the screen.
-		PostQuitMessage(0);
+	// case WM_MOUSEFIRST:
+		// break;
+
+	// case WM_NCMOUSEMOVE:
+		// break;
+
+	// case WM_NCLBUTTONDOWN:
+	 	// break;
+
+	// case WM_CAPTURECHANGED:
+		// break;
+
+	// case WM_SETCURSOR:
+		// break;
+
+	case WM_MOUSEMOVE:
+		globalEventHandler->mouseMotionEvent(LOWORD(lParam), HIWORD(lParam));
 		break;
 
-	//case WM_NCDESTROY:
-	//	break;
-	
-	case WM_CLOSE:
-		globalEventHandler->finishBeforeEvent();
+	case WM_LBUTTONDOWN:
+		globalEventHandler->mouseEvent(0, 1, LOWORD(lParam), HIWORD(lParam));
 		break;
 
-		// ********************************************************************
-		//  MOUSE MESSAGES
-		// ********************************************************************
-		case WM_LBUTTONDOWN:
-			globalEventHandler->mouseEvent(0, 1, LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_LBUTTONUP:
+		globalEventHandler->mouseEvent(0, 0, LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_LBUTTONUP:
-			globalEventHandler->mouseEvent(0, 0, LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_MBUTTONDOWN:
+		globalEventHandler->mouseEvent(1, 1, LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_MBUTTONDOWN:
-			globalEventHandler->mouseEvent(1, 1, LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_MBUTTONUP:
+		globalEventHandler->mouseEvent(1, 0, LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_MBUTTONUP:
-			globalEventHandler->mouseEvent(1, 0, LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_RBUTTONDOWN:
+		globalEventHandler->mouseEvent(2, 1, LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_RBUTTONDOWN:
-			globalEventHandler->mouseEvent(2, 1, LOWORD(lParam), HIWORD(lParam));
-			break;
+	case WM_RBUTTONUP:
+		globalEventHandler->mouseEvent(2, 0, LOWORD(lParam), HIWORD(lParam));
+		break;
 
-		case WM_RBUTTONUP:
-			globalEventHandler->mouseEvent(2, 0, LOWORD(lParam), HIWORD(lParam));
-			break;
+	// case WM_NCMOUSELEAVE:
+		// break;
 
-		case WM_MOUSEMOVE:
-			globalEventHandler->mouseMotionEvent(LOWORD(lParam), HIWORD(lParam));
-			break;
+	// ********************************************************************
+	//  KEYBOARD MESSAGES
+	// ********************************************************************
+	case WM_SYSKEYDOWN:
+		globalEventHandler->keyboardSpecialEvent(wParam, 1);
+		break;
 
-		// ********************************************************************
-		//  KEYBOARD MESSAGES
-		// ********************************************************************
-		case WM_SYSKEYDOWN:
-			globalEventHandler->keyboardSpecialEvent(wParam, 1);
-			break;
+	case WM_SYSKEYUP:
+		globalEventHandler->keyboardSpecialEvent(wParam, 0);
+		break;
 
-		case WM_SYSKEYUP:
-			globalEventHandler->keyboardSpecialEvent(wParam, 0);
-			break;
+	case WM_KEYDOWN:
+		globalEventHandler->keyboardEvent(wParam, 1);
+		break;
 
-		case WM_KEYDOWN:
-			globalEventHandler->keyboardEvent(wParam, 1);
-			break;
+	case WM_KEYUP:
+		globalEventHandler->keyboardEvent(wParam, 0);
+		break;
 
-		case WM_KEYUP:
-			globalEventHandler->keyboardEvent(wParam, 0);
-			break;
+	// case WM_CHAR:
+		// break;
 
-		default:
-			break;
+	// case WM_SYSCOMMAND:
+		// break;
+
+	// --------------------------------------------------------------------
+	//  PAINTING AND DRAWING MESSAGES
+	// --------------------------------------------------------------------
+	// case WM_NCPAINT:
+		// break;
+
+	// case WM_PAINT:
+		// break;
+
+	// case WM_ERASEBKGND:
+		// break;
+
+	// --------------------------------------------------------------------
+	//  DESKTOP WINDOW MANAGER (DWM) MESSAGES
+	// --------------------------------------------------------------------
+	// case WM_DWMNCRENDERINGCHANGED:
+		// break;
+		
+	default:
+		break;
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);

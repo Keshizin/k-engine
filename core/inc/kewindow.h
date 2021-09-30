@@ -39,7 +39,7 @@ public:
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
 	explicit KEWindow(KEWINAPIWrapper* apiWrapper);
-	
+
 	KEWindow(KEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style);
 
 	KEWindow(const KEWindow& win)

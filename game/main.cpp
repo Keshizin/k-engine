@@ -23,7 +23,6 @@
 	SOFTWARE.
 */
 
-// (ok compile lib)
 // CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp /Icore/inc
 // CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/ge.cpp core/src/getimehandler.cpp /Icore/inc
 // lib kewindow.obj kewinapiwrapper.obj /OUT:kengine.lib
@@ -31,12 +30,10 @@
 // CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib user32.lib /OUT:game.exe
 
 #include <kewindow.h>
-#include <geaux.h>
-// #define K_DEBUG 1
+#include <keaux.h>
 
 // #include <ge.h>
 #include <gl/gl.h>
-
 #include <iostream>
 
 // ****************************************************************************
@@ -51,6 +48,7 @@ public:
 	void keyboardEvent(unsigned long long key, int state) ;
 	void keyboardSpecialEvent(unsigned long long key, int state);
 	void resizeWindowEvent(int width, int height);
+	void moveWindowEvent(int x, int y);
 	void finishAfterEvent();
 	void finishBeforeEvent();
 	void resumeEvent();
@@ -60,6 +58,9 @@ public:
 };
 
 // KEngine* engine;
+
+KEWINAPIWrapper winapiWrapper;
+KEWindow gameWindow(&winapiWrapper);
 
 bool isLoop = true;
 
@@ -74,22 +75,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GameEventHandler eventHandler;
 
-	KEWINAPIWrapper winapiWrapper;
 	winapiWrapper.setGlobalEventHandler(&eventHandler);
-	winapiWrapper.createDebugConsole();
+	// winapiWrapper.createDebugConsole();
 
-	KEWindow gameWindow(&winapiWrapper);
-
-	gameWindow.setWindow(0, 0, 640, 480, "K-ENGINE TEST", K_WINDOW_COMPLETE);
+	gameWindow.setWindow(1000, 0, 640, 480, "K-ENGINE TEST", K_WINDOW_COMPLETE);
 	gameWindow.create();
+
+	winapiWrapper.initializeRenderingSystem();
+
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
 	gameWindow.show(nCmdShow);
 
 	while(isLoop)
 	{
 		winapiWrapper.handleSystemMessages();
+		
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		winapiWrapper.swapBuffers();
 	}
 
-	winapiWrapper.closeDebugConsole();
+	// winapiWrapper.closeDebugConsole();
 
 	// engine = new KEngine(&eventHandler);
 
@@ -114,9 +121,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// std::cout << "END K-ENGINE DEMO" << std::endl;
 	// delete engine;
-
-	// while(1);
-
 	return 1;
 }
 
@@ -142,8 +146,12 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
-	K_UNREFERENCED_PARAMETER(key);
-	K_UNREFERENCED_PARAMETER(state);
+	std::cout << "> keyboardEvent - key: " << key << " - state: " << state << std::endl;
+
+	if(key == '1' && state == 1)
+	{
+		gameWindow.destroy();
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
@@ -156,6 +164,19 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 {
 	K_UNREFERENCED_PARAMETER(width);
 	K_UNREFERENCED_PARAMETER(height);
+
+	glViewport(0, 0, width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-10, 10, -10, 10, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void GameEventHandler::moveWindowEvent(int x, int y)
+{
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::finishAfterEvent()

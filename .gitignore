@@ -5,3 +5,8 @@ out/
 # Ignoring build stuff
 build/*
 !build/build-msvc-x64.bat
+
+# Ignoring general files stuff
+*.exe
+*.lib
+*.obj

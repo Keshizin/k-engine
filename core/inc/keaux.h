@@ -1,5 +1,5 @@
 /*
-	K-Engine Auxiliary
+	K-Engine Auxiliary Header
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa

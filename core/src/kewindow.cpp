@@ -24,6 +24,7 @@
 */
 
 #include <kewindow.h>
+#include <kewinapiwrapper.h>
 #include <iostream>
 
 // ****************************************************************************

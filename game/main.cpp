@@ -23,16 +23,17 @@
 	SOFTWARE.
 */
 
-// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp /Icore/inc
-// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/ge.cpp core/src/getimehandler.cpp /Icore/inc
-// lib kewindow.obj kewinapiwrapper.obj /OUT:kengine.lib
-// lib kewindow.obj kewinapiwrapper.obj ge.obj getimehandler.obj /OUT:kengine.lib
+// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/kecore.cpp core/src/ketimehandler.cpp /Icore/inc
+// lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj /OUT:kengine.lib
 // CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib user32.lib /OUT:game.exe
 
+#include <kecore.h>
+
 #include <kewindow.h>
+#include <kewinapiwrapper.h>
+#include <keeventhandler.h>
 #include <keaux.h>
 
-// #include <ge.h>
 #include <gl/gl.h>
 #include <iostream>
 
@@ -54,15 +55,11 @@ public:
 	void resumeEvent();
 	void pauseEvent();
 	void beforeMainLoopEvent();
+	void afterMainLoopEvent();
 	void createWindowEvent();
 };
 
-// KEngine* engine;
-
-KEWINAPIWrapper winapiWrapper;
-KEWindow gameWindow(&winapiWrapper);
-
-bool isLoop = true;
+KEngine* engine;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -74,53 +71,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 
 	GameEventHandler eventHandler;
+	engine = new KEngine(&eventHandler);
 
-	winapiWrapper.setGlobalEventHandler(&eventHandler);
-	// winapiWrapper.createDebugConsole();
+	// Setting up the window
+	engine->getGameWindow()->setWindow(50, 50, 800, 800, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
 
-	gameWindow.setWindow(1000, 0, 640, 480, "K-ENGINE TEST", K_WINDOW_COMPLETE);
-	gameWindow.create();
+	// Creating the window
+	engine->getGameWindow()->create();
 
-	winapiWrapper.initializeRenderingSystem();
+	// Initializing OpenGL's context
+	engine->getAPIWrapper()->initializeRenderingSystem();
 
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	// Showing the window
+	engine->getGameWindow()->show(nCmdShow);
 
-	gameWindow.show(nCmdShow);
+	// Starting the game loop
+	engine->startMainLoop();
 
-	while(isLoop)
-	{
-		winapiWrapper.handleSystemMessages();
-		
-		glClear(GL_COLOR_BUFFER_BIT);
+	delete engine;
 
-		winapiWrapper.swapBuffers();
-	}
-
-	// winapiWrapper.closeDebugConsole();
-
-	// engine = new KEngine(&eventHandler);
-
-	// std::cout << "STARTING K-ENGINE DEMO" << std::endl;
-
-	// // Setting up the window
-	// engine->getGameWindow()->setWindow(20, 20, 800, 800, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
-
-	// // Create the window
-	// engine->getGameWindow()->create();
-
-	// // // Initializing OpenGL's context
-	// // engine->getAPIWrapper()->initializeRenderingSystem();
-
-	// // Show the window
-	// engine->getGameWindow()->show(nCmdShow);
-
-	// // glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-
-	// // // Starting the game loop
-	// // engine->startMainLoop();
-
-	// std::cout << "END K-ENGINE DEMO" << std::endl;
-	// delete engine;
 	return 1;
 }
 
@@ -146,12 +115,8 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
-	std::cout << "> keyboardEvent - key: " << key << " - state: " << state << std::endl;
-
-	if(key == '1' && state == 1)
-	{
-		gameWindow.destroy();
-	}
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
@@ -181,12 +146,12 @@ void GameEventHandler::moveWindowEvent(int x, int y)
 
 void GameEventHandler::finishAfterEvent()
 {
-	// engine->stopMainLoop();
-	isLoop = false;
+	engine->stopMainLoop();
 }
 
 void GameEventHandler::finishBeforeEvent()
 {
+	engine->getGameWindow()->destroy();
 }
 
 void GameEventHandler::resumeEvent()
@@ -198,6 +163,11 @@ void GameEventHandler::pauseEvent()
 }
 
 void GameEventHandler::beforeMainLoopEvent()
+{
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+}
+
+void GameEventHandler::afterMainLoopEvent()
 {
 }
 

@@ -28,7 +28,7 @@
 // ****************************************************************************
 //  GETimer constructor and destructor
 // ****************************************************************************
-GETimer::GETimer(GETimeHandler *timeHandlerParam)
+GETimer::GETimer(KETimeHandler *timeHandlerParam)
 {
 	this->timeHandler = timeHandlerParam;
 	this->stopTime = 0;

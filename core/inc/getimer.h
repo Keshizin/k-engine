@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_TIMER_H
 #define K_ENGINE_TIMER_H
 
-#include <getimehandler.h>
+#include <ketimehandler.h>
 
 // ****************************************************************************
 //  Timer Class
@@ -37,7 +37,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GETimer(GETimeHandler *timeHandler);
+	GETimer(KETimeHandler *timeHandler);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -54,7 +54,7 @@ private:
 	long long stopTime;
 	long long startTimer;
 	bool isStart;
-	GETimeHandler *timeHandler;
+	KETimeHandler *timeHandler;
 };
 
 #endif

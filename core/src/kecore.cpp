@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	K-Engine Core
+	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
@@ -23,37 +23,40 @@
 	SOFTWARE.
 */
 
-#include <ge.h>
+#include <kecore.h>
+#include <keeventhandler.h>
+#include <kewinapiwrapper.h>
+#include <kewindow.h>
+#include <ketimehandler.h>
 
 // ****************************************************************************
-//  KEngine - Constructors and Destructors
+//  K-Engine - Constructors and Destructors
 // ****************************************************************************
 KEngine::KEngine(KEEventHandler *eventHandler)
 	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
 {
 	this->apiWrapper = new KEWINAPIWrapper();
 	setEventHandler(eventHandler);
-
 	this->gameWindow = new KEWindow(this->apiWrapper);
-
-	this->timeHandler = new GETimeHandler();
+	
+	this->timeHandler = new KETimeHandler();
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
 	//this->renderingSystem = new GERenderingSystem(this->apiWrapper);
 	//this->profile = new GEProfile(this->timeHandler);
 
-// #ifdef K_DEBUG
+#ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->createDebugConsole();
-// #endif
+#endif
 }
 
 KEngine::~KEngine()
 {
-// #ifdef K_DEBUG
+#ifdef K_DEBUG
 	// (!) only in debug mode!
 	this->apiWrapper->closeDebugConsole();
-// #endif
+#endif
 
 	delete apiWrapper;
 	delete gameWindow;
@@ -96,8 +99,7 @@ void KEngine::startMainLoop()
 		if(runningStatus == K_RUNNING)
 		{
 			eventHandler->frameEvent(timeHandler->getFrameTimeInSeconds());
-
-			//renderingSystem->renderFrame();
+			// renderingSystem->renderFrame();
 			apiWrapper->swapBuffers();
 		}
 
@@ -120,6 +122,8 @@ void KEngine::startMainLoop()
 
 		timeHandler->setFrameTime(frameTime);
 	}
+
+	eventHandler->afterMainLoopEvent();
 }
 
 void KEngine::stopMainLoop()
@@ -137,17 +141,17 @@ void KEngine::resumeGameLoop()
 	runningStatus = K_RUNNING;
 }
 
-void KEngine::setFrameRate(int framePerSecond)
-{
-	if (!framePerSecond)
-	{
-		timeHandler->setFrameTimeLimit(0);
-	}
-	else
-	{
-		timeHandler->setFrameTimeLimit(apiWrapper->getHighResolutionTimerFrequency() / framePerSecond);
-	}	
-}
+// void KEngine::setFrameRate(int framePerSecond)
+// {
+// 	if (!framePerSecond)
+// 	{
+// 		timeHandler->setFrameTimeLimit(0);
+// 	}
+// 	else
+// 	{
+// 		timeHandler->setFrameTimeLimit(apiWrapper->getHighResolutionTimerFrequency() / framePerSecond);
+// 	}	
+// }
 
 // ****************************************************************************
 //  Getters and Setters
@@ -162,20 +166,20 @@ KEWindow *KEngine::getGameWindow() const
 	return gameWindow;
 }
 
-//GERenderingSystem *KEngine::getRenderingSystem()
-//{
-//	return renderingSystem;
-//}
+// //GERenderingSystem *KEngine::getRenderingSystem()
+// //{
+// //	return renderingSystem;
+// //}
 
-GETimeHandler *KEngine::getTimeHandler()
-{
-	return timeHandler;
-}
+// GETimeHandler *KEngine::getTimeHandler()
+// {
+// 	return timeHandler;
+// }
 
-//GEProfile *KEngine::getProfile()
-//{
-//	return profile;
-//}
+// //GEProfile *KEngine::getProfile()
+// //{
+// //	return profile;
+// //}
 
 void KEngine::setEventHandler(KEEventHandler *eventHandlerParam)
 {

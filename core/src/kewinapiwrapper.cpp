@@ -24,10 +24,10 @@
 */
 
 #include <kewinapiwrapper.h>
+#include <keeventhandler.h>
 #include <keconstants.h>
 
 #include <tchar.h>
-// #include <GL/gl.h>
 #include <iostream>
 
 static KEEventHandler *globalEventHandler = 0;

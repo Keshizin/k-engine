@@ -29,7 +29,7 @@
 // ****************************************************************************
 //  Constructors and Destructors
 // ****************************************************************************
-GEProfile::GEProfile(GETimeHandler *timeHandler)
+GEProfile::GEProfile(KETimeHandler *timeHandler)
 {
 	framesPerSecond = 0;
 	timer = new GETimer(timeHandler);

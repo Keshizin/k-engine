@@ -46,6 +46,7 @@ public:
 	virtual void resumeEvent() = 0;
 	virtual void pauseEvent() = 0;
 	virtual void beforeMainLoopEvent() = 0;
+	virtual void afterMainLoopEvent() = 0;
 	virtual void createWindowEvent() = 0;
 };
 

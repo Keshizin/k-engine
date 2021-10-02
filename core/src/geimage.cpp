@@ -24,7 +24,7 @@
 */
 
 #include <geimage.h>
-#include <geaux.h>
+#include <keaux.h>
 
 #include <iostream>
 #include <iomanip>

@@ -30,7 +30,8 @@
 #include <windows.h>
 
 #include <string>
-#include <keeventhandler.h>
+
+class KEEventHandler;
 
 // ****************************************************************************
 //  Win32 Window Class
@@ -58,8 +59,8 @@ public:
 		: hWindow(NULL), hDC(NULL), hRC(NULL)
 	{
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		//     Pode ocorrer problemas se dois objetos apontarem para hWindow,
-		//     hDC e hRC.
+		// Pode ocorrer problemas se dois objetos apontarem para hWindow,
+		// hDC e hRC.
 	}
 
 	// ------------------------------------------------------------------------

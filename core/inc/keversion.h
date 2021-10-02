@@ -1,8 +1,8 @@
 /*
-	Game Engine Core
+	K-Engine Version Header
 	This file is part of the BPM Game Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,6 @@
 //  Minor - adding new features
 //  Patch - bug fixes
 
-#define K_ENGINE_VERSION "1.1.0"
+#define K_ENGINE_VERSION "1.2.0"
 
 #endif

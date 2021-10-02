@@ -26,8 +26,10 @@
 #ifndef K_ENGINE_WINDOW_CLASS_H
 #define K_ENGINE_WINDOW_CLASS_H
 
-#include <kewinapiwrapper.h>
+#include <string>
 #include <keconstants.h>
+
+class KEWINAPIWrapper;
 
 // ****************************************************************************
 //  K-Engine Window Class

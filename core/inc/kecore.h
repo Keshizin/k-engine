@@ -1,6 +1,6 @@
 /*
-	Game Engine Core
-	This file is part of the BPM Game Engine.
+	K-Engine Core
+	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
@@ -26,20 +26,17 @@
 #ifndef K_ENGINE_H
 #define K_ENGINE_H
 
-//#define K_DEBUG 1
+#define K_DEBUG 1
 
-#include <kewindow.h>
-#include <getimehandler.h>
-//#include <geprofile.h>
-//#include <gerenderingsystem.h>
-//#include <geversion.h>
+class KEEventHandler;
+class KEWINAPIWrapper;
+class KEWindow;
+class KETimeHandler;
 
-// ****************************************************************************
-//  K-Engine Runtime States
-// ****************************************************************************
-#define K_RUNNING 0x01
-#define K_STOPPED 0x02
-#define K_PAUSED  0x03
+// #include <geprofile.h>
+// #include <gerenderingsystem.h>
+#include <keversion.h>
+#include <keconstants.h>
 
 // ****************************************************************************
 //  K-Engine Class
@@ -51,6 +48,14 @@ public:
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
 	explicit KEngine(KEEventHandler *eventHandler);
+
+	KEngine(const KEngine& win)
+		: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
+	{
+		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
+		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
+	}
+
 	~KEngine();
 
 	// ------------------------------------------------------------------------
@@ -60,23 +65,23 @@ public:
 	void stopMainLoop();
 	void pauseGameLoop();
 	void resumeGameLoop();
-	void setFrameRate(int framePerSecond);
+	// void setFrameRate(int framePerSecond);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	KEWINAPIWrapper* getAPIWrapper() const;
 	KEWindow* getGameWindow() const;
-	GETimeHandler* getTimeHandler();
+	KETimeHandler* getTimeHandler();
 	//GEProfile* getProfile();
 	//GERenderingSystem* getRenderingSystem();
 	void setEventHandler(KEEventHandler *eventHandler);
 
 private:
-	KEWINAPIWrapper* apiWrapper;
 	KEEventHandler* eventHandler;
+	KEWINAPIWrapper* apiWrapper;
 	KEWindow* gameWindow;
-	GETimeHandler* timeHandler;
+	KETimeHandler* timeHandler;
 
 	//GERenderingSystem* renderingSystem;
 	//GEProfile* profile;

@@ -1,5 +1,5 @@
 /*
-	Game Engine Time Handler
+	K-Engine Time Handler
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -27,12 +27,12 @@
 #define K_ENGINE_TIME_HANDLER_H
 
 // ****************************************************************************
-//  Game Engine Time Handler Class
+//  K-Engine Time Handler Class
 // ****************************************************************************
-class GETimeHandler
+class KETimeHandler
 {
 public:
-	GETimeHandler();
+	KETimeHandler();
 
 	// ------------------------------------------------------------------------
 	//  Public Methods

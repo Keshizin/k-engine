@@ -43,4 +43,11 @@
 #define K_WINDOW_SHOW          0x05
 #define K_WINDOW_FORCEMINIMIZE 0x0B
 
+// ****************************************************************************
+//  K-Engine Runtime States
+// ****************************************************************************
+#define K_RUNNING 0x01
+#define K_STOPPED 0x02
+#define K_PAUSED  0x03
+
 #endif

@@ -23,16 +23,16 @@
 	SOFTWARE.
 */
 
-// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/kecore.cpp core/src/ketimehandler.cpp /Icore/inc
-// lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj /OUT:kengine.lib
+// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/kecore.cpp core/src/ketimehandler.cpp core/src/ketimer.cpp /Icore/inc
+// lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj ketimer.obj /OUT:kengine.lib
 // CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib user32.lib /OUT:game.exe
 
 #include <kecore.h>
-
 #include <kewindow.h>
 #include <kewinapiwrapper.h>
 #include <keeventhandler.h>
 #include <keaux.h>
+#include <ketimer.h>
 
 #include <gl/gl.h>
 #include <iostream>
@@ -60,6 +60,7 @@ public:
 };
 
 KEngine* engine;
+KETimer* timer;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -72,7 +73,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GameEventHandler eventHandler;
 	engine = new KEngine(&eventHandler);
-
+	
 	// Setting up the window
 	engine->getGameWindow()->setWindow(50, 50, 800, 800, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
 
@@ -86,17 +87,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->show(nCmdShow);
 
 	// Starting the game loop
+	timer = new KETimer(engine->getTimeHandler());
+	timer->setTimerInMs(5000);
+	
 	engine->startMainLoop();
 
 	delete engine;
-
 	return 1;
 }
 
 void GameEventHandler::frameEvent(double frameTime)
 {
-	K_UNREFERENCED_PARAMETER(frameTime);
+	// K_UNREFERENCED_PARAMETER(frameTime);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if(timer->isDone())
+	{
+		glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+	}
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -117,6 +125,11 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
+
+	if(key == '1' && state)
+	{
+		timer->start();
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)

@@ -1,8 +1,8 @@
 /*
-	Game Engine Timer
+	K-Engine Timer Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,29 +26,29 @@
 #ifndef K_ENGINE_TIMER_H
 #define K_ENGINE_TIMER_H
 
-#include <ketimehandler.h>
+class KETimeHandler;
 
 // ****************************************************************************
-//  Timer Class
+//  K-Engine Timer Class
 // ****************************************************************************
-class GETimer
+class KETimer
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GETimer(KETimeHandler *timeHandler);
+	explicit KETimer(KETimeHandler *timeHandler);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	void setTimerInMs(long long stopTime);
 	void start();
-	void restart(long long remainTime);
-	void stop();
 	int isDone();
-	int isRestart();
-
+	
+	// void stop();
+	// void restart(long long remainTime);
+	// int isRestart();
 
 private:
 	long long stopTime;

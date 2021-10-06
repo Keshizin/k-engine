@@ -72,7 +72,7 @@ public:
 	// ------------------------------------------------------------------------
 	KEWINAPIWrapper* getAPIWrapper() const;
 	KEWindow* getGameWindow() const;
-	KETimeHandler* getTimeHandler();
+	KETimeHandler* getTimeHandler() const;
 	//GEProfile* getProfile();
 	//GERenderingSystem* getRenderingSystem();
 	void setEventHandler(KEEventHandler *eventHandler);

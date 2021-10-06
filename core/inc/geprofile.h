@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_PROFILE_H
 #define K_ENGINE_PROFILE_H
 
-#include <getimer.h>
+#include <ketimer.h>
 
 // ****************************************************************************
 //  Game Engine Profile Class
@@ -56,7 +56,7 @@ public:
 	double getMeanFrameTime();
 
 private:
-	GETimer *timer;
+	KETimer *timer;
 	unsigned long long framesPerSecond;
 	unsigned long long framesCounter;
 	long long maxFrameTime;

@@ -29,6 +29,8 @@
 #include <kewindow.h>
 #include <ketimehandler.h>
 
+#include <iostream>
+
 // ****************************************************************************
 //  K-Engine - Constructors and Destructors
 // ****************************************************************************
@@ -78,7 +80,7 @@ void KEngine::startMainLoop()
 	runningStatus = K_RUNNING;
 	timeHandler->setInternalTimer(0);
 	eventHandler->beforeMainLoopEvent();
-
+	
 	// profile->start();
 	startloopTime = endTime = apiWrapper->getHighResolutionTimerCounter();
 
@@ -166,15 +168,15 @@ KEWindow *KEngine::getGameWindow() const
 	return gameWindow;
 }
 
+KETimeHandler *KEngine::getTimeHandler() const
+{
+	return timeHandler;
+}
 // //GERenderingSystem *KEngine::getRenderingSystem()
 // //{
 // //	return renderingSystem;
 // //}
 
-// GETimeHandler *KEngine::getTimeHandler()
-// {
-// 	return timeHandler;
-// }
 
 // //GEProfile *KEngine::getProfile()
 // //{

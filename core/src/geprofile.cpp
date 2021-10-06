@@ -32,7 +32,7 @@
 GEProfile::GEProfile(KETimeHandler *timeHandler)
 {
 	framesPerSecond = 0;
-	timer = new GETimer(timeHandler);
+	timer = new KETimer(timeHandler);
 	frameTimeCounter = 0;
 	maxFrameTime = 0;
 	minFrameTime = 0;
@@ -64,44 +64,44 @@ void GEProfile::start()
 
 void GEProfile::update(long long frameTime)
 {
-	if(timer->isRestart())
-	{
-		framesPerSecond = framesCounter;
-		meanFrameTime = static_cast<double>(frameTimeCounter) / static_cast<double>(framesPerSecond);
+	// if(timer->isRestart())
+	// {
+	// 	framesPerSecond = framesCounter;
+	// 	meanFrameTime = static_cast<double>(frameTimeCounter) / static_cast<double>(framesPerSecond);
 
-		if(maxFramePerSecond < framesPerSecond)
-			maxFramePerSecond = framesPerSecond;
+	// 	if(maxFramePerSecond < framesPerSecond)
+	// 		maxFramePerSecond = framesPerSecond;
 
-		if(!minFramePerSecond || minFramePerSecond > framesPerSecond)
-		{
-			minFramePerSecond = framesPerSecond;
-		}
+	// 	if(!minFramePerSecond || minFramePerSecond > framesPerSecond)
+	// 	{
+	// 		minFramePerSecond = framesPerSecond;
+	// 	}
 
-		std::cout
-			<< "FPS: " << framesPerSecond
-			<< "\nMAX FPS: " << maxFramePerSecond
-			<< "\nMIN FPS: " << minFramePerSecond
-			<< "\nMEAN FRAME TIME: " << meanFrameTime
-			<< "\nMAX FRAME TIME: " << maxFrameTime
-			<< "\nMIN FRAME TIME: " << minFrameTime
-			<< "\n" << std::endl;
+	// 	std::cout
+	// 		<< "FPS: " << framesPerSecond
+	// 		<< "\nMAX FPS: " << maxFramePerSecond
+	// 		<< "\nMIN FPS: " << minFramePerSecond
+	// 		<< "\nMEAN FRAME TIME: " << meanFrameTime
+	// 		<< "\nMAX FRAME TIME: " << maxFrameTime
+	// 		<< "\nMIN FRAME TIME: " << minFrameTime
+	// 		<< "\n" << std::endl;
 
-		frameTimeCounter = 0;
-		framesCounter = 0;
-		maxFrameTime = 0;
-		minFrameTime = 0;
-	}
-	else
-	{
-		if(frameTime > maxFrameTime)
-			maxFrameTime = frameTime;
+	// 	frameTimeCounter = 0;
+	// 	framesCounter = 0;
+	// 	maxFrameTime = 0;
+	// 	minFrameTime = 0;
+	// }
+	// else
+	// {
+	// 	if(frameTime > maxFrameTime)
+	// 		maxFrameTime = frameTime;
 
-		if(!minFrameTime || frameTime < minFrameTime)
-			minFrameTime = frameTime;
+	// 	if(!minFrameTime || frameTime < minFrameTime)
+	// 		minFrameTime = frameTime;
 
-		frameTimeCounter += frameTime;
-		framesCounter++;
-	}
+	// 	frameTimeCounter += frameTime;
+	// 	framesCounter++;
+	// }
 }
 
 // ****************************************************************************

@@ -1,8 +1,8 @@
 /*
-	Game Engine Timer
+	K-Engine Timer Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,13 @@
 	SOFTWARE.
 */
 
-#include <getimer.h>
+#include <ketimer.h>
+#include <ketimehandler.h>
 
 // ****************************************************************************
-//  GETimer constructor and destructor
+//  KETimer constructor and destructor
 // ****************************************************************************
-GETimer::GETimer(KETimeHandler *timeHandlerParam)
+KETimer::KETimer(KETimeHandler *timeHandlerParam)
 {
 	this->timeHandler = timeHandlerParam;
 	this->stopTime = 0;
@@ -37,30 +38,20 @@ GETimer::GETimer(KETimeHandler *timeHandlerParam)
 }
 
 // ****************************************************************************
-//  GETimer public methods
+//  KETimer Public Methods
 // ****************************************************************************
-void GETimer::setTimerInMs(long long stopTimeParam)
+void KETimer::setTimerInMs(long long stopTimeParam)
 {
 	this->stopTime = stopTimeParam * (timeHandler->getPerfomanceFrequency() / 1000);
 }
 
-void GETimer::start()
+void KETimer::start()
 {
 	startTimer = timeHandler->getInternalTimer();
 	this->isStart = true;
 }
 
-void GETimer::restart(long long remainTime)
-{
-	startTimer = timeHandler->getInternalTimer() + remainTime;
-}
-
-void GETimer::stop()
-{
-	this->isStart = false;
-}
-
-int GETimer::isDone()
+int KETimer::isDone()
 {
 	long long internalTimer = timeHandler->getInternalTimer();
 
@@ -70,16 +61,27 @@ int GETimer::isDone()
 		return 0;
 }
 
-int GETimer::isRestart()
-{
-	long long internalTimer = timeHandler->getInternalTimer();
+// void KETimer::restart(long long remainTime)
+// {
+// 	startTimer = timeHandler->getInternalTimer() + remainTime;
+// }
 
-	if(this->isStart && internalTimer - startTimer >= stopTime)
-	{
-		// (!) dont put code before the next instruction!
-		restart(internalTimer - startTimer - stopTime);
-		return 1;
-	}
-	else
-		return 0;
-}
+// void KETimer::stop()
+// {
+// 	this->isStart = false;
+// }
+
+
+// int KETimer::isRestart()
+// {
+// 	long long internalTimer = timeHandler->getInternalTimer();
+
+// 	if(this->isStart && internalTimer - startTimer >= stopTime)
+// 	{
+// 		// (!) dont put code before the next instruction!
+// 		restart(internalTimer - startTimer - stopTime);
+// 		return 1;
+// 	}
+// 	else
+// 		return 0;
+// }

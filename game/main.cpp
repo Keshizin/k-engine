@@ -1,5 +1,5 @@
 /*
-	Game Engine Demonstration
+	K-Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -22,10 +22,6 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 */
-
-// CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/kecore.cpp core/src/ketimehandler.cpp core/src/ketimer.cpp /Icore/inc
-// lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj ketimer.obj /OUT:kengine.lib
-// CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib glu32.lib user32.lib /OUT:game.exe
 
 #include <kecore.h>
 #include <kewindow.h>

@@ -38,16 +38,12 @@ public:
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	double getFrameTimeInSeconds() const;
-	void updateInternalTimer(long long timer);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	void setFrameTime(long long frameTime);
 	long long getFrameTime() const;
-
-	void setInternalTimer(long long internalTimer);
-	long long getInternalTimer() const;
 
 	void setFrameTimeLimit(long long frameTimeLimit);
 	long long getFrameTimeLimit() const;
@@ -57,7 +53,6 @@ public:
 
 private:
 	long long frameTime;
-	long long internalTimer;
 	long long frameTimeLimit;
 	long long perfomanceFrequency;
 };

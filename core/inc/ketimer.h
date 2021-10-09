@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_TIMER_H
 #define K_ENGINE_TIMER_H
 
-class KETimeHandler;
+class KEWINAPIWrapper;
 
 // ****************************************************************************
 //  K-Engine Timer Class
@@ -37,7 +37,7 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	explicit KETimer(KETimeHandler *timeHandler);
+	explicit KETimer(KEWINAPIWrapper *timeHandler);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -45,16 +45,18 @@ public:
 	void setTimerInMs(long long stopTime);
 	void start();
 	int isDone();
+	void stop();
+	int isDoneAndRestart();
 	
-	// void stop();
 	// void restart(long long remainTime);
 	// int isRestart();
 
 private:
 	long long stopTime;
 	long long startTimer;
+	long long temp;
 	bool isStart;
-	KETimeHandler *timeHandler;
+	KEWINAPIWrapper *apiWrapper;
 };
 
 #endif

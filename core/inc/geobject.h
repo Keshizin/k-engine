@@ -33,4 +33,58 @@ public:
 	virtual void draw() {}
 };
 
+// CUBO
+// glBegin(GL_LINES);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glColor3f(0.0f, 1.0f, 0.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, 25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, 25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, -25.0f, -25.0f);
+// glVertex3f(-25.0f, 25.0f, -25.0f);
+// glColor3f(0.0f, 1.0f, 1.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, 25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, 25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, -25.0f, -25.0f);
+// glVertex3f(25.0f, 25.0f, -25.0f);
+// glEnd();
+
 #endif

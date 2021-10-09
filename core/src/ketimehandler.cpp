@@ -26,7 +26,7 @@
 #include <ketimehandler.h>
 
 KETimeHandler::KETimeHandler()
-	: frameTime(0), internalTimer(0), frameTimeLimit(0), perfomanceFrequency(0)
+	: frameTime(0), frameTimeLimit(0), perfomanceFrequency(0)
 {
 }
 
@@ -36,11 +36,6 @@ KETimeHandler::KETimeHandler()
 double KETimeHandler::getFrameTimeInSeconds() const
 {
 	return static_cast<double>(frameTime) / static_cast<double>(perfomanceFrequency);
-}
-
-void KETimeHandler::updateInternalTimer(long long timer)
-{
-	this->internalTimer = timer;
 }
 
 // ****************************************************************************
@@ -54,16 +49,6 @@ void KETimeHandler::setFrameTime(long long frameTimeParam)
 long long KETimeHandler::getFrameTime() const
 {
 	return frameTime;
-}
-
-void KETimeHandler::setInternalTimer(long long internalTimerParam)
-{
-	this->internalTimer = internalTimerParam;
-}
-
-long long KETimeHandler::getInternalTimer() const
-{
-	return internalTimer;
 }
 
 void KETimeHandler::setFrameTimeLimit(long long frameTimeLimitParam)

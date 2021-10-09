@@ -24,17 +24,15 @@
 */
 
 #include <ketimer.h>
-#include <ketimehandler.h>
+#include <kewinapiwrapper.h>
+#include <iostream>
 
 // ****************************************************************************
 //  KETimer constructor and destructor
 // ****************************************************************************
-KETimer::KETimer(KETimeHandler *timeHandlerParam)
+KETimer::KETimer(KEWINAPIWrapper *apiWrapper)
+	: stopTime(0), startTimer(0), temp(0), isStart(false), apiWrapper(apiWrapper)
 {
-	this->timeHandler = timeHandlerParam;
-	this->stopTime = 0;
-	this->startTimer = 0;
-	this->isStart = false;
 }
 
 // ****************************************************************************
@@ -42,46 +40,53 @@ KETimer::KETimer(KETimeHandler *timeHandlerParam)
 // ****************************************************************************
 void KETimer::setTimerInMs(long long stopTimeParam)
 {
-	this->stopTime = stopTimeParam * (timeHandler->getPerfomanceFrequency() / 1000);
+	this->stopTime = stopTimeParam * (apiWrapper->getHighResolutionTimerFrequency() / 1000);
 }
 
 void KETimer::start()
 {
-	startTimer = timeHandler->getInternalTimer();
+	startTimer = apiWrapper->getHighResolutionTimerCounter();
+	this->temp = startTimer;
 	this->isStart = true;
 }
 
 int KETimer::isDone()
 {
-	long long internalTimer = timeHandler->getInternalTimer();
+	long long internalTimer = apiWrapper->getHighResolutionTimerCounter();
 
 	if(this->isStart && internalTimer - startTimer >= stopTime)
+	{
+		// std::cout << "---------------------------------" << std::endl;
+		// std::cout << "@debug | isDone | startTimer: " << startTimer << std::endl;
+		// std::cout << "@debug | isDone | internalTimer: " << internalTimer << std::endl;
+		// std::cout << "---------------------------------" << std::endl;
 		return 1;
+	}
 	else
 		return 0;
 }
 
-// void KETimer::restart(long long remainTime)
-// {
-// 	startTimer = timeHandler->getInternalTimer() + remainTime;
-// }
+void KETimer::stop()
+{
+	this->isStart = false;
+}
 
-// void KETimer::stop()
-// {
-// 	this->isStart = false;
-// }
+int KETimer::isDoneAndRestart()
+{
+	long long internalTimer = apiWrapper->getHighResolutionTimerCounter();
 
+	if(this->isStart && internalTimer - startTimer >= stopTime)
+	{
+		// (!) dont put code before the next instruction!
+		startTimer = internalTimer + (internalTimer - startTimer - stopTime);
 
-// int KETimer::isRestart()
-// {
-// 	long long internalTimer = timeHandler->getInternalTimer();
-
-// 	if(this->isStart && internalTimer - startTimer >= stopTime)
-// 	{
-// 		// (!) dont put code before the next instruction!
-// 		restart(internalTimer - startTimer - stopTime);
-// 		return 1;
-// 	}
-// 	else
-// 		return 0;
-// }
+		// std::cout << "---------------------------------" << std::endl;
+		// std::cout << "@debug | isDone | startTimer: " << this->temp << std::endl;
+		// std::cout << "@debug | isDone | internalTimer: " << internalTimer << std::endl;
+		// std::cout << "---------------------------------" << std::endl;
+		// this->temp = startTimer;
+		return 1;
+	}
+	else
+		return 0;
+}

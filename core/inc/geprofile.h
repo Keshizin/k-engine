@@ -27,6 +27,7 @@
 #define K_ENGINE_PROFILE_H
 
 #include <ketimer.h>
+#include <ketimehandler.h>
 
 // ****************************************************************************
 //  Game Engine Profile Class

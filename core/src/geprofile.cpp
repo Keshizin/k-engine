@@ -32,7 +32,7 @@
 GEProfile::GEProfile(KETimeHandler *timeHandler)
 {
 	framesPerSecond = 0;
-	timer = new KETimer(timeHandler);
+	// timer = new KETimer(timeHandler);
 	frameTimeCounter = 0;
 	maxFrameTime = 0;
 	minFrameTime = 0;

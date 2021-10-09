@@ -25,7 +25,7 @@
 
 // CL /c /EHsc core/src/kewindow.cpp core/src/kewinapiwrapper.cpp core/src/kecore.cpp core/src/ketimehandler.cpp core/src/ketimer.cpp /Icore/inc
 // lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj ketimer.obj /OUT:kengine.lib
-// CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib user32.lib /OUT:game.exe
+// CL game/main.cpp /Icore/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib glu32.lib user32.lib /OUT:game.exe
 
 #include <kecore.h>
 #include <kewindow.h>
@@ -35,6 +35,7 @@
 #include <ketimer.h>
 
 #include <gl/gl.h>
+#include <gl/glu.h>
 #include <iostream>
 
 // ****************************************************************************
@@ -60,7 +61,6 @@ public:
 };
 
 KEngine* engine;
-KETimer* timer;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -75,7 +75,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine = new KEngine(&eventHandler);
 	
 	// Setting up the window
-	engine->getGameWindow()->setWindow(50, 50, 800, 800, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
+	engine->getGameWindow()->setWindow(50, 50, 450, 450, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
 
 	// Creating the window
 	engine->getGameWindow()->create();
@@ -87,9 +87,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->getGameWindow()->show(nCmdShow);
 
 	// Starting the game loop
-	timer = new KETimer(engine->getTimeHandler());
-	timer->setTimerInMs(5000);
-	
 	engine->startMainLoop();
 
 	delete engine;
@@ -98,13 +95,94 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void GameEventHandler::frameEvent(double frameTime)
 {
-	// K_UNREFERENCED_PARAMETER(frameTime);
+	K_UNREFERENCED_PARAMETER(frameTime);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if(timer->isDone())
-	{
-		glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-	}
+	glColor3f(0.0f, 0.0f, 0.0f);
+
+	glBegin(GL_LINES);
+
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+	glVertex3f(25.0f, 25.0f, 25.0f);
+
+	glVertex3f(25.0f, 25.0f, 25.0f);
+	glVertex3f(25.0f, -25.0f, 25.0f);
+
+	glVertex3f(25.0f, -25.0f, 25.0f);
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+
+	// ------------------------------
+
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+	glVertex3f(25.0f, 25.0f, -25.0f);
+	
+	glVertex3f(25.0f, 25.0f, -25.0f);
+	glVertex3f(25.0f, 25.0f, 25.0f);
+
+	glVertex3f(25.0f, 25.0f, 25.0f);
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+
+	// ------------------------------
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+	glVertex3f(25.0f, 25.0f, -25.0f);
+
+	glVertex3f(25.0f, 25.0f, -25.0f);
+	glVertex3f(25.0f, -25.0f, -25.0f);
+
+	glVertex3f(25.0f, -25.0f, -25.0f);
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+
+	// ------------------------------
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+	glVertex3f(25.0f, -25.0f, -25.0f);
+
+	glVertex3f(25.0f, -25.0f, -25.0f);
+	glVertex3f(25.0f, -25.0f, 25.0f);
+
+	glVertex3f(25.0f, -25.0f, 25.0f);
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+
+	// ------------------------------
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+
+	glVertex3f(-25.0f, 25.0f, 25.0f);
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+
+	glVertex3f(-25.0f, -25.0f, 25.0f);
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+
+	glVertex3f(-25.0f, -25.0f, -25.0f);
+	glVertex3f(-25.0f, 25.0f, -25.0f);
+
+	// ------------------------------
+	glColor3f(0.0f, 1.0f, 1.0f);
+	glVertex3f(25.0f, 25.0f, -25.0f);
+	glVertex3f(25.0f, 25.0f, 25.0f);
+
+	glVertex3f(25.0f, 25.0f, 25.0f);
+	glVertex3f(25.0f, -25.0f, 25.0f);
+	
+	glVertex3f(25.0f, -25.0f, 25.0f);
+	glVertex3f(25.0f, -25.0f, -25.0f);
+
+	glVertex3f(25.0f, -25.0f, -25.0f);
+	glVertex3f(25.0f, 25.0f, -25.0f);
+
+	glEnd();
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -126,10 +204,10 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
-	if(key == '1' && state)
-	{
-		timer->start();
-	}
+	// if(key == 27 && state)
+	// {
+	// 	engine->getGameWindow()->destroy();
+	// }
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
@@ -140,15 +218,30 @@ void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
-	K_UNREFERENCED_PARAMETER(width);
-	K_UNREFERENCED_PARAMETER(height);
-
+	// K_UNREFERENCED_PARAMETER(width);
+	// K_UNREFERENCED_PARAMETER(height);
 	glViewport(0, 0, width, height);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-10, 10, -10, 10, -1.0, 1.0);
+
+	float aspect;
+
+	if(width <= height)
+	{
+		aspect = height / width;
+	}
+	else
+	{
+		aspect = width / height;
+	}
+
+	glOrtho(-65.0, 65.0, -65.0, 65.0, -400.0, 400.0);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	gluLookAt(40, 60, 100, 0, 0, 0, 0, 1, 0);
 }
 
 void GameEventHandler::moveWindowEvent(int x, int y)
@@ -177,7 +270,34 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glLineWidth(2.0);
+
+	int width = 450;
+	int height = 450;
+
+	glViewport(0, 0, width, height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	float aspect;
+
+	if(width <= height)
+	{
+		aspect = height / width;
+	}
+	else
+	{
+		aspect = width / height;
+	}
+
+	glOrtho(-65.0, 65.0, -65.0, 65.0, -400.0, 400.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	gluLookAt(90, 60, 100, 0, 0, 0, 0, 1, 0);
 }
 
 void GameEventHandler::afterMainLoopEvent()

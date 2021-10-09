@@ -2,6 +2,16 @@
 
 What is K-Engine?
 
+## Personalização de uma janela de aplicação K-Engine!
+
+Tipos de janelas:
+
+- K_WINDOW_SPLASH
+- K_WINDOW_DEFAULT
+- K_WINDOW_NO_SYS
+- K_WINDOW_WINDOWED_FULLSCREEN
+- K_WINDOW_COMPLETE
+
 ## K-Engine Events
 
 - frameEvent
@@ -16,9 +26,37 @@ What is K-Engine?
 - resumeEvent
 - pauseEvent
 - beforeMainLoopEvent
+- afterMainLoopEvent
 - createWindowEvent
 
-### K-Events' calls Order
+### K-Events' calls order
+
+Eventos durante a criação de uma janela de aplicação:
+
+1. createWindowEvent
+2. resizeWindowEvent (também é chamado quando a janela é redimensionada)
+3. moveWindowEvent (também é chamado quando a posição da janela é alterada)
+
+Eventos durante a destruição de uma janela de aplicação:
+1. finishBeforeEvent
+
+Eventos durante a interação do mouse:
+- mouseMotionEvent
+- mouseEvent
+
+Eventos durante a interação do teclado:
+- keyboardEvent
+- keyboardSpecialEvent
+
+Eventos durante o main loop de K-Engine:
+- beforeMainLoopEvent
+- frameEvent
+- resumeEvent
+- pauseEvent
+- finishAfterEvent
+- afterMainLoopEvent
+
+### Win32's messages order
 
 Eventos chamados durante a execução da função CreateWindowEx (Win32):
 
@@ -52,10 +90,8 @@ Eventos chamados durante a execução da função ShoWindow(Win32):
 - WM_WINDOWPOSCHANGED (71)
 
 Eventos durante a destruição de uma janela de aplicação Win32:
-
 - WM_CLOSE (16)
   - finishBeforeEvent
-
 - WM_DESTROY (2)
 - WM_NCDESTROY (130)
 
@@ -102,10 +138,6 @@ Alguns eventos acima e outros eventos podem ser chamados dependendo da interaç�
 - WM_NCACTIVATE (134)
 - WM_KILLFOCUS (8)
 
-## Win32 Window Styles
+## KETimer
 
-- K_WINDOW_SPLASH
-- K_WINDOW_DEFAULT
-- K_WINDOW_NO_SYS
-- K_WINDOW_WINDOWED_FULLSCREEN
-- K_WINDOW_COMPLETE
+Nível de precisão: 2000 ciclos ~ 15000 ciclos

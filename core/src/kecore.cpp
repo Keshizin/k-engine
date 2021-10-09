@@ -78,7 +78,6 @@ void KEngine::startMainLoop()
 	long long frameTime = 0;
 	
 	runningStatus = K_RUNNING;
-	timeHandler->setInternalTimer(0);
 	eventHandler->beforeMainLoopEvent();
 	
 	// profile->start();
@@ -87,7 +86,6 @@ void KEngine::startMainLoop()
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
-		timeHandler->updateInternalTimer(startTime - startloopTime);
 		// profile->update(timeHandler->getFrameTime());
 
 		// --------------------------------------------------------------------

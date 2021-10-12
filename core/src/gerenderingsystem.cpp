@@ -248,7 +248,7 @@ void GEEntity::setBounding(double left, double right, double top, double bottom)
 GERenderingSystem::GERenderingSystem(KEWINAPIWrapper* apiWrapper)
 {
 	this->apiWrapper = apiWrapper;
-	this->renderingContext = K_CONTEXT_2D;
+	// this->renderingContext = K_CONTEXT_2D;
 	this->viewportWidth = 0;
 	this->viewportHeight = 0;
 
@@ -357,64 +357,6 @@ int GERenderingSystem::setVSync(int vsync)
 	return wglSwapIntervalEXT(vsync);
 }
 
-void GERenderingSystem::setViewport(int x, int y, int width, int height)
-{
-	glViewport(x, y, (GLsizei) width, (GLsizei) height);
-	viewportWidth = width;
-	viewportHeight = height;
-}
-
-void GERenderingSystem::setProjection()
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	if(renderingContext == K_CONTEXT_2D)
-	{
-		GERECT window;
-
-		window.left = renderingWindow.left;
-		window.right = renderingWindow.right;
-		window.top = renderingWindow.top;
-		window.bottom = renderingWindow.bottom;
-
-		if(windowAspectCorrectionState)
-		{
-			if(viewportWidth <= viewportHeight)
-			{
-				windowAspectCorrection = static_cast<GLdouble>(viewportHeight) / static_cast<double>(viewportWidth);
-
-				window.bottom *= windowAspectCorrection;
-				window.top *= windowAspectCorrection;
-			}
-			else
-			{
-				windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
-
-				window.left *= windowAspectCorrection;
-				window.right *= windowAspectCorrection;
-			}
-		}
-
-		glOrtho(
-			window.left + renderingWindowOffsetX + zoom,
-			window.right + renderingWindowOffsetX - zoom,
-			window.bottom + renderingWindowOffsetY + zoom,
-			window.top + renderingWindowOffsetY - zoom,
-			-1.0, 1.0);
-	}
-	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
-	{
-		windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
-		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
-		// o processo de PAN deve ser realizado através do observador
-	}
-	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
-	{
-		glOrtho(renderingWindow.left + renderingWindowOffsetX, renderingWindow.right + renderingWindowOffsetY, renderingWindow.bottom + renderingWindowOffsetX, renderingWindow.top + renderingWindowOffsetY, projectionZNear, projectionZFar);
-	}
-}
-
 void GERenderingSystem::drawGlobaldAxis()
 {
 	glPushMatrix();
@@ -441,22 +383,9 @@ void GERenderingSystem::getSystemVersion()
 // ****************************************************************************
 //  Getters and Setters
 // ****************************************************************************
-void GERenderingSystem::setRenderingContext(int renderingContextParam)
-{
-	this->renderingContext = renderingContextParam;
-}
-
 int GERenderingSystem::getRenderingContext()
 {
 	return renderingContext;
-}
-
-void GERenderingSystem::setRenderingWindow(double left, double right, double bottom, double top)
-{
-	this->renderingWindow.left = left;
-	this->renderingWindow.right = right;
-	this->renderingWindow.top = top;
-	this->renderingWindow.bottom = bottom;
 }
 
 GERECT GERenderingSystem::getRenderingWindow()
@@ -488,59 +417,9 @@ GERECT GERenderingSystem::getRenderingWindow()
 	return window;
 }
 
-void GERenderingSystem::setRenderingWindowOffsetX(double offset)
-{
-	renderingWindowOffsetX = offset;
-}
-
-double GERenderingSystem::getRenderingWindowOffsetX()
-{
-	return renderingWindowOffsetX;
-}
-
-void GERenderingSystem::setRenderingWindowOffsetY(double offset)
-{
-	renderingWindowOffsetY = offset;
-}
-
-double GERenderingSystem::getRenderingWindowOffsetY()
-{
-	return renderingWindowOffsetY;
-}
-
-void GERenderingSystem::setZoom(double zoom)
-{
-	this->zoom = zoom;
-}
-
-double GERenderingSystem::getZoom()
-{
-	return zoom;
-}
-
-void GERenderingSystem::setProjectionZNear(double projectionZNearParam)
-{
-	this->projectionZNear = projectionZNearParam;
-}
-
 double GERenderingSystem::getProjectionZNear()
 {
 	return projectionZNear;
-}
-
-void GERenderingSystem::setProjectionZFar(double projectionZFarParam)
-{
-	this->projectionZFar = projectionZFarParam;
-}
-
-double GERenderingSystem::getProjectionZFar()
-{
-	return projectionZFar;
-}
-
-void GERenderingSystem::setProjectionFOVY(double fovyParam)
-{
-	this->projectionFOVY = fovyParam;
 }
 
 double GERenderingSystem::getProjectionFOVY()

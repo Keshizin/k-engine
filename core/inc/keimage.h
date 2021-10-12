@@ -1,5 +1,5 @@
 /*
-	Game Engine Image Library
+	K-Engine Image Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa

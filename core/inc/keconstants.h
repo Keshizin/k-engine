@@ -50,4 +50,18 @@
 #define K_STOPPED 0x02
 #define K_PAUSED  0x03
 
+// ****************************************************************************
+//  Rendering System Context (2D or 3D)
+// ****************************************************************************
+#define K_CONTEXT_2D 0x01
+#define K_CONTEXT_3D_PERSPECTIVE 0x02
+#define K_CONTEXT_3D_ORTOGRAPHIC 0x03
+
+// ****************************************************************************
+//  K-Engine Mouse
+// ****************************************************************************
+#define K_MOUSE_LEFT_BUTTON   0
+#define K_MOUSE_MIDDLE_BUTTON 1
+#define K_MOUSE_RIGHT_BUTTON  2
+
 #endif

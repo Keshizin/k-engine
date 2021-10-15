@@ -67,7 +67,7 @@ typedef struct {
 */
 
 // Definição dos vértices
-VERTEX vertices[] = {
+GEOMETRIC_VERTEX vertices[] = {
 	{ -1, 0, -1 },	// 0 canto inf esquerdo tras.
 	{  1, 0, -1 },	// 1 canfo inf direito  tras.
 	{  1, 0,  1 },	// 2 canto inf direito  diant.
@@ -117,7 +117,8 @@ public:
 
 KEngine* engine;
 KERenderingSystem* renderingSystem;
-DIB* image;
+// DIB* image;
+OBJReader* obj; 
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -153,8 +154,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Starting the game loop
 	engine->startMainLoop();
 
-	image->release();
-	delete image;
+	// image->release();
+	// delete image;
+
+	delete obj;
+
 	delete renderingSystem;
 	delete engine;
 	return 1;
@@ -165,16 +169,16 @@ void GameEventHandler::frameEvent(double frameTime)
 	K_UNREFERENCED_PARAMETER(frameTime);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glColor3f(0.0f, 0.0f, 0.0f);
+	// glColor3f(0.0f, 0.0f, 0.0f);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	// glMatrixMode(GL_MODELVIEW);
+	// glLoadIdentity();
 
-	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	glRotatef(rotateX, 1, 0, 0);
-	glRotatef(rotateY, 0, 1, 0);
+	// glTranslatef(-cameraX, -cameraY, -cameraZ);
+	// glRotatef(rotateX, 1, 0, 0);
+	// glRotatef(rotateY, 0, 1, 0);
 
-	drawOBJ(&piramide);
+	// drawOBJ(&piramide);
 
 	// glRasterPos2i(0, 0);
 
@@ -348,14 +352,22 @@ void GameEventHandler::pauseEvent()
 void GameEventHandler::beforeMainLoopEvent()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
-	image = new DIB();
-	image->loadFile("24bpp_test.bmp", true);
+	// image = new DIB();
+	// image->loadFile("24bpp_test.bmp", true);
+
+	obj = new OBJReader();
+
+	for(int i = 0; i < 1; i++)
+	{
+		obj->loadfile("mech.obj");
+	}
 
 	renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	renderingSystem->setProjection();
 
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	glTranslatef(-cameraX, -cameraY, -cameraZ);
 	glRotatef(rotateX, 1, 0, 0);
 	glRotatef(rotateY, 0, 1, 0);

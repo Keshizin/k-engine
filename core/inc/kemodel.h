@@ -26,23 +26,40 @@
 #ifndef K_ENGINE_MODEL_H
 #define K_ENGINE_MODEL_H
 
+#include <vector>
+
 typedef struct {
-	float x, y, z;
-} VERTEX;
+	double x, y, z, w;
+} GEOMETRIC_VERTEX;
+
+typedef struct {
+	double u, v, w;
+} PARAMETER_SPACE_VERTEX;
+
+typedef struct {
+	double u, v, w;
+} TEXTURE_VERTEX;
+
+typedef struct {
+	double i, j, k;
+} NORMAL_VERTEX;
 
 typedef struct {
 	int total_of_vertices;
-	int vertex_index[4];
+	// int vertex_index[4];
+	std::vector<int> vertex_index;
+	std::vector<int> vertex_texture_index;
+	std::vector<int> vertex_normal_index;
 } FACE;
 
 typedef struct {
-	VERTEX *vertices;
+	GEOMETRIC_VERTEX *vertices;
 	FACE *faces;
 	int total_of_faces;
 } OBJ;
 
 typedef struct {
-	VERTEX *vertices;
+	GEOMETRIC_VERTEX *vertices;
 	// COLOR *colors;
 	unsigned int *indices;
 	
@@ -51,5 +68,19 @@ typedef struct {
 } MODEL;
 
 void drawOBJ(OBJ *obj);
+
+// ****************************************************************************
+//  K-Engine OBJReader Class
+// ****************************************************************************
+class OBJReader
+{
+public:
+	// ------------------------------------------------------------------------
+	//  Public Methods
+	// ------------------------------------------------------------------------
+	bool loadfile(const char *filename);
+
+private:
+};
 
 #endif

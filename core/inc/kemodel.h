@@ -37,50 +37,36 @@ typedef struct {
 } PARAMETER_SPACE_VERTEX;
 
 typedef struct {
-	double u, v, w;
-} TEXTURE_VERTEX;
-
-typedef struct {
 	double i, j, k;
 } NORMAL_VERTEX;
 
 typedef struct {
-	int total_of_vertices;
-	// int vertex_index[4];
+	double u, v, w;
+} TEXTURE_VERTEX;
+
+typedef struct {
 	std::vector<int> vertex_index;
 	std::vector<int> vertex_texture_index;
 	std::vector<int> vertex_normal_index;
 } FACE;
 
-typedef struct {
-	GEOMETRIC_VERTEX *vertices;
-	FACE *faces;
-	int total_of_faces;
-} OBJ;
-
-typedef struct {
-	GEOMETRIC_VERTEX *vertices;
-	// COLOR *colors;
-	unsigned int *indices;
-	
-	unsigned int total_indices;
-	unsigned int total_vertex;
-} MODEL;
-
-void drawOBJ(OBJ *obj);
-
 // ****************************************************************************
 //  K-Engine OBJReader Class
 // ****************************************************************************
-class OBJReader
+class KEModel
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	bool loadfile(const char *filename);
+	void print() const;
 
-private:
+	std::vector<GEOMETRIC_VERTEX> geometricVertices;
+	std::vector<PARAMETER_SPACE_VERTEX> parameterSpaceVertices;
+	std::vector<NORMAL_VERTEX> vertexNormals;
+	std::vector<TEXTURE_VERTEX> textureVertices;
+	std::vector<FACE> faces;
 };
 
 #endif

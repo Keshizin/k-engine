@@ -27,6 +27,7 @@
 #define K_ENGINE_RENDERING_SYSTEM_H
 
 class KEWINAPIWrapper;
+class KEModel;
 
 typedef struct {
 	double left;
@@ -34,6 +35,8 @@ typedef struct {
 	double top;
 	double bottom;
 } KERECT;
+
+void drawModel(const KEModel &model);
 
 // ****************************************************************************
 //  K-Engine Rendering System Class
@@ -57,16 +60,24 @@ public:
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
 	void setRenderingContext(int renderingContextParam);
+
 	void setRenderingWindow(double left, double right, double bottom, double top);
+	
 	void setWindowAspectCorrectionState(bool state);
+	
 	void setProjectionFOVY(double fovyParam);
 	double getProjectionFOVY() const;
+
 	void setProjectionZNear(double projectionZNearParam);
+	
 	void setProjectionZFar(double projectionZFarParam);
+	
 	void setZoom(double zoomParam);
 	double getZoom() const;
+	
 	void setRenderingWindowOffsetX(double offset);
 	double getRenderingWindowOffsetX() const;
+	
 	void setRenderingWindowOffsetY(double offset);
 	double getRenderingWindowOffsetY() const;
 

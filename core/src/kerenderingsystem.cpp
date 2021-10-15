@@ -26,6 +26,7 @@
 #include <kerenderingsystem.h>
 #include <kewinapiwrapper.h>
 #include <keconstants.h>
+#include <kemodel.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -34,6 +35,28 @@
 #include <gl/glu.h>
 
 #include <iostream>
+
+// ****************************************************************************
+//  KERenderingSystem Constructors and Destructors
+// ****************************************************************************
+void drawModel(const KEModel &model)
+{
+	for(int face = 0; face < model.faces.size(); face++)
+	{
+		glBegin(GL_LINE_LOOP);
+
+		for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
+		{
+			glVertex4d(
+				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].x,
+				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].y,
+				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].z,
+				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].w);
+		}
+
+		glEnd();
+	}
+}
 
 // ****************************************************************************
 //  KERenderingSystem Constructors and Destructors

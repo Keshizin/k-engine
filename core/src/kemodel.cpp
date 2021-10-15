@@ -25,42 +25,20 @@
 
 #include <kemodel.h>
 
+// remover estes header após validar o tempo de execuçao com HighTimer
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
-#include <gl/gl.h>
-#include <gl/glu.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
-
-void drawOBJ(OBJ *obj)
-{
-	for(int face = 0; face < obj->total_of_faces; face++)
-	{
-		glBegin(GL_LINE_LOOP);
-
-		for(int vertex = 0; vertex < obj->faces[face].total_of_vertices; vertex++)
-		{			
-			glVertex3f(
-				obj->vertices[ obj->faces[face].vertex_index[vertex] ].x,
-				obj->vertices[ obj->faces[face].vertex_index[vertex] ].y,
-				obj->vertices[ obj->faces[face].vertex_index[vertex] ].z);
-		}
-
-		glEnd();
-	}
-}
-
 #include <sstream>
-#include <vector>
 #include <regex>
 
 // ****************************************************************************
 //  OBJReader - Public Methods Definition
 // ****************************************************************************
-bool OBJReader::loadfile(const char *filename)
+bool KEModel::loadfile(const char *filename)
 {
 	LARGE_INTEGER time;
 	QueryPerformanceCounter(&time);
@@ -77,14 +55,8 @@ bool OBJReader::loadfile(const char *filename)
 	std::string data;
 	std::string element;
 
-	std::vector<GEOMETRIC_VERTEX> geometricVertices;
-	std::vector<PARAMETER_SPACE_VERTEX> parameterSpaceVertices;
-	std::vector<TEXTURE_VERTEX> textureVertices;
-	std::vector<FACE> faces;
-
 	while(objfile)
 	{
-		// objfile >> data;
 		std::getline (objfile, data);
 		std::istringstream dataStream(data);
 		dataStream >> element;
@@ -95,10 +67,26 @@ bool OBJReader::loadfile(const char *filename)
 			GEOMETRIC_VERTEX vertex;
 			vertex.w = 1.0;
 
-			// Some applications support vertex colors, by putting red, green
-			// and blue values after x y and z (this precludes specifying w)
 			dataStream >> vertex.x >> vertex.y >> vertex.z >> vertex.w;
 			geometricVertices.push_back(vertex);
+		}
+
+		// Parameter Space Vertices
+		if(element == "vp")
+		{
+			PARAMETER_SPACE_VERTEX parameterSpaceVertex;
+			parameterSpaceVertex.w = 1.0;
+
+			dataStream >> parameterSpaceVertex.u >> parameterSpaceVertex.v >> parameterSpaceVertex.w;
+			parameterSpaceVertices.push_back(parameterSpaceVertex);
+		}
+
+		if(element == "vn")
+		{
+			NORMAL_VERTEX normal;
+
+			dataStream >> normal.i >> normal.j >> normal.k;
+			vertexNormals.push_back(normal);
 		}
 
 		if(element == "vt")
@@ -116,16 +104,6 @@ bool OBJReader::loadfile(const char *filename)
 			textureVertices.push_back(textureVertex);
 		}
 
-		// Parameter Space Vertices
-		if(element == "vp")
-		{
-			PARAMETER_SPACE_VERTEX parameterSpaceVertex;
-			parameterSpaceVertex.w = 1.0;
-
-			dataStream >> parameterSpaceVertex.u >> parameterSpaceVertex.v >> parameterSpaceVertex.w;
-			parameterSpaceVertices.push_back(parameterSpaceVertex);
-		}
-
 		if(element == "f")
 		{
 			std::string vertex_index_string;
@@ -135,7 +113,6 @@ bool OBJReader::loadfile(const char *filename)
 			int vertex_normal_index;
 			
 			FACE face;
-			face.total_of_vertices = 0;
 
 			while(dataStream)
 			{
@@ -147,8 +124,6 @@ bool OBJReader::loadfile(const char *filename)
 				
 				if(!vertex_index_string.empty())
 				{
-					face.total_of_vertices++;
-
 					// std::replace(vertex_index_string.begin(), vertex_index_string.end(), '/', ' ');
 					vertex_index_string = std::regex_replace(vertex_index_string, std::regex("/"), " / ");
 					std::istringstream vertexIndexStream(vertex_index_string);
@@ -181,6 +156,8 @@ bool OBJReader::loadfile(const char *filename)
 
 				vertex_index_string = "";
 			}
+
+			faces.push_back(face);
 		}
 
 		element = "";
@@ -188,7 +165,73 @@ bool OBJReader::loadfile(const char *filename)
 
 	LARGE_INTEGER endTime;
 	QueryPerformanceCounter(&endTime);
-	std::cout << "OBJReader | loadfile | total time: " << (endTime.QuadPart - time.QuadPart) << std::endl;
+	std::cout << "MODEL | loadfile | total time: " << (endTime.QuadPart - time.QuadPart) << std::endl;
 
 	return true;
+}
+
+void KEModel::print() const
+{
+	std::cout << "GEOMETRIC VERTEX: " << geometricVertices.size() << std::endl;
+
+	for(int i = 0; i < geometricVertices.size(); i++)
+	{
+		std::cout << "v: "
+			<< geometricVertices[i].x << " "
+			<< geometricVertices[i].y << " "
+			<< geometricVertices[i].z << " "
+			<< geometricVertices[i].w << " " << std::endl;
+	}
+
+	std::cout << "TEXTURE_VERTEX: " << textureVertices.size() << std::endl;
+
+	for(int i = 0; i < textureVertices.size(); i++)
+	{
+		std::cout << "vt: "
+			<< textureVertices[i].u << " "
+			<< textureVertices[i].v << " "
+			<< textureVertices[i].w << " " << std::endl;
+	}
+
+	std::cout << "NORMAL_VERTEX: " << vertexNormals.size() << std::endl;
+
+	for(int i = 0; i < vertexNormals.size(); i++)
+	{
+		std::cout << "vn: "
+			<< vertexNormals[i].i << " "
+			<< vertexNormals[i].j << " "
+			<< vertexNormals[i].k << " " << std::endl;
+	}
+
+	std::cout << "PARAMETER_SPACE_VERTEX: " << parameterSpaceVertices.size() << std::endl;
+
+	for(int i = 0; i < parameterSpaceVertices.size(); i++)
+	{
+		std::cout << "vp: "
+			<< parameterSpaceVertices[i].u << " "
+			<< parameterSpaceVertices[i].v << " "
+			<< parameterSpaceVertices[i].w << " " << std::endl;
+	}
+
+	std::cout << "FACE: " << faces.size() << std::endl;
+
+	for(int i = 0; i < faces.size(); i++)
+	{
+		std::cout << "f: ";
+
+		for(int j = 0; j < faces[i].vertex_index.size(); j++)
+		{
+			std::cout << faces[i].vertex_index[j] << "/";
+
+			if(faces[i].vertex_texture_index.size())
+				std::cout << faces[i].vertex_texture_index[j];
+
+			if(faces[i].vertex_normal_index.size())
+				std::cout << "/" << faces[i].vertex_normal_index[j];
+
+			std::cout << " ";
+		}
+
+		std::cout << std::endl;
+	}
 }

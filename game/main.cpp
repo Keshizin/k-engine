@@ -40,58 +40,32 @@
 #define WINDOW_WIDTH  1016
 #define WINDOW_HEIGHT 800
 
-/*
-typedef struct {
-	float x, y, z;
-} VERTEX;
-
-typedef struct {
-	int total_of_vertices;
-	int vertex_index[4];
-} FACE;
-
-typedef struct {
-	VERTEX *vertices;
-	FACE *faces;
-	int total_of_faces;
-} OBJ;
-
-typedef struct {
-	VERTEX *vertices;
-	COLOR *colors;
-	unsigned int *indices;
-	
-	unsigned int total_indices;
-	unsigned int total_vertex;
-} MODEL;
-*/
-
 // Definição dos vértices
-GEOMETRIC_VERTEX vertices[] = {
-	{ -1, 0, -1 },	// 0 canto inf esquerdo tras.
-	{  1, 0, -1 },	// 1 canfo inf direito  tras.
-	{  1, 0,  1 },	// 2 canto inf direito  diant.
-	{ -1, 0,  1 },  // 3 canto inf esquerdo diant.
-	{  0, 2,  0 },  // 4 topo
-};
+// GEOMETRIC_VERTEX vertices[] = {
+// 	{ -1, 0, -1 },	// 0 canto inf esquerdo tras.
+// 	{  1, 0, -1 },	// 1 canfo inf direito  tras.
+// 	{  1, 0,  1 },	// 2 canto inf direito  diant.
+// 	{ -1, 0,  1 },  // 3 canto inf esquerdo diant.
+// 	{  0, 2,  0 },  // 4 topo
+// };
 
 // Definição das faces
-FACE faces[] = {
-	{ 4, { 0,1,2, 3 }},	// base
-	{ 3, { 0,1,4,-1 }},	// lado traseiro
-	{ 3, { 0,3,4,-1 }},	// lado esquerdo
-	{ 3, { 1,2,4,-1 }},	// lado direito
-	{ 3, { 3,2,4,-1 }}	// lado dianteiro
-};
+// FACE faces[] = {
+// 	{ 4, { 0,1,2, 3 }},	// base
+// 	{ 3, { 0,1,4,-1 }},	// lado traseiro
+// 	{ 3, { 0,3,4,-1 }},	// lado esquerdo
+// 	{ 3, { 1,2,4,-1 }},	// lado direito
+// 	{ 3, { 3,2,4,-1 }}	// lado dianteiro
+// };
 
-OBJ piramide = {vertices, faces, 5};
+// OBJ piramide = {vertices, faces, 5};
 
 double rotateX = 0.0;
 double rotateY = 0.0;
 double rotateZ = 0.0;
 double cameraX = 0.0;
 double cameraY = 0.0;
-double cameraZ = 5.0;
+double cameraZ = 100.0;
 
 // ****************************************************************************
 //  Game Engine Core Events
@@ -118,7 +92,9 @@ public:
 KEngine* engine;
 KERenderingSystem* renderingSystem;
 // DIB* image;
-OBJReader* obj; 
+KEModel* model[5];
+KEModel* obj = 0;
+int model_index = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -136,7 +112,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	renderingSystem->setRenderingContext(K_CONTEXT_3D_PERSPECTIVE);
 	renderingSystem->setRenderingWindow(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT);
 	renderingSystem->setProjectionZNear(0.1);
-	renderingSystem->setProjectionZFar(1200.0);
+	renderingSystem->setProjectionZFar(3200.0);
 	renderingSystem->setProjectionFOVY(60.0);
 	renderingSystem->setWindowAspectCorrectionState(true);
 
@@ -157,7 +133,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// image->release();
 	// delete image;
 
-	delete obj;
+	delete model[0];
+	delete model[1];
+	delete model[2];
+	delete model[3];
+	delete model[4];
 
 	delete renderingSystem;
 	delete engine;
@@ -169,16 +149,16 @@ void GameEventHandler::frameEvent(double frameTime)
 	K_UNREFERENCED_PARAMETER(frameTime);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// glColor3f(0.0f, 0.0f, 0.0f);
+	glColor3f(0.0f, 0.0f, 0.0f);
 
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(-cameraX, -cameraY, -cameraZ);
+	glRotatef(rotateX, 1, 0, 0);
+	glRotatef(rotateY, 0, 1, 0);
 
-	// glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// glRotatef(rotateX, 1, 0, 0);
-	// glRotatef(rotateY, 0, 1, 0);
-
-	// drawOBJ(&piramide);
+	if(obj)
+		drawModel(*obj);
 
 	// glRasterPos2i(0, 0);
 
@@ -196,7 +176,7 @@ double init_cameraX, init_cameraY, init_cameraZ;
 
 int buttonState = -1;
 #define SENS_ROTATE 5.0
-#define SENSE_CAMERA 30.0
+#define SENSE_CAMERA 10.0
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
@@ -298,6 +278,42 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 		glRotatef(rotateY, 0, 1, 0);
 	}
 
+	if(key == '3' && state)
+	{
+		model_index++;
+
+		if(model_index > 4)
+			model_index = 0;
+
+		obj = model[model_index]; 
+	}
+
+	if(key == '4' && state)
+	{
+		cameraZ += 100.0;
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glTranslatef(-cameraX, -cameraY, -cameraZ);
+		glRotatef(rotateX, 1, 0, 0);
+		glRotatef(rotateY, 0, 1, 0);
+	}
+
+	if(key == '5' && state)
+	{
+		cameraZ -= 100.0;
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glTranslatef(-cameraX, -cameraY, -cameraZ);
+		glRotatef(rotateX, 1, 0, 0);
+		glRotatef(rotateY, 0, 1, 0);
+	}
+
+
+
+
+
 	// if(key == 27 && state)
 	// {
 	// 	engine->getGameWindow()->destroy();
@@ -356,12 +372,17 @@ void GameEventHandler::beforeMainLoopEvent()
 	// image = new DIB();
 	// image->loadFile("24bpp_test.bmp", true);
 
-	obj = new OBJReader();
+	model[0] = new KEModel();
+	model[1] = new KEModel();
+	model[2] = new KEModel();
+	model[3] = new KEModel();
+	model[4] = new KEModel();
 
-	for(int i = 0; i < 1; i++)
-	{
-		obj->loadfile("mech.obj");
-	}
+	model[0]->loadfile("cadeira.obj");
+	model[1]->loadfile("cubo.obj");
+	model[2]->loadfile("deer.obj");
+	model[3]->loadfile("mech.obj");
+	model[4]->loadfile("mesagrande.obj");
 
 	renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	renderingSystem->setProjection();

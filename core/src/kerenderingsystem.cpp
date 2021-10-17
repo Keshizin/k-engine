@@ -27,6 +27,8 @@
 #include <kewinapiwrapper.h>
 #include <keconstants.h>
 #include <kemodel.h>
+#include <keimage.h>
+#include <kelight.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -37,16 +39,30 @@
 #include <iostream>
 
 // ****************************************************************************
-//  KERenderingSystem Constructors and Destructors
+//  drawModel - Function to draw model 2D/3D
 // ****************************************************************************
 void drawModel(const KEModel &model)
 {
 	for(int face = 0; face < model.faces.size(); face++)
 	{
-		glBegin(GL_LINE_LOOP);
+		if(model.faces[face].vertex_index.size() == 3)
+			glBegin(GL_TRIANGLES);
+		else if(model.faces[face].vertex_index.size() == 4)
+			glBegin(GL_QUADS);
+
+		// glBegin(GL_LINE_LOOP);
 
 		for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
 		{
+
+			if(model.faces[face].vertex_normal_index.size())
+			{
+				glNormal3f(
+					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].i,
+					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].j,
+					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].k);
+			}
+
 			glVertex4d(
 				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].x,
 				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].y,
@@ -56,6 +72,38 @@ void drawModel(const KEModel &model)
 
 		glEnd();
 	}
+}
+
+// ****************************************************************************
+//  drawImage - Function to draw bitmap images
+// ****************************************************************************
+void drawImage(int posX, int posY, const DIB &image)
+{
+	glRasterPos2i(posX, posY);
+
+	glDrawPixels(
+		image.getWidth(),
+		image.getHeight(),
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		image.getColorIndex());
+}
+
+// ****************************************************************************
+//  setLighting - Function to active lighting
+// ****************************************************************************
+void setLight(const KELight &light, int isLightEnable)
+{
+	if(isLightEnable)
+	{
+		glEnable(GL_LIGHT0);
+		glLightfv(GL_LIGHT0, GL_AMBIENT,  light.ambient);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE,  light.diffuse);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, light.specular);
+		glLightfv(GL_LIGHT0, GL_POSITION, light.position);
+	}
+	else
+		glDisable(GL_LIGHT0);
 }
 
 // ****************************************************************************
@@ -73,7 +121,8 @@ KERenderingSystem::KERenderingSystem(KEWINAPIWrapper* apiWrapperParam) :
 	projectionZFar(0.0),
 	zoom(0.0),
 	renderingWindowOffsetX(0.0),
-	renderingWindowOffsetY(0.0)
+	renderingWindowOffsetY(0.0),
+	lightModelAmbient()
 {
 	renderingWindow.left   = 0.0;
 	renderingWindow.right  = 0.0;
@@ -182,7 +231,21 @@ int KERenderingSystem::initialize()
 
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
+	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
+	glShadeModel(GL_SMOOTH);
+
 	return 1;
+}
+
+void KERenderingSystem::setLightModel(int isLightEnable)
+{
+	if(isLightEnable)
+	{
+		glEnable(GL_LIGHTING);
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightModelAmbient);
+	}
+	else
+		glDisable(GL_LIGHTING);
 }
 
 // ****************************************************************************
@@ -254,4 +317,12 @@ void KERenderingSystem::setRenderingWindowOffsetY(double offset)
 double KERenderingSystem::getRenderingWindowOffsetY() const
 {
 	return renderingWindowOffsetY;
+}
+
+void KERenderingSystem::setLightModelAmbient(float red, float green, float blue, float alpha)
+{
+	lightModelAmbient[0] = red;
+	lightModelAmbient[1] = green;
+	lightModelAmbient[2] = blue;
+	lightModelAmbient[3] = alpha;
 }

@@ -32,6 +32,7 @@
 #include <kerenderingsystem.h>
 #include <keimage.h>
 #include <kemodel.h>
+#include <kelight.h>
 
 #include <gl/gl.h>
 #include <gl/glu.h>
@@ -39,26 +40,6 @@
 
 #define WINDOW_WIDTH  1016
 #define WINDOW_HEIGHT 800
-
-// Definição dos vértices
-// GEOMETRIC_VERTEX vertices[] = {
-// 	{ -1, 0, -1 },	// 0 canto inf esquerdo tras.
-// 	{  1, 0, -1 },	// 1 canfo inf direito  tras.
-// 	{  1, 0,  1 },	// 2 canto inf direito  diant.
-// 	{ -1, 0,  1 },  // 3 canto inf esquerdo diant.
-// 	{  0, 2,  0 },  // 4 topo
-// };
-
-// Definição das faces
-// FACE faces[] = {
-// 	{ 4, { 0,1,2, 3 }},	// base
-// 	{ 3, { 0,1,4,-1 }},	// lado traseiro
-// 	{ 3, { 0,3,4,-1 }},	// lado esquerdo
-// 	{ 3, { 1,2,4,-1 }},	// lado direito
-// 	{ 3, { 3,2,4,-1 }}	// lado dianteiro
-// };
-
-// OBJ piramide = {vertices, faces, 5};
 
 double rotateX = 0.0;
 double rotateY = 0.0;
@@ -91,10 +72,12 @@ public:
 
 KEngine* engine;
 KERenderingSystem* renderingSystem;
-// DIB* image;
-KEModel* model[5];
+DIB* image;
+KEModel* model[6];
 KEModel* obj = 0;
+KEModel* floorOBJ;
 int model_index = 0;
+KELight *light = 0;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -130,44 +113,59 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Starting the game loop
 	engine->startMainLoop();
 
-	// image->release();
-	// delete image;
+	image->release();
+	delete image;
+
+	delete light;
 
 	delete model[0];
 	delete model[1];
 	delete model[2];
 	delete model[3];
 	delete model[4];
+	delete model[5];
+	delete floorOBJ;
 
 	delete renderingSystem;
 	delete engine;
 	return 1;
 }
 
+float ambientLight = 0.0f;
+float diffuseLight = 0.0f;
+float specularLight = 0.0f;
+
+float materialAmbient = 0.0f;
+float materialSpecular = 0.0f;
+float materialDiffuse = 0.0f;
+float materialShininess = 0.0f;
+float materialEmission = 0.0f;
+
 void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glColor3f(0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
 	glTranslatef(-cameraX, -cameraY, -cameraZ);
 	glRotatef(rotateX, 1, 0, 0);
 	glRotatef(rotateY, 0, 1, 0);
 
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glPointSize(5.0);
+	glBegin(GL_POINTS);
+	glVertex4fv(light->position);
+	glEnd();
+
+	glColor3f(0.0f, 1.0f, 0.0f);
+
+	// if(floorOBJ)
+	// 	drawModel(*floorOBJ);
+
 	if(obj)
 		drawModel(*obj);
-
-	// glRasterPos2i(0, 0);
-
-	// glDrawPixels(
-	// 	image->getWidth(),
-	// 	image->getHeight(),
-	// 	GL_RGB,
-	// 	GL_UNSIGNED_BYTE,
-	// 	image->getColorIndex());
 }
 
 int init_x, init_y;
@@ -247,6 +245,8 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
+	std::cout << "debug: " << key << std::endl;
+
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
@@ -282,7 +282,7 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	{
 		model_index++;
 
-		if(model_index > 4)
+		if(model_index > 5)
 			model_index = 0;
 
 		obj = model[model_index]; 
@@ -310,14 +310,106 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 		glRotatef(rotateY, 0, 1, 0);
 	}
 
+	if(key == '9' && state)
+	{
+		ambientLight += 0.1;
 
+		if(ambientLight > 1.0)
+			ambientLight = 0.0;
 
+		std::cout << "> ambientLight: " << ambientLight << std::endl;
+		light->setAmbient(ambientLight, ambientLight, ambientLight, 1.0);
+		setLight(*light, 1);
+	}
 
+	if(key == '0' && state)
+	{
+		diffuseLight += 0.1;
 
-	// if(key == 27 && state)
-	// {
-	// 	engine->getGameWindow()->destroy();
-	// }
+		if(diffuseLight > 1.0)
+			diffuseLight = 0.0;
+
+		std::cout << "> diffuseLight: " << diffuseLight << std::endl;
+		light->setDiffuse(diffuseLight, diffuseLight, diffuseLight, 1.0);
+		setLight(*light, 1);
+	}
+
+	if(key == '8' && state)
+	{
+		specularLight += 0.1;
+
+		if(specularLight > 1.0)
+			specularLight = 0.0;
+
+		std::cout << "> specularLight: " << specularLight << std::endl;
+		light->setSpecular(specularLight, specularLight, specularLight, 1.0);
+		setLight(*light, 1);
+	}
+
+	if(key == 81 && state)
+	{
+		materialAmbient += 0.1;
+
+		if(materialAmbient > 1.0)
+			materialAmbient = 0.0;
+
+		std::cout << "> materialAmbient: " << materialAmbient << std::endl;
+		float mAmbient[4] = {0.0f, materialAmbient, 0.0f, 1.0f};
+		glMaterialfv(GL_FRONT, GL_AMBIENT, mAmbient);
+	}
+
+	if(key == 87 && state)
+	{
+		materialSpecular += 0.1;
+
+		if(materialSpecular > 1.0)
+			materialSpecular = 0.0;
+
+		std::cout << "> materialSpecular: " << materialSpecular << std::endl;
+		float mSpecular[4] = {materialSpecular, materialSpecular, materialSpecular, 1.0f};
+		glMaterialfv(GL_FRONT, GL_SPECULAR, mSpecular);
+	}
+
+	if(key == 69 && state)
+	{
+		materialDiffuse += 0.1;
+
+		if(materialDiffuse > 1.0)
+			materialDiffuse = 0.0;
+
+		std::cout << "> materialDiffuse: " << materialDiffuse << std::endl;
+		float mDiffuse[4] = {materialDiffuse, materialDiffuse, materialDiffuse, 1.0f};
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, mDiffuse);
+	}
+
+	if(key == 82 && state)
+	{
+		materialShininess += 0.1;
+
+		if(materialShininess > 1.0)
+			materialShininess = 0.0;
+
+		std::cout << "> materialShininess: " << materialShininess << std::endl;
+		float mDiffuse[4] = {materialShininess, materialShininess, materialShininess, 1.0f};
+		glMaterialfv(GL_FRONT, GL_SHININESS, mDiffuse);
+	}
+
+	if(key == 84 && state)
+	{
+		materialEmission += 0.1;
+
+		if(materialEmission > 1.0)
+			materialEmission = 0.0;
+
+		std::cout << "> materialEmission: " << materialEmission << std::endl;
+		float mDiffuse[4] = {materialEmission, materialEmission, materialEmission, 1.0f};
+		glMaterialfv(GL_FRONT, GL_EMISSION, mDiffuse);
+	}
+
+	if(key == 27 && state)
+	{
+		engine->getGameWindow()->destroy();
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
@@ -369,6 +461,29 @@ void GameEventHandler::beforeMainLoopEvent()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+	glEnable(GL_DEPTH_TEST);
+
+	renderingSystem->setLightModelAmbient(ambientLight, ambientLight, ambientLight, 1.0);
+	renderingSystem->setLightModel(1);
+	
+	light = new KELight();
+	light->setAmbient(ambientLight, ambientLight, ambientLight, 1.0f);
+	light->setDiffuse(diffuseLight, diffuseLight, diffuseLight, 1.0f);
+	light->setSpecular(specularLight, specularLight, specularLight, 1.0f);
+	light->setPosition(0.0f, 5.0f, 0.0f, 1.0f);
+	setLight(*light, 1);
+
+	// float mAmbient[4] = {materialAmbient, materialAmbient, materialAmbient, 1.0f};
+	// glMaterialfv(GL_FRONT, GL_AMBIENT, mAmbient);
+	// float mSpecular[4] = {materialSpecular, materialSpecular, materialSpecular, 1.0f};
+	// glMaterialfv(GL_FRONT, GL_SPECULAR, mSpecular);
+	// float mDiffuse[4] = {materialDiffuse, materialDiffuse, materialDiffuse, 1.0f};
+	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mDiffuse);
+	// float mShininess[4] = {materialShininess, materialShininess, materialShininess, 1.0f};
+	// glMaterialfv(GL_FRONT, GL_SHININESS, mShininess);
+	// float mEmission[4] = {materialEmission, materialEmission, materialEmission, 1.0f};
+	// glMaterialfv(GL_FRONT, GL_EMISSION, mEmission);
+
 	// image = new DIB();
 	// image->loadFile("24bpp_test.bmp", true);
 
@@ -377,12 +492,17 @@ void GameEventHandler::beforeMainLoopEvent()
 	model[2] = new KEModel();
 	model[3] = new KEModel();
 	model[4] = new KEModel();
+	// model[5] = new KEModel();
 
-	model[0]->loadfile("cadeira.obj");
-	model[1]->loadfile("cubo.obj");
-	model[2]->loadfile("deer.obj");
-	model[3]->loadfile("mech.obj");
-	model[4]->loadfile("mesagrande.obj");
+	// model[0]->loadfile("cadeira.obj");
+	// model[1]->loadfile("cubo.obj");
+	// model[2]->loadfile("deer.obj");
+	// model[3]->loadfile("mech.obj");
+	// model[4]->loadfile("mesagrande.obj");
+	model[1]->loadfile("esfera.obj");
+
+	floorOBJ = new KEModel();
+	floorOBJ->loadfile("floor.obj");
 
 	renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	renderingSystem->setProjection();

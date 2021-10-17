@@ -52,12 +52,12 @@ void DIBLIB::WORD::swap()
 	byte1 = temp;
 }
 
-unsigned char DIBLIB::WORD::getByte1()
+unsigned char DIBLIB::WORD::getByte1() const
 {
 	return byte1;
 }
 
-unsigned char DIBLIB::WORD::getByte2()
+unsigned char DIBLIB::WORD::getByte2() const
 {
 	return byte2;
 }
@@ -87,22 +87,22 @@ void DIBLIB::DWORD::swap()
 	byte3 = temp;
 }
 
-unsigned char DIBLIB::DWORD::getByte1()
+unsigned char DIBLIB::DWORD::getByte1() const
 {
 	return byte1;
 }
 
-unsigned char DIBLIB::DWORD::getByte2()
+unsigned char DIBLIB::DWORD::getByte2() const
 {
 	return byte2;
 }
 
-unsigned char DIBLIB::DWORD::getByte3()
+unsigned char DIBLIB::DWORD::getByte3() const
 {
 	return byte3;
 }
 
-unsigned char DIBLIB::DWORD::getByte4()
+unsigned char DIBLIB::DWORD::getByte4() const
 {
 	return byte4;
 }
@@ -112,7 +112,7 @@ unsigned char DIBLIB::DWORD::getByte4()
 // ----------------------------------------------------------------------------
 DIBLIB::RGBQUAD::RGBQUAD() : rgbBlue(0), rgbGreen(0), rgbRed(0), rgbReserved(0) {}
 
-void DIBLIB::RGBQUAD::print()
+void DIBLIB::RGBQUAD::print() const
 {
 	std::cout
 		<< "================================================================================"
@@ -128,7 +128,7 @@ void DIBLIB::RGBQUAD::print()
 // ----------------------------------------------------------------------------
 //  BITMAPFILEHEADER CLASS METHODS
 // ----------------------------------------------------------------------------
-void DIBLIB::BITMAPFILEHEADER::print()
+void DIBLIB::BITMAPFILEHEADER::print() const
 {
 	std::cout
 		<< "================================================================================"
@@ -175,12 +175,12 @@ void DIBLIB::BITMAPFILEHEADER::swap()
 	bfOffBits.swap();
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfSize()
+DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfSize() const
 {
 	return bfSize;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfOffBits()
+DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfOffBits() const
 {
 	return bfOffBits;
 }
@@ -189,7 +189,7 @@ DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfOffBits()
 // ----------------------------------------------------------------------------
 //  BITMAPINFOHEADER CLASS METHODS
 // ----------------------------------------------------------------------------
-void DIBLIB::BITMAPINFOHEADER::print()
+void DIBLIB::BITMAPINFOHEADER::print() const
 {
 	std::cout
 		<< "================================================================================"
@@ -279,32 +279,32 @@ void DIBLIB::BITMAPINFOHEADER::swap()
 	biClrImportant.swap();
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSize()
+DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSize() const
 {
 	return biSize;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiWidth()
+DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiWidth() const
 {
 	return biWidth;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiHeight()
+DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiHeight() const
 {
 	return biHeight;
 }
 
-DIBLIB::WORD DIBLIB::BITMAPINFOHEADER::getBiBitCount()
+DIBLIB::WORD DIBLIB::BITMAPINFOHEADER::getBiBitCount() const
 {
 	return biBitCount;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiCompression()
+DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiCompression() const
 {
 	return biCompression;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSizeImage()
+DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSizeImage() const
 {
 	return biSizeImage;
 }
@@ -440,7 +440,7 @@ void DIB::release()
 	colorIndexSize = 0;
 }
 
-void DIB::printColorIndexDump()
+void DIB::printColorIndexDump() const
 {
 	std::cout
 		<< "================================================================================"
@@ -462,7 +462,7 @@ void DIB::printColorIndexDump()
 		<< "\n================================================================================" << std::endl;
 }
 
-void DIB::printDump()
+void DIB::printDump() const
 {
 	bmfHeader.print();
 	bmiHeader.print();
@@ -473,27 +473,27 @@ void DIB::printDump()
 	printColorIndexDump();
 }
 
-unsigned long DIB::getWidth()
+unsigned long DIB::getWidth() const
 {
 	return bmiHeader.getBiWidth().get();
 }
 
-unsigned long DIB::getHeight()
+unsigned long DIB::getHeight() const
 {
 	return bmiHeader.getBiHeight().get();
 }
 
-unsigned char* DIB::getColorIndex()
+unsigned char* DIB::getColorIndex() const
 {
 	return colorIndex;
 }
 
-unsigned long DIB::getColorTableSize()
+unsigned long DIB::getColorTableSize() const
 {
 	return colorTableSize;
 }
 
-unsigned long DIB::getColorIndexSize()
+unsigned long DIB::getColorIndexSize() const
 {
 	return colorIndexSize;
 }

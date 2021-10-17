@@ -28,6 +28,8 @@
 
 class KEWINAPIWrapper;
 class KEModel;
+class DIB;
+class KELight;
 
 typedef struct {
 	double left;
@@ -37,6 +39,8 @@ typedef struct {
 } KERECT;
 
 void drawModel(const KEModel &model);
+void drawImage(int posX, int posY, const DIB &image);
+void setLight(const KELight &light, int isLightEnable);
 
 // ****************************************************************************
 //  K-Engine Rendering System Class
@@ -55,6 +59,7 @@ public:
 	void setViewport(int x, int y, int width, int height);
 	void setProjection();
 	int initialize();
+	void setLightModel(int isLightEnable);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
@@ -81,6 +86,8 @@ public:
 	void setRenderingWindowOffsetY(double offset);
 	double getRenderingWindowOffsetY() const;
 
+	void setLightModelAmbient(float red, float green, float blue, float alpha);
+
 private:
 	KEWINAPIWrapper* apiWrapper;
 	int renderingContext;
@@ -95,6 +102,8 @@ private:
 	double zoom;
 	double renderingWindowOffsetX;
 	double renderingWindowOffsetY;
+
+	float lightModelAmbient[4];
 };
 
 #endif

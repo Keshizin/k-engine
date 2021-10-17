@@ -40,8 +40,8 @@ namespace DIBLIB
 		unsigned short get() const;
 		void set(unsigned short word);
 		void swap();
-		unsigned char getByte1();
-		unsigned char getByte2();
+		unsigned char getByte1() const;
+		unsigned char getByte2() const;
 	private:
 		unsigned char byte1;
 		unsigned char byte2;
@@ -55,10 +55,10 @@ namespace DIBLIB
 		unsigned long get() const;
 		void set(unsigned long dword);
 		void swap();
-		unsigned char getByte1();
-		unsigned char getByte2();
-		unsigned char getByte3();
-		unsigned char getByte4();
+		unsigned char getByte1() const;
+		unsigned char getByte2() const;
+		unsigned char getByte3() const;
+		unsigned char getByte4() const;
 	private:
 		unsigned char byte1;
 		unsigned char byte2;
@@ -71,7 +71,7 @@ namespace DIBLIB
 	public:
 		RGBQUAD();
 
-		void print();
+		void print() const;
 
 	private:
 		unsigned char rgbBlue;
@@ -83,11 +83,11 @@ namespace DIBLIB
 	class BITMAPFILEHEADER
 	{
 	public:
-		void print();
+		void print() const;
 		void swap();
 
-		DWORD getBfSize();
-		DWORD getBfOffBits();
+		DWORD getBfSize() const;
+		DWORD getBfOffBits() const;
 
 	private:
 		WORD bfType;
@@ -100,15 +100,15 @@ namespace DIBLIB
 	class BITMAPINFOHEADER
 	{
 	public:
-		void print();
+		void print() const;
 		void swap();
 
-		DWORD getBiSize();
-		DWORD getBiWidth();
-		DWORD getBiHeight();
-		WORD getBiBitCount();
-		DWORD getBiCompression();
-		DWORD getBiSizeImage();
+		DWORD getBiSize() const;
+		DWORD getBiWidth() const;
+		DWORD getBiHeight() const;
+		WORD getBiBitCount() const;
+		DWORD getBiCompression() const;
+		DWORD getBiSizeImage() const;
 
 	private:
 		DWORD biSize;
@@ -133,14 +133,14 @@ public:
 
 	void loadFile(std::string filename, int swap);
 	void release();
-	void printDump();
-	void printColorIndexDump();
+	void printDump() const;
+	void printColorIndexDump() const;
 
-	unsigned long getWidth();
-	unsigned long getHeight();
-	unsigned char* getColorIndex();
-	unsigned long getColorTableSize();
-	unsigned long getColorIndexSize();
+	unsigned long getWidth() const;
+	unsigned long getHeight() const ;
+	unsigned char* getColorIndex() const;
+	unsigned long getColorTableSize() const;
+	unsigned long getColorIndexSize() const;
 
 private:
 	DIBLIB::BITMAPFILEHEADER bmfHeader;

@@ -38,9 +38,9 @@ typedef struct {
 	double bottom;
 } KERECT;
 
-void drawModel(const KEModel &model);
+void drawModel(const KEModel &model, int mode);
 void drawImage(int posX, int posY, const DIB &image);
-void setLight(const KELight &light, int isLightEnable);
+void setLight(const KELight &light, int isLightEnable, int lightParam);
 
 // ****************************************************************************
 //  K-Engine Rendering System Class
@@ -107,89 +107,3 @@ private:
 };
 
 #endif
-
-/*
-	glBegin(GL_LINES);
-
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-	glVertex3f(25.0f, 25.0f, 25.0f);
-
-	glVertex3f(25.0f, 25.0f, 25.0f);
-	glVertex3f(25.0f, -25.0f, 25.0f);
-
-	glVertex3f(25.0f, -25.0f, 25.0f);
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-
-	// ------------------------------
-
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-	glVertex3f(25.0f, 25.0f, -25.0f);
-	
-	glVertex3f(25.0f, 25.0f, -25.0f);
-	glVertex3f(25.0f, 25.0f, 25.0f);
-
-	glVertex3f(25.0f, 25.0f, 25.0f);
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-
-	// ------------------------------
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-	glVertex3f(25.0f, 25.0f, -25.0f);
-
-	glVertex3f(25.0f, 25.0f, -25.0f);
-	glVertex3f(25.0f, -25.0f, -25.0f);
-
-	glVertex3f(25.0f, -25.0f, -25.0f);
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-
-	// ------------------------------
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-	glVertex3f(25.0f, -25.0f, -25.0f);
-
-	glVertex3f(25.0f, -25.0f, -25.0f);
-	glVertex3f(25.0f, -25.0f, 25.0f);
-
-	glVertex3f(25.0f, -25.0f, 25.0f);
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-
-	// ------------------------------
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-
-	glVertex3f(-25.0f, 25.0f, 25.0f);
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-
-	glVertex3f(-25.0f, -25.0f, 25.0f);
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-
-	glVertex3f(-25.0f, -25.0f, -25.0f);
-	glVertex3f(-25.0f, 25.0f, -25.0f);
-
-	// ------------------------------
-	glColor3f(0.0f, 1.0f, 1.0f);
-	glVertex3f(25.0f, 25.0f, -25.0f);
-	glVertex3f(25.0f, 25.0f, 25.0f);
-
-	glVertex3f(25.0f, 25.0f, 25.0f);
-	glVertex3f(25.0f, -25.0f, 25.0f);
-	
-	glVertex3f(25.0f, -25.0f, 25.0f);
-	glVertex3f(25.0f, -25.0f, -25.0f);
-
-	glVertex3f(25.0f, -25.0f, -25.0f);
-	glVertex3f(25.0f, 25.0f, -25.0f);
-
-	glEnd();
-*/

@@ -45,25 +45,6 @@
 // 	float x;
 // 	float y;
 // 	float z;
-// } TRANSLATE;
-
-// typedef struct {
-// 	float angle;
-// 	float x;
-// 	float y;
-// 	float z;
-// } ROTATE;
-
-// typedef struct {
-// 	float x;
-// 	float y;
-// 	float z;
-// } SCALE;
-
-// typedef struct {
-// 	float x;
-// 	float y;
-// 	float z;
 // } SPEED;
 
 // // ----------------------------------------------------------------------------
@@ -92,9 +73,6 @@
 
 // private:
 // 	MODEL *model;
-// 	TRANSLATE translate;
-// 	ROTATE rotate;
-// 	SCALE scale;
 // 	SPEED speed;
 // 	GERECT bounding;
 // };

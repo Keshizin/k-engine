@@ -41,20 +41,23 @@
 // ****************************************************************************
 //  drawModel - Function to draw model 2D/3D
 // ****************************************************************************
-void drawModel(const KEModel &model)
+void drawModel(const KEModel &model, int mode)
 {
 	for(int face = 0; face < model.faces.size(); face++)
 	{
-		if(model.faces[face].vertex_index.size() == 3)
-			glBegin(GL_TRIANGLES);
-		else if(model.faces[face].vertex_index.size() == 4)
-			glBegin(GL_QUADS);
+		if(mode == 1)
+			glBegin(GL_LINE_LOOP);
+		else
+			glBegin(GL_POLYGON);
+		// else if(model.faces[face].vertex_index.size() == 3)
+		// 	glBegin(GL_TRIANGLES);
+		// else if(model.faces[face].vertex_index.size() == 4)
+		// 	glBegin(GL_QUADS);
 
 		// glBegin(GL_LINE_LOOP);
 
 		for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
 		{
-
 			if(model.faces[face].vertex_normal_index.size())
 			{
 				glNormal3f(
@@ -92,18 +95,18 @@ void drawImage(int posX, int posY, const DIB &image)
 // ****************************************************************************
 //  setLighting - Function to active lighting
 // ****************************************************************************
-void setLight(const KELight &light, int isLightEnable)
+void setLight(const KELight &light, int isLightEnable, int lightParam)
 {
 	if(isLightEnable)
 	{
-		glEnable(GL_LIGHT0);
-		glLightfv(GL_LIGHT0, GL_AMBIENT,  light.ambient);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE,  light.diffuse);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, light.specular);
-		glLightfv(GL_LIGHT0, GL_POSITION, light.position);
+		glEnable(static_cast<GLenum>(lightParam));
+		glLightfv(lightParam, GL_AMBIENT,  light.ambient);
+		glLightfv(lightParam, GL_DIFFUSE,  light.diffuse);
+		glLightfv(lightParam, GL_SPECULAR, light.specular);
+		glLightfv(lightParam, GL_POSITION, light.position);
 	}
 	else
-		glDisable(GL_LIGHT0);
+		glDisable(static_cast<GLenum>(lightParam));
 }
 
 // ****************************************************************************
@@ -233,6 +236,9 @@ int KERenderingSystem::initialize()
 
 	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
 	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE);
 
 	return 1;
 }

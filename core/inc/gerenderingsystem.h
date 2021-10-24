@@ -88,7 +88,6 @@
 // 	// ------------------------------------------------------------------------
 // 	void resetView();
 // 	void renderFrame();
-// 	int setVSync(int vsync);
 // 	void setViewport(int x, int y, int width, int height);
 // 	void setProjection();
 // 	void drawGlobaldAxis();

@@ -1,58 +1,3 @@
-// /*
-// 	Game Engine Rendering System
-// 	This file is part of the K-Engine.
-
-// 	Copyright (C) 2021 Fabio Takeshi Ishikawa
-
-// 	Permission is hereby granted, free of charge, to any person obtaining a copy
-// 	of this software and associated documentation files (the "Software"), to deal
-// 	in the Software without restriction, including without limitation the rights
-// 	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// 	copies of the Software, and to permit persons to whom the Software is
-// 	furnished to do so, subject to the following conditions:
-
-// 	The above copyright notice and this permission notice shall be included in all
-// 	copies or substantial portions of the Software.
-
-// 	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// 	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// 	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// 	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// 	SOFTWARE.
-// */
-
-// #define WIN32_LEAN_AND_MEAN
-// #include <windows.h>
-
-// #include <GL/gl.h>
-// #include <GL/glu.h>
-// #include <GLEXT/wglext.h>
-// #include <GLEXT/glext.h>
-
-// #include <gerenderingsystem.h>
-// #include <iostream>
-
-// // ----------------------------------------------------------------------------
-// //  OpenGL Procedures Extension for Win32
-// // ----------------------------------------------------------------------------
-// PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
-// PFNGLGENBUFFERSPROC glGenBuffers = 0;
-// PFNGLISBUFFERPROC glIsBuffer = 0;
-// PFNGLBINDBUFFERPROC glBindBuffer = 0;
-// PFNGLBUFFERDATAPROC glBufferData = 0;
-// PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
-// PFNGLMAPBUFFERPROC glMapBuffer = 0;
-// PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
-// PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
-// PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
-// PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
-// PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = 0;
-// PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
-// PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
-// PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
-
 // // ****************************************************************************
 // //  GEModel Class Definition - Constructors and Destructors
 // // ****************************************************************************
@@ -243,89 +188,8 @@
 // // }
 
 // // ****************************************************************************
-// //  Constructors and Destructors
-// // ****************************************************************************
-// GERenderingSystem::GERenderingSystem(KEWINAPIWrapper* apiWrapper)
-// {
-// 	this->apiWrapper = apiWrapper;
-// 	// this->renderingContext = K_CONTEXT_2D;
-// 	this->viewportWidth = 0;
-// 	this->viewportHeight = 0;
-
-// 	this->renderingWindow.left = 0.0f;
-// 	this->renderingWindow.right = 0.0f;
-// 	this->renderingWindow.top = 0.0f;
-// 	this->renderingWindow.bottom = 0.0f;
-
-// 	this->renderingWindowOffsetX = 0.0f;
-// 	this->renderingWindowOffsetY = 0.0f;
-
-// 	this->zoom = 0.0f;
-
-// 	this->projectionZNear = 0.0;
-// 	this->projectionZFar = 0.0;
-// 	this->projectionFOVY = 0.0;
-// 	this->windowAspectCorrection = 0.0;
-// 	this->windowAspectCorrectionState = false;
-// 	this->globalAxisState = false;
-// }
-
-// // ****************************************************************************
 // //  Public Methods
 // // ****************************************************************************
-// int GERenderingSystem::initialize()
-// {
-// 	if(!apiWrapper)
-// 	{
-// 		std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
-// 		return 0;
-// 	}
-
-// 	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-// 	// apontando para o objeto. Fazer essa validação!
-// 	if(!apiWrapper->initializeRenderingSystem())
-// 		return 0;
-
-// 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
-
-// 	glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
-// 	glIsBuffer = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
-// 	glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
-// 	glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
-// 	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
-// 	glMapBuffer = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
-// 	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
-// 	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
-// 	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
-// 	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
-// 	glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
-// 	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
-// 	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
-// 	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
-
-// 	if(
-// 		!wglSwapIntervalEXT &&
-// 		!glGenBuffers &&
-// 		!glIsBuffer &&
-// 		!glBindBuffer &&
-// 		!glBufferData &&
-// 		!glBufferSubData &&
-// 		!glMapBuffer &&
-// 		!glUnmapBuffer &&
-// 		!glMapBufferRange &&
-// 		!glFlushMappedBufferRange &&
-// 		!glCopyBufferSubData &&
-// 		!glDeleteBuffers &&
-// 		!glGenVertexArrays &&
-// 		!glBindVertexArray &&
-// 		!glDeleteVertexArrays)
-// 	{
-// 		std::cout << "(!) ERROR - It was not possible to load GL extension: " << glGetError() << "\n" << std::endl;
-// 		return 0;
-// 	}
-
-// 	return 1;
-// }
 
 // void GERenderingSystem::resetView()
 // {
@@ -350,11 +214,6 @@
 // 	// SWAP BUFFERS
 
 // 	// this->apiWrapper->swapBuffers();
-// }
-
-// int GERenderingSystem::setVSync(int vsync)
-// {
-// 	return wglSwapIntervalEXT(vsync);
 // }
 
 // void GERenderingSystem::drawGlobaldAxis()

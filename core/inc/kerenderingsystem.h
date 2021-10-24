@@ -60,6 +60,7 @@ public:
 	void setProjection();
 	int initialize();
 	void setLightModel(int isLightEnable);
+	int setVSync(int vsync);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters

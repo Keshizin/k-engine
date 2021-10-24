@@ -35,8 +35,29 @@
 
 #include <gl/gl.h>
 #include <gl/glu.h>
+#include <GLEXT/wglext.h>
+#include <GLEXT/glext.h>
 
 #include <iostream>
+
+// ----------------------------------------------------------------------------
+//  OpenGL Procedures Extension for Win32
+// ----------------------------------------------------------------------------
+PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
+PFNGLGENBUFFERSPROC glGenBuffers = 0;
+PFNGLISBUFFERPROC glIsBuffer = 0;
+PFNGLBINDBUFFERPROC glBindBuffer = 0;
+PFNGLBUFFERDATAPROC glBufferData = 0;
+PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
+PFNGLMAPBUFFERPROC glMapBuffer = 0;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = 0;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
 
 // ****************************************************************************
 //  drawModel - Function to draw model 2D/3D
@@ -232,11 +253,51 @@ int KERenderingSystem::initialize()
 	// apontando para o objeto. Fazer essa validação!
 	apiWrapper->initializeRenderingSystem();
 
-	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
+
+	glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
+	glIsBuffer = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
+	glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
+	glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
+	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
+	glMapBuffer = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
+	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
+	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
+	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
+	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
+	glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
+	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
+	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
+	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
+
+	if(
+		!wglSwapIntervalEXT &&
+		!glGenBuffers &&
+		!glIsBuffer &&
+		!glBindBuffer &&
+		!glBufferData &&
+		!glBufferSubData &&
+		!glMapBuffer &&
+		!glUnmapBuffer &&
+		!glMapBufferRange &&
+		!glFlushMappedBufferRange &&
+		!glCopyBufferSubData &&
+		!glDeleteBuffers &&
+		!glGenVertexArrays &&
+		!glBindVertexArray &&
+		!glDeleteVertexArrays)
+	{
+		std::cout << "(!) ERROR - It was not possible to load GL extension: " << glGetError() << "\n" << std::endl;
+		return 0;
+	}
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
 	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
 	glShadeModel(GL_SMOOTH);
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
 
@@ -252,6 +313,11 @@ void KERenderingSystem::setLightModel(int isLightEnable)
 	}
 	else
 		glDisable(GL_LIGHTING);
+}
+
+int KERenderingSystem::setVSync(int vsync)
+{
+	return wglSwapIntervalEXT(vsync);
 }
 
 // ****************************************************************************

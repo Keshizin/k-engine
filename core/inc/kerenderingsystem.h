@@ -61,10 +61,12 @@ public:
 	int initialize();
 	void setLightModel(int isLightEnable);
 	int setVSync(int vsync);
+	void getGLVersion() const;
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
+	int getRenderingContext() const;
 	void setRenderingContext(int renderingContextParam);
 
 	void setRenderingWindow(double left, double right, double bottom, double top);
@@ -75,8 +77,10 @@ public:
 	double getProjectionFOVY() const;
 
 	void setProjectionZNear(double projectionZNearParam);
+	double getProjectionZNear() const;
 	
 	void setProjectionZFar(double projectionZFarParam);
+	double getProjectionZFar() const;
 	
 	void setZoom(double zoomParam);
 	double getZoom() const;

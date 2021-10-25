@@ -187,66 +187,9 @@
 // // {
 // // }
 
-// // ****************************************************************************
-// //  Public Methods
-// // ****************************************************************************
-
-// void GERenderingSystem::resetView()
-// {
-// 	glMatrixMode(GL_MODELVIEW);
-// 	glLoadIdentity();
-// }
-
-// void GERenderingSystem::renderFrame()
-// {
-// 	// if(!apiWrapper)
-// 	// {
-// 	// 	std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
-// 	// 	return;
-// 	// }
-
-// 	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-// 	// apontando para o objeto. Fazer essa validação!
-
-// 	// UPDATE CAMERA
-// 	// UPDATE SCENE ELEMENTS
-// 	// RENDER SCENE
-// 	// SWAP BUFFERS
-
-// 	// this->apiWrapper->swapBuffers();
-// }
-
-// void GERenderingSystem::drawGlobaldAxis()
-// {
-// 	// glPushMatrix();
-// 	// glMatrixMode(GL_MODELVIEW);
-// 	// glLoadIdentity();
-
-// 	// glBegin(GL_LINES);
-// 	// glColor3f(1.0f, 0.0f, 0.0f);
-// 	// glVertex3d(renderingWindow.left, 0.0, 0.0);
-// 	// glVertex3d(renderingWindow.right, 0.0, 0.0);
-// 	// glColor3f(0.0, 1.0f, 0.0f);
-// 	// glVertex3d(0.0, renderingWindow.top, 0.0);
-// 	// glVertex3d(0.0, renderingWindow.bottom, 0.0);
-// 	// glEnd();
-
-// 	// glPopMatrix();
-// }
-
-// void GERenderingSystem::getSystemVersion()
-// {
-// 	std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
-// }
-
-// // ****************************************************************************
-// //  Getters and Setters
-// // ****************************************************************************
-// int GERenderingSystem::getRenderingContext()
-// {
-// 	// return renderingContext;
-// 	return 1;
-// }
+// ****************************************************************************
+//  Getters and Setters
+// ****************************************************************************
 
 // GERECT GERenderingSystem::getRenderingWindow()
 // {
@@ -275,39 +218,4 @@
 // 	window.bottom += renderingWindowOffsetX + zoom;
 
 // 	return window;
-// }
-
-// double GERenderingSystem::getProjectionZNear()
-// {
-// 	return projectionZNear;
-// }
-
-// double GERenderingSystem::getProjectionFOVY()
-// {
-// 	return projectionFOVY;
-// }
-
-// void GERenderingSystem::setWindowAspectCorrection(double windowAspectCorrectionParam)
-// {
-// 	this->windowAspectCorrection = windowAspectCorrectionParam;
-// }
-
-// double GERenderingSystem::getWindowAspectCorrection()
-// {
-// 	return windowAspectCorrection;
-// }
-
-// void GERenderingSystem::setWindowAspectCorrectionState(bool state)
-// {
-// 	this->windowAspectCorrectionState = state;
-// }
-
-// bool GERenderingSystem::getWindowAspectCorrectionState()
-// {
-// 	return windowAspectCorrectionState;
-// }
-
-// void GERenderingSystem::setGlobalAxisState(bool state)
-// {
-// 	globalAxisState = state;
 // }

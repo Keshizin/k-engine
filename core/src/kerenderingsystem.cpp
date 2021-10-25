@@ -291,15 +291,15 @@ int KERenderingSystem::initialize()
 		return 0;
 	}
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glEnable(GL_BLEND);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
 	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
-	glShadeModel(GL_SMOOTH);
+	// glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
+	// glEnable(GL_NORMALIZE);
 
 	return 1;
 }
@@ -320,12 +320,22 @@ int KERenderingSystem::setVSync(int vsync)
 	return wglSwapIntervalEXT(vsync);
 }
 
+void KERenderingSystem::getGLVersion() const
+{
+	std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
+}
+
 // ****************************************************************************
 //  KERenderingSystem - Getters and Setters
 // ****************************************************************************
 void KERenderingSystem::setRenderingContext(int renderingContextParam)
 {
 	renderingContext = renderingContextParam;
+}
+
+int KERenderingSystem::getRenderingContext() const
+{
+	return renderingContext;
 }
 
 void KERenderingSystem::setRenderingWindow(double left, double right, double bottom, double top)
@@ -356,9 +366,19 @@ void KERenderingSystem::setProjectionZNear(double projectionZNearParam)
 	projectionZNear = projectionZNearParam;
 }
 
+double KERenderingSystem::getProjectionZNear() const
+{
+	return projectionZNear;
+}
+
 void KERenderingSystem::setProjectionZFar(double projectionZFarParam)
 {
 	projectionZFar = projectionZFarParam;
+}
+
+double KERenderingSystem::getProjectionZFar() const
+{
+	return projectionZFar;
 }
 
 void KERenderingSystem::setZoom(double zoomParam)

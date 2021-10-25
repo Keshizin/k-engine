@@ -84,34 +84,9 @@
 // {
 // public:
 // 	// ------------------------------------------------------------------------
-// 	//  Public Methods
-// 	// ------------------------------------------------------------------------
-// 	void resetView();
-// 	void renderFrame();
-// 	void setViewport(int x, int y, int width, int height);
-// 	void setProjection();
-// 	void drawGlobaldAxis();
-// 	void getSystemVersion();
-
-// 	// ------------------------------------------------------------------------
 // 	//  Getters and Setters
 // 	// ------------------------------------------------------------------------
-// 	int getRenderingContext();
 // 	GERECT getRenderingWindow();
-
-// 	double getProjectionZNear();
-// 	double getProjectionZFar();
-
-// 	void setWindowAspectCorrection(double windowAspectCorrection);
-// 	double getWindowAspectCorrection();
-
-// 	void setWindowAspectCorrectionState(bool state);
-// 	bool getWindowAspectCorrectionState();
-
-// 	void setGlobalAxisState(bool state);
-
-// private:
-// 	bool globalAxisState;
 // };
 
 // #endif

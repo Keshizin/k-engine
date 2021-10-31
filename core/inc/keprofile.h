@@ -26,20 +26,20 @@
 #ifndef K_ENGINE_PROFILE_H
 #define K_ENGINE_PROFILE_H
 
-#include <ketimer.h>
-#include <ketimehandler.h>
+class KETimer;
+class KEWINAPIWrapper;
 
 // ****************************************************************************
-//  Game Engine Profile Class
+//  K-Engine Profile Class
 // ****************************************************************************
-class GEProfile
+class KEProfile
 {
 public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	GEProfile(KETimeHandler *timeHandler);
-	~GEProfile();
+	explicit KEProfile(KEWINAPIWrapper *apiWrapper);
+	~KEProfile();
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
@@ -50,11 +50,12 @@ public:
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	unsigned long long getFramesPerSecond();
-
-	long long getMaxFrameTime();
-	long long getMinFrameTime();
-	double getMeanFrameTime();
+	unsigned long long getFramesPerSecond() const;
+	unsigned long long getMaxFramesPerSecond() const;
+	unsigned long long getMinFramesPerSecond() const;
+	long long getMaxFrameTime() const;
+	long long getMinFrameTime() const;
+	double getMeanFrameTime() const;
 
 private:
 	KETimer *timer;
@@ -63,9 +64,9 @@ private:
 	long long maxFrameTime;
 	long long minFrameTime;
 	double meanFrameTime;
-	long long frameTimeCounter;
-	unsigned long long maxFramePerSecond;
-	unsigned long long minFramePerSecond;
+	long long frameTimeTotal;
+	unsigned long long maxFramesPerSecond;
+	unsigned long long minFramesPerSecond;
 };
 
 #endif

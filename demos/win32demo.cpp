@@ -1,5 +1,5 @@
 /*
-	Game Engine Demonstration
+	K-Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -23,18 +23,32 @@
 	SOFTWARE.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <kecore.h>
+#include <kewindow.h>
+#include <kewinapiwrapper.h>
+#include <keeventhandler.h>
+#include <keaux.h>
+#include <ketimer.h>
+#include <kerenderingsystem.h>
+#include <keimage.h>
+#include <kemodel.h>
+#include <kelight.h>
+#include <keobject.h>
+
+#include <GL/gl.h>
 
 #include <iostream>
-#include <geaux.h>
 
-#include <gewinapiwrapper.h>
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+KEngine* engine;
+KERenderingSystem* renderingSystem;
 
 // ****************************************************************************
 //  Game Engine Core Events
 // ****************************************************************************
-class GameEventHandler : public GEEventHandler
+class GameEventHandler : public KEEventHandler
 {
 public:
 	void frameEvent(double frameTime);
@@ -43,16 +57,15 @@ public:
 	void keyboardEvent(unsigned long long key, int state) ;
 	void keyboardSpecialEvent(unsigned long long key, int state);
 	void resizeWindowEvent(int width, int height);
+	void moveWindowEvent(int x, int y);
 	void finishAfterEvent();
 	void finishBeforeEvent();
 	void resumeEvent();
 	void pauseEvent();
 	void beforeMainLoopEvent();
+	void afterMainLoopEvent();
 	void createWindowEvent();
 };
-
-bool isDone = false;
-GEWINAPIWrapper apiWrapper;
 
 // ****************************************************************************
 //  Point Entry Execution
@@ -62,59 +75,94 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	K_UNREFERENCED_PARAMETER(hInstance);
 	K_UNREFERENCED_PARAMETER(hPrevInstance);
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
-	K_UNREFERENCED_PARAMETER(nCmdShow);
 
 	GameEventHandler eventHandler;
+	engine = new KEngine(&eventHandler);
 
-	apiWrapper.setGlobalEventHandler(&eventHandler);
-	apiWrapper.createDebugConsole();
+	renderingSystem = new KERenderingSystem(engine->getAPIWrapper());
+	renderingSystem->setRenderingContext(K_CONTEXT_2D);
+	renderingSystem->setRenderingWindow(-1, 1, -1, 1);
+	renderingSystem->setProjectionZNear(0.1);
+	renderingSystem->setProjectionZFar(500.0);
+	renderingSystem->setProjectionFOVY(90.0);
+	renderingSystem->setWindowAspectCorrectionState(true);
 
-	std::cout << "K-ENGINE! WIN32 DEMO" << std::endl;
-	apiWrapper.createWindow(0, 0, 640, 480, "K-ENGINE! WIN32 DEMO", 5);
-	apiWrapper.showWindow(nCmdShow);
+	// Setting up the window
+	engine->getGameWindow()->setWindow(1000, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
 
-	while (!isDone)
-	{
-		apiWrapper.handleSystemMessages();
+	// Creating the window
+	engine->getGameWindow()->create();
 
-		// YOUR APP CODE HERE!
-	}
+	renderingSystem->initialize();
 
+	// Showing the window
+	engine->getGameWindow()->show(nCmdShow);
+
+	renderingSystem->setVSync(0);
+	engine->setFrameRate(0);
+
+	// Starting the game loop
+	engine->startMainLoop();
+
+	delete renderingSystem;
+	delete engine;
 	return 1;
 }
 
 void GameEventHandler::frameEvent(double frameTime)
 {
+	K_UNREFERENCED_PARAMETER(frameTime);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(button);
+	K_UNREFERENCED_PARAMETER(state);
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
 {
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 {
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 {
+	K_UNREFERENCED_PARAMETER(key);
+	K_UNREFERENCED_PARAMETER(state);
 }
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
+	K_UNREFERENCED_PARAMETER(width);
+	K_UNREFERENCED_PARAMETER(height);
+
+	renderingSystem->setViewport(0, 0, width, height);
+	renderingSystem->setProjection();
+}
+
+void GameEventHandler::moveWindowEvent(int x, int y)
+{
+	K_UNREFERENCED_PARAMETER(x);
+	K_UNREFERENCED_PARAMETER(y);
 }
 
 void GameEventHandler::finishAfterEvent()
 {
-	isDone = true;
+	engine->stopMainLoop();
 }
 
 void GameEventHandler::finishBeforeEvent()
 {
-	apiWrapper.destroyWindow();
+	engine->getGameWindow()->destroy();
 }
 
 void GameEventHandler::resumeEvent()
@@ -126,6 +174,10 @@ void GameEventHandler::pauseEvent()
 }
 
 void GameEventHandler::beforeMainLoopEvent()
+{
+}
+
+void GameEventHandler::afterMainLoopEvent()
 {
 }
 

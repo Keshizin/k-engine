@@ -34,16 +34,17 @@
 #include <string>
 #include <sstream>
 #include <regex>
+#include <iomanip>
 
 // ****************************************************************************
 //  OBJReader - Public Methods Definition
 // ****************************************************************************
-bool KEModel::loadfile(const char *filename)
+bool KEModel::loadfile(std::string path, std::string filename)
 {
-	LARGE_INTEGER time;
-	QueryPerformanceCounter(&time);
+	// LARGE_INTEGER time;
+	// QueryPerformanceCounter(&time);
 
-	std::ifstream objfile(filename, std::ios::in);
+	std::ifstream objfile(path + filename, std::ios::in);
 
 	if(!objfile)
 	{
@@ -54,6 +55,7 @@ bool KEModel::loadfile(const char *filename)
 
 	std::string data;
 	std::string element;
+	std::string current_material;
 
 	while(objfile)
 	{
@@ -113,6 +115,7 @@ bool KEModel::loadfile(const char *filename)
 			int vertex_normal_index;
 			
 			FACE face;
+			face.material_name = current_material;
 
 			while(dataStream)
 			{
@@ -160,14 +163,121 @@ bool KEModel::loadfile(const char *filename)
 			faces.push_back(face);
 		}
 
+		if(element == "mtllib")
+		{
+			std::string mtlFileName;
+			dataStream >> mtlFileName;
+			loadMTLFile(path, mtlFileName);
+		}
+
+		if(element == "usemtl")
+		{
+			std::string material_name;
+			dataStream >> material_name;
+			current_material = material_name;
+		}
+
 		element = "";
 	}
 
-	LARGE_INTEGER endTime;
-	QueryPerformanceCounter(&endTime);
-	std::cout << "MODEL | loadfile | total time: " << (endTime.QuadPart - time.QuadPart) << std::endl;
+	// LARGE_INTEGER endTime;
+	// QueryPerformanceCounter(&endTime);
+	// std::cout << "MODEL | loadfile | total time: " << (endTime.QuadPart - time.QuadPart) << std::endl;
 
 	return true;
+}
+
+bool KEModel::loadMTLFile(std::string path, std::string filename)
+{
+	std::ifstream mtlfile(path + filename, std::ios::in);
+
+	if(!mtlfile)
+	{
+		std::cout << "(x) This file " << filename << " cannot be opened." << std::endl;
+		// throw std::exception("This file cannot be opened.\n");
+		return false;
+	}
+
+	std::string data;
+	std::string element;
+
+	while(mtlfile)
+	{
+		std::getline (mtlfile, data);
+		std::istringstream dataStream(data);
+		dataStream >> element;
+
+		if(element == "newmtl")
+		{
+			MATERIAL material;
+			dataStream >> material.name;
+			materials.push_back(material);
+		}
+
+		if(element == "Ns")
+		{
+			dataStream >> materials.back().Ns;
+		}
+
+		if(element == "Ka")
+		{
+			dataStream >> materials.back().Ka[0] >> materials.back().Ka[1] >> materials.back().Ka[2];
+		}
+
+		if(element == "Kd")
+		{
+			dataStream >> materials.back().Kd[0] >> materials.back().Kd[1] >> materials.back().Kd[2];
+		}
+
+		if(element == "Ks")
+		{
+			dataStream >> materials.back().Ks[0] >> materials.back().Ks[1] >> materials.back().Ks[2];
+		}
+
+		if(element == "Ke")
+		{
+			dataStream >> materials.back().Ke[0] >> materials.back().Ke[1] >> materials.back().Ke[2];
+		}
+
+		if(element == "Ni")
+		{
+			dataStream >> materials.back().Ni;
+		}
+
+		if(element == "d")
+		{
+			dataStream >> materials.back().d;
+		}
+
+		if(element == "illum")
+		{
+			dataStream >> materials.back().illum;
+		}
+
+		if(element == "map_Kd")
+		{
+			dataStream >> materials.back().map_Kd;
+		}
+
+		element = "";
+	}
+
+	return true;
+}
+
+int KEModel::getMaterial(std::string material_name) const
+{
+	int index = -1;
+
+	for(int i = 0; i < materials.size(); i++)
+	{
+		if(materials[i].name == material_name)
+		{
+			index = i;
+		}
+	}
+
+	return index;
 }
 
 void KEModel::print() const
@@ -213,11 +323,11 @@ void KEModel::print() const
 			<< parameterSpaceVertices[i].w << " " << std::endl;
 	}
 
-	std::cout << "FACE: " << faces.size() << std::endl;
+	std::cout << "FACE " << faces.size() << std::endl;
 
 	for(int i = 0; i < faces.size(); i++)
 	{
-		std::cout << "f: ";
+		std::cout << "f " << faces[i].material_name << ": ";
 
 		for(int j = 0; j < faces[i].vertex_index.size(); j++)
 		{
@@ -233,5 +343,22 @@ void KEModel::print() const
 		}
 
 		std::cout << std::endl;
+	}
+
+	std::cout << "MATERIALS: " << materials.size() << std::endl;
+
+	for(int i  = 0; i < materials.size(); i++)
+	{
+		std::cout << "materials.name: " << materials[i].name
+			<< "\nmaterials.Ns: " << materials[i].Ns
+			<< "\nmaterials.Ka: " << materials[i].Ka[0] << " " << materials[i].Ka[1] << " " << materials[i].Ka[2]
+			<< "\nmaterials.Kd: " << materials[i].Kd[0] << " " << materials[i].Kd[1] << " " << materials[i].Kd[2]
+			<< "\nmaterials.Ks: " << materials[i].Ks[0] << " " << materials[i].Ks[1] << " " << materials[i].Ks[2]
+			<< "\nmaterials.Ke: " << materials[i].Ke[0] << " " << materials[i].Ke[1] << " " << materials[i].Ke[2]
+			<< "\nmaterials.Ni: " << materials[i].Ni
+			<< "\nmaterials.d: " << materials[i].d
+			<< "\nmaterials.illum: " << materials[i].illum
+			<< "\nmaterials.map_Kd: " << materials[i].map_Kd
+			<< "\n" << std::endl;
 	}
 }

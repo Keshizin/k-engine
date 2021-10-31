@@ -35,13 +35,13 @@
 #include <kelight.h>
 #include <keobject.h>
 
-#include <gl/gl.h>
+#include <GL/gl.h>
 #include <gl/glu.h>
 #include <iostream>
 
 #define WINDOW_WIDTH  1200
-#define WINDOW_HEIGHT 800
-#define TOTAL_OBJ     15
+#define WINDOW_HEIGHT  800
+#define TOTAL_OBJ     16
 #define SENS_ROTATE   5.0
 #define SENSE_CAMERA  10.0
 
@@ -69,6 +69,7 @@ float materialSpecular  = 0.0f;
 float materialDiffuse   = 0.0f;
 float materialShininess = 0.0f;
 float materialEmission  = 0.0f;
+bool lightStatus[5] = {1, 1, 1, 1, 1};
 
 int render_type = 1;
 
@@ -88,13 +89,7 @@ int buttonState = -1;
 
 KEngine* engine;
 KERenderingSystem* renderingSystem;
-
 KEModel* models[TOTAL_OBJ];
-// KEObject obj[TOTAL_OBJ];
-
-typedef struct {
-	float x, y, z;
-};
 
 KELight *light1;
 KELight *light2;
@@ -102,10 +97,9 @@ KELight *light3;
 KELight *light4;
 KELight *light5;
 
-bool lightStatus[5] = {1, 1, 1, 1, 1};
-
 void drawObjects();
 void DefineLimitesMesas();
+void drawGlasses(float x, float y, float z, float a);
 
 // ****************************************************************************
 //  Game Engine Core Events
@@ -160,6 +154,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Showing the window
 	engine->getGameWindow()->show(nCmdShow);
 
+	renderingSystem->setVSync(0);
+	engine->setFrameRate(0);
+
 	// Starting the game loop
 	engine->startMainLoop();
 
@@ -176,13 +173,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
+	// glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glRotatef(rotateX, 1,0,0);
-	glRotatef(rotateY, 0,1,0);
+	setLight(*light5, lightStatus[4], GL_LIGHT4);
+
+	glRotatef(rotateX, 1, 0, 0);
+	glRotatef(rotateY, 0, 1, 0);
 	glTranslatef(-cameraX, -cameraY, -cameraZ);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -191,9 +191,18 @@ void GameEventHandler::frameEvent(double frameTime)
 	setLight(*light2, lightStatus[1], GL_LIGHT1);
 	setLight(*light3, lightStatus[2], GL_LIGHT2);
 	setLight(*light4, lightStatus[3], GL_LIGHT3);
-	setLight(*light5, lightStatus[4], GL_LIGHT4);
 
 	drawObjects();
+
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	drawGlasses(303, 150, -250, 10);
+	drawGlasses(303, 150,    0, 30);
+	drawGlasses(303, 150,  250,  7);
+
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -202,7 +211,7 @@ void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 	K_UNREFERENCED_PARAMETER(state);
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
-	
+
 	if(state == 1)
 	{
 		init_x = x;
@@ -225,7 +234,6 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 {
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
-	// std::cout << "@mouseMotionEvent | x: " << x << " | y: " << y << std::endl;
 
 	if(buttonState == K_MOUSE_LEFT_BUTTON)
 	{
@@ -268,8 +276,6 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
-	std::cout << "> keyboard event - key: " << key << " - state: " << state << std::endl;
-
 	if(key == 84 && state )
 	{
 		render_type = (render_type ? 0 : 1);
@@ -307,8 +313,8 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 
 	if(key == 87 && state)
 	{
-		float sina = 5 * sin( rotateY * 3.1415 / 180.0);
-		float cosa = 5 * cos( rotateY * 3.1415 / 180.0);
+		float sina = 10 * sin( rotateY * 3.1415 / 180.0);
+		float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
 
 		cameraX += 0.2 * sina;
 		cameraZ -= 0.2 * cosa;
@@ -316,168 +322,12 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 
 	if(key == 83 && state)
 	{
-		float sina = 5 * sin( rotateY * 3.1415 / 180.0);
-		float cosa = 5 * cos( rotateY * 3.1415 / 180.0);
+		float sina = 10 * sin( rotateY * 3.1415 / 180.0);
+		float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
 
 		cameraX -= 0.2 * sina;
 		cameraZ += 0.2 * cosa;
 	}
-
-	// if(key == '1' && state)
-	// {
-	// 	double fovy = renderingSystem->getProjectionFOVY();
-	// 	renderingSystem->setProjectionFOVY(fovy + 1.0);
-	// 	renderingSystem->setProjection();
-
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
-
-	// if(key == '2' && state)
-	// {
-	// 	double fovy = renderingSystem->getProjectionFOVY();
-	// 	renderingSystem->setProjectionFOVY(fovy - 1.0);
-	// 	renderingSystem->setProjection();
-
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
-
-	// if(key == '3' && state)
-	// {
-	// 	model_index++;
-
-	// 	if(model_index > 5)
-	// 		model_index = 0;
-
-	// 	obj = model[model_index]; 
-	// }
-
-	// if(key == '4' && state)
-	// {
-	// 	cameraZ += 100.0;
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
-
-	// if(key == '5' && state)
-	// {
-	// 	cameraZ -= 100.0;
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
-
-	// if(key == '9' && state)
-	// {
-	// 	ambientLight += 0.1;
-
-	// 	if(ambientLight > 1.0)
-	// 		ambientLight = 0.0;
-
-	// 	std::cout << "> ambientLight: " << ambientLight << std::endl;
-	// 	light->setAmbient(ambientLight, ambientLight, ambientLight, 1.0);
-	// 	setLight(*light, 1);
-	// }
-
-	// if(key == '0' && state)
-	// {
-	// 	diffuseLight += 0.1;
-
-	// 	if(diffuseLight > 1.0)
-	// 		diffuseLight = 0.0;
-
-	// 	std::cout << "> diffuseLight: " << diffuseLight << std::endl;
-	// 	light->setDiffuse(diffuseLight, diffuseLight, diffuseLight, 1.0);
-	// 	setLight(*light, 1);
-	// }
-
-	// if(key == '8' && state)
-	// {
-	// 	specularLight += 0.1;
-
-	// 	if(specularLight > 1.0)
-	// 		specularLight = 0.0;
-
-	// 	std::cout << "> specularLight: " << specularLight << std::endl;
-	// 	light->setSpecular(specularLight, specularLight, specularLight, 1.0);
-	// 	setLight(*light, 1);
-	// }
-
-	// if(key == 81 && state)
-	// {
-	// 	materialAmbient += 0.1;
-
-	// 	if(materialAmbient > 1.0)
-	// 		materialAmbient = 0.0;
-
-	// 	std::cout << "> materialAmbient: " << materialAmbient << std::endl;
-	// 	float mAmbient[4] = {0.0f, materialAmbient, 0.0f, 1.0f};
-	// 	glMaterialfv(GL_FRONT, GL_AMBIENT, mAmbient);
-	// }
-
-	// if(key == 87 && state)
-	// {
-	// 	materialSpecular += 0.1;
-
-	// 	if(materialSpecular > 1.0)
-	// 		materialSpecular = 0.0;
-
-	// 	std::cout << "> materialSpecular: " << materialSpecular << std::endl;
-	// 	float mSpecular[4] = {materialSpecular, materialSpecular, materialSpecular, 1.0f};
-	// 	glMaterialfv(GL_FRONT, GL_SPECULAR, mSpecular);
-	// }
-
-	// if(key == 69 && state)
-	// {
-	// 	materialDiffuse += 0.1;
-
-	// 	if(materialDiffuse > 1.0)
-	// 		materialDiffuse = 0.0;
-
-	// 	std::cout << "> materialDiffuse: " << materialDiffuse << std::endl;
-	// 	float mDiffuse[4] = {materialDiffuse, materialDiffuse, materialDiffuse, 1.0f};
-	// 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mDiffuse);
-	// }
-
-	// if(key == 82 && state)
-	// {
-	// 	materialShininess += 0.1;
-
-	// 	if(materialShininess > 1.0)
-	// 		materialShininess = 0.0;
-
-	// 	std::cout << "> materialShininess: " << materialShininess << std::endl;
-	// 	float mDiffuse[4] = {materialShininess, materialShininess, materialShininess, 1.0f};
-	// 	glMaterialfv(GL_FRONT, GL_SHININESS, mDiffuse);
-	// }
-
-	// if(key == 84 && state)
-	// {
-	// 	materialEmission += 0.1;
-
-	// 	if(materialEmission > 1.0)
-	// 		materialEmission = 0.0;
-
-	// 	std::cout << "> materialEmission: " << materialEmission << std::endl;
-	// 	float mDiffuse[4] = {materialEmission, materialEmission, materialEmission, 1.0f};
-	// 	glMaterialfv(GL_FRONT, GL_EMISSION, mDiffuse);
-	// }
 
 	if(key == 27 && state)
 	{
@@ -493,8 +343,9 @@ void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
 
 void GameEventHandler::resizeWindowEvent(int width, int height)
 {
-	// K_UNREFERENCED_PARAMETER(width);
-	// K_UNREFERENCED_PARAMETER(height);
+	K_UNREFERENCED_PARAMETER(width);
+	K_UNREFERENCED_PARAMETER(height);
+
 	renderingSystem->setViewport(0, 0, width, height);
 	renderingSystem->setProjection();
 
@@ -536,7 +387,8 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	renderingSystem->setLightModelAmbient(ambientLight, ambientLight, ambientLight, 1.0);
 	renderingSystem->setLightModel(1);
-	
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+
 	light1 = new KELight();
 	light1->setAmbient(ambientLight, ambientLight, ambientLight, 1.0f);
 	light1->setDiffuse(diffuseLight, diffuseLight, diffuseLight, 1.0f);
@@ -579,26 +431,33 @@ void GameEventHandler::beforeMainLoopEvent()
 	float mDiffuse[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mDiffuse);
 
+	// glEnable(GL_COLOR_MATERIAL);
+	// glColorMaterial(GL_FRONT, GL_DIFFUSE);
+
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	for(int i = 0; i < TOTAL_OBJ; i++)
 	{
 		models[i] = new KEModel();
 	}
 
-	models[0]->loadfile("parede.obj");
-	models[1]->loadfile("mesagrande.obj");
-	models[2]->loadfile("mesapeq.obj");
-	models[3]->loadfile("cadeira2.obj");
-	models[4]->loadfile("quadronegro.obj");
-	models[5]->loadfile("porta.obj");
-	models[6]->loadfile("janela.obj");
-	models[7]->loadfile("lampada.obj");
-	models[8]->loadfile("lapis.obj");
-	models[9]->loadfile("livro.obj");
-	models[10]->loadfile("papel1.obj");
-	models[11]->loadfile("papel2.obj");
-	models[12]->loadfile("papel3.obj");
-	models[13]->loadfile("cuiabomba.obj");
-	models[14]->loadfile("borracha.obj");
+	models[ 0]->loadfile("obj/", "parede.obj");
+	models[ 1]->loadfile("obj/", "mesagrande.obj");
+	models[ 2]->loadfile("obj/", "mesapeq.obj");
+	models[ 3]->loadfile("obj/", "cadeira2.obj");
+	models[ 4]->loadfile("obj/", "quadronegro.obj");
+	models[ 5]->loadfile("obj/", "porta.obj");
+	models[ 6]->loadfile("obj/", "janela.obj");
+	models[ 7]->loadfile("obj/", "lampada.obj");
+
+	models[ 8]->loadfile("obj/", "lapis.obj");
+	models[ 9]->loadfile("obj/", "livro.obj");
+	models[10]->loadfile("obj/", "papel1.obj");
+	models[11]->loadfile("obj/", "papel2.obj");
+	models[12]->loadfile("obj/", "papel3.obj");
+	models[13]->loadfile("obj/", "cuiabomba.obj");
+	models[14]->loadfile("obj/", "borracha.obj");
+	models[15]->loadfile("obj/", "vidro.obj");
 
 	renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	renderingSystem->setProjection();
@@ -620,18 +479,48 @@ void GameEventHandler::createWindowEvent()
 {
 }
 
-// ----------------------------------------------------------------------------
 void drawObjects()
 {
+	// ------------------------------------------------------------------------
+	//  DESENHA CEU
+	// ------------------------------------------------------------------------
+	if(!render_type)
+	{
+		glDisable(GL_LIGHTING);
+		glBegin(GL_QUAD_STRIP);
+		glColor3ub(239, 235,   55);
+		glVertex3f(310,  70, -500);
+		glVertex3f(310,  70,  500);
+		glColor3ub(255, 136,    0);
+		glVertex3f(310,  85, -500);
+		glVertex3f(310,  85,  500);
+		glColor3ub(170,  11,   61);
+		glVertex3f(310, 100, -500);
+		glVertex3f(310, 100,  500);
+		glColor3ub(28,   17,  145);
+		glVertex3f(310, 150, -500);
+		glVertex3f(310, 150,  500);
+		glColor3ub(  0,   0,    0);
+		glVertex3f(310, 250, -500);
+		glVertex3f(310, 250,  500);
+		glEnd();
+		glEnable(GL_LIGHTING);
+	}
+
+	// ------------------------------------------------------------------------
+	//  DESENHA PORTA
+	// ------------------------------------------------------------------------
 	glPushMatrix();
 	glTranslatef(-301, 100, 300);
 	glRotatef(90, 0, 1, 0);
 	drawModel(*models[5], render_type);
 	glPopMatrix();
 
-	// Seta cor da parede
-	glColor3ub(196,210,184);
-	// Parede dos fundos
+	// ------------------------------------------------------------------------
+	//  DESENHA PAREDES
+	// ------------------------------------------------------------------------
+	glColor3ub(196, 210, 184);
+
 	glPushMatrix();
 	glTranslatef(0, 150, -400);
 	glScalef(6, 3, 1);
@@ -653,30 +542,30 @@ void drawObjects()
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(300,37.5,0);
-	glRotatef(-90,0,1,0);
-	glScalef(8,0.75,1);
+	glTranslatef(300, 37.5, 0);
+	glRotatef(-90, 0, 1, 0);
+	glScalef(8, 0.75, 1);
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(300,300-37.5,0);
-	glRotatef(-90,0,1,0);
-	glScalef(8,0.75,1);
+	glTranslatef(300, 300 - 37.5,0);
+	glRotatef(-90, 0, 1, 0);
+	glScalef(8, 0.75, 1);
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(300,150,-375);
-	glRotatef(-90,0,1,0);
-	glScalef(0.5,1.5,1);
+	glTranslatef(300, 150, -375);
+	glRotatef(-90, 0, 1, 0);
+	glScalef(0.5, 1.5, 1);
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(300,150,-125);
-	glRotatef(-90,0,1,0);
-	glScalef(0.5,1.5,1);
+	glTranslatef(300, 150, -125);
+	glRotatef(-90, 0, 1, 0);
+	glScalef(0.5, 1.5, 1);
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
@@ -694,60 +583,58 @@ void drawObjects()
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
+	// ------------------------------------------------------------------------
+	//  DESENHA JANELAS
+	// ------------------------------------------------------------------------
 	glPushMatrix();
 	glTranslatef(300, 150, -250);
 	glRotatef(-90, 0, 1, 0);
-	drawModel(*models[0], render_type);
+	drawModel(*models[6], render_type);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(300, 150, 0);
 	glRotatef(-90, 0, 1, 0);
-	drawModel(*models[0], render_type);
+	drawModel(*models[6], render_type);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(300, 150, 250);
 	glRotatef(-90, 0, 1, 0);
-	drawModel(*models[0], render_type);
+	drawModel(*models[6], render_type);
 	glPopMatrix();
 
-	for(int x = -150; x <= 300; x += 300)
-	{
-		int cont = 0;
-		// 3 filas de lâmpadas
-		for(int z = -250; z <= 300; z += 250, cont++)
-		{
-			// float emissao = 0.0;
-			// Seta o coeficiente de emissão para
-			// as luzes que estiverem ativas
-			// if(luzes[2- c ont]) emissao = 1.0;
-			// mat_luz->ke[0] = mat_luz->ke[1] = mat_luz->ke[2] = emissao;
-			glPushMatrix();
-			glTranslatef(x, 297, z);
-			glRotatef(90, 1, 0, 0);
-			glRotatef(90, 0, 0, 1);
-			drawModel(*models[7], render_type);
-			glPopMatrix();
-		}
-	}
-
-	glColor3ub(145,105,54);
+	// ------------------------------------------------------------------------
+	//  DESENHA QUADRO
+	// ------------------------------------------------------------------------
 	glPushMatrix();
-	glTranslatef(0,0,0);
-	glRotatef(-90,1,0,0);
-	glScalef(6,8,1);
-	drawModel(*models[0], render_type);
+	glTranslatef(0,160,398);
+	glRotatef(180,0,1,0);
+	drawModel(*models[4], render_type);
 	glPopMatrix();
 
-	glColor3ub(212,199,183);
+	// ------------------------------------------------------------------------
+	//  DESENHA CHAO E TETO
+	// ------------------------------------------------------------------------
+	glColor3ub(145, 105, 54);
 	glPushMatrix();
-	glTranslatef(0,300,0);
-	glRotatef(90,1,0,0);
-	glScalef(6,8,1);
+	glTranslatef(0, 0, 0);
+	glRotatef(-90, 1, 0, 0);
+	glScalef(6, 8, 1);
 	drawModel(*models[0], render_type);
 	glPopMatrix();
 
+	glColor3ub(212, 199, 183);
+	glPushMatrix();
+	glTranslatef(0, 300, 0);
+	glRotatef(90, 1, 0, 0);
+	glScalef(6, 8, 1);
+	drawModel(*models[0], render_type);
+	glPopMatrix();
+
+	// ------------------------------------------------------------------------
+	//  DESENHA MESAS
+	// ------------------------------------------------------------------------
 	glPushMatrix();
 
 	glTranslatef(limites[36].x,limites[36].y-12,limites[36].z);
@@ -772,90 +659,96 @@ void drawObjects()
 		glPopMatrix();
 	}
 
-	int mesaIndex[] = {0, 9, 9, 9, 9, 36, 36, 36, 36, 36, 15, 15, 15, 20, 36, 8};
-	// int tipoIndex[] = {0, 0, 1, 3, 4,  0,  1,  1,  0,  5,  0,  2,  3,  1,  1, 6};
-	int tipoIndex[] = {8, 8, 9, 11, 12,  8,  9,  9,  8,  13,  8,  10,  11,  9,  9, 14};
+	// ------------------------------------------------------------------------
+	//  DESENHA OBJETOS
+	// ------------------------------------------------------------------------
+	int mesaIndex[] = {0, 9, 9,  9,  9, 36, 36, 36, 36, 36, 15, 15, 15, 20, 36,  8};
+	int tipoIndex[] = {8, 8, 9, 11, 12,  8,  9,  9,  8, 13,  8, 10, 11,  9,  9, 14};
 
 	float t[] = {
-		-9.000000, 0.000000, -4.000000, //0
-		-37.000000, 0.000000, 6.000000,// 3
-		-18.000000, 0.000000, 5.000000, // 6
-		-26.000000, 0.000000, 6.000000, // 9
-		-18.000000, 0.010000, 5.000000,
-		31.000000, 0.000000, 1.000000,
+		 -9.000000, 0.000000, -4.000000,
+		-37.000000, 0.000000,  6.000000,
+		-18.000000, 0.000000,  5.000000,
+		-26.000000, 0.000000,  6.000000,
+		-18.000000, 0.010000,  5.000000,
+		 31.000000, 0.000000,  1.000000,
 		-46.000000, 0.000000, 12.000000,
+
 		-46.000000, 3.200001, 11.000000,
-		35.000000, 0.000000, 9.000000,
-		16.000000, 7.000000, 19.000000,
-		-22.000000, 0.000000, 0.000000,
-		2.000000, 0.000000, -2.000000,
-		8.000000, 0.200000, -2.000000,
-		11.000000, 0.000000, -2.000000,
+
+		 35.000000, 0.000000,  9.000000,
+		 16.000000, 7.000000, 19.000000,
+		-22.000000, 0.000000,  0.000000,
+		  2.000000, 0.000000, -2.000000,
+		  8.000000, 0.200000, -2.000000,
+		 11.000000, 0.000000, -2.000000,
 		-46.000000, 6.400002, 13.000000,
-		19.399998, 0.600000, 11.000000
+		 19.399998, 0.600000, 11.000000
 	};
 
 	float r[] = {
-		153.000000, 0.000000, 1.000000, 0.000000,
-		405.000000, 0.000000, 1.000000, 0.000000,
-		42.000000, 0.000000, 1.000000, 0.000000,
-		-70.000000, 0.000000, 1.000000, 0.000000,
-		65.000000, 0.000000, 1.000000, 0.000000,
-		0.000000, 0.000000, 1.000000, 0.000000,
-		187.000000, 0.000000, 1.000000, 0.000000,
-		177.000000, 0.000000, 1.000000, 0.000000,
-		0.000000, 0.000000, 1.000000, 0.000000,
+		 153.000000, 0.000000, 1.000000, 0.000000,
+		 405.000000, 0.000000, 1.000000, 0.000000,
+		  42.000000, 0.000000, 1.000000, 0.000000,
+		 -70.000000, 0.000000, 1.000000, 0.000000,
+		  65.000000, 0.000000, 1.000000, 0.000000,
+		   0.000000, 0.000000, 1.000000, 0.000000,
+		 187.000000, 0.000000, 1.000000, 0.000000,
+		 177.000000, 0.000000, 1.000000, 0.000000,
+		   0.000000, 0.000000, 1.000000, 0.000000,
 		-130.000000, 0.000000, 1.000000, 0.000000,
 		-206.000000, 0.000000, 1.000000, 0.000000,
-		-13.000000, 0.000000, 1.000000, 0.000000,
-		10.000000, 0.000000, 1.000000, 0.000000,
-		-17.000000, 0.000000, 1.000000, 0.000000,
-		185.000000, 0.000000, 1.000000, 0.000000,
-		139.000000, 0.000000, 1.000000, 0.000000
+		 -13.000000, 0.000000, 1.000000, 0.000000,
+		  10.000000, 0.000000, 1.000000, 0.000000,
+		 -17.000000, 0.000000, 1.000000, 0.000000,
+		 185.000000, 0.000000, 1.000000, 0.000000,
+		 139.000000, 0.000000, 1.000000, 0.000000
 	};
 
 	for(int tr = 0, rot = 0, i = 0; i < 16; i++, tr += 3, rot += 4)
 	{
 		glPushMatrix();
-
 		MESA mesa = limites[mesaIndex[i]];
-
 		glTranslatef(mesa.x,mesa.y,mesa.z);
-		// glTranslatef(objetos[i]->transl[0],objetos[i]->transl[1],objetos[i]->transl[2]);
-		glTranslatef(t[tr], t[tr * 3 + 1], t[tr + 2]);
-
-		// glRotatef(objetos[i]->rot[0],objetos[i]->rot[1],objetos[i]->rot[2],objetos[i]->rot[3]);
+		glTranslatef(t[tr], t[tr + 1], t[tr + 2]);
 		glRotatef(r[rot], r[rot + 1], r[rot + 2], r[rot + 3]);
 		drawModel(*models[tipoIndex[i]], render_type);
 		glPopMatrix();
 	}
 
-	glPushMatrix();
-	glTranslatef(0,160,398);
-	glRotatef(180,0,1,0);
-	drawModel(*models[4], render_type);
-	glPopMatrix();
+	// ------------------------------------------------------------------------
+	//  DESENHA LAMPADAS
+	// ------------------------------------------------------------------------
+	for(int x = -150; x <= 300; x += 300)
+	{
+		int cont = 0;
 
-	// IF MODO DESENHO
-	// glDisable(GL_LIGHTING);
-	glBegin(GL_QUAD_STRIP);
-	glColor3ub(239,235,55);
-	glVertex3f(310,70,-500);
-	glVertex3f(310,70, 500);
-	glColor3ub(255,136,0);
-	glVertex3f(310,85,-500);
-	glVertex3f(310,85,500);
-	glColor3ub(170,11,61);
-	glVertex3f(310,100,-500);
-	glVertex3f(310,100,500);
-	glColor3ub(28,17,145);
-	glVertex3f(310,150,-500);
-	glVertex3f(310,150,500);
-	glColor3ub(0,0,0);
-	glVertex3f(310,250,-500);
-	glVertex3f(310,250,500);
-	glEnd();
-	// glEnable(GL_LIGHTING);
+		for(int z = -250; z <= 300; z += 250, cont++)
+		{
+			float emissao = 0.0f;
+
+			if(lightStatus[2 - cont])
+			{
+				emissao = 1.0f;
+			}
+
+			int index = models[7]->getMaterial("Luz");
+
+			if(index != -1)
+			{
+				models[7]->materials[index].Ke[0] = emissao;
+				models[7]->materials[index].Ke[1] = emissao;
+				models[7]->materials[index].Ke[2] = emissao;
+			}
+
+			glPushMatrix();
+			glTranslatef(x, 297, z);
+			glRotatef(90, 1, 0, 0);
+			glRotatef(90, 0, 0, 1);
+			drawModel(*models[7], render_type);
+			glPopMatrix();
+		}
+	}
 }
 
 void DefineLimitesMesas()
@@ -892,4 +785,26 @@ void DefineLimitesMesas()
 	limites[pos].x = 200;
 	limites[pos].z = 300;	
 	limites[pos].y = 70;
+}
+
+void drawGlasses(float x, float y, float z, float a)
+{
+	a += 25;
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	glRotatef(-90, 0, 1, 0);
+
+	glTranslatef(-a, 0, 0);
+	drawModel(*models[15], render_type);
+
+	glTranslatef(a * 2, 0, 0);
+	drawModel(*models[15], render_type);
+	
+	glTranslatef(75 - a, 0, 3);
+	drawModel(*models[15], render_type);
+	
+	glTranslatef(-150, 0, 0);
+	drawModel(*models[15], render_type);
+	
+	glPopMatrix();
 }

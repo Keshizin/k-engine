@@ -58,6 +58,7 @@ public:
 	// ------------------------------------------------------------------------
 	void setViewport(int x, int y, int width, int height);
 	void setProjection();
+	void setBackgroundColor(float red, float green, float blue, float alpha);
 	int initialize();
 	void setLightModel(int isLightEnable);
 	int setVSync(int vsync);
@@ -107,7 +108,6 @@ private:
 	double zoom;
 	double renderingWindowOffsetX;
 	double renderingWindowOffsetY;
-
 	float lightModelAmbient[4];
 };
 

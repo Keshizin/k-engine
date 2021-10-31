@@ -335,7 +335,7 @@ void GameEventHandler::beforeMainLoopEvent()
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
 	models = new KEModel();
-	models->loadfile("cubo.obj");
+	models->loadfile("obj/", "cubo.obj");
 }
 
 void GameEventHandler::afterMainLoopEvent()

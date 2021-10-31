@@ -64,4 +64,10 @@
 #define K_MOUSE_MIDDLE_BUTTON 1
 #define K_MOUSE_RIGHT_BUTTON  2
 
+// ****************************************************************************
+//  Common Colors
+// ****************************************************************************
+#define K_YELLOW_SHISA          0xF7C217
+#define K_DARK_AUBERGINE_UBUNTU 0x2C001E
+
 #endif

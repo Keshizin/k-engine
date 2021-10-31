@@ -37,7 +37,14 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	explicit KETimer(KEWINAPIWrapper *timeHandler);
+	explicit KETimer(KEWINAPIWrapper *apiWrapper);
+
+	KETimer(const KETimer& timer)
+		: stopTime(0), startTimer(0), temp(0), isStart(false), apiWrapper(apiWrapper)
+	{
+		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
+		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
+	}
 
 	// ------------------------------------------------------------------------
 	//  Public Methods

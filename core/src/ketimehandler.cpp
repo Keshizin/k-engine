@@ -25,6 +25,9 @@
 
 #include <ketimehandler.h>
 
+// ****************************************************************************
+//  KETimeHandler - Constructors & Destructors
+// ****************************************************************************
 KETimeHandler::KETimeHandler()
 	: frameTime(0), frameTimeLimit(0), perfomanceFrequency(0)
 {

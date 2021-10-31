@@ -27,6 +27,7 @@
 #define K_ENGINE_MODEL_H
 
 #include <vector>
+#include <string>
 
 typedef struct {
 	double x, y, z, w;
@@ -44,11 +45,34 @@ typedef struct {
 	double u, v, w;
 } TEXTURE_VERTEX;
 
-typedef struct {
+class MATERIAL
+{
+public:
+	MATERIAL() :
+		name(), Ns(0.0f), Ka(), Kd(), Ks(), Ke(), Ni(0.0f), d(0.0f), illum(0.0f), map_Kd()
+	{
+	}
+
+	std::string name;
+	float Ns; // focus of specular highlights in the material
+	float Ka[4];
+	float Kd[4];
+	float Ks[4];
+	float Ke[4];
+	float Ni; // optical density (aka index of refraction)
+	float d; // factor for dissolve
+	float illum;
+	std::string map_Kd;
+};
+
+class FACE
+{
+public:
 	std::vector<int> vertex_index;
 	std::vector<int> vertex_texture_index;
 	std::vector<int> vertex_normal_index;
-} FACE;
+	std::string material_name;
+};
 
 // ****************************************************************************
 //  K-Engine OBJReader Class
@@ -59,7 +83,9 @@ public:
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
-	bool loadfile(const char *filename);
+	bool loadfile(std::string path, std::string filename);
+	bool loadMTLFile(std::string path, std::string filename);
+	int getMaterial(std::string material_name) const;
 	void print() const;
 
 	std::vector<GEOMETRIC_VERTEX> geometricVertices;
@@ -67,6 +93,7 @@ public:
 	std::vector<NORMAL_VERTEX> vertexNormals;
 	std::vector<TEXTURE_VERTEX> textureVertices;
 	std::vector<FACE> faces;
+	std::vector<MATERIAL> materials;
 };
 
 #endif

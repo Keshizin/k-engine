@@ -28,14 +28,15 @@
 #include <kewinapiwrapper.h>
 #include <kewindow.h>
 #include <ketimehandler.h>
+#include <keprofile.h>
 
 #include <iostream>
 
 // ****************************************************************************
-//  K-Engine - Constructors and Destructors
+//  K-Engine Class - Constructors and Destructors
 // ****************************************************************************
 KEngine::KEngine(KEEventHandler *eventHandler)
-	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
+	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), profile(0), runningStatus(K_STOPPED)
 {
 	this->apiWrapper = new KEWINAPIWrapper();
 	setEventHandler(eventHandler);
@@ -44,8 +45,7 @@ KEngine::KEngine(KEEventHandler *eventHandler)
 	this->timeHandler = new KETimeHandler();
 	timeHandler->setPerfomanceFrequency(apiWrapper->getHighResolutionTimerFrequency());
 
-	//this->renderingSystem = new GERenderingSystem(this->apiWrapper);
-	//this->profile = new GEProfile(this->timeHandler);
+	this->profile = new KEProfile(this->apiWrapper);
 
 #ifdef K_DEBUG
 	// (!) only in debug mode!
@@ -63,12 +63,11 @@ KEngine::~KEngine()
 	delete apiWrapper;
 	delete gameWindow;
 	delete timeHandler;
-	//delete renderingSystem;
-	//delete profile;
+	delete profile;
 }
 
 // ****************************************************************************
-//  Public Methods
+//  K-Engine Class - Public Methods
 // ****************************************************************************
 void KEngine::startMainLoop()
 {
@@ -80,13 +79,13 @@ void KEngine::startMainLoop()
 	runningStatus = K_RUNNING;
 	eventHandler->beforeMainLoopEvent();
 	
-	// profile->start();
+	profile->start();
 	startloopTime = endTime = apiWrapper->getHighResolutionTimerCounter();
 
 	while(runningStatus != K_STOPPED)
 	{
 		startTime = apiWrapper->getHighResolutionTimerCounter();
-		// profile->update(timeHandler->getFrameTime());
+		profile->update(timeHandler->getFrameTime());
 
 		// --------------------------------------------------------------------
 		//  Win32 Message Pump
@@ -141,45 +140,40 @@ void KEngine::resumeGameLoop()
 	runningStatus = K_RUNNING;
 }
 
-// void KEngine::setFrameRate(int framePerSecond)
-// {
-// 	if (!framePerSecond)
-// 	{
-// 		timeHandler->setFrameTimeLimit(0);
-// 	}
-// 	else
-// 	{
-// 		timeHandler->setFrameTimeLimit(apiWrapper->getHighResolutionTimerFrequency() / framePerSecond);
-// 	}	
-// }
+void KEngine::setFrameRate(int framePerSecond)
+{
+	if (!framePerSecond)
+	{
+		timeHandler->setFrameTimeLimit(0);
+	}
+	else
+	{
+		timeHandler->setFrameTimeLimit(apiWrapper->getHighResolutionTimerFrequency() / framePerSecond);
+	}
+}
 
 // ****************************************************************************
-//  Getters and Setters
+//  K-Engine Class - Getters and Setters
 // ****************************************************************************
 KEWINAPIWrapper* KEngine::getAPIWrapper() const
 {
 	return apiWrapper;
 }
 
-KEWindow *KEngine::getGameWindow() const
+KEWindow* KEngine::getGameWindow() const
 {
 	return gameWindow;
 }
 
-KETimeHandler *KEngine::getTimeHandler() const
+KETimeHandler* KEngine::getTimeHandler() const
 {
 	return timeHandler;
 }
-// //GERenderingSystem *KEngine::getRenderingSystem()
-// //{
-// //	return renderingSystem;
-// //}
 
-
-// //GEProfile *KEngine::getProfile()
-// //{
-// //	return profile;
-// //}
+KEProfile* KEngine::getProfile()
+{
+	return profile;
+}
 
 void KEngine::setEventHandler(KEEventHandler *eventHandlerParam)
 {

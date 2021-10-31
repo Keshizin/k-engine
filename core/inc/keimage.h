@@ -28,9 +28,9 @@
 
 #include <string>
 
-namespace DIBLIB
+namespace KEIMAGE
 {
-	enum { DIBLIB_RGB, DIBLIB_RLE8, DIBLIB_RLE4, DIBLIB_BITFIELDS, DIBLIB_JPEG, DIBLIB_PNG };
+	enum { KEIMAGE_RGB, KEIMAGE_RLE8, KEIMAGE_RLE4, KEIMAGE_BITFIELDS, KEIMAGE_JPEG, KEIMAGE_PNG };
 	
 	class WORD
 	{
@@ -131,11 +131,12 @@ public:
 	DIB();
 	~DIB();
 
-	void loadFile(std::string filename, int swap);
+	void loadfile(std::string filename, int swap);
 	void release();
 	void printDump() const;
 	void printColorIndexDump() const;
 
+	unsigned long getBiBitCount() const;
 	unsigned long getWidth() const;
 	unsigned long getHeight() const ;
 	unsigned char* getColorIndex() const;
@@ -143,9 +144,9 @@ public:
 	unsigned long getColorIndexSize() const;
 
 private:
-	DIBLIB::BITMAPFILEHEADER bmfHeader;
-	DIBLIB::BITMAPINFOHEADER bmiHeader;
-	DIBLIB::RGBQUAD* bmiColors;
+	KEIMAGE::BITMAPFILEHEADER bmfHeader;
+	KEIMAGE::BITMAPINFOHEADER bmiHeader;
+	KEIMAGE::RGBQUAD* bmiColors;
 	unsigned long colorTableSize;
 	unsigned long colorIndexSize;
 	unsigned char* colorIndex;

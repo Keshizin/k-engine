@@ -32,9 +32,8 @@ class KEEventHandler;
 class KEWINAPIWrapper;
 class KEWindow;
 class KETimeHandler;
+class KEProfile;
 
-// #include <geprofile.h>
-// #include <gerenderingsystem.h>
 #include <keversion.h>
 #include <keconstants.h>
 
@@ -45,7 +44,7 @@ class KEngine
 {
 public:
 	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
+	//  Constructors & Destructors
 	// ------------------------------------------------------------------------
 	explicit KEngine(KEEventHandler *eventHandler);
 
@@ -65,7 +64,7 @@ public:
 	void stopMainLoop();
 	void pauseGameLoop();
 	void resumeGameLoop();
-	// void setFrameRate(int framePerSecond);
+	void setFrameRate(int framePerSecond);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
@@ -73,18 +72,15 @@ public:
 	KEWINAPIWrapper* getAPIWrapper() const;
 	KEWindow* getGameWindow() const;
 	KETimeHandler* getTimeHandler() const;
-	//GEProfile* getProfile();
-	//GERenderingSystem* getRenderingSystem();
 	void setEventHandler(KEEventHandler *eventHandler);
+	KEProfile* getProfile();
 
 private:
 	KEEventHandler* eventHandler;
 	KEWINAPIWrapper* apiWrapper;
 	KEWindow* gameWindow;
 	KETimeHandler* timeHandler;
-
-	//GERenderingSystem* renderingSystem;
-	//GEProfile* profile;
+	KEProfile* profile;
 	int runningStatus;
 };
 

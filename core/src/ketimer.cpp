@@ -25,7 +25,7 @@
 
 #include <ketimer.h>
 #include <kewinapiwrapper.h>
-#include <iostream>
+// #include <iostream>
 
 // ****************************************************************************
 //  KETimer constructor and destructor

@@ -33,31 +33,31 @@
 // ----------------------------------------------------------------------------
 //  WORD CLASS METHOD DEFINITIONS
 // ----------------------------------------------------------------------------
-DIBLIB::WORD::WORD() : byte1(0), byte2(0) {}
+KEIMAGE::WORD::WORD() : byte1(0), byte2(0) {}
 
-unsigned short DIBLIB::WORD::get() const
+unsigned short KEIMAGE::WORD::get() const
 {
 	return static_cast<unsigned short>((0 | byte1) << 8 | byte2);
 }
 
-void DIBLIB::WORD::set(unsigned short word)
+void KEIMAGE::WORD::set(unsigned short word)
 {
 	K_UNREFERENCED_PARAMETER(word);
 }
 
-void DIBLIB::WORD::swap()
+void KEIMAGE::WORD::swap()
 {
 	unsigned char temp = byte2;
 	byte2 = byte1;
 	byte1 = temp;
 }
 
-unsigned char DIBLIB::WORD::getByte1() const
+unsigned char KEIMAGE::WORD::getByte1() const
 {
 	return byte1;
 }
 
-unsigned char DIBLIB::WORD::getByte2() const
+unsigned char KEIMAGE::WORD::getByte2() const
 {
 	return byte2;
 }
@@ -65,19 +65,19 @@ unsigned char DIBLIB::WORD::getByte2() const
 // ----------------------------------------------------------------------------
 //  DWORD CLASS METHODS
 // ----------------------------------------------------------------------------
-DIBLIB::DWORD::DWORD() : byte1(0), byte2(0), byte3(0), byte4(0) {}
+KEIMAGE::DWORD::DWORD() : byte1(0), byte2(0), byte3(0), byte4(0) {}
 
-unsigned long DIBLIB::DWORD::get() const
+unsigned long KEIMAGE::DWORD::get() const
 {
 	return static_cast<unsigned long>((((0 | byte1) << 8 | byte2) << 8 | byte3) << 8 | byte4);
 }
 
-void DIBLIB::DWORD::set(unsigned long dword)
+void KEIMAGE::DWORD::set(unsigned long dword)
 {
 	K_UNREFERENCED_PARAMETER(dword);
 }
 
-void DIBLIB::DWORD::swap()
+void KEIMAGE::DWORD::swap()
 {
 	unsigned char temp = byte1;
 	byte1 = byte4;
@@ -87,22 +87,22 @@ void DIBLIB::DWORD::swap()
 	byte3 = temp;
 }
 
-unsigned char DIBLIB::DWORD::getByte1() const
+unsigned char KEIMAGE::DWORD::getByte1() const
 {
 	return byte1;
 }
 
-unsigned char DIBLIB::DWORD::getByte2() const
+unsigned char KEIMAGE::DWORD::getByte2() const
 {
 	return byte2;
 }
 
-unsigned char DIBLIB::DWORD::getByte3() const
+unsigned char KEIMAGE::DWORD::getByte3() const
 {
 	return byte3;
 }
 
-unsigned char DIBLIB::DWORD::getByte4() const
+unsigned char KEIMAGE::DWORD::getByte4() const
 {
 	return byte4;
 }
@@ -110,13 +110,13 @@ unsigned char DIBLIB::DWORD::getByte4() const
 // ----------------------------------------------------------------------------
 //  RGBQUAD CLASS METHODS
 // ----------------------------------------------------------------------------
-DIBLIB::RGBQUAD::RGBQUAD() : rgbBlue(0), rgbGreen(0), rgbRed(0), rgbReserved(0) {}
+KEIMAGE::RGBQUAD::RGBQUAD() : rgbBlue(0), rgbGreen(0), rgbRed(0), rgbReserved(0) {}
 
-void DIBLIB::RGBQUAD::print() const
+void KEIMAGE::RGBQUAD::print() const
 {
 	std::cout
 		<< "================================================================================"
-		<< "\n R G B Q U A D   -   " << sizeof(DIBLIB::RGBQUAD) << " bytes"
+		<< "\n R G B Q U A D   -   " << sizeof(KEIMAGE::RGBQUAD) << " bytes"
 		<< "\n================================================================================"
 		<< "\n    rgbBlue: " << std::setw(4) << static_cast<int>(rgbBlue)
 		<< "\n   rgbGreen: " << std::setw(4) << static_cast<int>(rgbGreen)
@@ -128,11 +128,11 @@ void DIBLIB::RGBQUAD::print() const
 // ----------------------------------------------------------------------------
 //  BITMAPFILEHEADER CLASS METHODS
 // ----------------------------------------------------------------------------
-void DIBLIB::BITMAPFILEHEADER::print() const
+void KEIMAGE::BITMAPFILEHEADER::print() const
 {
 	std::cout
 		<< "================================================================================"
-		<< "\n B I T M A P   F I L E   H E A D E R   -   " << sizeof(DIBLIB::BITMAPFILEHEADER) << " bytes"
+		<< "\n B I T M A P   F I L E   H E A D E R   -   " << sizeof(KEIMAGE::BITMAPFILEHEADER) << " bytes"
 		<< "\n================================================================================"
 		<< "\n     bfType: "
 		<< std::setw(4) << bfType.getByte1()
@@ -167,7 +167,7 @@ void DIBLIB::BITMAPFILEHEADER::print() const
 		<< "\n================================================================================" << std::endl;
 }
 
-void DIBLIB::BITMAPFILEHEADER::swap()
+void KEIMAGE::BITMAPFILEHEADER::swap()
 {
 	bfSize.swap();
 	bfReserved1.swap();
@@ -175,25 +175,24 @@ void DIBLIB::BITMAPFILEHEADER::swap()
 	bfOffBits.swap();
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfSize() const
+KEIMAGE::DWORD KEIMAGE::BITMAPFILEHEADER::getBfSize() const
 {
 	return bfSize;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPFILEHEADER::getBfOffBits() const
+KEIMAGE::DWORD KEIMAGE::BITMAPFILEHEADER::getBfOffBits() const
 {
 	return bfOffBits;
 }
 
-
 // ----------------------------------------------------------------------------
 //  BITMAPINFOHEADER CLASS METHODS
 // ----------------------------------------------------------------------------
-void DIBLIB::BITMAPINFOHEADER::print() const
+void KEIMAGE::BITMAPINFOHEADER::print() const
 {
 	std::cout
 		<< "================================================================================"
-		<< "\n B I T M A P   I N F O   H E A D E R   -   " << sizeof(DIBLIB::BITMAPINFOHEADER) << " bytes"
+		<< "\n B I T M A P   I N F O   H E A D E R   -   " << sizeof(KEIMAGE::BITMAPINFOHEADER) << " bytes"
 		<< "\n================================================================================"
 		<< "\n         biSize: "
 		<< std::setw(4) << static_cast<int>(biSize.getByte1())
@@ -264,7 +263,7 @@ void DIBLIB::BITMAPINFOHEADER::print() const
 		<< "\n================================================================================" << std::endl;
 }
 
-void DIBLIB::BITMAPINFOHEADER::swap()
+void KEIMAGE::BITMAPINFOHEADER::swap()
 {
 	biSize.swap();
 	biWidth.swap();
@@ -279,32 +278,32 @@ void DIBLIB::BITMAPINFOHEADER::swap()
 	biClrImportant.swap();
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSize() const
+KEIMAGE::DWORD KEIMAGE::BITMAPINFOHEADER::getBiSize() const
 {
 	return biSize;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiWidth() const
+KEIMAGE::DWORD KEIMAGE::BITMAPINFOHEADER::getBiWidth() const
 {
 	return biWidth;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiHeight() const
+KEIMAGE::DWORD KEIMAGE::BITMAPINFOHEADER::getBiHeight() const
 {
 	return biHeight;
 }
 
-DIBLIB::WORD DIBLIB::BITMAPINFOHEADER::getBiBitCount() const
+KEIMAGE::WORD KEIMAGE::BITMAPINFOHEADER::getBiBitCount() const
 {
 	return biBitCount;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiCompression() const
+KEIMAGE::DWORD KEIMAGE::BITMAPINFOHEADER::getBiCompression() const
 {
 	return biCompression;
 }
 
-DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSizeImage() const
+KEIMAGE::DWORD KEIMAGE::BITMAPINFOHEADER::getBiSizeImage() const
 {
 	return biSizeImage;
 }
@@ -312,7 +311,10 @@ DIBLIB::DWORD DIBLIB::BITMAPINFOHEADER::getBiSizeImage() const
 // ----------------------------------------------------------------------------
 //  DIB CLASS METHODS
 // ----------------------------------------------------------------------------
-DIB::DIB() : bmiColors(0), colorTableSize(0), colorIndexSize(0), colorIndex(0) {}
+DIB::DIB()
+	: bmfHeader(), bmiHeader(), bmiColors(), colorTableSize(0), colorIndexSize(0), colorIndex(0)
+{
+}
 
 DIB::~DIB()
 {
@@ -320,7 +322,7 @@ DIB::~DIB()
 	delete colorIndex;
 }
 
-void DIB::loadFile(std::string filename, int swap)
+void DIB::loadfile(std::string filename, int swap)
 {
 	std::ifstream bitmapFile(filename, std::ios::in | std::ios::binary);
 
@@ -331,29 +333,25 @@ void DIB::loadFile(std::string filename, int swap)
 		return;
 	}
 
-	// reading BITMAPFILEHEADER
-	bitmapFile.read(reinterpret_cast<char*>(&bmfHeader), sizeof(DIBLIB::BITMAPFILEHEADER));
+	bitmapFile.read(reinterpret_cast<char*>(&bmfHeader), sizeof(KEIMAGE::BITMAPFILEHEADER));
 	bmfHeader.swap();
 
-	// reading BITMAPINFOHEADER
-	bitmapFile.read(reinterpret_cast<char*>(&bmiHeader), sizeof(DIBLIB::BITMAPINFOHEADER));
+	bitmapFile.read(reinterpret_cast<char*>(&bmiHeader), sizeof(KEIMAGE::BITMAPINFOHEADER));
 	bmiHeader.swap();
 
-	// reading RGBQUAD (COLOR TABLE)
-	colorTableSize = bmfHeader.getBfOffBits().get() - (bmiHeader.getBiSize().get() + sizeof(DIBLIB::BITMAPFILEHEADER));
+	colorTableSize = bmfHeader.getBfOffBits().get() - (bmiHeader.getBiSize().get() + sizeof(KEIMAGE::BITMAPFILEHEADER));
 
 	if (colorTableSize)
 	{
-		colorTableSize /= sizeof(DIBLIB::RGBQUAD);
-		bmiColors = new DIBLIB::RGBQUAD[colorTableSize];
+		colorTableSize /= sizeof(KEIMAGE::RGBQUAD);
+		bmiColors = new KEIMAGE::RGBQUAD[colorTableSize];
 
 		for (unsigned long i = 0; i < colorTableSize; i++)
 		{
-			bitmapFile.read(reinterpret_cast<char*>(&bmiColors[i]), sizeof(DIBLIB::RGBQUAD));
+			bitmapFile.read(reinterpret_cast<char*>(&bmiColors[i]), sizeof(KEIMAGE::RGBQUAD));
 		}
 	}
 
-	// reading COLOR INDEX ARRAY
 	colorIndexSize = bmfHeader.getBfSize().get() - bmfHeader.getBfOffBits().get();
 	colorIndex = new unsigned char[colorIndexSize];
 
@@ -366,6 +364,16 @@ void DIB::loadFile(std::string filename, int swap)
 
 		switch (bmiHeader.getBiBitCount().get())
 		{
+		case 1:
+			for(int i = 0; i < colorIndexSize; i++)
+			{
+				bitmapFile.read(reinterpret_cast<char*>(&colorIndex[index]), sizeof(unsigned char));
+				colorIndex[index] = ~colorIndex[index];
+				index++;
+			}
+
+			break;
+
 		case 24:
 			width = bmiHeader.getBiWidth().get();
 			height = static_cast<long>(bmiHeader.getBiHeight().get());
@@ -393,7 +401,7 @@ void DIB::loadFile(std::string filename, int swap)
 			break;
 
 		case 32:
-			if (bmiHeader.getBiCompression().get() == DIBLIB::DIBLIB_RGB)
+			if (bmiHeader.getBiCompression().get() == KEIMAGE::KEIMAGE_RGB)
 			{
 				width = bmiHeader.getBiWidth().get();
 				height = static_cast<long>(bmiHeader.getBiHeight().get());
@@ -427,15 +435,14 @@ void DIB::loadFile(std::string filename, int swap)
 	{
 		bitmapFile.read(reinterpret_cast<char*>(colorIndex), colorIndexSize);
 	}
-
 }
 
 void DIB::release()
 {
 	delete bmiColors;
+	delete colorIndex;
 	bmiColors = 0;
 	colorTableSize = 0;
-	delete colorIndex;
 	colorIndex = 0;
 	colorIndexSize = 0;
 }
@@ -471,6 +478,11 @@ void DIB::printDump() const
 		bmiColors[i].print();
 
 	printColorIndexDump();
+}
+
+unsigned long DIB::getBiBitCount() const
+{
+	return bmiHeader.getBiBitCount().get();
 }
 
 unsigned long DIB::getWidth() const

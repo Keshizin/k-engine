@@ -33,7 +33,7 @@
 static KEEventHandler *globalEventHandler = 0;
 
 // ****************************************************************************
-//  KEWINAPIWrapper Class - Constructors and Destructor
+//  KEWINAPIWrapper - Constructors and Destructor
 // ****************************************************************************
 KEWINAPIWrapper::KEWINAPIWrapper()
 	: hWindow(NULL), hDC(NULL), hRC(NULL)

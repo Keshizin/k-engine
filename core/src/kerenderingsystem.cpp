@@ -70,17 +70,27 @@ void drawModel(const KEModel &model, int mode)
 			glBegin(GL_LINE_LOOP);
 		else
 			glBegin(GL_POLYGON);
-		// else if(model.faces[face].vertex_index.size() == 3)
-		// 	glBegin(GL_TRIANGLES);
-		// else if(model.faces[face].vertex_index.size() == 4)
-		// 	glBegin(GL_QUADS);
-
-		// glBegin(GL_LINE_LOOP);
 
 		for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
 		{
 			if(model.faces[face].vertex_normal_index.size())
 			{
+				if(!model.faces[face].material_name.empty())
+				{
+					glDisable(GL_COLOR_MATERIAL);
+
+					int index = model.getMaterial(model.faces[face].material_name);
+
+					if(index != -1)
+					{
+						glMaterialfv(GL_FRONT, GL_AMBIENT,   model.materials[index].Ka);
+						glMaterialfv(GL_FRONT, GL_DIFFUSE,   model.materials[index].Kd);
+						glMaterialfv(GL_FRONT, GL_SPECULAR,  model.materials[index].Ks);
+						glMaterialfv(GL_FRONT, GL_EMISSION,  model.materials[index].Ke);
+						glMaterialf(GL_FRONT,  GL_SHININESS, model.materials[index].Ns);
+					}
+				}
+
 				glNormal3f(
 					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].i,
 					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].j,
@@ -105,12 +115,30 @@ void drawImage(int posX, int posY, const DIB &image)
 {
 	glRasterPos2i(posX, posY);
 
-	glDrawPixels(
-		image.getWidth(),
-		image.getHeight(),
-		GL_RGB,
-		GL_UNSIGNED_BYTE,
-		image.getColorIndex());
+	switch(image.getBiBitCount())
+	{
+		case 1:
+			glBitmap(
+				image.getWidth(),
+				image.getHeight(),
+				posX,
+				posY,
+				image.getWidth(),
+				image.getHeight(),
+				image.getColorIndex());
+			
+			break;
+
+		case 24:
+			glDrawPixels(
+				image.getWidth(),
+				image.getHeight(),
+				GL_RGB,
+				GL_UNSIGNED_BYTE,
+				image.getColorIndex());
+			
+			break;
+	}
 }
 
 // ****************************************************************************
@@ -241,6 +269,11 @@ void KERenderingSystem::setProjection()
 	}
 }
 
+void KERenderingSystem::setBackgroundColor(float red, float green, float blue, float alpha)
+{
+	glClearColor(red, green, blue, alpha);
+}
+
 int KERenderingSystem::initialize()
 {
 	if(!apiWrapper)
@@ -291,15 +324,15 @@ int KERenderingSystem::initialize()
 		return 0;
 	}
 
-	// glEnable(GL_BLEND);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
 	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
-	// glShadeModel(GL_SMOOTH);
+	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_NORMALIZE);
+	glEnable(GL_NORMALIZE);
 
 	return 1;
 }

@@ -1,8 +1,8 @@
 /*
-	Game Engine Mathmatics Library
+	K-Engine Mathmatics Library
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020 Fabio Takeshi Ishikawa
+	Copyright (C) 2021 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 	SOFTWARE.
 */
 
-#include <gemath.h>
+#include <kemath.h>
 #include <cmath>
 
 void getCirclePoints(double **vector, int numberOfPoints)

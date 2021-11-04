@@ -1,8 +1,35 @@
 # -----------------------------------------------------------------------------
-#  K-Engine MAKEFILE
+#  K-Engine MAKEFILE for Visual Studio C++ Compiler
 # -----------------------------------------------------------------------------
 
-all:
-	CL /c /EHsc ../core/src/kewindow.cpp ../core/src/kewinapiwrapper.cpp ../core/src/kecore.cpp ../core/src/ketimehandler.cpp ../core/src/ketimer.cpp ../core/src/kerenderingsystem.cpp ../core/src/keimage.cpp ../core/src/kemodel.cpp ../core/src/kelight.cpp ../core/src/keprofile.cpp /I../core/inc
-	lib kewindow.obj kewinapiwrapper.obj kecore.obj ketimehandler.obj ketimer.obj kerenderingsystem.obj keimage.obj kemodel.obj kelight.obj keprofile.obj /OUT:kengine.lib
-	CL ../game/main.cpp /I../core/inc /EHsc /link kengine.lib gdi32.lib opengl32.lib glu32.lib user32.lib /OUT:game.exe
+# Caminho dos diretórios
+CORE_INC_DIR=../core/inc
+CORE_SRC_DIR=../core/src
+LIBNAME=kengine.lib
+
+# Compilation and Linking Flags
+SRC_LIST=$(wildcard $(CORE_SRC_DIR)/*.cpp)
+OBJ_LIST=$(patsubst $(CORE_SRC_DIR)/%.cpp,%.obj,$(SRC_LIST))
+MSVCFLAGS=/EHsc /I$(CORE_INC_DIR)
+LIBFLAGS=/link $(LIBNAME) gdi32.lib opengl32.lib glu32.lib user32.lib
+
+# # Game Executable Generation
+all: $(LIBNAME)
+	CL ../game/main.cpp $(MSVCFLAGS) $(LIBFLAGS) /OUT:game.exe
+
+# K-Engine Static Library Generation
+# $(LIBNAME): $(SRC_LIST:.cpp=.obj)
+$(LIBNAME): $(OBJ_LIST)
+	lib $^ /OUT:$@
+
+%.obj: $(CORE_SRC_DIR)/%.cpp
+	CL /c $< $(MSVCFLAGS)
+
+clean:
+	del *.lib
+	del *.obj
+	del *.exe
+
+rebuild:
+	$(MAKE) clean
+	$(MAKE)

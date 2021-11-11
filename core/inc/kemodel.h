@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 typedef struct {
 	double x, y, z, w;
@@ -75,17 +76,29 @@ public:
 };
 
 // ****************************************************************************
-//  K-Engine OBJReader Class
+//  K-Engine KEModel Class
 // ****************************************************************************
 class KEModel
 {
 public:
+	KEModel() :
+		vertexArray(0), vertexArrayIndices(0), total(0),totalOfVertices(0)
+	{
+	}
+
+	~KEModel()
+	{
+		delete vertexArray;
+		delete vertexArrayIndices;
+	}
+
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	bool loadfile(std::string path, std::string filename);
 	bool loadMTLFile(std::string path, std::string filename);
 	int getMaterial(std::string material_name) const;
+	void setArrayVertex();
 	void print() const;
 
 	std::vector<GEOMETRIC_VERTEX> geometricVertices;
@@ -94,6 +107,11 @@ public:
 	std::vector<TEXTURE_VERTEX> textureVertices;
 	std::vector<FACE> faces;
 	std::vector<MATERIAL> materials;
+
+	double *vertexArray;
+	int totalOfVertices;
+	int *vertexArrayIndices;
+	int total;
 };
 
 #endif

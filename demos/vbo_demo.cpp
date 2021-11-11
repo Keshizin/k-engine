@@ -147,21 +147,17 @@ void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
 
-	// static const float black[] = {1.0f, 0.0f, 0.0f, 0.0f};
-	// glClearBufferfv(GL_COLOR, 0, black);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// // glMatrixMode(GL_MODELVIEW);
-	// // glLoadIdentity();
-	// // glRotatef(rotateX, 1,0,0);
-	// // glRotatef(rotateY, 0,1,0);
-	// // glTranslatef(-cameraX, -cameraY, -cameraZ);
+	// glMatrixMode(GL_MODELVIEW);
+	// glLoadIdentity();
+	// glRotatef(rotateX, 1,0,0);
+	// glRotatef(rotateY, 0,1,0);
+	// glTranslatef(-cameraX, -cameraY, -cameraZ);
 	
-	// glColor3f(1.0f, 1.0f, 1.0f);
-	// // drawModel(*models, render_type);
-	// drawModel2(*models, render_type);
-	draw();
+	glColor3f(1.0f, 1.0f, 1.0f);
+	// drawModel(*models, render_type);
+	drawModel2(*models, render_type);
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -171,22 +167,22 @@ void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
 
-	// if(state == 1)
-	// {
-	// 	init_x = x;
-	// 	init_y = y;
-	// 	init_rotateX = rotateX;
-	// 	init_rotateY = rotateY;
-	// 	init_cameraX = cameraX;
-	// 	init_cameraY = cameraY;
-	// 	init_cameraZ = cameraZ;
-	// 	buttonState = button;
-	// }
+	if(state == 1)
+	{
+		init_x = x;
+		init_y = y;
+		init_rotateX = rotateX;
+		init_rotateY = rotateY;
+		init_cameraX = cameraX;
+		init_cameraY = cameraY;
+		init_cameraZ = cameraZ;
+		buttonState = button;
+	}
 
-	// if(state == 0)
-	// {
-	// 	buttonState = -1;
-	// }
+	if(state == 0)
+	{
+		buttonState = -1;
+	}
 }
 
 void GameEventHandler::mouseMotionEvent(int x, int y)
@@ -194,40 +190,40 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
 
-	// if(buttonState == K_MOUSE_LEFT_BUTTON)
-	// {
-	// 	rotateY = init_rotateY - ((init_x - x) / SENS_ROTATE);
-	// 	rotateX = init_rotateX - ((init_y - y) / SENS_ROTATE);
+	if(buttonState == K_MOUSE_LEFT_BUTTON)
+	{
+		rotateY = init_rotateY - ((init_x - x) / SENS_ROTATE);
+		rotateX = init_rotateX - ((init_y - y) / SENS_ROTATE);
 
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-cameraX, -cameraY, -cameraZ);
+		glRotatef(rotateX, 1, 0, 0);
+		glRotatef(rotateY, 0, 1, 0);
+	}
 
-	// if(buttonState == K_MOUSE_MIDDLE_BUTTON)
-	// {
-	// 	cameraZ = init_cameraZ + ((init_y - y) / SENSE_CAMERA);
+	if(buttonState == K_MOUSE_MIDDLE_BUTTON)
+	{
+		cameraZ = init_cameraZ + ((init_y - y) / SENSE_CAMERA);
 
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-cameraX, -cameraY, -cameraZ);
+		glRotatef(rotateX, 1, 0, 0);
+		glRotatef(rotateY, 0, 1, 0);
+	}
 
-	// if(buttonState == K_MOUSE_RIGHT_BUTTON)
-	// {
-	// 	cameraX = init_cameraX + ((init_x - x) / SENSE_CAMERA);
-	// 	cameraY = init_cameraY - ((init_y - y) / SENSE_CAMERA);
+	if(buttonState == K_MOUSE_RIGHT_BUTTON)
+	{
+		cameraX = init_cameraX + ((init_x - x) / SENSE_CAMERA);
+		cameraY = init_cameraY - ((init_y - y) / SENSE_CAMERA);
 
-	// 	glMatrixMode(GL_MODELVIEW);
-	// 	glLoadIdentity();
-	// 	glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// 	glRotatef(rotateX, 1, 0, 0);
-	// 	glRotatef(rotateY, 0, 1, 0);
-	// }
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-cameraX, -cameraY, -cameraZ);
+		glRotatef(rotateX, 1, 0, 0);
+		glRotatef(rotateY, 0, 1, 0);
+	}
 }
 
 void GameEventHandler::keyboardEvent(unsigned long long key, int state)
@@ -235,28 +231,28 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
-	// if(key == 87 && state)
-	// {
-	// 	float sina = 10 * sin( rotateY * 3.1415 / 180.0);
-	// 	float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
+	if(key == 87 && state)
+	{
+		float sina = 10 * sin( rotateY * 3.1415 / 180.0);
+		float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
 
-	// 	cameraX += 0.2 * sina;
-	// 	cameraZ -= 0.2 * cosa;
-	// }
+		cameraX += 0.2 * sina;
+		cameraZ -= 0.2 * cosa;
+	}
 
-	// if(key == 83 && state)
-	// {
-	// 	float sina = 10 * sin( rotateY * 3.1415 / 180.0);
-	// 	float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
+	if(key == 83 && state)
+	{
+		float sina = 10 * sin( rotateY * 3.1415 / 180.0);
+		float cosa = 10 * cos( rotateY * 3.1415 / 180.0);
 
-	// 	cameraX -= 0.2 * sina;
-	// 	cameraZ += 0.2 * cosa;
-	// }
+		cameraX -= 0.2 * sina;
+		cameraZ += 0.2 * cosa;
+	}
 
-	// if(key == 27 && state)
-	// {
-	// 	engine->getGameWindow()->destroy();
-	// }
+	if(key == 27 && state)
+	{
+		engine->getGameWindow()->destroy();
+	}
 }
 
 void GameEventHandler::keyboardSpecialEvent(unsigned long long key, int state)
@@ -270,15 +266,15 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 	K_UNREFERENCED_PARAMETER(width);
 	K_UNREFERENCED_PARAMETER(height);
 
-	// renderingSystem->setViewport(0, 0, width, height);
-	// renderingSystem->setProjection();
+	renderingSystem->setViewport(0, 0, width, height);
+	renderingSystem->setProjection();
 
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
-	// glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// glRotatef(rotateX, 1, 0, 0);
-	// glRotatef(rotateY, 0, 1, 0);
+	glTranslatef(-cameraX, -cameraY, -cameraZ);
+	glRotatef(rotateX, 1, 0, 0);
+	glRotatef(rotateY, 0, 1, 0);
 }
 
 void GameEventHandler::moveWindowEvent(int x, int y)
@@ -307,8 +303,6 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	renderingSystem->getGLVersion();
-
 	// GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	// GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -339,18 +333,17 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	models = new KEModel();
 	models->loadfile("obj/", "cubo.obj");
-	set(*models);
 
-	// renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	// renderingSystem->setProjection();
+	renderingSystem->setViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	renderingSystem->setProjection();
 
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
-	// glTranslatef(-cameraX, -cameraY, -cameraZ);
-	// glRotatef(rotateX, 1, 0, 0);
-	// glRotatef(rotateY, 0, 1, 0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(-cameraX, -cameraY, -cameraZ);
+	glRotatef(rotateX, 1, 0, 0);
+	glRotatef(rotateY, 0, 1, 0);
 
-	// setVertexArray(*models);
+	setVertexArray(*models);
 }
 
 void GameEventHandler::afterMainLoopEvent()

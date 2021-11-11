@@ -39,8 +39,15 @@ typedef struct {
 } KERECT;
 
 void drawModel(const KEModel &model, int mode);
+
+void setVertexArray(KEModel &model);
+void drawModel2(const KEModel &model, int mode);
+
 void drawImage(int posX, int posY, const DIB &image);
 void setLight(const KELight &light, int isLightEnable, int lightParam);
+
+void set(const KEModel &model);
+void draw();
 
 // ****************************************************************************
 //  K-Engine Rendering System Class
@@ -71,6 +78,7 @@ public:
 	void setRenderingContext(int renderingContextParam);
 
 	void setRenderingWindow(double left, double right, double bottom, double top);
+	KERECT getRenderingWindow() const;
 	
 	void setWindowAspectCorrectionState(bool state);
 	
@@ -100,7 +108,6 @@ private:
 	int viewportWidth;
 	int viewportHeight;
 	KERECT renderingWindow;
-	double windowAspectCorrection;
 	bool windowAspectCorrectionState;
 	double projectionFOVY;
 	double projectionZNear;

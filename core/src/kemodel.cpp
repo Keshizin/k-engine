@@ -280,6 +280,42 @@ int KEModel::getMaterial(std::string material_name) const
 	return index;
 }
 
+void KEModel::setArrayVertex()
+{
+	int vertexCount = geometricVertices.size() * 3;
+
+	vertexArray = new double[vertexCount];
+	totalOfVertices = vertexCount;
+
+	int index = 0;
+
+	for(int i = 0; i < geometricVertices.size(); i++)
+	{
+		vertexArray[index++] = geometricVertices[i].x;
+		vertexArray[index++] = geometricVertices[i].y;
+		vertexArray[index++] = geometricVertices[i].z;
+	}
+
+	int c = 0;
+
+	for(int face = 0; face < faces.size(); face++)
+	{
+		c += faces[face].vertex_index.size();
+	}
+
+	total = c;
+	index = 0;
+	vertexArrayIndices = new int[c];
+
+	for(int face = 0; face < faces.size(); face++)
+	{
+		for(int vertex = 0; vertex < faces[face].vertex_index.size(); vertex++)
+		{
+			vertexArrayIndices[index++] = faces[face].vertex_index[vertex] - 1;
+		}
+	}
+}
+
 void KEModel::print() const
 {
 	std::cout << "GEOMETRIC VERTEX: " << geometricVertices.size() << std::endl;

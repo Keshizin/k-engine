@@ -55,7 +55,7 @@
 // ****************************************************************************
 #define K_CONTEXT_2D 0x01
 #define K_CONTEXT_3D_PERSPECTIVE 0x02
-#define K_CONTEXT_3D_ORTOGRAPHIC 0x03
+#define K_CONTEXT_3D_ORTHOGRAPHIC 0x03
 
 // ****************************************************************************
 //  K-Engine Mouse

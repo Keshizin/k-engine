@@ -29,6 +29,7 @@
 #include <kemodel.h>
 #include <keimage.h>
 #include <kelight.h>
+#include <keshader.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -58,12 +59,32 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
 PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
 PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
+PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex = 0;
+PFNGLCREATEBUFFERSPROC glCreateBuffers = 0;
+PFNGLCLEARBUFFERFVPROC glClearBufferfv = 0;
+PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage = 0;
+PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays = 0;
+PFNGLUSEPROGRAMPROC glUseProgram = 0;
+PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer = 0;
+PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = 0;
+PFNGLCREATEPROGRAMPROC glCreateProgram = 0;
+PFNGLCREATESHADERPROC glCreateShader = 0;
+PFNGLSHADERSOURCEPROC glShaderSource = 0;
+PFNGLCOMPILESHADERPROC glCompileShader = 0;
+PFNGLGETSHADERIVPROC glGetShaderiv = 0;
+PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog = 0;
+PFNGLATTACHSHADERPROC glAttachShader = 0;
+PFNGLLINKPROGRAMPROC glLinkProgram = 0;
+PFNGLGETPROGRAMIVPROC glGetProgramiv = 0;
+PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog = 0;
 
 // ****************************************************************************
 //  drawModel - Function to draw model 2D/3D
 // ****************************************************************************
 void drawModel(const KEModel &model, int mode)
 {
+	// int c = 0;
+
 	for(int face = 0; face < model.faces.size(); face++)
 	{
 		if(mode == 1)
@@ -73,29 +94,29 @@ void drawModel(const KEModel &model, int mode)
 
 		for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
 		{
-			if(model.faces[face].vertex_normal_index.size())
-			{
-				if(!model.faces[face].material_name.empty())
-				{
-					glDisable(GL_COLOR_MATERIAL);
+			// if(model.faces[face].vertex_normal_index.size())
+			// {
+			// 	if(!model.faces[face].material_name.empty())
+			// 	{
+			// 		glDisable(GL_COLOR_MATERIAL);
 
-					int index = model.getMaterial(model.faces[face].material_name);
+			// 		int index = model.getMaterial(model.faces[face].material_name);
 
-					if(index != -1)
-					{
-						glMaterialfv(GL_FRONT, GL_AMBIENT,   model.materials[index].Ka);
-						glMaterialfv(GL_FRONT, GL_DIFFUSE,   model.materials[index].Kd);
-						glMaterialfv(GL_FRONT, GL_SPECULAR,  model.materials[index].Ks);
-						glMaterialfv(GL_FRONT, GL_EMISSION,  model.materials[index].Ke);
-						glMaterialf(GL_FRONT,  GL_SHININESS, model.materials[index].Ns);
-					}
-				}
+			// 		if(index != -1)
+			// 		{
+			// 			glMaterialfv(GL_FRONT, GL_AMBIENT,   model.materials[index].Ka);
+			// 			glMaterialfv(GL_FRONT, GL_DIFFUSE,   model.materials[index].Kd);
+			// 			glMaterialfv(GL_FRONT, GL_SPECULAR,  model.materials[index].Ks);
+			// 			glMaterialfv(GL_FRONT, GL_EMISSION,  model.materials[index].Ke);
+			// 			glMaterialf(GL_FRONT,  GL_SHININESS, model.materials[index].Ns);
+			// 		}
+			// 	}
 
-				glNormal3f(
-					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].i,
-					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].j,
-					model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].k);
-			}
+			// 	glNormal3f(
+			// 		model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].i,
+			// 		model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].j,
+			// 		model.vertexNormals[ model.faces[face].vertex_normal_index[vertex] - 1 ].k);
+			// }
 
 			glVertex4d(
 				model.geometricVertices[ model.faces[face].vertex_index[vertex] - 1 ].x,
@@ -106,6 +127,125 @@ void drawModel(const KEModel &model, int mode)
 
 		glEnd();
 	}
+
+	// std::cout << "> c: " << c << std::endl; 
+}
+
+void setVertexArray(KEModel &model)
+{
+	model.setArrayVertex();
+
+	// GLuint vao;
+
+	// glGenVertexArrays(1, &vao);
+
+	// glBindVertexArray(vao);
+
+	GLuint name = 0;
+	glGenBuffers(1, &name);
+
+	std::cout << "@debug | name: " << name << std::endl;
+
+	if(glIsBuffer(name))
+	{
+
+		std::cout << "@debug | 1" << std::endl;
+	}
+	else
+	{
+		std::cout << "@debug | 2" << std::endl;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, name);
+
+	glBufferData(GL_ARRAY_BUFFER, model.totalOfVertices * sizeof(double), model.vertexArray, GL_STATIC_DRAW);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_DOUBLE, 0, 0);
+	// glVertexPointer(3, GL_DOUBLE, 0, model.vertexArray);
+}
+
+void drawModel2(const KEModel &model, int mode)
+{
+	// GLenum type;
+
+	// if(mode == 1)
+	// 	type = GL_LINE_LOOP;
+	// else
+	// 	// type = GL_QUADS;
+	// 	type = GL_TRIANGLES;
+
+	glDrawArrays(GL_TRIANGLES, 0, model.totalOfVertices);
+
+	// for(int face = 0; face < model.faces.size(); face++)
+	// {
+	// 	glBegin(type);
+		
+	// 	for(int vertex = 0; vertex < model.faces[face].vertex_index.size(); vertex++)
+	// 	{
+	// 		glArrayElement((model.faces[face].vertex_index[vertex] - 1));
+	// 	}
+
+	// 	glEnd();
+	// }
+}
+
+GLuint vao = 0;
+
+void draw()
+{
+	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
+	glClearBufferfv(GL_COLOR, 0, black);
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void set(const KEModel &model)
+{
+	// GLuint vbo;
+
+	// creating VAOs
+	// GLuint vao;
+	// glCreateVertexArrays(1, &vao);
+
+	// creating VBOs
+	// glCreateBuffers(1, &vbo);
+	// glNamedBufferStorage(vbo, model.totalOfVertices, model.vertexArray, 0);
+
+	// Setting up Shaders
+	// ShaderInfo shaders[] = {
+	// 	{GL_VERTEX_SHADER, "triangles.vert"},
+	// 	{GL_FRAGMENT_SHADER, "triangles.frag"},
+	// 	{GL_NONE, NULL}
+	// };
+
+	// GLuint program = LoadShaders(shaders);
+	// glUseProgram(program);
+
+	// glBindVertexArray(vao);
+	// glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 0, 0);
+	// glEnableVertexAttribArray(0);
+
+	static const GLfloat vertices[6][2] = 
+	{ 
+		{ -0.90, -0.90 }, // Triangle 1 
+		{0.85, -0.90 }, 
+		{ -0.90,0.85 }, 
+		{0.90, -0.85 }, // Triangle 2 
+		{0.90,0.90 }, 
+		{ -0.85,0.90 } 
+	};
+
+	GLuint vbo;
+	glCreateBuffers(1, &vbo); 
+	glNamedBufferStorage(vbo, sizeof(vertices), vertices, 0); 
+
+	glGenVertexArrays(1, &vao); 
+	glBindVertexArray(vao); 
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); 
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); 
+	glEnableVertexAttribArray(0);
 }
 
 // ****************************************************************************
@@ -166,7 +306,6 @@ KERenderingSystem::KERenderingSystem(KEWINAPIWrapper* apiWrapperParam) :
 	renderingContext(K_CONTEXT_2D),
 	viewportWidth(0),
 	viewportHeight(0),
-	windowAspectCorrection(1.0),
 	windowAspectCorrectionState(true),
 	projectionFOVY(0.0),
 	projectionZNear(0.0),
@@ -209,13 +348,13 @@ void KERenderingSystem::setProjection()
 		{
 			if(viewportWidth <= viewportHeight)
 			{
-				windowAspectCorrection = static_cast<double>(viewportHeight) / static_cast<double>(viewportWidth);
+				double windowAspectCorrection = static_cast<double>(viewportHeight) / static_cast<double>(viewportWidth);
 				window.bottom *= windowAspectCorrection;
 				window.top *= windowAspectCorrection;
 			}
 			else
 			{
-				windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
+				double windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
 				window.left *= windowAspectCorrection;
 				window.right *= windowAspectCorrection;
 			}
@@ -231,11 +370,11 @@ void KERenderingSystem::setProjection()
 	}
 	else if(renderingContext == K_CONTEXT_3D_PERSPECTIVE)
 	{
-		windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
+		double windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
 		gluPerspective(projectionFOVY, windowAspectCorrection, projectionZNear, projectionZFar);
 		// o processo de PAN deve ser realizado através do observador
 	}
-	else if(renderingContext == K_CONTEXT_3D_ORTOGRAPHIC)
+	else if(renderingContext == K_CONTEXT_3D_ORTHOGRAPHIC)
 	{
 		KERECT window;
 		window.left = renderingWindow.left;
@@ -247,13 +386,13 @@ void KERenderingSystem::setProjection()
 		{
 			if(viewportWidth <= viewportHeight)
 			{
-				windowAspectCorrection = static_cast<double>(viewportHeight) / static_cast<double>(viewportWidth);
+				double windowAspectCorrection = static_cast<double>(viewportHeight) / static_cast<double>(viewportWidth);
 				window.bottom *= windowAspectCorrection;
 				window.top *= windowAspectCorrection;
 			}
 			else
 			{
-				windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
+				double windowAspectCorrection = static_cast<double>(viewportWidth) / static_cast<double>(viewportHeight);
 				window.left *= windowAspectCorrection;
 				window.right *= windowAspectCorrection;
 			}
@@ -302,6 +441,24 @@ int KERenderingSystem::initialize()
 	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
 	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
 	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
+	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)wglGetProcAddress("glPrimitiveRestartIndex");
+	glCreateBuffers = (PFNGLCREATEBUFFERSPROC)wglGetProcAddress("glCreateBuffers");
+	glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)wglGetProcAddress("glClearBufferfv");
+	glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)wglGetProcAddress("glNamedBufferStorage");
+	glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)wglGetProcAddress("glCreateVertexArrays");
+	glUseProgram = (PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram");
+	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)wglGetProcAddress("glVertexAttribPointer");
+	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress("glEnableVertexAttribArray");
+	glCreateProgram = (PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram");
+	glCreateShader = (PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader");
+	glShaderSource = (PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource");
+	glCompileShader = (PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader");
+	glGetShaderiv = (PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv");
+	glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)wglGetProcAddress("glGetShaderInfoLog");
+	glAttachShader = (PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader");
+	glLinkProgram = (PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram");
+	glGetProgramiv = (PFNGLGETPROGRAMIVPROC)wglGetProcAddress("glGetProgramiv");
+	glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog");
 
 	if(
 		!wglSwapIntervalEXT &&
@@ -318,22 +475,113 @@ int KERenderingSystem::initialize()
 		!glDeleteBuffers &&
 		!glGenVertexArrays &&
 		!glBindVertexArray &&
-		!glDeleteVertexArrays)
+		!glDeleteVertexArrays &&
+		!glPrimitiveRestartIndex &&
+		!glCreateBuffers &&
+		!glClearBufferfv &&
+		!glNamedBufferStorage &&
+		!glCreateVertexArrays &&
+		!glUseProgram &&
+		!glVertexAttribPointer &&
+		!glEnableVertexAttribArray &&
+		!glCreateProgram &&
+		!glCreateShader &&
+		!glShaderSource &&
+		!glCompileShader &&
+		!glGetShaderiv &&
+		!glGetShaderInfoLog &&
+		!glAttachShader &&
+		!glLinkProgram &&
+		!glGetProgramiv &&
+		!glGetProgramInfoLog)
 	{
 		std::cout << "(!) ERROR - It was not possible to load GL extension: " << glGetError() << "\n" << std::endl;
 		return 0;
 	}
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// (!) Enabling VERTEX SHADER and FRAGMENT SHADER here!
+	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
-	glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+	if(!vertexShaderID)
+	{
+		std::cout << "(!) ERROR - It was not possible to create a vertex shader!\n" << std::endl;
+	}
+
+	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	if(!fragmentShaderID)
+	{
+		std::cout << "(!) ERROR - It was not possible to create a fragment shader!\n" << std::endl;
+	}
+
+	KEShader vertexShader("../shaders/", "main_vertex_shader.vert");
+	const GLchar * vertexSource = vertexShader.getSource();
+
+	glShaderSource(vertexShaderID, 1, &vertexSource, NULL);
+	glCompileShader(vertexShaderID);
+	GLint param = 0;
+
+	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &param);
+
+	if(!param)
+	{
+		char buffer[500] = {0};
+
+		glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &param);
+		glGetShaderInfoLog(vertexShaderID, 500, &param, buffer);
+
+		std::cout << "(!) ERROR - vertex shader compilation:\n" << buffer << std::endl;
+	}
+
+	KEShader fragmentShader("../shaders/", "main_fragment_shader.frag");
+	const GLchar * fragmentSource = fragmentShader.getSource();
+
+	glShaderSource(fragmentShaderID, 1, &fragmentSource, NULL);
+	glCompileShader(fragmentShaderID);
+	param = 0;
+
+	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &param);
+
+	if(!param)
+	{
+		char buffer[500] = {0};
+
+		glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &param);
+		glGetShaderInfoLog(fragmentShaderID, 500, &param, buffer);
+
+		std::cout << "(!) ERROR - fragment shader compilation:\n" << buffer << std::endl;
+	}
+
+	// Creating the Main Shader
+	GLuint programID = glCreateProgram();
+	glAttachShader(programID, vertexShaderID);
+	glAttachShader(programID, fragmentShaderID);
+	glLinkProgram(programID);
+
+	param = 0;
+
+	glGetProgramiv(programID, GL_LINK_STATUS, &param);
+
+	if(!param)
+	{
+		char buffer[500] = {0};
+
+		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &param);
+		glGetProgramInfoLog(programID, 500, &param, buffer);
+
+		std::cout << "(!) ERROR - fragment shader compilation:\n" << buffer << std::endl;
+	}
+
+	glUseProgram(programID);
+
+	// glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
 	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
-
+	// glShadeModel(GL_SMOOTH);
+	// glEnable(GL_DEPTH_TEST);
+	// glEnable(GL_NORMALIZE);
+	// glEnable(GL_BLEND);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	return 1;
 }
 
@@ -377,6 +625,37 @@ void KERenderingSystem::setRenderingWindow(double left, double right, double bot
 	renderingWindow.right  = right;
 	renderingWindow.bottom = bottom;
 	renderingWindow.top    = top;
+}
+
+KERECT KERenderingSystem::getRenderingWindow() const
+{
+	KERECT window;
+	window.left = renderingWindow.left;
+	window.right = renderingWindow.right;
+	window.top = renderingWindow.top;
+	window.bottom = renderingWindow.bottom;
+
+	if(windowAspectCorrectionState)
+	{
+		if(viewportWidth <= viewportHeight)
+		{
+			double windowAspectCorrection = static_cast<GLdouble>(viewportHeight) / static_cast<double>(viewportWidth);
+			window.bottom *= windowAspectCorrection;
+			window.top *= windowAspectCorrection;
+		}
+		else
+		{
+			double windowAspectCorrection = static_cast<GLdouble>(viewportWidth) / static_cast<double>(viewportHeight);
+			window.left *= windowAspectCorrection;
+			window.right *= windowAspectCorrection;
+		}
+	}
+
+	window.left   += renderingWindowOffsetX + zoom;
+	window.right  += renderingWindowOffsetX - zoom;
+	window.top    += renderingWindowOffsetX - zoom;
+	window.bottom += renderingWindowOffsetX + zoom;
+	return window;
 }
 
 void KERenderingSystem::setWindowAspectCorrectionState(bool state)

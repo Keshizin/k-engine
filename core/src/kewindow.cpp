@@ -56,14 +56,14 @@ int KEWindow::create()
 	return apiWrapper->createWindow(x, y, width, height, name, style);
 }
 
-int KEWindow::create(int x, int y, int width, int height, std::string name, unsigned int style)
+int KEWindow::create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam)
 {
-	this->x = x;
-	this->y = y;
-	this->width = width;
-	this->height = height;
-	this->name = name;
-	this->style = style;
+	this->x = xParam;
+	this->y = yParam;
+	this->width = widthParam;
+	this->height = heightParam;
+	this->name = nameParam;
+	this->style = styleParam;
 
 	if(!apiWrapper)
 	{

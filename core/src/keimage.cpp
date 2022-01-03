@@ -365,7 +365,7 @@ void DIB::loadfile(std::string filename, int swap)
 		switch (bmiHeader.getBiBitCount().get())
 		{
 		case 1:
-			for(int i = 0; i < colorIndexSize; i++)
+			for(unsigned long i = 0; i < colorIndexSize; i++)
 			{
 				bitmapFile.read(reinterpret_cast<char*>(&colorIndex[index]), sizeof(unsigned char));
 				colorIndex[index] = ~colorIndex[index];

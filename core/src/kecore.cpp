@@ -34,7 +34,7 @@
 //  K-Engine Class - Constructors and Destructors
 // ****************************************************************************
 KEngine::KEngine(KEEventHandler *eventHandler)
-	: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), profile(0), runningStatus(K_STOPPED)
+	: eventHandler(0), apiWrapper(0), gameWindow(0), timeHandler(0), profile(0), runningStatus(K_STOPPED)
 {
 	this->apiWrapper = new KEWINAPIWrapper();
 	setEventHandler(eventHandler);

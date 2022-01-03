@@ -51,15 +51,17 @@ int KEShader::loadShader(std::string path, std::string filename)
 	}
 
 	shaderfile.seekg(0, std::ios::end);
-	int fileSize = shaderfile.tellg();
+	// int fileSize = shaderfile.tellg();
+	std::streamoff fileSize = shaderfile.tellg();
 	shaderfile.seekg(0, std::ios::beg);
-	source = new char[fileSize];
+	source = new char[ static_cast<size_t>(fileSize)];
 	shaderfile.read(reinterpret_cast<char*>(source), fileSize);
 	std::string s = source;
 	rows = std::count(s.begin(), s.end(), '\n');
+	return true;
 }
 
-int KEShader::getRows() const
+long long int KEShader::getRows() const
 {
 	return rows;
 }

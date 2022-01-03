@@ -24,7 +24,6 @@
 */
 
 #include <kecore.h>
-#include <keaux.h>
 #include <keeventhandler.h>
 #include <kerenderingsystem.h>
 #include <kemodel.h>

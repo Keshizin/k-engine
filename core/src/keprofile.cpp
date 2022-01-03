@@ -38,9 +38,9 @@ KEProfile::KEProfile(KEWINAPIWrapper *apiWrapper) :
 	maxFrameTime(0),
 	minFrameTime(0),
 	meanFrameTime(0),
-	minFramesPerSecond(0),
+	frameTimeTotal(0),
 	maxFramesPerSecond(0),
-	frameTimeTotal(0)
+	minFramesPerSecond(0)
 {
 	timer = new KETimer(apiWrapper);
 	timer->setTimerInMs(1000);

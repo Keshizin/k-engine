@@ -35,11 +35,11 @@ public:
 	~KEShader();
 
 	int loadShader(std::string path, std::string filename);
-	int getRows() const;
+	long long int getRows() const;
 	const char * getSource() const; 
 
 private:
-	int rows;
+	long long int rows;
 	char *source;
 
 };

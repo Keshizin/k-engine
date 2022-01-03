@@ -26,6 +26,7 @@
 #ifndef K_ENGINE_H
 #define K_ENGINE_H
 
+#include <keaux.h>
 #include <keversion.h>
 #include <kewinapiwrapper.h>
 #include <kewindow.h>
@@ -46,9 +47,10 @@ public:
 	// ------------------------------------------------------------------------
 	explicit KEngine(KEEventHandler *eventHandler);
 
-	KEngine(const KEngine& win)
-		: apiWrapper(0), eventHandler(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
+	KEngine(const KEngine& engine)
+		: eventHandler(0), apiWrapper(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
 	{
+		K_UNREFERENCED_PARAMETER(const_cast<KEngine&>(engine));
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
 		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
 	}

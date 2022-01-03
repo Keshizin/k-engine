@@ -28,7 +28,8 @@
 // ****************************************************************************
 //  KELight Class - Constructors and Destructors
 // ****************************************************************************
-KELight::KELight() : diffuse(), specular(), ambient(), position()
+KELight::KELight()
+	: ambient(), diffuse(), specular(), position()
 {
 }
 

@@ -26,6 +26,8 @@
 #ifndef K_ENGINE_TIMER_H
 #define K_ENGINE_TIMER_H
 
+#include <keaux.h>
+
 class KEWINAPIWrapper;
 
 // ****************************************************************************
@@ -42,6 +44,8 @@ public:
 	KETimer(const KETimer& timer)
 		: stopTime(0), startTimer(0), temp(0), isStart(false), apiWrapper(apiWrapper)
 	{
+		K_UNREFERENCED_PARAMETER(const_cast<KETimer&>(timer));
+
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
 		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
 	}

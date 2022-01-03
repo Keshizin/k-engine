@@ -26,6 +26,7 @@
 #ifndef K_ENGINE_WINDOW_CLASS_H
 #define K_ENGINE_WINDOW_CLASS_H
 
+#include <keaux.h>
 #include <keconstants.h>
 #include <string>
 
@@ -47,6 +48,7 @@ public:
 	KEWindow(const KEWindow& win)
 		: apiWrapper(0), x(0), y(0), width(0), height(0), name(""), style(K_WINDOW_DEFAULT)
 	{
+		K_UNREFERENCED_PARAMETER(const_cast<KEWindow&>(win));
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
 		//     Pode ocorrer problemas se dois objetos apontarem para o mesmo apiWrapper.
 	}
@@ -55,7 +57,7 @@ public:
 	//  Public Methods
 	// ------------------------------------------------------------------------
 	int create();
-	int create(int x, int y, int width, int height, std::string name, unsigned int style);
+	int create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam);
 	int destroy();
 	int show(int showType);
 

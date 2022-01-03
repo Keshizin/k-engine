@@ -29,6 +29,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <keaux.h>
 #include <string>
 
 class KEEventHandler;
@@ -55,9 +56,11 @@ public:
 	KEWINAPIWrapper();
 	~KEWINAPIWrapper();
 
-	KEWINAPIWrapper(const KEWINAPIWrapper& win)
+	KEWINAPIWrapper(const KEWINAPIWrapper& api)
 		: hWindow(NULL), hDC(NULL), hRC(NULL)
 	{
+		K_UNREFERENCED_PARAMETER(const_cast<KEWINAPIWrapper&>(api));
+
 		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
 		// Pode ocorrer problemas se dois objetos apontarem para hWindow,
 		// hDC e hRC.

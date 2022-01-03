@@ -47,10 +47,10 @@ typedef struct {
 	float z;
 } SCALE;
 
-class GEObject
+class KEOBject
 {
 public:
-	GEObject(KEModel* modelParam);
+	KEOBject(KEModel* modelParam);
 
 	// void update(long long frameTime);
 	// void draw();

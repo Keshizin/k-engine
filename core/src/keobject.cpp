@@ -26,7 +26,7 @@
 #include <keobject.h>
 #include <kemodel.h>
 
-GEObject::GEObject(KEModel* modelParam) :
+KEOBject::KEOBject(KEModel* modelParam) :
 	model(modelParam)
 {
 	translate.x = 0.0f;

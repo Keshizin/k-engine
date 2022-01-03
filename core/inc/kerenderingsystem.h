@@ -26,28 +26,54 @@
 #ifndef K_ENGINE_RENDERING_SYSTEM_H
 #define K_ENGINE_RENDERING_SYSTEM_H
 
+#include <kemodel.h>
+
 class KEWINAPIWrapper;
 class KEModel;
-class DIB;
-class KELight;
 
-typedef struct {
-	double left;
-	double right;
-	double top;
-	double bottom;
-} KERECT;
+//class DIB;
+//class KELight;
 
-void drawModel(const KEModel &model, int mode);
+//typedef struct {
+//	double left;
+//	double right;
+//	double top;
+//	double bottom;
+//} KERECT;
 
-void setVertexArray(KEModel &model);
-void drawModel2(const KEModel &model, int mode);
+//void drawModel(const KEModel &model, int mode);
+//void setVertexArray(KEModel &model);
+//void drawModel2(const KEModel &model, int mode);
+//void drawImage(int posX, int posY, const DIB &image);
+//void setLight(const KELight &light, int isLightEnable, int lightParam);
+//void set(const KEModel &model);
+//void draw(const KEModel &model);
+//void release();
 
-void drawImage(int posX, int posY, const DIB &image);
-void setLight(const KELight &light, int isLightEnable, int lightParam);
+// ****************************************************************************
+//  K-Engine VAO Manager Class
+// ****************************************************************************
+class ModelManager
+{
+public:
+	ModelManager(int size);
 
-void set(const KEModel &model);
-void draw();
+private:
+	KEModel* models;
+};
+
+// class VAOManager
+// {
+// public:
+// 	VAOManager(int n);
+// 	~VAOManager();
+
+// 	void loadVBO(unsigned int vaoName, const &KEModel);
+
+// private:
+// 	unsigned int *vaoNames;
+// 	int size;
+// };
 
 // ****************************************************************************
 //  K-Engine Rendering System Class
@@ -58,64 +84,67 @@ public:
 	// ------------------------------------------------------------------------
 	//  Constructors and Destructors
 	// ------------------------------------------------------------------------
-	KERenderingSystem(KEWINAPIWrapper* apiWrapperParam);
+	explicit KERenderingSystem(KEWINAPIWrapper* apiWrapperParam);
 
 	// ------------------------------------------------------------------------
 	//  Public Methods
 	// ------------------------------------------------------------------------
-	void setViewport(int x, int y, int width, int height);
-	void setProjection();
-	void setBackgroundColor(float red, float green, float blue, float alpha);
-	int initialize();
-	void setLightModel(int isLightEnable);
+	//void setViewport(int x, int y, int width, int height);
+	//void setProjection();
+	//void setBackgroundColor(float red, float green, float blue, float alpha);
+
+	int startup();
 	int setVSync(int vsync);
 	void getGLVersion() const;
+
+	//void setLightModel(int isLightEnable);
 
 	// ------------------------------------------------------------------------
 	//  Getters and Setters
 	// ------------------------------------------------------------------------
-	int getRenderingContext() const;
-	void setRenderingContext(int renderingContextParam);
+	//int getRenderingContext() const;
+	//void setRenderingContext(int renderingContextParam);
 
-	void setRenderingWindow(double left, double right, double bottom, double top);
-	KERECT getRenderingWindow() const;
+	//void setRenderingWindow(double left, double right, double bottom, double top);
+	//KERECT getRenderingWindow() const;
 	
-	void setWindowAspectCorrectionState(bool state);
+	//void setWindowAspectCorrectionState(bool state);
 	
-	void setProjectionFOVY(double fovyParam);
-	double getProjectionFOVY() const;
+	//void setProjectionFOVY(double fovyParam);
+	//double getProjectionFOVY() const;
 
-	void setProjectionZNear(double projectionZNearParam);
-	double getProjectionZNear() const;
-	
-	void setProjectionZFar(double projectionZFarParam);
-	double getProjectionZFar() const;
-	
-	void setZoom(double zoomParam);
-	double getZoom() const;
-	
-	void setRenderingWindowOffsetX(double offset);
-	double getRenderingWindowOffsetX() const;
-	
-	void setRenderingWindowOffsetY(double offset);
-	double getRenderingWindowOffsetY() const;
+	//void setProjectionZNear(double projectionZNearParam);
+	//double getProjectionZNear() const;
+	//
+	//void setProjectionZFar(double projectionZFarParam);
+	//double getProjectionZFar() const;
+	//
+	//void setZoom(double zoomParam);
+	//double getZoom() const;
+	//
+	//void setRenderingWindowOffsetX(double offset);
+	//double getRenderingWindowOffsetX() const;
+	//
+	//void setRenderingWindowOffsetY(double offset);
+	//double getRenderingWindowOffsetY() const;
 
-	void setLightModelAmbient(float red, float green, float blue, float alpha);
+	//void setLightModelAmbient(float red, float green, float blue, float alpha);
 
 private:
 	KEWINAPIWrapper* apiWrapper;
-	int renderingContext;
-	int viewportWidth;
-	int viewportHeight;
-	KERECT renderingWindow;
-	bool windowAspectCorrectionState;
-	double projectionFOVY;
-	double projectionZNear;
-	double projectionZFar;
-	double zoom;
-	double renderingWindowOffsetX;
-	double renderingWindowOffsetY;
-	float lightModelAmbient[4];
+
+	//int renderingContext;
+	//int viewportWidth;
+	//int viewportHeight;
+	//KERECT renderingWindow;
+	//bool windowAspectCorrectionState;
+	//double projectionFOVY;
+	//double projectionZNear;
+	//double projectionZFar;
+	//double zoom;
+	//double renderingWindowOffsetX;
+	//double renderingWindowOffsetY;
+	//float lightModelAmbient[4];
 };
 
 #endif

@@ -26,92 +26,14 @@
 #ifndef K_ENGINE_MODEL_H
 #define K_ENGINE_MODEL_H
 
-#include <vector>
-#include <string>
-#include <iostream>
-
-typedef struct {
-	double x, y, z, w;
-} GEOMETRIC_VERTEX;
-
-typedef struct {
-	double u, v, w;
-} PARAMETER_SPACE_VERTEX;
-
-typedef struct {
-	double i, j, k;
-} NORMAL_VERTEX;
-
-typedef struct {
-	double u, v, w;
-} TEXTURE_VERTEX;
-
-class MATERIAL
-{
-public:
-	MATERIAL() :
-		name(), Ns(0.0f), Ka(), Kd(), Ks(), Ke(), Ni(0.0f), d(0.0f), illum(0.0f), map_Kd()
-	{
-	}
-
-	std::string name;
-	float Ns; // focus of specular highlights in the material
-	float Ka[4];
-	float Kd[4];
-	float Ks[4];
-	float Ke[4];
-	float Ni; // optical density (aka index of refraction)
-	float d; // factor for dissolve
-	float illum;
-	std::string map_Kd;
-};
-
-class FACE
-{
-public:
-	std::vector<int> vertex_index;
-	std::vector<int> vertex_texture_index;
-	std::vector<int> vertex_normal_index;
-	std::string material_name;
-};
-
 // ****************************************************************************
 //  K-Engine KEModel Class
 // ****************************************************************************
 class KEModel
 {
 public:
-	KEModel() :
-		vertexArray(0), vertexArrayIndices(0), total(0),totalOfVertices(0)
-	{
-	}
-
-	~KEModel()
-	{
-		delete vertexArray;
-		delete vertexArrayIndices;
-	}
-
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	bool loadfile(std::string path, std::string filename);
-	bool loadMTLFile(std::string path, std::string filename);
-	int getMaterial(std::string material_name) const;
-	void setArrayVertex();
-	void print() const;
-
-	std::vector<GEOMETRIC_VERTEX> geometricVertices;
-	std::vector<PARAMETER_SPACE_VERTEX> parameterSpaceVertices;
-	std::vector<NORMAL_VERTEX> vertexNormals;
-	std::vector<TEXTURE_VERTEX> textureVertices;
-	std::vector<FACE> faces;
-	std::vector<MATERIAL> materials;
-
-	double *vertexArray;
-	int totalOfVertices;
-	int *vertexArrayIndices;
-	int total;
+private:
+	float* vertexArray;
 };
 
 #endif

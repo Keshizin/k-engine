@@ -26,16 +26,14 @@
 #ifndef K_ENGINE_H
 #define K_ENGINE_H
 
+#include <keversion.h>
+#include <kewinapiwrapper.h>
+#include <kewindow.h>
+
 #define K_DEBUG 1
 
-class KEEventHandler;
-class KEWINAPIWrapper;
-class KEWindow;
 class KETimeHandler;
 class KEProfile;
-
-#include <keversion.h>
-#include <keconstants.h>
 
 // ****************************************************************************
 //  K-Engine Class

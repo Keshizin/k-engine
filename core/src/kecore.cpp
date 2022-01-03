@@ -25,8 +25,6 @@
 
 #include <kecore.h>
 #include <keeventhandler.h>
-#include <kewinapiwrapper.h>
-#include <kewindow.h>
 #include <ketimehandler.h>
 #include <keprofile.h>
 

@@ -1,5 +1,5 @@
 /*
-	K-Engine Mathmatics Library
+	K-Engine Mathematics Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -24,22 +24,27 @@
 */
 
 #include <kemath.h>
-#include <cmath>
 
-void getCirclePoints(double **vector, int numberOfPoints)
-{
-	double radAngle = 0.0;
+// ****************************************************************************
+//  Vector 4 elements Data Type
+// ****************************************************************************
 
-	for (int points = 0; points < numberOfPoints; points++)
-	{
-		radAngle = 2 * K_PI * points / numberOfPoints;
+// #include <cmath>
 
-		vector[points][0] = cos(cos(radAngle));
-		vector[points][1] = sin(cos(radAngle));
-	}
-}
+// void getCirclePoints(double **vector, int numberOfPoints)
+// {
+// 	double radAngle = 0.0;
 
-int center(int a, int b)
-{
-	return (a - b) / 2;
-}
+// 	for (int points = 0; points < numberOfPoints; points++)
+// 	{
+// 		radAngle = 2 * K_PI * points / numberOfPoints;
+
+// 		vector[points][0] = cos(cos(radAngle));
+// 		vector[points][1] = sin(cos(radAngle));
+// 	}
+// }
+
+// int center(int a, int b)
+// {
+// 	return (a - b) / 2;
+// }

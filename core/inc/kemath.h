@@ -1,5 +1,5 @@
 /*
-	K-Engine Mathmatics Library
+	K-Engine Mathematics Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2021 Fabio Takeshi Ishikawa
@@ -26,16 +26,23 @@
 #ifndef K_ENGINE_MATH_H
 #define K_ENGINE_MATH_H
 
-// ****************************************************************************
-//  Constant Symbolic for PI
-// ****************************************************************************
-#define K_PI 3.141592653589793
+namespace kemath
+{
+	// ************************************************************************
+	//  Vector 4 elements Data Type
+	// ************************************************************************
+}
 
-// ****************************************************************************
-//  Function to calculate points of circle
-// ****************************************************************************
-void getCirclePoints(double **vector, int numberOfPoints);
+// // ****************************************************************************
+// //  Constant Symbolic for PI
+// // ****************************************************************************
+// #define K_PI 3.141592653589793
 
-int center(int a, int b);
+// // ****************************************************************************
+// //  Function to calculate points of circle
+// // ****************************************************************************
+// void getCirclePoints(double **vector, int numberOfPoints);
+
+// int center(int a, int b);
 
 #endif

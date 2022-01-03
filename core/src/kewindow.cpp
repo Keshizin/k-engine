@@ -56,6 +56,26 @@ int KEWindow::create()
 	return apiWrapper->createWindow(x, y, width, height, name, style);
 }
 
+int KEWindow::create(int x, int y, int width, int height, std::string name, unsigned int style)
+{
+	this->x = x;
+	this->y = y;
+	this->width = width;
+	this->height = height;
+	this->name = name;
+	this->style = style;
+
+	if(!apiWrapper)
+	{
+		std::cout << "(!) ERROR - It was not possible create a window: no apiwrapper.\n" << std::endl;
+		return 0;
+	}
+
+	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
+	// apontando para o objeto. Fazer essa validação!
+	return apiWrapper->createWindow(x, y, width, height, name, style);
+}
+
 int KEWindow::destroy()
 {
 	if(!apiWrapper)
@@ -153,14 +173,4 @@ void KEWindow::setStyle(unsigned int styleParam)
 unsigned int KEWindow::getStyle() const
 {
 	return style;
-}
-
-void KEWindow::setWindow(int x, int y, int width, int height, std::string name, unsigned int style)
-{
-	this->x = x;
-	this->y = y;
-	this->width = width;
-	this->height = height;
-	this->name = name;
-	this->style = style;
 }

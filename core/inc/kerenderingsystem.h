@@ -26,13 +26,63 @@
 #ifndef K_ENGINE_RENDERING_SYSTEM_H
 #define K_ENGINE_RENDERING_SYSTEM_H
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <GLEXT/wglext.h>
+#include <GLEXT/glext.h>
+
 #include <kemodel.h>
 
 class KEWINAPIWrapper;
-class KEModel;
 
-//class DIB;
-//class KELight;
+// ----------------------------------------------------------------------------
+//  OpenGL Procedures Extension for Win32
+// ----------------------------------------------------------------------------
+extern PFNWGLSWAPINTERVALEXTPROC        wglSwapIntervalEXT;
+extern PFNGLGENBUFFERSPROC              glGenBuffers;
+extern PFNGLISBUFFERPROC                glIsBuffer;
+extern PFNGLBINDBUFFERPROC              glBindBuffer;
+extern PFNGLBUFFERDATAPROC              glBufferData;
+extern PFNGLBUFFERSUBDATAPROC           glBufferSubData;
+extern PFNGLMAPBUFFERPROC               glMapBuffer;
+extern PFNGLUNMAPBUFFERPROC             glUnmapBuffer;
+extern PFNGLMAPBUFFERRANGEPROC          glMapBufferRange;
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC  glFlushMappedBufferRange;
+extern PFNGLCOPYBUFFERSUBDATAPROC       glCopyBufferSubData;
+extern PFNGLDELETEBUFFERSARBPROC        glDeleteBuffers;
+extern PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
+extern PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
+extern PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
+extern PFNGLPRIMITIVERESTARTINDEXPROC   glPrimitiveRestartIndex;
+extern PFNGLCREATEBUFFERSPROC           glCreateBuffers;
+extern PFNGLCLEARBUFFERFVPROC           glClearBufferfv;
+extern PFNGLNAMEDBUFFERSTORAGEPROC      glNamedBufferStorage;
+extern PFNGLCREATEVERTEXARRAYSPROC      glCreateVertexArrays;
+extern PFNGLUSEPROGRAMPROC              glUseProgram;
+extern PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
+extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+extern PFNGLCREATEPROGRAMPROC           glCreateProgram;
+extern PFNGLCREATESHADERPROC            glCreateShader;
+extern PFNGLSHADERSOURCEPROC            glShaderSource;
+extern PFNGLCOMPILESHADERPROC           glCompileShader;
+extern PFNGLGETSHADERIVPROC             glGetShaderiv;
+extern PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog;
+extern PFNGLATTACHSHADERPROC            glAttachShader;
+extern PFNGLLINKPROGRAMPROC             glLinkProgram;
+extern PFNGLGETPROGRAMIVPROC            glGetProgramiv;
+extern PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog;
+extern PFNGLMULTIDRAWELEMENTSPROC       glMultiDrawElements;
+extern PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv;
+extern PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
+extern PFNGLDRAWELEMENTSBASEVERTEXPROC  glDrawElementsBaseVertex;
+extern PFNGLDRAWARRAYSINSTANCEDPROC     glDrawArraysInstanced;
+extern PFNGLBUFFERSTORAGEPROC           glBufferStorage;
+extern PFNGLISVERTEXARRAYPROC           glIsVertexArray;
+extern PFNGLNAMEDBUFFERSUBDATAPROC      glNamedBufferSubData;
+extern PFNGLDELETEPROGRAMPROC           glDeleteProgram;
+extern PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
 
 //typedef struct {
 //	double left;
@@ -41,39 +91,50 @@ class KEModel;
 //	double bottom;
 //} KERECT;
 
-//void drawModel(const KEModel &model, int mode);
-//void setVertexArray(KEModel &model);
-//void drawModel2(const KEModel &model, int mode);
-//void drawImage(int posX, int posY, const DIB &image);
-//void setLight(const KELight &light, int isLightEnable, int lightParam);
-//void set(const KEModel &model);
-//void draw(const KEModel &model);
-//void release();
-
-// ****************************************************************************
-//  K-Engine VAO Manager Class
-// ****************************************************************************
-class ModelManager
+namespace kengine
 {
-public:
-	ModelManager(int size);
+	class ModelManager;
 
-private:
-	KEModel* models;
-};
+	// ------------------------------------------------------------------------
+	//  K-Engine Model Node class
+	// ------------------------------------------------------------------------
+	class modelnode
+	{
+		friend class modelmanager;
 
-// class VAOManager
-// {
-// public:
-// 	VAOManager(int n);
-// 	~VAOManager();
+	public:
+		explicit modelnode(const kengine::model &m);
+		~modelnode();
 
-// 	void loadVBO(unsigned int vaoName, const &KEModel);
+		void draw() const;
 
-// private:
-// 	unsigned int *vaoNames;
-// 	int size;
-// };
+	private:
+		GLuint vao;
+		GLuint vbo;
+
+		kengine::model data;
+		modelnode *next;
+	};
+
+	// ------------------------------------------------------------------------
+	//  K-Engine Model Node Manager class
+	// ------------------------------------------------------------------------
+	class modelmanager
+	{
+	public:
+		modelmanager();
+		~modelmanager();
+
+		void add(const kengine::model &m);
+		bool isEmpty() const;
+
+		void drawModels() const;
+
+	private:
+		modelnode *first;
+		modelnode *last;
+	};
+}
 
 // ****************************************************************************
 //  K-Engine Rendering System Class

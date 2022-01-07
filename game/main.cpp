@@ -26,13 +26,16 @@
 #include <kecore.h>
 #include <keeventhandler.h>
 #include <kerenderingsystem.h>
-#include <kemodel.h>
+
+#include <iostream>
 
 #define WINDOW_WIDTH   800
 #define WINDOW_HEIGHT  800
 
 KEngine* engine;
 KERenderingSystem* renderingSystem;
+
+kengine::modelmanager* manager;
 
 // ****************************************************************************
 //  Game Engine Core Events
@@ -94,6 +97,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
+
+	static const float bkgColor[] = { 0.4f, 0.2f, 0.6f, 1.0f }; 
+	glClearBufferfv(GL_COLOR, 0, bkgColor);
+
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
+	manager->drawModels();
 }
 
 void GameEventHandler::mouseEvent(int button, int state, int x, int y)
@@ -141,6 +150,7 @@ void GameEventHandler::moveWindowEvent(int x, int y)
 
 void GameEventHandler::finishAfterEvent()
 {
+	delete manager;
 	engine->stopMainLoop();
 }
 
@@ -159,7 +169,23 @@ void GameEventHandler::pauseEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	 renderingSystem->getGLVersion();
+	renderingSystem->getGLVersion();
+
+	manager = new kengine::modelmanager();
+
+	const GLfloat vertices[] = {
+		-0.90f, -0.90f, 0.0f,
+		 0.85f, -0.90f, 0.0f,
+		-0.90f,  0.85f, 0.0f,
+		 0.90f, -0.85f, 0.0f,
+		 0.90f,  0.90f, 0.0f,
+		-0.85f,  0.90f, 0.0f
+	};
+
+	kengine::model triangles;
+	triangles.copyData(vertices, 18);
+
+	manager->add(triangles);
 }
 
 void GameEventHandler::afterMainLoopEvent()

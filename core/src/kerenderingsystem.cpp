@@ -25,14 +25,10 @@
 
 #include <kerenderingsystem.h>
 #include <kewinapiwrapper.h>
+#include <keshader.h>
 #include <iostream>
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-#include <GLEXT/wglext.h>
-#include <GLEXT/glext.h>
+GLuint programID;
 
 // ----------------------------------------------------------------------------
 //  OpenGL Procedures Extension for Win32
@@ -84,6 +80,122 @@ PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor = 0;
 void getProcedureAddress();
 
 // ****************************************************************************
+//  K-Engine modelnode class 
+// ****************************************************************************
+kengine::modelnode::modelnode(const kengine::model &m)
+	: vao(0), vbo(0), data(m), next(0)
+{
+	// ------------------------------------------------------------------------
+	//  Creating Vertex Array Object (VAO)
+	// ------------------------------------------------------------------------
+	glCreateVertexArrays(1, &vao);
+
+	if(glGetError() == GL_INVALID_VALUE)
+	{
+		std::cout << "(!) ERROR - It was not possible to create VAO: " << glGetError() << "\n" << std::endl;
+	}
+
+	glBindVertexArray(vao);
+
+	if(glGetError() == GL_INVALID_OPERATION)
+	{
+		std::cout << "(!) ERROR - It was not possible to bind VAO: " << glGetError() << "\n" << std::endl;
+	}
+
+	// ------------------------------------------------------------------------
+	//  Creating Vertex Buffer Object (VBO)
+	// ------------------------------------------------------------------------
+	glCreateBuffers(1, &vbo);
+
+	if(glGetError() == GL_INVALID_VALUE)
+	{
+		std::cout << "(!) ERROR - It was not possible to create VBO: " << glGetError() << "\n" << std::endl;
+	}
+
+	// ------------------------------------------------------------------------
+	//  Loading VERTICES for Vertex Buffer Object (VBO)
+	// ------------------------------------------------------------------------
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glNamedBufferStorage(vbo, data.getSizeInBytes(), data.getVertexArray(), 0);
+
+	GLenum error = glGetError();
+
+	if(error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE)
+	{
+		std::cout << "(!) ERROR - It was not possible to allocate space for VBO: " << glGetError() << "\n" << std::endl;
+	}
+
+	// ------------------------------------------------------------------------
+	//  Shader Plumbing
+	// ------------------------------------------------------------------------
+	GLuint index = 0;
+	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(index);
+}
+
+kengine::modelnode::~modelnode()
+{
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+}
+
+void kengine::modelnode::draw() const
+{
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, data.getSize());
+}
+
+// ****************************************************************************
+//  K-Engine modelmanager class 
+// ****************************************************************************
+kengine::modelmanager::modelmanager()
+	: first(nullptr), last(nullptr)
+{
+}
+
+kengine::modelmanager::~modelmanager()
+{
+	modelnode *current = first;
+	modelnode *temp;
+
+	while(current != nullptr)
+	{
+		temp = current;
+		current = current->next;
+		delete temp;
+	}
+}
+
+void kengine::modelmanager::add(const kengine::model &m)
+{
+	modelnode *node = new modelnode(m);
+
+	if(isEmpty())
+		first = last = node;
+	else
+	{
+		last->next = node;
+		last = node;
+	}
+}
+
+bool kengine::modelmanager::isEmpty() const
+{
+	return first == nullptr;
+}
+
+void kengine::modelmanager::drawModels() const
+{
+	modelnode *current = first;
+
+	while(current != nullptr)
+	{
+		current->draw();
+		current = current->next;
+	}
+}
+
+// ****************************************************************************
 //  KERenderingSystem Constructors and Destructors
 // ****************************************************************************
 KERenderingSystem::KERenderingSystem(KEWINAPIWrapper* apiWrapperParam)
@@ -104,7 +216,6 @@ int KERenderingSystem::startup()
 	apiWrapper->initializeRenderingSystem();
 	getProcedureAddress();
 
-	/*
 	// (!) Enabling VERTEX SHADER and FRAGMENT SHADER here!
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
@@ -120,9 +231,8 @@ int KERenderingSystem::startup()
 		std::cout << "(!) ERROR - It was not possible to create a fragment shader!\n" << std::endl;
 	}
 
-	// KEShader vertexShader("../shaders/", "main_vertex_shader.vert");
-	KEShader vertexShader("../shaders/", "teste.vert");
-	const GLchar * vertexSource = vertexShader.getSource();
+	KEGLSLShader vertexShader("../shaders/", "main_vertex_shader.vert");
+	const GLchar* vertexSource = vertexShader.getSource();
 
 	glShaderSource(vertexShaderID, 1, &vertexSource, NULL);
 	glCompileShader(vertexShaderID);
@@ -140,8 +250,7 @@ int KERenderingSystem::startup()
 		std::cout << "(!) ERROR - vertex shader compilation:\n" << buffer << std::endl;
 	}
 
-	// KEShader fragmentShader("../shaders/", "main_fragment_shader.frag");
-	KEShader fragmentShader("../shaders/", "teste.frag");
+	KEGLSLShader fragmentShader("../shaders/", "main_fragment_shader.frag");
 	const GLchar * fragmentSource = fragmentShader.getSource();
 
 	glShaderSource(fragmentShaderID, 1, &fragmentSource, NULL);
@@ -182,18 +291,20 @@ int KERenderingSystem::startup()
 
 	glUseProgram(programID);
 
-	// render_model_matrix_loc = glGetUniformLocation(programID, "model_matrix");
-	render_projection_matrix_loc = glGetUniformLocation(programID, "projection_matrix");
+	// // render_model_matrix_loc = glGetUniformLocation(programID, "model_matrix");
+	// render_projection_matrix_loc = glGetUniformLocation(programID, "projection_matrix");
 
-	// glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+	// // glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
-	// modelos de Shading (GL_FLAT ou GL_SMOOTH)
-	// glShadeModel(GL_SMOOTH);
-	// glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_NORMALIZE);
-	// glEnable(GL_BLEND);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	*/
+	// // modelos de Shading (GL_FLAT ou GL_SMOOTH)
+	// // glShadeModel(GL_SMOOTH);
+	// // glEnable(GL_DEPTH_TEST);
+	// // glEnable(GL_NORMALIZE);
+	// // glEnable(GL_BLEND);
+	// // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+
 	return 1;
 }
 

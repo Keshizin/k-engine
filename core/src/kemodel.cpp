@@ -24,3 +24,84 @@
 */
 
 #include <kemodel.h>
+#include <iostream>
+
+// ----------------------------------------------------------------------------
+//  k-engine model class constructor
+// ----------------------------------------------------------------------------
+kengine::model::model()
+	: vertexArray{nullptr}, size{0}
+{
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class copy constructor
+// ----------------------------------------------------------------------------
+kengine::model::model(const model &m)
+{
+	size = m.size;
+	vertexArray = new float[size];
+
+	for(size_t i = 0; i < size; i++)
+		vertexArray[i] = m.vertexArray[i];
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class destructor
+// ----------------------------------------------------------------------------
+kengine::model::~model()
+{
+	delete vertexArray;
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class copy data
+// ----------------------------------------------------------------------------
+void kengine::model::copyData(const float *v, const size_t n)
+{
+	if(vertexArray != nullptr)
+	{
+		delete vertexArray;
+	}
+
+	size = n;
+	vertexArray = new float[size];
+
+	for(size_t i = 0; i < size; i++)
+	{
+		vertexArray[i] = v[i];
+	}
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class print dump
+// ----------------------------------------------------------------------------
+void kengine::model::printDump() const
+{
+	if(vertexArray == nullptr)
+		return;
+
+	for(size_t i = 0; i < size; i++)
+		std::cout << "element[" << i << "]: " << vertexArray[i] << std::endl;
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class get size in bytes
+// ----------------------------------------------------------------------------
+size_t kengine::model::getSizeInBytes() const
+{
+	return size * sizeof(float);
+}
+
+size_t kengine::model::getSize() const
+{
+	return size / 3;
+}
+
+// ----------------------------------------------------------------------------
+//  k-engine model class vertex array
+// ----------------------------------------------------------------------------
+const float * const kengine::model::getVertexArray() const
+{
+	return vertexArray;
+}

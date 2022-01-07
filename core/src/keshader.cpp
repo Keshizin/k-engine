@@ -28,18 +28,18 @@
 #include <iostream>
 #include <fstream>
 
-KEShader::KEShader(std::string path, std::string filename) :
+KEGLSLShader::KEGLSLShader(std::string path, std::string filename) :
 	rows(0), source(0)
 {
 	loadShader(path, filename);
 }
 
-KEShader::~KEShader()
+KEGLSLShader::~KEGLSLShader()
 {
 	delete source;
 }
 
-int KEShader::loadShader(std::string path, std::string filename)
+int KEGLSLShader::loadShader(std::string path, std::string filename)
 {
 	std::ifstream shaderfile(path + filename, std::ios::in | std::ios::binary);
 
@@ -61,12 +61,12 @@ int KEShader::loadShader(std::string path, std::string filename)
 	return true;
 }
 
-long long int KEShader::getRows() const
+long long int KEGLSLShader::getRows() const
 {
 	return rows;
 }
 
-const char * KEShader::getSource() const
+const char * KEGLSLShader::getSource() const
 {
 	return source;
 }

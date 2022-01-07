@@ -26,14 +26,28 @@
 #ifndef K_ENGINE_MODEL_H
 #define K_ENGINE_MODEL_H
 
-// ****************************************************************************
-//  K-Engine KEModel Class
-// ****************************************************************************
-class KEModel
+namespace kengine
 {
-public:
-private:
-	float* vertexArray;
-};
+	// ------------------------------------------------------------------------
+	//  This class is a conteiner for a Geometric Vertex Data
+	// ------------------------------------------------------------------------
+	class model
+	{
+	public:
+		model();
+		model(const model &m); // copy constructor
+		~model();
+
+		void copyData(const float *v, const size_t n);
+		void printDump() const;
+		size_t getSizeInBytes() const;
+		size_t getSize() const;
+		const float * const getVertexArray() const;
+
+	private:
+		float* vertexArray;
+		size_t size;
+	};
+}
 
 #endif

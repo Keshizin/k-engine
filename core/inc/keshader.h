@@ -28,11 +28,11 @@
 
 #include <string>
 
-class KEShader
+class KEGLSLShader
 {
 public:
-	KEShader(std::string path, std::string filename);
-	~KEShader();
+	KEGLSLShader(std::string path, std::string filename);
+	~KEGLSLShader();
 
 	int loadShader(std::string path, std::string filename);
 	long long int getRows() const;

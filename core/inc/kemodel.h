@@ -29,20 +29,24 @@
 namespace kengine
 {
 	// ------------------------------------------------------------------------
-	//  This class is a conteiner for a Geometric Vertex Data
+	//   model class is a container for a geometric vertex data
 	// ------------------------------------------------------------------------
 	class model
 	{
 	public:
-		model();
-		model(const model &m); // copy constructor
+		model(); // default constructor
+		model(const model& m); // copy constructor
+		model(model&& m); // move constructor
 		~model();
 
-		void copyData(const float *v, const size_t n);
-		void printDump() const;
-		size_t getSizeInBytes() const;
-		size_t getSize() const;
-		const float * const getVertexArray() const;
+		model& operator=(const model& m); // copy assigment
+
+		void load(const float *v, const size_t n);
+		void dump() const;
+		
+		size_t getSizeInBytes() const { return size * sizeof(float); }
+		size_t getTotalVertices() const { return size / 3; }
+		const float* getVertexArray() const { return vertexArray;  }
 
 	private:
 		float* vertexArray;

@@ -23,34 +23,39 @@
 	SOFTWARE.
 */
 
-#include <kemodel.h>
+#include "kemodel.h"
 #include <iostream>
 
 // ----------------------------------------------------------------------------
 //  k-engine model class constructors & destructor
 // ----------------------------------------------------------------------------
-kengine::model::model()
-	: vertexArray{nullptr}, size{0}
+//kengine::model::model()
+//	: coords{}
+//{
+//	std::cout << "> kengine::model default constructor - [" << this << "]" << std::endl;
+//}
+
+kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<int>& i)
+	: coords { std::move(v) }, colors { std::move(c) }, indices { std::move(i) }
 {
+	// std::cout << "> kengine::model constructor with arguments - [" << this << "]" << std::endl;
 }
 
 kengine::model::model(const model &m)
-	: vertexArray{ new float[m.size] }, size{ m.size }
+	: coords{ m.coords }, colors{ m.colors }, indices{ m.indices }
 {
-	for(size_t i = 0; i < size; i++)
-		vertexArray[i] = m.vertexArray[i];
+	// std::cout << "> kengine::model copy constructor - [" << this << "]" << std::endl;
 }
 
-kengine::model::model(model&& m)
-	: vertexArray { m.vertexArray }, size { m.size }
+kengine::model::model(model&& m) noexcept
+	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, indices{ std::move(m.indices) }
 {
-	m.vertexArray = nullptr;
-	m.size = 0;
+	// std::cout << "> kengine::model move constructor - [" << this << "]" << std::endl;
 }
 
 kengine::model::~model()
 {
-	delete vertexArray;
+	// std::cout << "> kengine::model destructor - [" << this << "]" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -58,49 +63,50 @@ kengine::model::~model()
 // ----------------------------------------------------------------------------
 kengine::model& kengine::model::operator=(const model& m)
 {
-	delete vertexArray;
+	// std::cout << "> kengine::model = operator overload - [" << this << "]" << std::endl;
 
-	size = m.size;
-	vertexArray = new float[size];
-
-	for(size_t i = 0; i < size; i++)
-		vertexArray[i] = m.vertexArray[i];
-
+	coords = m.coords;
+	colors = m.colors;
+	indices = m.indices;
 	return *this;
 }
 
 // ----------------------------------------------------------------------------
 //  k-engine model class public methods
 // ----------------------------------------------------------------------------
-void kengine::model::load(const float *v, const size_t n)
-{
-	if(vertexArray != nullptr)
-	{
-		delete vertexArray;
-	}
-
-	size = n;
-	vertexArray = new float[size];
-
-	for(size_t i = 0; i < size; i++)
-	{
-		vertexArray[i] = v[i];
-	}
-}
+//void kengine::model::load(const struct vattrib<float>& v)
+//{
+//	coords = v;
+//}
 
 void kengine::model::dump() const
 {
-	if (vertexArray == nullptr)
-		return;
+	std::cout << "\n> kengine::model object [0x" << this << "]" << std::endl;
 
 	std::cout
-		<< "\n> kengine::model object [0x" << this << "]\n\n"
-		<< "   - vertexArray memory address [0x" << vertexArray << "]\n"
-		<< "   - array size: " << size << "\n"
-		<< std::endl;
+		<< "   - coords.attributeArray memory address [0x" << coords.attributeArray << "]\n"
+		<< "   - coords.arraySize: " << coords.arraySize << "\n" << std::endl;
 
-	for (size_t i = 0; i < size; i++)
-		std::cout << "     vertexArray[" << i << "]: " << vertexArray[i] << std::endl;
-	
+	for (size_t i = 0; i < coords.arraySize; i++)
+		std::cout << "     coords.attributeArray[" << i << "]: " << coords.attributeArray[i] << std::endl;
+
+	std::cout << std::endl;
+
+	std::cout
+		<< "   - colors.attributeArray memory address [0x" << colors.attributeArray << "]\n"
+		<< "   - colors.arraySize: " << colors.arraySize << "\n" << std::endl;
+
+	for (size_t i = 0; i < colors.arraySize; i++)
+		std::cout << "     colors.attributeArray[" << i << "]: " << colors.attributeArray[i] << std::endl;
+
+	std::cout << std::endl;
+
+	std::cout
+		<< "   - indices.attributeArray memory address [0x" << indices.attributeArray << "]\n"
+		<< "   - indices.arraySize: " << indices.arraySize << "\n" << std::endl;
+
+	for (size_t i = 0; i < indices.arraySize; i++)
+		std::cout << "     indices.attributeArray[" << i << "]: " << indices.attributeArray[i] << std::endl;
+
 	std::cout << std::endl;
 }

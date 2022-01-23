@@ -28,18 +28,17 @@
 #include <iostream>
 #include <fstream>
 
-KEGLSLShader::KEGLSLShader(std::string path, std::string filename) :
-	rows(0), source(0)
+kengine::shader::shader()
+	: source(nullptr)
 {
-	loadShader(path, filename);
 }
 
-KEGLSLShader::~KEGLSLShader()
+kengine::shader::~shader()
 {
 	delete source;
 }
 
-int KEGLSLShader::loadShader(std::string path, std::string filename)
+bool kengine::shader::load(std::string path, std::string filename)
 {
 	std::ifstream shaderfile(path + filename, std::ios::in | std::ios::binary);
 
@@ -51,22 +50,17 @@ int KEGLSLShader::loadShader(std::string path, std::string filename)
 	}
 
 	shaderfile.seekg(0, std::ios::end);
-	// int fileSize = shaderfile.tellg();
 	std::streamoff fileSize = shaderfile.tellg();
 	shaderfile.seekg(0, std::ios::beg);
-	source = new char[ static_cast<size_t>(fileSize)];
+	size_t size = static_cast<size_t>(fileSize) + 1;
+	source = new char[size];
+	memset(source, 0, size);
 	shaderfile.read(reinterpret_cast<char*>(source), fileSize);
 	std::string s = source;
-	rows = std::count(s.begin(), s.end(), '\n');
 	return true;
 }
 
-long long int KEGLSLShader::getRows() const
-{
-	return rows;
-}
-
-const char * KEGLSLShader::getSource() const
+const char * kengine::shader::getSource() const
 {
 	return source;
 }

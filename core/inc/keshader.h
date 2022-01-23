@@ -28,20 +28,20 @@
 
 #include <string>
 
-class KEGLSLShader
+namespace kengine
 {
-public:
-	KEGLSLShader(std::string path, std::string filename);
-	~KEGLSLShader();
+	class shader
+	{
+	public:
+		shader();
+		~shader();
 
-	int loadShader(std::string path, std::string filename);
-	long long int getRows() const;
-	const char * getSource() const; 
+		bool load(std::string path, std::string filename);
+		const char* getSource() const;
 
-private:
-	long long int rows;
-	char *source;
-
-};
+	private:
+		char* source;
+	};
+}
 
 #endif

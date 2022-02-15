@@ -26,11 +26,33 @@
 #ifndef K_ENGINE_MATH_H
 #define K_ENGINE_MATH_H
 
-namespace kemath
+namespace kengine
 {
-	// ************************************************************************
-	//  Vector 4 elements Data Type
-	// ************************************************************************
+	// this class stores the matrix in column-major order
+	class matrix {
+		friend kengine::matrix translate(float x, float y, float z);
+		friend kengine::matrix rotate(float x, float y, float z);
+		friend kengine::matrix scale(float x, float y, float z);
+		friend kengine::matrix frustum(const float left, const float right, const float bottom, const float top, const float near, const float far);
+		friend kengine::matrix ortho(const float left, const float right, const float bottom, const float top, const float near, const float far);
+
+	public:
+		matrix(); // default constructor
+		matrix(int identity); // explicit constructor
+		matrix(const matrix& copy); // copy constructor
+		matrix(matrix&& move) noexcept; // move constructor
+		~matrix(); // destructor
+
+		matrix operator*(const matrix& right);
+		matrix& operator=(const matrix& right);
+		
+		const float * const getMatrix() { return m; }
+
+	private:
+		float* m;
+	};
+
+	void lookAt();
 }
 
 // // ****************************************************************************

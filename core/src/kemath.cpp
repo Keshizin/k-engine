@@ -24,12 +24,193 @@
 */
 
 #include <kemath.h>
+#include <cmath>
 
-// ****************************************************************************
-//  Vector 4 elements Data Type
-// ****************************************************************************
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::translate(float x, float y, float z)
+{
+	kengine::matrix t(1);
+	t.m[12] = x;
+	t.m[13] = y;
+	t.m[14] = z;
+	return t;
+}
 
-// #include <cmath>
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::rotate(float x, float y, float z)
+{
+	kengine::matrix r(1);
+
+	if (x > 0.0f)
+	{
+		// convert to radians
+		x *= 0.0174533f;
+
+		r.m[5] = std::cos(x);
+		r.m[6] = std::sin(x);
+		r.m[9] = -std::sin(x);
+		r.m[10] = std::cos(x);
+	}
+
+	if (y > 0.0f)
+	{
+		// convert to radians
+		y *= 0.0174533f;
+
+		r.m[0] = std::cos(y);
+		r.m[2] = -std::sin(y);
+		r.m[8] = std::sin(y);
+		r.m[10] = std::cos(y);
+	}
+
+	if (z > 0.0f)
+	{
+		// convert to radians
+		z *= 0.0174533f;
+
+		r.m[0] = std::cos(z);
+		r.m[1] = std::sin(z);
+		r.m[4] = -std::sin(z);
+		r.m[5] = std::cos(z);
+	}
+
+	return r;
+}
+
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::scale(float x, float y, float z)
+{
+	kengine::matrix s(1);
+	s.m[0] = x;
+	s.m[5] = y;
+	s.m[10] = z;
+	return s;
+}
+
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::frustum(const float left, const float right, const float bottom, const float top, const float near, const float far)
+{
+	kengine::matrix p;
+
+	p.m[0] = (2.0f * near) / (right - left);
+	p.m[5] = (2.0f * near) / (top - bottom);
+	p.m[8] = (right + left) / (right - left);
+	p.m[9] = (top + bottom) / (top - bottom);
+	p.m[10] = -(far + near) / (far - near);
+	p.m[11] = -1.0f;
+	p.m[14] = -(2.0f * far * near) / (far - near);
+	p.m[15] = 0.0f;
+
+	return p;
+}
+
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far)
+{
+	kengine::matrix p;
+		
+	p.m[0] = 2.0f / (right - left);
+	p.m[5] = 2.0f / (top - bottom);
+	p.m[10] = -2.0f / (far - near);
+	p.m[12] = -(right + left) / (right - left);
+	p.m[13] = -(top + bottom) / (top - bottom);
+	p.m[14] = -(far + near) / (far - near);
+	p.m[15] = 1.0f;
+
+	return p;
+}
+
+void kengine::lookAt()
+{
+}
+
+/*
+*	kengine::matrix class method's definition
+*/
+kengine::matrix::matrix()
+	: m{ new float[16] }
+{
+	//std::cout << "> kengine::matrix default constructor - [" << this << "]" << std::endl;
+
+	m[ 0] = 0.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
+	m[ 4] = 0.0f; m[ 5] = 0.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
+	m[ 8] = 0.0f; m[ 9] = 0.0f; m[10] = 0.0f; m[11] = 0.0f;
+	m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 0.0f;
+}
+
+kengine::matrix::matrix(int identity)
+	: m{ new float[16] }
+{
+	//std::cout << "> kengine::matrix constructor with argument - [" << this << "]" << std::endl;
+
+	m[ 0] = 1.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
+	m[ 4] = 0.0f; m[ 5] = 1.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
+	m[ 8] = 0.0f; m[ 9] = 0.0f; m[10] = 1.0f; m[11] = 0.0f;
+	m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 1.0f;
+}
+
+kengine::matrix::matrix(const matrix& copy)
+	: m{ new float[16] }
+{
+	//std::cout << "> kengine::matrix copy constructor - [" << this << "]" << std::endl;
+
+	for (int i = 0; i < 16; i++)
+	{
+		m[i] = copy.m[i];
+	}
+}
+
+kengine::matrix::matrix(matrix&& move) noexcept
+	: m{ move.m }
+{
+	//std::cout << "> kengine::matrix move constructor - [" << this << "]" << std::endl;
+	move.m = nullptr;
+}
+
+kengine::matrix::~matrix()
+{
+	//std::cout << "> kengine::matrix destructor - [" << this << "]" << std::endl;
+	delete m;
+}
+
+kengine::matrix kengine::matrix::operator*(const matrix& right)
+{
+	//std::cout << "> kengine::matrix * operator overloading - [" << this << "]" << std::endl;
+
+	kengine::matrix result;
+	int indices = 0;
+
+	// column major multiplication
+	for (int z = 0; z < 4; z++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				result.m[indices] += this->m[(i * 4) + j] * right.m[i + (z * 4)];
+			}
+
+			indices++;
+		}
+	}
+
+	return result;
+}
+
+kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
+{
+	//std::cout << "> kengine::matrix = operator overloading - [" << this << "]" << std::endl;
+
+	delete m;
+	m = new float[16];
+
+	for (int i = 0; i < 16; i++)
+	{
+		m[i] = right.m[i];
+	}
+
+	return *this;
+}
 
 // void getCirclePoints(double **vector, int numberOfPoints)
 // {

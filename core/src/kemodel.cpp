@@ -35,27 +35,27 @@
 //	std::cout << "> kengine::model default constructor - [" << this << "]" << std::endl;
 //}
 
-kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<int>& i)
-	: coords { std::move(v) }, colors { std::move(c) }, indices { std::move(i) }
+kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<unsigned int>& i)
+	: coords{ std::move(v) }, colors{ std::move(c) }, indices{ std::move(i) }
 {
-	// std::cout << "> kengine::model constructor with arguments - [" << this << "]" << std::endl;
+	//std::cout << "> kengine::model constructor with arguments - [" << this << "]" << std::endl;
 }
 
 kengine::model::model(const model &m)
 	: coords{ m.coords }, colors{ m.colors }, indices{ m.indices }
 {
-	// std::cout << "> kengine::model copy constructor - [" << this << "]" << std::endl;
+	//std::cout << "> kengine::model copy constructor - [" << this << "]" << std::endl;
 }
 
 kengine::model::model(model&& m) noexcept
 	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, indices{ std::move(m.indices) }
 {
-	// std::cout << "> kengine::model move constructor - [" << this << "]" << std::endl;
+	//std::cout << "> kengine::model move constructor - [" << this << "]" << std::endl;
 }
 
 kengine::model::~model()
 {
-	// std::cout << "> kengine::model destructor - [" << this << "]" << std::endl;
+	//std::cout << "> kengine::model destructor - [" << this << "]" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -63,12 +63,12 @@ kengine::model::~model()
 // ----------------------------------------------------------------------------
 kengine::model& kengine::model::operator=(const model& m)
 {
-	// std::cout << "> kengine::model = operator overload - [" << this << "]" << std::endl;
+	//std::cout << "> kengine::model = operator overload - [" << this << "]" << std::endl;
 
 	coords = m.coords;
 	colors = m.colors;
 	indices = m.indices;
-	return *this;
+ 	return *this;
 }
 
 // ----------------------------------------------------------------------------
@@ -82,19 +82,21 @@ kengine::model& kengine::model::operator=(const model& m)
 void kengine::model::dump() const
 {
 	std::cout << "\n> kengine::model object [0x" << this << "]" << std::endl;
-
+	
 	std::cout
 		<< "   - coords.attributeArray memory address [0x" << coords.attributeArray << "]\n"
-		<< "   - coords.arraySize: " << coords.arraySize << "\n" << std::endl;
-
+		<< "   - coords.arraySize: " << coords.arraySize << "\n"
+		<< "   - coords.count: " << coords.count << "\n" << std::endl;
+	
 	for (size_t i = 0; i < coords.arraySize; i++)
 		std::cout << "     coords.attributeArray[" << i << "]: " << coords.attributeArray[i] << std::endl;
-
+	
 	std::cout << std::endl;
 
 	std::cout
 		<< "   - colors.attributeArray memory address [0x" << colors.attributeArray << "]\n"
-		<< "   - colors.arraySize: " << colors.arraySize << "\n" << std::endl;
+		<< "   - colors.arraySize: " << colors.arraySize << "\n"
+		<< "   - colors.count: " << colors.count << "\n" << std::endl;
 
 	for (size_t i = 0; i < colors.arraySize; i++)
 		std::cout << "     colors.attributeArray[" << i << "]: " << colors.attributeArray[i] << std::endl;
@@ -103,10 +105,162 @@ void kengine::model::dump() const
 
 	std::cout
 		<< "   - indices.attributeArray memory address [0x" << indices.attributeArray << "]\n"
-		<< "   - indices.arraySize: " << indices.arraySize << "\n" << std::endl;
+		<< "   - indices.arraySize: " << indices.arraySize
+		<< "   - indices.count: " << indices.count << "\n" << std::endl;
 
 	for (size_t i = 0; i < indices.arraySize; i++)
 		std::cout << "     indices.attributeArray[" << i << "]: " << indices.attributeArray[i] << std::endl;
 
 	std::cout << std::endl;
+}
+
+void kengine::model::release()
+{
+	coords.release();
+	colors.release();
+	indices.release();
+}
+
+kengine::model kengine::triangle(float size)
+{
+	float vertex_positions[] =
+	{
+		-size, -size,  0.0f, 1.0f,
+		 size, -size,  0.0f, 1.0f,
+		-size,  size,  0.0f, 1.0f
+	};
+
+	float vertex_colors[] =
+	{
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
+	unsigned int vertex_indices[] =
+	{
+		0, 1, 2
+	};
+
+	kengine::vattrib<float> v = {
+		vertex_positions,
+		12,
+		4
+	};
+
+	kengine::vattrib<float> c = {
+		vertex_colors,
+		12,
+		4
+	};
+
+	kengine::vattrib<unsigned int> i = {
+		vertex_indices,
+		3,
+		1
+	};
+
+	kengine::model q(v, c, i);
+	return q;
+}
+
+kengine::model kengine::quad(float size)
+{
+	float half = size / 2.0f;
+
+	float vertex_positions[] =
+	{
+		-half,  half,  0.0f, 1.0f,
+		-half, -half,  0.0f, 1.0f,
+		 half, -half,  0.0f, 1.0f,
+		 half,  half,  0.0f, 1.0f
+	};
+
+	float vertex_colors[] =
+	{
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
+	unsigned int vertex_indices[] =
+	{
+		0, 1, 2, 3, 0, 2
+	};
+
+	kengine::vattrib<float> v = {
+		vertex_positions,
+		16,
+		4
+	};
+
+	kengine::vattrib<float> c = {
+		vertex_colors,
+		12,
+		4
+	};
+
+	kengine::vattrib<unsigned int> i = {
+		vertex_indices,
+		6,
+		1
+	};
+
+	kengine::model q(v, c, i);
+	return q;
+}
+
+kengine::model kengine::cube(float size)
+{
+	float half = size / 2.0f;
+
+	float vertex_positions[] =
+	{
+		-half,  half,  half, 1.0f,
+		-half, -half,  half, 1.0f,
+		 half, -half,  half, 1.0f,
+		 half,  half,  half, 1.0f,
+		 half,  half, -half, 1.0f,
+		 half, -half, -half, 1.0f,
+		-half, -half, -half, 1.0f,
+		-half,  half, -half, 1.0f
+	};
+
+	float vertex_colors[] =
+	{
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+	};
+	
+	unsigned int vertex_indices[] =
+	{
+		0, 1, 2, 3, 0, 2, // front
+		2, 5, 4, 3, 2, 4, // right
+		2, 1, 6, 5, 2, 6, // bottom
+		6, 1, 0, 7, 6, 0, // left
+		0, 3, 4, 7, 0, 4, // top
+		4, 5, 6, 7, 4, 6  // back
+	};
+
+	kengine::vattrib<float> v = {
+		vertex_positions,
+		32,
+		4
+	};
+
+	kengine::vattrib<float> c = {
+		vertex_colors,
+		3,
+		4
+	};
+
+	kengine::vattrib<unsigned int> i = {
+		vertex_indices,
+		36,
+		1
+	};
+
+	kengine::model cube3D(v, c, i);
+	return cube3D;
 }

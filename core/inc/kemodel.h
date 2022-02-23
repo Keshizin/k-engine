@@ -26,7 +26,7 @@
 #ifndef K_ENGINE_MODEL_H
 #define K_ENGINE_MODEL_H
 
-#include <iostream>
+//#include <iostream>
 
 namespace kengine
 {
@@ -36,25 +36,22 @@ namespace kengine
 	template <typename TYPE>
 	struct vattrib
 	{
-		TYPE* attributeArray;
+		TYPE*  attributeArray;
 		size_t arraySize;
 		size_t count; // count of elements per attribute (i.e. must be 4 for RGBA)
 
-		size_t getSizeinBytes() const { return arraySize * sizeof(TYPE); }
-		size_t getSize() const { return arraySize / count; }
-
 		// default constructor
 		vattrib()
-			: attributeArray { nullptr }, arraySize { 0 }, count { 0 }
+			: attributeArray{ nullptr }, arraySize{ 0 }, count{ 0 }
 		{
-			// std::cout << "> kengine::vattrib default constructor - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib default constructor - [" << this << "]" << std::endl;
 		}
 
 		// copy constructor
 		vattrib(const vattrib& va)
-			: attributeArray { nullptr }, arraySize { 0 }, count { 0 }
+			: attributeArray{ nullptr }, arraySize{ 0 }, count{ 0 }
 		{
-			// std::cout << "> kengine::vattrib copy constructor - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib copy constructor - [" << this << "]" << std::endl;
 
 			if (va.arraySize)
 			{
@@ -71,9 +68,9 @@ namespace kengine
 
 		// constructor with arguments
 		vattrib(TYPE* array, size_t size, size_t c)
-			: attributeArray { new TYPE[size] }, arraySize { size }, count { c }
+			: attributeArray{ new TYPE[size] }, arraySize{ size }, count{ c }
 		{
-			// std::cout << "> kengine::vattrib constructor with arguments - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib constructor with arguments - [" << this << "]" << std::endl;
 
 			for (size_t i = 0; i < size; i++)
 			{
@@ -83,23 +80,24 @@ namespace kengine
 
 		// move constructor
 		vattrib(vattrib&& va) noexcept
-			: attributeArray { va.attributeArray }, arraySize { va.arraySize }, count { va.count }
+			: attributeArray{ va.attributeArray }, arraySize{ va.arraySize }, count{ va.count }
 		{
-			// std::cout << "> kengine::vattrib move constructor - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib move constructor - [" << this << "]" << std::endl;
 			va.attributeArray = nullptr;
 			va.arraySize = 0;
 			va.count = 0;
 		}
 
+		// destrcutor
 		~vattrib()
 		{
-			// std::cout << "> kengine::vattrib destructor - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib destructor - [" << this << "]" << std::endl;
 			delete attributeArray;
 		}
 
 		vattrib& operator=(const vattrib& va)
 		{
-			// std::cout << "> kengine::vattrib = operator overload - [" << this << "]" << std::endl;
+			//std::cout << "> kengine::vattrib = operator overload - [" << this << "]" << std::endl;
 
 			delete attributeArray;
 
@@ -123,34 +121,53 @@ namespace kengine
 
 			return *this;
 		}
+
+		size_t getSizeinBytes() const { return arraySize * sizeof(TYPE); }
+		size_t getSize() const { return arraySize / count; }
+		
+		void release()
+		{
+			delete attributeArray;
+			attributeArray = nullptr;
+			arraySize = 0;
+			count = 0;
+		}
 	};
 
 	// ------------------------------------------------------------------------
 	//  model class is a container for a geometric vertex data
-	//  *default constructor and load method must be disabled to avoid
-	//   unnecessary copying of data
+	//     *default constructor and load method must be disabled to avoid
+	//     unnecessary copying of data
 	// ------------------------------------------------------------------------
 	class model
 	{
 	public:
 		//model(); // default constructor
-		model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<int>& i);
+		model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<unsigned int>& i);
 		model(const model& m); // copy constructor
 		model(model&& m) noexcept; // move constructor
 		~model();
-
+		
 		model& operator=(const model& m); // copy assigment
 
 		//void load(const struct vattrib<float> &v);
 		void dump() const;
+		size_t getSizeInBytes() const { return coords.getSizeinBytes() + colors.getSizeinBytes(); }
+		void release();
 
 		const struct vattrib<float> * getCoords() const { return &coords; }
+		const struct vattrib<float> * getColors() const { return &colors; }
+		const struct vattrib<unsigned int> * getIndices() const { return &indices; }
 
 	private:
 		struct vattrib<float> coords;
 		struct vattrib<float> colors;
-		struct vattrib<int>  indices;
+		struct vattrib<unsigned int>  indices;
 	};
+
+	model triangle(float size);
+	model quad(float size);
+	model cube(float size);
 }
 
 #endif

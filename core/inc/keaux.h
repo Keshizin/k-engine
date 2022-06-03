@@ -26,11 +26,6 @@
 #ifndef K_ENGINE_AUX_H
 #define K_ENGINE_AUX_H
 
-// ----------------------------------------------------------------------------
-//  This define must be defined in bulding files like makefile, cmake etc
-// ----------------------------------------------------------------------------
-#define K_DEBUG 1
-
 
 // ----------------------------------------------------------------------------
 //  This macro provide std output for debug only
@@ -44,7 +39,7 @@
 	#define K_DEBUG_OUTPUT(type, message) std::cout << type << " - " << message << std::endl;
 
 #else
-	#define K_DEBUG_OUTPUT(x)
+	#define K_DEBUG_OUTPUT(type, message)
 #endif
 
 

@@ -29,6 +29,8 @@
 #include <keaux.h>
 #include <keutils.h>
 
+#include <iostream>
+
 
 // ----------------------------------------------------------------------------
 //  função para compilar shader GLSL

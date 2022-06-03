@@ -2,7 +2,7 @@
 	K-Engine Profile
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,47 +26,64 @@
 #ifndef K_ENGINE_PROFILE_H
 #define K_ENGINE_PROFILE_H
 
-class KETimer;
-class KEWINAPIWrapper;
+#include <vector>
 
-// ****************************************************************************
-//  K-Engine Profile Class
-// ****************************************************************************
-class KEProfile
+namespace kengine
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	explicit KEProfile(KEWINAPIWrapper *apiWrapper);
-	~KEProfile();
+	class timer; // forward declaration
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void start();
-	void update(long long frameTime);
+	// ----------------------------------------------------------------------------
+	//  kengine::profile class
+	// ----------------------------------------------------------------------------
+	class profile
+	{
+		friend class log;
 
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	unsigned long long getFramesPerSecond() const;
-	unsigned long long getMaxFramesPerSecond() const;
-	unsigned long long getMinFramesPerSecond() const;
-	long long getMaxFrameTime() const;
-	long long getMinFrameTime() const;
-	double getMeanFrameTime() const;
+	public:
+		profile();
+		~profile();
 
-private:
-	KETimer *timer;
-	unsigned long long framesPerSecond;
-	unsigned long long framesCounter;
-	long long maxFrameTime;
-	long long minFrameTime;
-	double meanFrameTime;
-	long long frameTimeTotal;
-	unsigned long long maxFramesPerSecond;
-	unsigned long long minFramesPerSecond;
-};
+		profile(const profile& copy); // copy constructor
+		profile& operator=(const profile& copy); // copy assignment
+
+		void start();
+		bool update(long long frameTime);
+		void print();
+
+	private:
+		kengine::timer* timer;
+		unsigned long long framesPerSecond;
+		long long frameTime;
+		long long maxFrameTime;
+		long long minFrameTime;
+		double meanFrameTime;
+		unsigned long long maxFramesPerSecond;
+		unsigned long long minFramesPerSecond;
+		unsigned long long framesCounter;
+		long long frameTimeTotal;
+	};
+
+#define MAX_LOG_SIZE 300
+
+	// ----------------------------------------------------------------------------
+	//  kengine::log class
+	// ----------------------------------------------------------------------------
+	class log
+	{
+	public:
+		log(size_t size);
+		~log();
+
+		void restart() { index = 0; }
+		void copy(const kengine::profile& copy);
+
+		void print();
+		void writeToFile();
+
+	private:
+		std::vector<kengine::profile> profileArray;
+		size_t index;
+	};
+}
 
 #endif

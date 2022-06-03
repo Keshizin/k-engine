@@ -2,7 +2,7 @@
 	K-Engine Auxiliary Header
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,34 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_AUXILIARY_H
-#define K_ENGINE_AUXILIARY_H
+#ifndef K_ENGINE_AUX_H
+#define K_ENGINE_AUX_H
 
+// ----------------------------------------------------------------------------
+//  This define must be defined in bulding files like makefile, cmake etc
+// ----------------------------------------------------------------------------
+#define K_DEBUG 1
+
+
+// ----------------------------------------------------------------------------
+//  This macro provide std output for debug only
+// ----------------------------------------------------------------------------
+#ifdef K_DEBUG
+
+	#define K_DEBUG_ERROR "(x) ERROR"
+	#define K_DEBUG_WARNING "(!) WARNING"
+
+	#include <iostream>
+	#define K_DEBUG_OUTPUT(type, message) std::cout << type << " - " << message << std::endl;
+
+#else
+	#define K_DEBUG_OUTPUT(x)
+#endif
+
+
+// ----------------------------------------------------------------------------
+//  This macro is used for avoid non-used parameter warning
+// ----------------------------------------------------------------------------
 #define K_UNREFERENCED_PARAMETER(p) reinterpret_cast<void*>(&p)
 
 #endif

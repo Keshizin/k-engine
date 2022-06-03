@@ -2,7 +2,7 @@
 	K-Engine Mathematics Library
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,17 @@
 	SOFTWARE.
 */
 
+
 #ifndef K_ENGINE_MATH_H
 #define K_ENGINE_MATH_H
 
 namespace kengine
 {
-	// this class stores the matrix in column-major order
+	// ----------------------------------------------------------------------------
+	//  (!) kengine::matrix class
+	// 
+	//  This class stores the matrix in column-major order
+	// ----------------------------------------------------------------------------
 	class matrix {
 		friend kengine::matrix translate(float x, float y, float z);
 		friend kengine::matrix rotate(float x, float y, float z);
@@ -37,8 +42,10 @@ namespace kengine
 		friend kengine::matrix ortho(const float left, const float right, const float bottom, const float top, const float near, const float far);
 
 	public:
+		static size_t size() { return 16 * sizeof(float); }
+
 		matrix(); // default constructor
-		matrix(int identity); // explicit constructor
+		explicit matrix(float identity); // explicit constructor
 		matrix(const matrix& copy); // copy constructor
 		matrix(matrix&& move) noexcept; // move constructor
 		~matrix(); // destructor
@@ -46,25 +53,11 @@ namespace kengine
 		matrix operator*(const matrix& right);
 		matrix& operator=(const matrix& right);
 		
-		const float * const getMatrix() { return m; }
+		const float * const value() { return m; }
 
 	private:
 		float* m;
 	};
-
-	void lookAt();
 }
-
-// // ****************************************************************************
-// //  Constant Symbolic for PI
-// // ****************************************************************************
-// #define K_PI 3.141592653589793
-
-// // ****************************************************************************
-// //  Function to calculate points of circle
-// // ****************************************************************************
-// void getCirclePoints(double **vector, int numberOfPoints);
-
-// int center(int a, int b);
 
 #endif

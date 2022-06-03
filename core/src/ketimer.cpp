@@ -2,7 +2,7 @@
 	K-Engine Timer Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,66 +25,62 @@
 
 #include <ketimer.h>
 #include <kewinapiwrapper.h>
-// #include <iostream>
+#include <keaux.h>
 
-// ****************************************************************************
-//  KETimer constructor and destructor
-// ****************************************************************************
-KETimer::KETimer(KEWINAPIWrapper *apiWrapper)
-	: stopTime(0), startTimer(0), temp(0), isStart(false), apiWrapper(apiWrapper)
+
+kengine::timer::timer()
+	: stopTime{ 0 }, startTimer{ 0 }, stopWatch{ 0 }, isRunning{ false }
 {
 }
 
-// ****************************************************************************
-//  KETimer Public Methods
-// ****************************************************************************
-void KETimer::setTimerInMs(long long stopTimeParam)
+
+kengine::timer::timer(const kengine::timer& copy)
+	: stopTime{ copy.stopTime }, startTimer{ copy.startTimer }, stopWatch{ copy.stopWatch }, isRunning{ copy.isRunning }
 {
-	this->stopTime = stopTimeParam * (apiWrapper->getHighResolutionTimerFrequency() / 1000);
 }
 
-void KETimer::start()
+
+void kengine::timer::setTimerInMs(long long stopTimeParam)
 {
-	startTimer = apiWrapper->getHighResolutionTimerCounter();
-	this->temp = startTimer;
-	this->isStart = true;
+	this->stopTime = stopTimeParam * (getHighResolutionTimerFrequency() / 1000);
 }
 
-int KETimer::isDone()
-{
-	long long internalTimer = apiWrapper->getHighResolutionTimerCounter();
 
-	if(this->isStart && internalTimer - startTimer >= stopTime)
+void kengine::timer::start()
+{
+	stopWatch = stopTime;
+	isRunning = true;
+	startTimer = getHighResolutionTimerCounter();
+}
+
+
+int kengine::timer::isDone()
+{
+	long long internalTimer = getHighResolutionTimerCounter();
+
+	if(isRunning && internalTimer - startTimer >= stopTime)
 	{
-		// std::cout << "---------------------------------" << std::endl;
-		// std::cout << "@debug | isDone | startTimer: " << startTimer << std::endl;
-		// std::cout << "@debug | isDone | internalTimer: " << internalTimer << std::endl;
-		// std::cout << "---------------------------------" << std::endl;
 		return 1;
 	}
 	else
 		return 0;
 }
 
-void KETimer::stop()
+
+void kengine::timer::stop()
 {
-	this->isStart = false;
+	isRunning = false;
 }
 
-int KETimer::isDoneAndRestart()
-{
-	long long internalTimer = apiWrapper->getHighResolutionTimerCounter();
 
-	if(this->isStart && internalTimer - startTimer >= stopTime)
+int kengine::timer::isDoneAndRestart()
+{
+	long long internalTimer = getHighResolutionTimerCounter();
+
+	if(isRunning && internalTimer - startTimer >= stopWatch)
 	{
 		// (!) dont put code before the next instruction!
-		startTimer = internalTimer + (internalTimer - startTimer - stopTime);
-
-		// std::cout << "---------------------------------" << std::endl;
-		// std::cout << "@debug | isDone | startTimer: " << this->temp << std::endl;
-		// std::cout << "@debug | isDone | internalTimer: " << internalTimer << std::endl;
-		// std::cout << "---------------------------------" << std::endl;
-		// this->temp = startTimer;
+		stopWatch += stopTime;
 		return 1;
 	}
 	else

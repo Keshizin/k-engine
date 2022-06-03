@@ -2,7 +2,7 @@
 	K-Engine Win32 API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -24,51 +24,121 @@
 */
 
 #include <kewinapiwrapper.h>
-#include <keeventhandler.h>
 #include <keconstants.h>
+#include <keeventhandler.h>
+#include <keaux.h>
 
 #include <tchar.h>
 #include <iostream>
 
-static KEEventHandler *globalEventHandler = 0;
+static kengine::eventhandler* globalEventHandler = 0;
 
-// ****************************************************************************
-//  KEWINAPIWrapper - Constructors and Destructor
-// ****************************************************************************
-KEWINAPIWrapper::KEWINAPIWrapper()
-	: hWindow(NULL), hDC(NULL), hRC(NULL)
-{
-}
 
-KEWINAPIWrapper::~KEWINAPIWrapper()
-{
-	globalEventHandler = 0;
-}
-
-// ****************************************************************************
+// ----------------------------------------------------------------------------
 //  CPU's stuff
-// ****************************************************************************
-long long KEWINAPIWrapper:: getHighResolutionTimerCounter() const
+// ----------------------------------------------------------------------------
+long long kengine::getHighResolutionTimerCounter()
 {
 	LARGE_INTEGER time;
 	QueryPerformanceCounter(&time);
 	return time.QuadPart;
 }
 
-long long KEWINAPIWrapper::getHighResolutionTimerFrequency() const
+
+long long kengine::getHighResolutionTimerFrequency()
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	return frequency.QuadPart;
 }
 
-// ****************************************************************************
-//  Window System's stuff
-// ****************************************************************************
-int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::string name, unsigned int style)
+
+// ----------------------------------------------------------------------------
+//  message events handling (message pump)
+// ----------------------------------------------------------------------------
+void kengine::handleSystemMessages()
 {
-	DWORD error;
-	WNDCLASSEX windowClass;
+	// (!) PLEASE DONT INCLUDE I/O's STUFF HERE!
+	MSG msg;
+	
+	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		if(msg.message == WM_QUIT)
+		{
+			globalEventHandler->finishAfterEvent();
+		}
+		
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+//  set global event handler
+// ----------------------------------------------------------------------------
+void kengine::setGlobalEventHandler(eventhandler *evt)
+{
+	globalEventHandler = evt;
+}
+
+
+// ----------------------------------------------------------------------------
+//  creating new console for debug
+// ----------------------------------------------------------------------------
+int kengine::createDebugConsole()
+{
+	if(!AllocConsole())
+	{
+		return 0;
+	}
+
+	FILE* fp;
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+	freopen_s(&fp, "CONOUT$", "w", stderr);
+	freopen_s(&fp, "CONIN$", "r", stdin);
+	std::cout.clear();
+	std::clog.clear();
+	std::cerr.clear();
+	std::cin.clear();
+	HANDLE hConOut = CreateFile(_T("CONOUT$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hConIn = CreateFile(_T("CONIN$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
+	SetStdHandle(STD_ERROR_HANDLE, hConOut);
+	SetStdHandle(STD_INPUT_HANDLE, hConIn);
+	std::wcout.clear();
+	std::wclog.clear();
+	std::wcerr.clear();
+	std::wcin.clear();
+
+	return 1;
+}
+
+
+int kengine::closeDebugConsole()
+{
+	return FreeConsole();
+}
+
+
+// ----------------------------------------------------------------------------
+//  kengine win32window class
+// ----------------------------------------------------------------------------
+kengine::win32wrapper::win32wrapper()
+	: hWindow{ nullptr }, hDC{ nullptr }, hRC{ nullptr }
+{
+}
+
+
+kengine::win32wrapper::~win32wrapper()
+{
+}
+
+
+int kengine::win32wrapper::create(int x, int y, int width, int height, std::string name, unsigned int style)
+{
+	//DWORD error;
+	WNDCLASSEX windowClass = { 0 };
 
 	windowClass.cbSize = sizeof(WNDCLASSEX);
 	windowClass.style = CS_DBLCLKS | CS_HREDRAW | CS_OWNDC | CS_VREDRAW;
@@ -85,41 +155,41 @@ int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 	windowClass.lpszMenuName = 0;
 	windowClass.lpszClassName = WINDOWCLASSNAME; // mandatory
 
-	if(RegisterClassEx(&windowClass) == 0)
+	if (RegisterClassEx(&windowClass) == 0)
 	{
 		// (!) Write the error to the LOG Component
-		error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to register a class window: " << error << "\n" << std::endl;
+		DWORD error = GetLastError();
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to register a class window: " << error << "\n")
 		return 0;
 	}
 
 	DWORD dwExStyle = WS_EX_APPWINDOW;
 	DWORD dwStyle = 0;
 
-	switch(style)
+	switch (style)
 	{
-		case K_WINDOW_SPLASH:
-			dwStyle = WS_POPUP | WS_BORDER;
-			break;
+	case K_WINDOW_SPLASH:
+		dwStyle = WS_POPUP | WS_BORDER;
+		break;
 
-		case K_WINDOW_DEFAULT:
-			dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU;
-			break;
+	case K_WINDOW_DEFAULT:
+		dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU;
+		break;
 
-		case K_WINDOW_NO_SYS:
-			dwStyle = WS_POPUP | WS_BORDER | WS_CAPTION;
-			break;
+	case K_WINDOW_NO_SYS:
+		dwStyle = WS_POPUP | WS_BORDER | WS_CAPTION;
+		break;
 
-		case K_WINDOW_WINDOWED_FULLSCREEN:
-			dwStyle = WS_POPUP | WS_BORDER | WS_MAXIMIZE;
-			break;
+	case K_WINDOW_WINDOWED_FULLSCREEN:
+		dwStyle = WS_POPUP | WS_BORDER | WS_MAXIMIZE;
+		break;
 
-		case K_WINDOW_COMPLETE:
-			dwStyle = WS_POPUP | WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX;
-			break;
+	case K_WINDOW_COMPLETE:
+		dwStyle = WS_POPUP | WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX;
+		break;
 	}
 
-	RECT windowSize;
+	RECT windowSize = { 0 };
 	windowSize.left = (LONG)0;
 	windowSize.right = (LONG)width;
 	windowSize.top = (LONG)0;
@@ -141,17 +211,17 @@ int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 		GetModuleHandle(NULL),
 		NULL);
 
-	if(hWindow == NULL)
+	if (hWindow == NULL)
 	{
-		error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to create the window: " << error << "\n" << std::endl;
+		DWORD error = GetLastError();
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the window: " << error << "\n")
 
 		BOOL ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
 
-		if(!ret)
+		if (!ret)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to unregister a class window: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n")
 		}
 
 		return 0;
@@ -160,42 +230,43 @@ int KEWINAPIWrapper::createWindow(int x, int y, int width, int height, std::stri
 	return 1;
 }
 
-int KEWINAPIWrapper::destroyWindow()
+
+int kengine::win32wrapper::destroy()
 {
 	BOOL ret;
 	int isSuccessful = 1;
 
-	if(hRC != NULL)
+	if (hRC != NULL)
 	{
 		ret = wglMakeCurrent(NULL, NULL);
 
-		if(ret == FALSE)
+		if (ret == FALSE)
 		{
 			DWORD error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the rendering context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the rendering context: " << error << "\n")
 			error = 0;
 		}
 
 		ret = wglDeleteContext(hRC);
 
-		if(ret == FALSE)
+		if (ret == FALSE)
 		{
 			DWORD error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to delete the rendering context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n")
 			error = 0;
 		}
 
 		hRC = NULL;
 	}
 
-	if(hDC != NULL)
+	if (hDC != NULL)
 	{
 		ret = ReleaseDC(hWindow, hDC);
 
-		if(!ret)
+		if (!ret)
 		{
 			DWORD error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
 			error = 0;
 		}
 
@@ -204,11 +275,11 @@ int KEWINAPIWrapper::destroyWindow()
 
 	ret = DestroyWindow(hWindow);
 
-	if(!ret)
+	if (!ret)
 	{
 		// (!) Write the error to the LOG Component
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to destroy a window application: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy a window application: " << error << "\n")
 		isSuccessful = 0;
 	}
 
@@ -216,55 +287,28 @@ int KEWINAPIWrapper::destroyWindow()
 
 	ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
 
-	if(!ret)
+	if (!ret)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to unregister a class window: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n")
 		isSuccessful = 0;
 	}
 
 	return isSuccessful;
 }
 
-int KEWINAPIWrapper::showWindow(int showType) const
-{
-	if(hWindow == NULL)
-	{
-		std::cout << "(!) ERROR - It was not possible to show the window: window handle is NULL\n" << std::endl;
-		return 0;
-	}
 
+int kengine::win32wrapper::show(int showType) const
+{
 	return ShowWindow(hWindow, showType);
 }
 
-// ****************************************************************************
-//  Message Events Handling (Message Pump)
-// ****************************************************************************
-void KEWINAPIWrapper::handleSystemMessages() const
-{
-	// (!) PLEASE DONT INCLUDE I/O's stuff here!
 
-	MSG msg;
-
-	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-	{
-		if(msg.message == WM_QUIT)
-		{
-			globalEventHandler->finishAfterEvent();
-		}
-
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-}
-
-// ****************************************************************************
-//  OPENGL REDENRING's stuff
-// ****************************************************************************
-int KEWINAPIWrapper::initializeRenderingSystem()
+//  opengl rendering's stuff
+int kengine::win32wrapper::initializeRenderingSystem()
 {
 	int ret;
-
+	
 	static PIXELFORMATDESCRIPTOR pfd =
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),
@@ -300,7 +344,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	if(hDC == NULL)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to get device context: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to get device context: " << error << "\n")
 		return 0;
 	}
 
@@ -309,14 +353,14 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	if(!PixelFormat)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to choose an pixel format: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to choose an pixel format: " << error << "\n")
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context : " << error << "\n")
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -324,7 +368,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -332,7 +376,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
 		}
 
 		return 0;
@@ -343,14 +387,14 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	if(ret == FALSE)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to set the format pixel: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to set the format pixel: " << error << "\n")
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -358,7 +402,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -366,7 +410,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
 		}
 
 		return 0;
@@ -377,14 +421,14 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	if(hRC == NULL)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to create the rendering context: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the rendering context: " << error << "\n")
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -392,7 +436,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -400,7 +444,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
 		}
 
 		return 0;
@@ -411,14 +455,14 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	if(ret == FALSE)
 	{
 		DWORD error = GetLastError();
-		std::cout << "(!) ERROR - It was not possible to make current the rendering context: " << error << "\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to make current the rendering context: " << error << "\n")
 
 		ret = wglDeleteContext(hRC);
 
 		if(ret == FALSE)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to delete the rendering context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n")
 		}
 
 		ret = ReleaseDC(hWindow, hDC);
@@ -426,7 +470,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(!ret)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to release the device context: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -434,7 +478,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to destroy the window: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -442,7 +486,7 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			std::cout << "(!) ERROR - It was not possible to unregister the window class: " << error << "\n" << std::endl;
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
 		}
 
 		return 0;
@@ -451,74 +495,16 @@ int KEWINAPIWrapper::initializeRenderingSystem()
 	return 1;
 }
 
-int KEWINAPIWrapper::swapBuffers() const
+
+int kengine::win32wrapper::swapBuffers() const
 {
 	return SwapBuffers(hDC);
-
-	// if(hDC)
-	// {
-	// 	BOOL ret = SwapBuffers(hDC);
-
-	// if(ret != TRUE)
-	// {
-	// 	DWORD error = GetLastError();
-	// 	std::cout << "(!) ERROR - It was not possible to swap the buffers: " << error << "\n" << std::endl;
-	// 	return 0;
-	// }
-
-	// 	return 1;
-	// }
-	
-	// return 0;
 }
 
-// ****************************************************************************
-//  Creating new Console for Debug
-// ****************************************************************************
-int KEWINAPIWrapper::createDebugConsole() const
-{
-	if(!AllocConsole())
-	{
-		return 0;
-	}
 
-	FILE* fp;
-	freopen_s(&fp, "CONOUT$", "w", stdout);
-	freopen_s(&fp, "CONOUT$", "w", stderr);
-	freopen_s(&fp, "CONIN$", "r", stdin);
-	std::cout.clear();
-	std::clog.clear();
-	std::cerr.clear();
-	std::cin.clear();
-	HANDLE hConOut = CreateFile(_T("CONOUT$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	HANDLE hConIn = CreateFile(_T("CONIN$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
-	SetStdHandle(STD_ERROR_HANDLE, hConOut);
-	SetStdHandle(STD_INPUT_HANDLE, hConIn);
-	std::wcout.clear();
-	std::wclog.clear();
-	std::wcerr.clear();
-	std::wcin.clear();
-
-	return 1;
-}
-
-int KEWINAPIWrapper::closeDebugConsole() const
-{
-	return FreeConsole();
-}
-
-// ****************************************************************************
-//  Set Global Event Handler
-// ****************************************************************************
-void KEWINAPIWrapper::setGlobalEventHandler(KEEventHandler *eventHandler)
-{
-	globalEventHandler = eventHandler;
-}
-
-// ****************************************************************************
+// ----------------------------------------------------------------------------
 //  Win32 Window Procedure Definition
-// ****************************************************************************
+// ----------------------------------------------------------------------------
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// prevent the null pointer exception!

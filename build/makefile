@@ -16,6 +16,8 @@ OBJ_LIST=$(patsubst $(CORE_SRC_DIR)/%.cpp,%.obj,$(SRC_LIST))
 MSVCFLAGS=/EHsc /I$(CORE_INC_DIR) /Wall
 LIBFLAGS=/link $(LIBNAME) gdi32.lib opengl32.lib glu32.lib user32.lib
 
+APP_FLAGS=-DK_DEBUG
+
 # game executable eeneration
 all: $(LIBNAME)
 	CL ../game/main.cpp $(MSVCFLAGS) $(LIBFLAGS) /OUT:$(GAMENAME)
@@ -33,7 +35,7 @@ $(LIBNAME): $(OBJ_LIST)
 	lib $^ /OUT:$@
 
 %.obj: $(CORE_SRC_DIR)/%.cpp
-	CL /c $< $(MSVCFLAGS)
+	CL /c $< $(MSVCFLAGS) $(DK_DEBUG)
 
 clean:
 	del *.lib

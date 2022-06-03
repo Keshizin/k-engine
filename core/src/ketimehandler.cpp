@@ -2,7 +2,7 @@
 	K-Engine Time Handler
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -24,52 +24,66 @@
 */
 
 #include <ketimehandler.h>
+#include <keaux.h>
 
-// ****************************************************************************
-//  KETimeHandler - Constructors & Destructors
-// ****************************************************************************
-KETimeHandler::KETimeHandler()
-	: frameTime(0), frameTimeLimit(0), perfomanceFrequency(0)
+
+// ----------------------------------------------------------------------------
+//  timehandler class - constructor and destructor definition
+// ----------------------------------------------------------------------------
+kengine::timehandler::timehandler()
+	: frameTime{ 0 }, frameTimeLimit{ 0 }, perfomanceFrequency{ 0 }
 {
 }
 
-// ****************************************************************************
-//  KETimeHandler - Public Methods Definition
-// ****************************************************************************
-double KETimeHandler::getFrameTimeInSeconds() const
+
+kengine::timehandler::~timehandler()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+//  timehandler class - public methods definition
+// ----------------------------------------------------------------------------
+double kengine::timehandler::getFrameTimeInSeconds() const
 {
 	return static_cast<double>(frameTime) / static_cast<double>(perfomanceFrequency);
 }
 
-// ****************************************************************************
-//  KETimeHandler - Getters and Setters Definition
-// ****************************************************************************
-void KETimeHandler::setFrameTime(long long frameTimeParam)
+
+// ----------------------------------------------------------------------------
+//  timehandler class - getters and setters definition
+// ----------------------------------------------------------------------------
+void kengine::timehandler::setFrameTime(long long frameTimeParam)
 {
-	this->frameTime = frameTimeParam;
+	frameTime = frameTimeParam;
 }
 
-long long KETimeHandler::getFrameTime() const
+
+long long kengine::timehandler::getFrameTime() const
 {
 	return frameTime;
 }
 
-void KETimeHandler::setFrameTimeLimit(long long frameTimeLimitParam)
+
+void kengine::timehandler::setFrameTimeLimit(long long frameTimeLimitParam)
 {
-	this->frameTimeLimit = frameTimeLimitParam;
+	frameTimeLimit = frameTimeLimitParam;
 }
 
-long long KETimeHandler::getFrameTimeLimit() const
+
+long long kengine::timehandler::getFrameTimeLimit() const
 {
 	return frameTimeLimit;
 }
 
-void KETimeHandler::setPerfomanceFrequency(long long perfomanceFrequencyParam)
+
+void kengine::timehandler::setPerfomanceFrequency(long long perfomanceFrequencyParam)
 {
-	this->perfomanceFrequency = perfomanceFrequencyParam;
+	perfomanceFrequency = perfomanceFrequencyParam;
 }
 
-long long KETimeHandler::getPerfomanceFrequency() const
+
+long long kengine::timehandler::getPerfomanceFrequency() const
 {
-	return this->perfomanceFrequency;
+	return perfomanceFrequency;
 }

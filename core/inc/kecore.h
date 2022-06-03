@@ -2,7 +2,7 @@
 	K-Engine Core
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,65 +23,52 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_H
-#define K_ENGINE_H
+#ifndef K_ENGINE_CORE_H
+#define K_ENGINE_CORE_H
 
-#include <keaux.h>
-#include <keversion.h>
+#include <keeventhandler.h>
 #include <kewinapiwrapper.h>
 #include <kewindow.h>
 
-#define K_DEBUG 1
+#include <ketimehandler.h>
+#include <keprofile.h>
+#include <keconstants.h>
 
-class KETimeHandler;
-class KEProfile;
-
-// ****************************************************************************
-//  K-Engine Class
-// ****************************************************************************
-class KEngine
+namespace kengine
 {
-public:
 	// ------------------------------------------------------------------------
-	//  Constructors & Destructors
+	//  kengine::core class
 	// ------------------------------------------------------------------------
-	explicit KEngine(KEEventHandler *eventHandler);
-
-	KEngine(const KEngine& engine)
-		: eventHandler(0), apiWrapper(0), gameWindow(0), timeHandler(0), runningStatus(K_STOPPED)
+	class core
 	{
-		K_UNREFERENCED_PARAMETER(const_cast<KEngine&>(engine));
-		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
-	}
+	public:
+		explicit core(kengine::eventhandler* evt);
+		~core();
 
-	~KEngine();
+		core(const core& copy) = delete; // copy constructor
+		core(core&& move) noexcept = delete; // move constructor
+		core& operator=(const core& copy) = delete; // copy assignment
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void startMainLoop();
-	void stopMainLoop();
-	void pauseGameLoop();
-	void resumeGameLoop();
-	void setFrameRate(int framePerSecond);
+		void startMainLoop();
+		void stopMainLoop();
+		void pauseGameLoop();
+		void resumeGameLoop();
+		void setFrameRate(unsigned int framePerSecond);
 
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	KEWINAPIWrapper* getAPIWrapper() const;
-	KEWindow* getGameWindow() const;
-	KETimeHandler* getTimeHandler() const;
-	void setEventHandler(KEEventHandler *eventHandler);
-	KEProfile* getProfile();
+		void setEventHandler(kengine::eventhandler* evt);
 
-private:
-	KEEventHandler* eventHandler;
-	KEWINAPIWrapper* apiWrapper;
-	KEWindow* gameWindow;
-	KETimeHandler* timeHandler;
-	KEProfile* profile;
-	int runningStatus;
-};
+		kengine::win32wrapper* getWin32api() const { return win32api; }
+		kengine::window* const getGameWindow() const;
+		kengine::log* getProfileLog() { return &profileLog; }
+
+	private:
+		int runningStatus;
+		kengine::eventhandler* eventHandler;
+		kengine::win32wrapper* win32api;
+		kengine::window* gameWindow;
+		kengine::timehandler timeHandler;
+		kengine::log profileLog;
+	};
+}
 
 #endif

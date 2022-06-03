@@ -2,7 +2,7 @@
 	K-Engine Geometric Model
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,61 +23,52 @@
 	SOFTWARE.
 */
 
-#include "kemodel.h"
+#include <kemodel.h>
+#include <keaux.h>
 #include <iostream>
+
 
 // ----------------------------------------------------------------------------
 //  k-engine model class constructors & destructor
 // ----------------------------------------------------------------------------
-//kengine::model::model()
-//	: coords{}
-//{
-//	std::cout << "> kengine::model default constructor - [" << this << "]" << std::endl;
-//}
-
-kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<unsigned int>& i)
-	: coords{ std::move(v) }, colors{ std::move(c) }, indices{ std::move(i) }
+kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i)
+	: coords{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
 {
-	//std::cout << "> kengine::model constructor with arguments - [" << this << "]" << std::endl;
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model constructor with arguments - [" << this << "]")
 }
 
-kengine::model::model(const model &m)
-	: coords{ m.coords }, colors{ m.colors }, indices{ m.indices }
+
+kengine::model::model(const model& m)
+	: coords{ m.coords }, colors{ m.colors }, texCoords{ m.texCoords }, indices{ m.indices }
 {
-	//std::cout << "> kengine::model copy constructor - [" << this << "]" << std::endl;
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model copy constructor - [" << this << "]")
 }
+
 
 kengine::model::model(model&& m) noexcept
-	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, indices{ std::move(m.indices) }
+	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, texCoords{ std::move(m.texCoords) }, indices{ std::move(m.indices) }
 {
-	//std::cout << "> kengine::model move constructor - [" << this << "]" << std::endl;
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model move constructor - [" << this << "]")
 }
+
 
 kengine::model::~model()
 {
-	//std::cout << "> kengine::model destructor - [" << this << "]" << std::endl;
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model destructor - [" << this << "]")
 }
 
-// ----------------------------------------------------------------------------
-//  k-engine model class operators overload
-// ----------------------------------------------------------------------------
+
 kengine::model& kengine::model::operator=(const model& m)
 {
-	//std::cout << "> kengine::model = operator overload - [" << this << "]" << std::endl;
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> kengine::model = operator overload - [" << this << "]")
 
 	coords = m.coords;
 	colors = m.colors;
+	texCoords = m.texCoords;
 	indices = m.indices;
  	return *this;
 }
 
-// ----------------------------------------------------------------------------
-//  k-engine model class public methods
-// ----------------------------------------------------------------------------
-//void kengine::model::load(const struct vattrib<float>& v)
-//{
-//	coords = v;
-//}
 
 void kengine::model::dump() const
 {
@@ -104,6 +95,16 @@ void kengine::model::dump() const
 	std::cout << std::endl;
 
 	std::cout
+		<< "   - texCoords.attributeArray memory address [0x" << texCoords.attributeArray << "]\n"
+		<< "   - texCoords.arraySize: " << texCoords.arraySize << "\n"
+		<< "   - texCoords.count: " << texCoords.count << "\n" << std::endl;
+
+	for (size_t i = 0; i < texCoords.arraySize; i++)
+		std::cout << "     texCoords.attributeArray[" << i << "]: " << texCoords.attributeArray[i] << std::endl;
+
+	std::cout << std::endl;
+
+	std::cout
 		<< "   - indices.attributeArray memory address [0x" << indices.attributeArray << "]\n"
 		<< "   - indices.arraySize: " << indices.arraySize
 		<< "   - indices.count: " << indices.count << "\n" << std::endl;
@@ -114,13 +115,19 @@ void kengine::model::dump() const
 	std::cout << std::endl;
 }
 
+
 void kengine::model::release()
 {
-	coords.release();
-	colors.release();
-	indices.release();
+	coords.clear();
+	colors.clear();
+	texCoords.clear();
+	indices.clear();
 }
 
+
+// ------------------------------------------------------------------------
+//  functions to create basic geometric models
+// ------------------------------------------------------------------------
 kengine::model kengine::triangle(float size)
 {
 	float vertex_positions[] =
@@ -135,6 +142,12 @@ kengine::model kengine::triangle(float size)
 		0.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
+	float texture_coordinates[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f
 	};
 
 	unsigned int vertex_indices[] =
@@ -154,15 +167,22 @@ kengine::model kengine::triangle(float size)
 		4
 	};
 
+	kengine::vattrib<float> t = {
+		texture_coordinates,
+		6,
+		2
+	};
+
 	kengine::vattrib<unsigned int> i = {
 		vertex_indices,
 		3,
 		1
 	};
 
-	kengine::model q(v, c, i);
+	kengine::model q(v, c, t, i);
 	return q;
 }
+
 
 kengine::model kengine::quad(float size)
 {
@@ -178,9 +198,18 @@ kengine::model kengine::quad(float size)
 
 	float vertex_colors[] =
 	{
-		0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.8f, 0.2f, 0.5f, 1.0f,
+	};
+
+	float texture_coordinates[] =
+	{
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f,
+		1.0f, 0.0f
 	};
 
 	unsigned int vertex_indices[] =
@@ -196,8 +225,14 @@ kengine::model kengine::quad(float size)
 
 	kengine::vattrib<float> c = {
 		vertex_colors,
-		12,
+		16,
 		4
+	};
+
+	kengine::vattrib<float> t = {
+		texture_coordinates,
+		8,
+		2
 	};
 
 	kengine::vattrib<unsigned int> i = {
@@ -206,9 +241,10 @@ kengine::model kengine::quad(float size)
 		1
 	};
 
-	kengine::model q(v, c, i);
+	kengine::model q(v, c, t, i);
 	return q;
 }
+
 
 kengine::model kengine::cube(float size)
 {
@@ -231,6 +267,19 @@ kengine::model kengine::cube(float size)
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+	};
+
+	float texture_coordinates[] =
+	{
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f
 	};
 	
 	unsigned int vertex_indices[] =
@@ -251,8 +300,14 @@ kengine::model kengine::cube(float size)
 
 	kengine::vattrib<float> c = {
 		vertex_colors,
-		3,
+		32,
 		4
+	};
+
+	kengine::vattrib<float> t = {
+		texture_coordinates,
+		8,
+		2
 	};
 
 	kengine::vattrib<unsigned int> i = {
@@ -261,6 +316,6 @@ kengine::model kengine::cube(float size)
 		1
 	};
 
-	kengine::model cube3D(v, c, i);
+	kengine::model cube3D(v, c, t, i);
 	return cube3D;
 }

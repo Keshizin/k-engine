@@ -2,7 +2,7 @@
 	K-Engine Timer Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,48 +26,32 @@
 #ifndef K_ENGINE_TIMER_H
 #define K_ENGINE_TIMER_H
 
-#include <keaux.h>
-
-class KEWINAPIWrapper;
-
-// ****************************************************************************
-//  K-Engine Timer Class
-// ****************************************************************************
-class KETimer
+namespace kengine
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	explicit KETimer(KEWINAPIWrapper *apiWrapper);
-
-	KETimer(const KETimer& timer)
-		: stopTime(0), startTimer(0), temp(0), isStart(false), apiWrapper(apiWrapper)
+	// ----------------------------------------------------------------------------
+	//  kengine::timer class
+	// ----------------------------------------------------------------------------
+	class timer
 	{
-		K_UNREFERENCED_PARAMETER(const_cast<KETimer&>(timer));
+	public:
+		timer();
 
-		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		// Pode ocorrer problemas se dois objetos apontarem para o mesmo ponteiro.
-	}
+		timer(const timer& copy); // copy constructor
+		timer(timer&& move) noexcept = delete; // move constructor
+		timer& operator=(const timer& copy) = delete; // copy assignment
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	void setTimerInMs(long long stopTime);
-	void start();
-	int isDone();
-	void stop();
-	int isDoneAndRestart();
-	
-	// void restart(long long remainTime);
-	// int isRestart();
+		void setTimerInMs(long long stopTimeParam);
+		void start();
+		int isDone();
+		void stop();
+		int isDoneAndRestart();
 
-private:
-	long long stopTime;
-	long long startTimer;
-	long long temp;
-	bool isStart;
-	KEWINAPIWrapper *apiWrapper;
-};
+	private:
+		long long stopTime;
+		long long startTimer;
+		long long stopWatch;
+		bool isRunning;
+	};
+}
 
 #endif

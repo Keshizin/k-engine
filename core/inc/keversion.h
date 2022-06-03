@@ -26,13 +26,15 @@
 #ifndef K_ENGINE_VERSION_H
 #define K_ENGINE_VERSION_H
 
-// ****************************************************************************
-//  Semantic Versioning M.N.P
-// ****************************************************************************
-//  Major - releaseing number
-//  Minor - adding new features
-//  Patch - bug fixes
 
-#define K_ENGINE_VERSION "1.2.0"
+// ----------------------------------------------------------------------------
+//  Semantic Versioning M.N.P
+// 
+//  - Major: releaseing number
+//  - Minor: adding new features
+//  - Patch: bug fixes
+// ----------------------------------------------------------------------------
+
+#define K_ENGINE_VERSION "1.0.0"
 
 #endif

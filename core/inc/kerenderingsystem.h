@@ -1,8 +1,8 @@
-/*
+ /*
 	K-Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,186 +26,188 @@
 #ifndef K_ENGINE_RENDERING_SYSTEM_H
 #define K_ENGINE_RENDERING_SYSTEM_H
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-#include <GLEXT/wglext.h>
-#include <GLEXT/glext.h>
-
+#include <keglwrapper.h>
 #include <kemodel.h>
+#include <kemath.h>
+#include <keraw.h>
 
-class KEWINAPIWrapper;
+#include <string>
 
-// ----------------------------------------------------------------------------
-//  OpenGL Procedures Extension for Win32
-// ----------------------------------------------------------------------------
-extern PFNWGLSWAPINTERVALEXTPROC        wglSwapIntervalEXT;
-extern PFNGLGENBUFFERSPROC              glGenBuffers;
-extern PFNGLISBUFFERPROC                glIsBuffer;
-extern PFNGLBINDBUFFERPROC              glBindBuffer;
-extern PFNGLBUFFERDATAPROC              glBufferData;
-extern PFNGLBUFFERSUBDATAPROC           glBufferSubData;
-extern PFNGLMAPBUFFERPROC               glMapBuffer;
-extern PFNGLUNMAPBUFFERPROC             glUnmapBuffer;
-extern PFNGLMAPBUFFERRANGEPROC          glMapBufferRange;
-extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC  glFlushMappedBufferRange;
-extern PFNGLCOPYBUFFERSUBDATAPROC       glCopyBufferSubData;
-extern PFNGLDELETEBUFFERSARBPROC        glDeleteBuffers;
-extern PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
-extern PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
-extern PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
-extern PFNGLPRIMITIVERESTARTINDEXPROC   glPrimitiveRestartIndex;
-extern PFNGLCREATEBUFFERSPROC           glCreateBuffers;
-extern PFNGLCLEARBUFFERFVPROC           glClearBufferfv;
-extern PFNGLNAMEDBUFFERSTORAGEPROC      glNamedBufferStorage;
-extern PFNGLCREATEVERTEXARRAYSPROC      glCreateVertexArrays;
-extern PFNGLUSEPROGRAMPROC              glUseProgram;
-extern PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
-extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-extern PFNGLCREATEPROGRAMPROC           glCreateProgram;
-extern PFNGLCREATESHADERPROC            glCreateShader;
-extern PFNGLSHADERSOURCEPROC            glShaderSource;
-extern PFNGLCOMPILESHADERPROC           glCompileShader;
-extern PFNGLGETSHADERIVPROC             glGetShaderiv;
-extern PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog;
-extern PFNGLATTACHSHADERPROC            glAttachShader;
-extern PFNGLLINKPROGRAMPROC             glLinkProgram;
-extern PFNGLGETPROGRAMIVPROC            glGetProgramiv;
-extern PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog;
-extern PFNGLMULTIDRAWELEMENTSPROC       glMultiDrawElements;
-extern PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv;
-extern PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
-extern PFNGLDRAWELEMENTSBASEVERTEXPROC  glDrawElementsBaseVertex;
-extern PFNGLDRAWARRAYSINSTANCEDPROC     glDrawArraysInstanced;
-extern PFNGLBUFFERSTORAGEPROC           glBufferStorage;
-extern PFNGLISVERTEXARRAYPROC           glIsVertexArray;
-extern PFNGLNAMEDBUFFERSUBDATAPROC      glNamedBufferSubData;
-extern PFNGLDELETEPROGRAMPROC           glDeleteProgram;
-extern PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
-
-//typedef struct {
-//	double left;
-//	double right;
-//	double top;
-//	double bottom;
-//} KERECT;
 
 namespace kengine
 {
-	class ModelManager;
+	// ------------------------------------------------------------------------
+	//  (!) struct kengine::ShaderInfo
+	//
+	//	Esta struct serve para passar uma lista de shaders que podem ser
+	//  compilados.
+	// 
+	//		- GL_VERTEX_SHADER
+	//		- GL_GEOMETRY_SHADER
+	//		- GL_TESS_EVALUATION_SHADER
+	//		- GL_TESS_CONTROL_SHADER
+	//		- GL_COMPUTE_SHADER
+	//		- GL_FRAGMENT_SHADER
+	// ------------------------------------------------------------------------
+	struct ShaderInfo
+	{
+		GLuint type;
+		std::string filename;
+	};
+
 
 	// ------------------------------------------------------------------------
-	//  K-Engine Model Node class
+	//  função para compilar shader GLSL
+	// ------------------------------------------------------------------------
+	GLuint compileShader(GLuint shader_type, std::string filename);
+
+
+	// ------------------------------------------------------------------------
+	//  (!) kengine::GLSLprogram class
+	// 
+	//  Esta classe fornece a base para criar shaders mais complexos que
+	//  utilizam uniform variables, uniform blocks etc.
+	// ------------------------------------------------------------------------
+	class GLSLprogram
+	{
+	public:
+		GLSLprogram();
+		~GLSLprogram();
+
+		GLSLprogram(const GLSLprogram& copy) = delete; // copy constructor
+		GLSLprogram(GLSLprogram&& move) = delete; // move constructor
+		GLSLprogram& operator=(const GLSLprogram& copy) = delete; // copy assignment
+
+		bool loadShaders(kengine::ShaderInfo* shaders);
+		void useProgram();
+		GLuint getProgram() const { return programID; }
+
+	protected:
+		GLuint programID;
+	};
+
+
+	// ------------------------------------------------------------------------
+	//  (!) kengine::TransformProgram class
+	// 
+	//  Esta classe é um shader herdade de GLSLprogram que possui:
+	//		- cores (vertex attributes)
+	//		- coordenadas de textura UV (vertex attributes)
+	//		- matrizes de visualização (vertex attributes)
+	//		- matriz de projeção (uniform matrix)
+	// ------------------------------------------------------------------------
+	class TransformProgram : public GLSLprogram
+	{
+	public:
+		TransformProgram();
+		~TransformProgram();
+
+		TransformProgram(const TransformProgram& copy) = delete; // copy constructor
+		TransformProgram(TransformProgram&& move) = delete; // move constructor
+		TransformProgram& operator=(const TransformProgram& copy) = delete; // copy assignment
+
+		bool loadShaders(kengine::ShaderInfo* shaders);
+		void setProjection(kengine::matrix& p);
+
+	private:
+		GLint projectionView_location;
+	};
+
+
+	// ------------------------------------------------------------------------
+	//  kengine::modelnode class
 	// ------------------------------------------------------------------------
 	class modelnode
 	{
-		friend class modelmanager;
+		friend class instancedmodelnode;
 
 	public:
-		explicit modelnode(const kengine::model &m);
+		static constexpr int VBO_COUNT = 2;
+
+		explicit modelnode(kengine::model& m);
 		~modelnode();
 
-		void draw() const;
+		modelnode(const modelnode& copy) = delete; // copy constructor
+		modelnode(modelnode&& move) noexcept = delete; // move constructor
+		modelnode& operator=(const modelnode& copy) = delete; // copy assignment
+		
+		void draw();
 
 	private:
 		GLuint vao;
-		GLuint vbo;
-
-		kengine::model data;
-		modelnode *next;
+		GLuint vbo[VBO_COUNT];
+		GLsizei count;
 	};
 
+
 	// ------------------------------------------------------------------------
-	//  K-Engine Model Node Manager class
+	//  kengine::instancedmodelnode class
 	// ------------------------------------------------------------------------
-	class modelmanager
+	class instancedmodelnode : public modelnode
 	{
 	public:
-		modelmanager();
-		~modelmanager();
+		instancedmodelnode(int size, kengine::model& m);
+		~instancedmodelnode();
 
-		void add(const kengine::model &m);
-		bool isEmpty() const;
+		instancedmodelnode(const instancedmodelnode& copy) = delete; // copy constructor
+		instancedmodelnode(instancedmodelnode&& move) noexcept = delete; // move constructor
+		instancedmodelnode& operator=(const instancedmodelnode& copy) = delete; // copy assignment
 
-		void drawModels() const;
+		void update(const long long int size, float* data) const;
+		void draw(int size) const;
 
 	private:
-		modelnode *first;
-		modelnode *last;
+		int max_size;
+		GLuint modelview_vbo;
+	};
+
+
+	// ---------------------------------------------------------------------------
+	//  kengine::texture class
+	// ---------------------------------------------------------------------------
+	class texture
+	{
+	public:
+		texture(const kengine::raw_img& img);
+		~texture();
+
+		texture(const texture& copy) = delete; // copy constructor
+		texture(texture&& move) noexcept = delete; // move constructor
+		texture& operator=(const texture& copy) = delete; // copy assignment
+
+		void bindTexture(int unit, int texture);
+
+	private:
+		GLuint id;
+	};
+
+
+	// ---------------------------------------------------------------------------
+	//  kengine::renderingsystem class
+	// ---------------------------------------------------------------------------
+	class win32wrapper;
+
+	class renderingsystem
+	{
+	public:
+		explicit renderingsystem(kengine::win32wrapper* w);
+		~renderingsystem();
+
+		renderingsystem(const renderingsystem& copy) = delete; // copy constructor
+		renderingsystem(renderingsystem&& move) noexcept = delete; // move constructor
+		renderingsystem& operator=(const renderingsystem& copy) = delete; // copy assignment
+
+		int startup();
+		void printInfo() const;
+
+		int setVSync(int vsync);
+		void setPolygonMode(int mode) const;
+		void setCullFace(int mode) const;
+		void setViewport(int x, int y, int width, int height) const;
+
+	private:
+		kengine::win32wrapper* win;
 	};
 }
-
-// ****************************************************************************
-//  K-Engine Rendering System Class
-// ****************************************************************************
-class KERenderingSystem
-{
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	explicit KERenderingSystem(KEWINAPIWrapper* apiWrapperParam);
-
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	//void setViewport(int x, int y, int width, int height);
-	//void setProjection();
-	//void setBackgroundColor(float red, float green, float blue, float alpha);
-
-	int startup();
-	int setVSync(int vsync);
-	void getGLVersion() const;
-
-	//void setLightModel(int isLightEnable);
-
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	//int getRenderingContext() const;
-	//void setRenderingContext(int renderingContextParam);
-
-	//void setRenderingWindow(double left, double right, double bottom, double top);
-	//KERECT getRenderingWindow() const;
-	
-	//void setWindowAspectCorrectionState(bool state);
-	
-	//void setProjectionFOVY(double fovyParam);
-	//double getProjectionFOVY() const;
-
-	//void setProjectionZNear(double projectionZNearParam);
-	//double getProjectionZNear() const;
-	//
-	//void setProjectionZFar(double projectionZFarParam);
-	//double getProjectionZFar() const;
-	//
-	//void setZoom(double zoomParam);
-	//double getZoom() const;
-	//
-	//void setRenderingWindowOffsetX(double offset);
-	//double getRenderingWindowOffsetX() const;
-	//
-	//void setRenderingWindowOffsetY(double offset);
-	//double getRenderingWindowOffsetY() const;
-
-	//void setLightModelAmbient(float red, float green, float blue, float alpha);
-
-private:
-	KEWINAPIWrapper* apiWrapper;
-
-	//int renderingContext;
-	//int viewportWidth;
-	//int viewportHeight;
-	//KERECT renderingWindow;
-	//bool windowAspectCorrectionState;
-	//double projectionFOVY;
-	//double projectionZNear;
-	//double projectionZFar;
-	//double zoom;
-	//double renderingWindowOffsetX;
-	//double renderingWindowOffsetY;
-	//float lightModelAmbient[4];
-};
 
 #endif

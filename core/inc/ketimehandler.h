@@ -2,7 +2,7 @@
 	K-Engine Time Handler
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,38 +26,37 @@
 #ifndef K_ENGINE_TIME_HANDLER_H
 #define K_ENGINE_TIME_HANDLER_H
 
-// ****************************************************************************
-//  K-Engine Time Handler Class
-// ****************************************************************************
-class KETimeHandler
+namespace kengine
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors & Destructors
-	// ------------------------------------------------------------------------
-	KETimeHandler();
+	// ----------------------------------------------------------------------------
+	//  kengine::timehandler class
+	// ----------------------------------------------------------------------------
+	class timehandler
+	{
+	public:
+		timehandler();
+		~timehandler();
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	double getFrameTimeInSeconds() const;
+		timehandler(const timehandler& copy) = delete; // copy constructor
+		timehandler(timehandler&& move) noexcept = delete; // move constructor
+		timehandler& operator=(const timehandler& copy) = delete; // copy assignment
 
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	void setFrameTime(long long frameTime);
-	long long getFrameTime() const;
+		double getFrameTimeInSeconds() const;
+		
+		void setFrameTime(long long frameTimeParam);
+		long long getFrameTime() const;
 
-	void setFrameTimeLimit(long long frameTimeLimit);
-	long long getFrameTimeLimit() const;
+		void setFrameTimeLimit(long long frameTimeLimitParam);
+		long long getFrameTimeLimit() const;
 
-	void setPerfomanceFrequency(long long perfomanceFrequency);
-	long long getPerfomanceFrequency() const;
+		void setPerfomanceFrequency(long long perfomanceFrequencyParam);
+		long long getPerfomanceFrequency() const;
 
-private:
-	long long frameTime;
-	long long frameTimeLimit;
-	long long perfomanceFrequency;
-};
+	private:
+		long long frameTime;
+		long long frameTimeLimit;
+		long long perfomanceFrequency;
+	};
+}
 
 #endif

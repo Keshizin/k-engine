@@ -2,7 +2,7 @@
 	K-Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,393 +25,493 @@
 
 #include <kerenderingsystem.h>
 #include <kewinapiwrapper.h>
-#include <keshader.h>
-#include <iostream>
+#include <keconstants.h>
+#include <keaux.h>
+#include <keutils.h>
 
-GLuint programID;
 
 // ----------------------------------------------------------------------------
-//  OpenGL Procedures Extension for Win32
+//  função para compilar shader GLSL
 // ----------------------------------------------------------------------------
-PFNWGLSWAPINTERVALEXTPROC        wglSwapIntervalEXT = 0;
-PFNGLGENBUFFERSPROC              glGenBuffers = 0;
-PFNGLISBUFFERPROC                glIsBuffer = 0;
-PFNGLBINDBUFFERPROC              glBindBuffer = 0;
-PFNGLBUFFERDATAPROC              glBufferData = 0;
-PFNGLBUFFERSUBDATAPROC           glBufferSubData = 0;
-PFNGLMAPBUFFERPROC               glMapBuffer = 0;
-PFNGLUNMAPBUFFERPROC             glUnmapBuffer = 0;
-PFNGLMAPBUFFERRANGEPROC          glMapBufferRange = 0;
-PFNGLFLUSHMAPPEDBUFFERRANGEPROC  glFlushMappedBufferRange = 0;
-PFNGLCOPYBUFFERSUBDATAPROC       glCopyBufferSubData = 0;
-PFNGLDELETEBUFFERSARBPROC        glDeleteBuffers = 0;
-PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays = 0;
-PFNGLBINDVERTEXARRAYPROC         glBindVertexArray = 0;
-PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays = 0;
-PFNGLPRIMITIVERESTARTINDEXPROC   glPrimitiveRestartIndex = 0;
-PFNGLCREATEBUFFERSPROC           glCreateBuffers = 0;
-PFNGLCLEARBUFFERFVPROC           glClearBufferfv = 0;
-PFNGLNAMEDBUFFERSTORAGEPROC      glNamedBufferStorage = 0;
-PFNGLCREATEVERTEXARRAYSPROC      glCreateVertexArrays = 0;
-PFNGLUSEPROGRAMPROC              glUseProgram = 0;
-PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer = 0;
-PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = 0;
-PFNGLCREATEPROGRAMPROC           glCreateProgram = 0;
-PFNGLCREATESHADERPROC            glCreateShader = 0;
-PFNGLSHADERSOURCEPROC            glShaderSource = 0;
-PFNGLCOMPILESHADERPROC           glCompileShader = 0;
-PFNGLGETSHADERIVPROC             glGetShaderiv = 0;
-PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog = 0;
-PFNGLATTACHSHADERPROC            glAttachShader = 0;
-PFNGLLINKPROGRAMPROC             glLinkProgram = 0;
-PFNGLGETPROGRAMIVPROC            glGetProgramiv = 0;
-PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog = 0;
-PFNGLMULTIDRAWELEMENTSPROC       glMultiDrawElements = 0;
-PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv = 0;
-PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation = 0;
-PFNGLDRAWELEMENTSBASEVERTEXPROC  glDrawElementsBaseVertex = 0;
-PFNGLDRAWARRAYSINSTANCEDPROC     glDrawArraysInstanced = 0;
-PFNGLBUFFERSTORAGEPROC           glBufferStorage = 0;
-PFNGLISVERTEXARRAYPROC           glIsVertexArray = 0;
-PFNGLNAMEDBUFFERSUBDATAPROC      glNamedBufferSubData = 0;
-PFNGLDELETEPROGRAMPROC           glDeleteProgram = 0;
-PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor = 0;
-
-void getProcedureAddress();
-
-// ****************************************************************************
-//  K-Engine modelnode class 
-// ****************************************************************************
-kengine::modelnode::modelnode(const kengine::model &m)
-	: vao(0), vbo(0), data(m), next(0)
+GLuint kengine::compileShader(GLuint shader_type, std::string filename)
 {
-	// ------------------------------------------------------------------------
-	//  Creating Vertex Array Object (VAO)
-	// ------------------------------------------------------------------------
-	glCreateVertexArrays(1, &vao);
+	GLuint shader = glCreateShader(shader_type);
 
-	if(glGetError() == GL_INVALID_VALUE)
+	if (!shader)
 	{
-		std::cout << "(!) ERROR - It was not possible to create VAO: " << glGetError() << "\n" << std::endl;
-	}
-
-	glBindVertexArray(vao);
-
-	if(glGetError() == GL_INVALID_OPERATION)
-	{
-		std::cout << "(!) ERROR - It was not possible to bind VAO: " << glGetError() << "\n" << std::endl;
-	}
-
-	// ------------------------------------------------------------------------
-	//  Creating Vertex Buffer Object (VBO)
-	// ------------------------------------------------------------------------
-	glCreateBuffers(1, &vbo);
-
-	if(glGetError() == GL_INVALID_VALUE)
-	{
-		std::cout << "(!) ERROR - It was not possible to create VBO: " << glGetError() << "\n" << std::endl;
-	}
-
-	// ------------------------------------------------------------------------
-	//  Loading VERTICES for Vertex Buffer Object (VBO)
-	// ------------------------------------------------------------------------
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glNamedBufferStorage(vbo, data.getSizeInBytes(), data.getVertexArray(), 0);
-
-	GLenum error = glGetError();
-
-	if(error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE)
-	{
-		std::cout << "(!) ERROR - It was not possible to allocate space for VBO: " << glGetError() << "\n" << std::endl;
-	}
-
-	// ------------------------------------------------------------------------
-	//  Shader Plumbing
-	// ------------------------------------------------------------------------
-	GLuint index = 0;
-	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(index);
-}
-
-kengine::modelnode::~modelnode()
-{
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-}
-
-void kengine::modelnode::draw() const
-{
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, data.getSize());
-}
-
-// ****************************************************************************
-//  K-Engine modelmanager class 
-// ****************************************************************************
-kengine::modelmanager::modelmanager()
-	: first(nullptr), last(nullptr)
-{
-}
-
-kengine::modelmanager::~modelmanager()
-{
-	modelnode *current = first;
-	modelnode *temp;
-
-	while(current != nullptr)
-	{
-		temp = current;
-		current = current->next;
-		delete temp;
-	}
-}
-
-void kengine::modelmanager::add(const kengine::model &m)
-{
-	modelnode *node = new modelnode(m);
-
-	if(isEmpty())
-		first = last = node;
-	else
-	{
-		last->next = node;
-		last = node;
-	}
-}
-
-bool kengine::modelmanager::isEmpty() const
-{
-	return first == nullptr;
-}
-
-void kengine::modelmanager::drawModels() const
-{
-	modelnode *current = first;
-
-	while(current != nullptr)
-	{
-		current->draw();
-		current = current->next;
-	}
-}
-
-// ****************************************************************************
-//  KERenderingSystem Constructors and Destructors
-// ****************************************************************************
-KERenderingSystem::KERenderingSystem(KEWINAPIWrapper* apiWrapperParam)
-	: apiWrapper(apiWrapperParam)
-{
-}
-
-int KERenderingSystem::startup()
-{
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible initialize rendering system: no apiwrapper.\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create a vertex shader!")
 		return 0;
 	}
 
-	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-	// apontando para o objeto. Fazer essa validação!
-	apiWrapper->initializeRenderingSystem();
-	getProcedureAddress();
+	std::string source = readFromFile(filename);
 
-	// (!) Enabling VERTEX SHADER and FRAGMENT SHADER here!
-	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-
-	if(!vertexShaderID)
+	if (source == "")
 	{
-		std::cout << "(!) ERROR - It was not possible to create a vertex shader!\n" << std::endl;
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "This file " << filename << " cannot be opened.")
+		glDeleteShader(shader);
+		return 0;
 	}
 
-	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLchar* vertexSource = source.c_str();
 
-	if(!fragmentShaderID)
-	{
-		std::cout << "(!) ERROR - It was not possible to create a fragment shader!\n" << std::endl;
-	}
+	glShaderSource(shader, 1, &vertexSource, nullptr);
+	glCompileShader(shader);
 
-	KEGLSLShader vertexShader("../shaders/", "main_vertex_shader.vert");
-	const GLchar* vertexSource = vertexShader.getSource();
-
-	glShaderSource(vertexShaderID, 1, &vertexSource, NULL);
-	glCompileShader(vertexShaderID);
 	GLint param = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &param);
 
-	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &param);
-
-	if(!param)
+	if (param == GL_FALSE)
 	{
-		char buffer[500] = {0};
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &param);
 
-		glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &param);
-		glGetShaderInfoLog(vertexShaderID, 500, &param, buffer);
+		if (param > 0)
+		{
+			std::string infoLog(static_cast<unsigned int>(param), ' ');
+			GLsizei length;
+			glGetShaderInfoLog(shader, param, &length, &infoLog[0]);
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to compile a shader [" << shader_type << "]:\n" << infoLog)
+		}
 
-		std::cout << "(!) ERROR - vertex shader compilation:\n" << buffer << std::endl;
+		glDeleteShader(shader);
+		return 0;
 	}
 
-	KEGLSLShader fragmentShader("../shaders/", "main_fragment_shader.frag");
-	const GLchar * fragmentSource = fragmentShader.getSource();
+	return shader;
+}
 
-	glShaderSource(fragmentShaderID, 1, &fragmentSource, NULL);
-	glCompileShader(fragmentShaderID);
-	param = 0;
 
-	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &param);
+// ------------------------------------------------------------------------
+//  (!) kengine::GLSLprogram class
+// 
+//  Esta classe fornece a base para criar shaders mais complexos que
+//  utilizam uniform variables, uniform blocks etc.
+// ------------------------------------------------------------------------
+kengine::GLSLprogram::GLSLprogram()
+	: programID{ 0 }
+{
+}
 
-	if(!param)
+
+kengine::GLSLprogram::~GLSLprogram()
+{
+	glDeleteProgram(programID);
+}
+
+
+bool kengine::GLSLprogram::loadShaders(kengine::ShaderInfo* shaderInfo)
+{
+	if (shaderInfo)
 	{
-		char buffer[500] = {0};
+		if (programID)
+		{
+			glDeleteProgram(programID);
+		}
 
-		glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &param);
-		glGetShaderInfoLog(fragmentShaderID, 500, &param, buffer);
+		GLuint shaders[6] = { 0 };
 
-		std::cout << "(!) ERROR - fragment shader compilation:\n" << buffer << std::endl;
+		for (int index = 0; shaderInfo[index].type != GL_NONE && index < 6; index++)
+		{
+			shaders[index] = compileShader(shaderInfo[index].type, shaderInfo[index].filename);
+		}
+
+		programID = glCreateProgram();
+
+		if (!programID)
+		{
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create a shader program!")
+			return false;
+		}
+
+		for (int index = 0; index < 6; index++)
+		{
+			if (shaders[index])
+			{
+				glAttachShader(programID, shaders[index]);
+			}
+		}
+
+		glLinkProgram(programID);
+
+		GLint param;
+		glGetProgramiv(programID, GL_LINK_STATUS, &param);
+
+		if (param == GL_FALSE)
+		{
+			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &param);
+
+			if (param > 0)
+			{
+				std::string infoLog(static_cast<unsigned int>(param), ' ');
+				GLsizei length;
+				glGetProgramInfoLog(programID, param, &length, &infoLog[0]);
+				K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to link a shader program: \n" << infoLog)
+			}
+		}
+
+		for (int index = 0; index < 6; index++)
+		{
+			if (shaders[index])
+			{
+				glDetachShader(programID, shaders[index]);
+				glDeleteShader(shaders[index]);
+			}
+		}
+
+		return true;
 	}
 
-	// Creating the Main Shader
-	programID = glCreateProgram();
-	glAttachShader(programID, vertexShaderID);
-	glAttachShader(programID, fragmentShaderID);
-	glLinkProgram(programID);
+	return false;
+}
 
-	param = 0;
 
-	glGetProgramiv(programID, GL_LINK_STATUS, &param);
+void kengine::GLSLprogram::useProgram()
+{
+	if (programID)
+		glUseProgram(programID);
+}
 
-	if(!param)
+
+// ------------------------------------------------------------------------
+//  (!) kengine::TransformProgram class
+// 
+//  Esta classe é um shader herdade de GLSLprogram que possui:
+//		- cores (vertex attributes)
+//		- coordenadas de textura UV (vertex attributes)
+//		- matrizes de visualização (vertex attributes)
+//		- matriz de projeção (uniform matrix)
+// ------------------------------------------------------------------------
+kengine::TransformProgram::TransformProgram()
+	:projectionView_location{ -1 }
+{
+}
+
+
+kengine::TransformProgram::~TransformProgram()
+{
+}
+
+
+bool kengine::TransformProgram::loadShaders(kengine::ShaderInfo* shaders)
+{
+	if (!GLSLprogram::loadShaders(shaders))
+		return false;
+
+	projectionView_location = glGetUniformLocation(programID, "projectionView");
+
+	return true;
+}
+
+
+void kengine::TransformProgram::setProjection(kengine::matrix& p)
+{
+	if (projectionView_location != -1)
 	{
-		char buffer[500] = {0};
+		glUniformMatrix4fv(projectionView_location, 1, GL_FALSE, p.value());
+	}
+}
 
-		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &param);
-		glGetProgramInfoLog(programID, 500, &param, buffer);
 
-		std::cout << "(!) ERROR - fragment shader compilation:\n" << buffer << std::endl;
+// ------------------------------------------------------------------------
+//  kengine::modelnode class
+// ------------------------------------------------------------------------
+kengine::modelnode::modelnode(kengine::model& m)
+	: vao{ 0 }, vbo{ 0 }, count{ 0 }
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode constructor with argument - [" << this << "]")
+
+	glCreateBuffers(VBO_COUNT, vbo);
+
+	if (glGetError() == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
 	}
 
-	glUseProgram(programID);
+	//  store elements in VBO
+	const kengine::vattrib<unsigned int>* indices = m.getIndices();
+	glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
 
-	// // render_model_matrix_loc = glGetUniformLocation(programID, "model_matrix");
-	// render_projection_matrix_loc = glGetUniformLocation(programID, "projection_matrix");
+	GLuint error = glGetError();
 
-	// // glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+	}
 
-	// // modelos de Shading (GL_FLAT ou GL_SMOOTH)
-	// // glShadeModel(GL_SMOOTH);
-	// // glEnable(GL_DEPTH_TEST);
-	// // glEnable(GL_NORMALIZE);
-	// // glEnable(GL_BLEND);
-	// // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//  store vertex attributes in VBO
+	glNamedBufferStorage(vbo[1], static_cast<GLsizeiptr>(m.getSizeInBytes()), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	error = glGetError();
+
+	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
+	}
+
+	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), coordsPTR->attributeArray);
+
+	const kengine::vattrib<float>* colorsPTR = m.getColors();
+	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(colorsPTR->getSizeinBytes()), colorsPTR->attributeArray);
+
+	const kengine::vattrib<float>* texCoordsPTR = m.getTexCoords();
+	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(texCoordsPTR->getSizeinBytes()), texCoordsPTR->attributeArray);
+
+	//  creating VAO
+	glCreateVertexArrays(1, &vao);
+
+	if (glGetError() == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create vao: " << glGetError())
+	}
+
+	glBindVertexArray(vao);
+
+	if (glGetError() == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
+	}
+
+	//  Shader Plumbing
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)coordsPTR->getSizeinBytes());
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()));
+
+	count = static_cast<GLsizei>(m.getIndices()->getSize());
+}
 
 
+kengine::modelnode::~modelnode()
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]")
+
+	glInvalidateBufferData(vbo[0]);
+	glInvalidateBufferData(vbo[1]);
+	glDeleteBuffers(VBO_COUNT, vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+
+void kengine::modelnode::draw()
+{
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+}
+
+
+// ----------------------------------------------------------------------------
+//  kengine::instancedmodelnode class
+// ----------------------------------------------------------------------------
+kengine::instancedmodelnode::instancedmodelnode(int size, kengine::model& m)
+	: modelnode{ m }, max_size{ size }, modelview_vbo{ 0 }
+{
+	glCreateBuffers(1, &modelview_vbo);
+	glNamedBufferStorage(modelview_vbo, static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat)), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, modelview_vbo);
+
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)(sizeof(float) * 4 * i));
+		glEnableVertexAttribArray(3UL + i);
+		glVertexAttribDivisor(3UL + i, 1);
+	}
+}
+
+kengine::instancedmodelnode::~instancedmodelnode()
+{
+	glInvalidateBufferData(modelview_vbo);
+	glDeleteBuffers(1, &modelview_vbo);
+}
+
+void kengine::instancedmodelnode::update(const long long int size, float* data) const
+{
+	glNamedBufferSubData(modelview_vbo, 0, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
+}
+
+void kengine::instancedmodelnode::draw(int size) const
+{
+	if (size < 0)
+		size = 0;
+
+	glBindVertexArray(vao);
+	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
+}
+
+
+// ---------------------------------------------------------------------------
+//  kengine::texture class
+// ---------------------------------------------------------------------------
+kengine::texture::texture(const kengine::raw_img& img)
+	: id{0}
+{
+	glCreateTextures(GL_TEXTURE_2D, 1, &id);
+
+	GLenum error = glGetError();
+
+	if (error == GL_INVALID_ENUM || error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create texture object: " << error)
+	}
+
+	glTextureStorage2D(id, 1, GL_RGBA8, img.getWidth(), img.getHeight());
+
+	error = glGetError();
+
+	if (error == GL_INVALID_OPERATION || error == GL_INVALID_ENUM || error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to storage texture object: " << error)
+	}
+
+	glTextureSubImage2D(id, 0, 0, 0, img.getWidth(), img.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, img.getPixels());
+
+	if (error == GL_INVALID_OPERATION || error == GL_INVALID_ENUM || error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to specify texture subimage: " << error)
+	}
+}
+
+
+kengine::texture::~texture()
+{
+	glDeleteTextures(1, &id);
+
+	GLenum error = glGetError();
+
+	if (error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete texture object: " << error)
+	}
+}
+
+
+void kengine::texture::bindTexture(int unit, int texture)
+{
+	if (texture)
+		glBindTextureUnit(static_cast<GLuint>(unit), id);
+	else
+		glBindTextureUnit(static_cast<GLuint>(unit), 0);
+
+	GLenum error = glGetError();
+
+	if (error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind texture unit: " << error)
+	}
+}
+
+
+// ----------------------------------------------------------------------------
+//  kengine::rendersystem class
+// ----------------------------------------------------------------------------
+kengine::renderingsystem::renderingsystem(kengine::win32wrapper* w)
+	: win(w)
+{
+}
+
+
+kengine::renderingsystem::~renderingsystem()
+{
+}
+
+
+int kengine::renderingsystem::startup()
+{
+	if (!win)
+	{
+		return 0;
+	}
+
+	win->initializeRenderingSystem();
+	getProcedureAddress();
 
 	return 1;
 }
 
-int KERenderingSystem::setVSync(int vsync)
+
+void kengine::renderingsystem::printInfo() const
+{
+	const GLubyte* renderer = glGetString(GL_RENDERER);
+	const GLubyte* vendor = glGetString(GL_VENDOR);
+	const GLubyte* version = glGetString(GL_VERSION);
+	const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+	int maxTextureImageUnits;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
+
+	int maxCombinedTexImageUnits;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTexImageUnits);
+
+	std::cout << "> Rendering System: OpenGL\n"
+		<< "  renderer: " << renderer << "\n"
+		<< "  vendor: " << vendor << "\n"
+		<< "  version: " << version << "\n"
+		<< "  GLSL Version: " << glslVersion << "\n"
+		<< "  max vertex attribs: " << GL_MAX_VERTEX_ATTRIBS << "\n"
+		<< "  max texture units: " << maxTextureImageUnits << "\n"
+		<< "  max combined texture units: " << maxCombinedTexImageUnits << "\n"
+		<< "  max texture buffer size: " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n"
+		//<< "  max texture size: " << GL_MAX_TEXTURE_SIZE << "\n"
+		//<< "  max uniform block size: " << GL_MAX_UNIFORM_BLOCK_SIZE << "\n"
+		//<< "  max shader storage block size: " << GL_MAX_SHADER_STORAGE_BLOCK_SIZE << "\n"
+		<< std::endl;
+}
+
+
+int kengine::renderingsystem::setVSync(int vsync)
 {
 	return wglSwapIntervalEXT(vsync);
 }
 
-void KERenderingSystem::getGLVersion() const
+
+void kengine::renderingsystem::setPolygonMode(int modeParam) const
 {
-	std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
+	GLenum mode = GL_FILL;
+
+	if (modeParam == K_RENDERING_MODE_POINT)
+		mode = GL_POINT;
+	else if (modeParam == K_RENDERING_MODE_LINE)
+		mode = GL_LINE;
+
+	glPolygonMode(GL_FRONT_AND_BACK, mode);
 }
 
-// ****************************************************************************
-//  KERenderingSystem - Getters and Setters
-// ****************************************************************************
 
-void getProcedureAddress()
+void kengine::renderingsystem::setCullFace(int modeParam) const
 {
-	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
-	glIsBuffer = (PFNGLISBUFFERPROC)wglGetProcAddress("glIsBuffer");
-	glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
-	glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
-	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)wglGetProcAddress("glBufferSubData");
-	glMapBuffer = (PFNGLMAPBUFFERPROC)wglGetProcAddress("glMapBuffer");
-	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)wglGetProcAddress("glUnmapBuffer");
-	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)wglGetProcAddress("glMapBufferRange");
-	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)wglGetProcAddress("glFlushMappedBufferRange");
-	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
-	glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)wglGetProcAddress("glDeleteBuffers");
-	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
-	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
-	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
-	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)wglGetProcAddress("glPrimitiveRestartIndex");
-	glCreateBuffers = (PFNGLCREATEBUFFERSPROC)wglGetProcAddress("glCreateBuffers");
-	glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)wglGetProcAddress("glClearBufferfv");
-	glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)wglGetProcAddress("glNamedBufferStorage");
-	glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)wglGetProcAddress("glCreateVertexArrays");
-	glUseProgram = (PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram");
-	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)wglGetProcAddress("glVertexAttribPointer");
-	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress("glEnableVertexAttribArray");
-	glCreateProgram = (PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram");
-	glCreateShader = (PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader");
-	glShaderSource = (PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource");
-	glCompileShader = (PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader");
-	glGetShaderiv = (PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv");
-	glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)wglGetProcAddress("glGetShaderInfoLog");
-	glAttachShader = (PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader");
-	glLinkProgram = (PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram");
-	glGetProgramiv = (PFNGLGETPROGRAMIVPROC)wglGetProcAddress("glGetProgramiv");
-	glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)wglGetProcAddress("glGetProgramInfoLog");
-	glMultiDrawElements = (PFNGLMULTIDRAWELEMENTSPROC)wglGetProcAddress("glMultiDrawElements");
-	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)wglGetProcAddress("glUniformMatrix4fv");
-	glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation");
-	glDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)wglGetProcAddress("glDrawElementsBaseVertex");
-	glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)wglGetProcAddress("glDrawArraysInstanced");
-	glBufferStorage = (PFNGLBUFFERSTORAGEPROC)wglGetProcAddress("glBufferStorage");
-	glIsVertexArray = (PFNGLISVERTEXARRAYPROC)wglGetProcAddress("glIsVertexArray");
-	glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)wglGetProcAddress("glNamedBufferSubData");
-	glDeleteProgram = (PFNGLDELETEPROGRAMPROC)wglGetProcAddress("glDeleteProgram");
-	glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)wglGetProcAddress("glVertexAttribDivisor");
-
-	if (!wglSwapIntervalEXT &&
-		!glGenBuffers &&
-		!glIsBuffer &&
-		!glBindBuffer &&
-		!glBufferData &&
-		!glBufferSubData &&
-		!glMapBuffer &&
-		!glUnmapBuffer &&
-		!glMapBufferRange &&
-		!glFlushMappedBufferRange &&
-		!glCopyBufferSubData &&
-		!glDeleteBuffers &&
-		!glGenVertexArrays &&
-		!glBindVertexArray &&
-		!glDeleteVertexArrays &&
-		!glPrimitiveRestartIndex &&
-		!glCreateBuffers &&
-		!glClearBufferfv &&
-		!glNamedBufferStorage &&
-		!glCreateVertexArrays &&
-		!glUseProgram &&
-		!glVertexAttribPointer &&
-		!glEnableVertexAttribArray &&
-		!glCreateProgram &&
-		!glCreateShader &&
-		!glShaderSource &&
-		!glCompileShader &&
-		!glGetShaderiv &&
-		!glGetShaderInfoLog &&
-		!glAttachShader &&
-		!glLinkProgram &&
-		!glGetProgramiv &&
-		!glGetProgramInfoLog &&
-		!glMultiDrawElements &&
-		!glUniformMatrix4fv &&
-		!glGetUniformLocation &&
-		!glDrawElementsBaseVertex &&
-		!glDrawArraysInstanced &&
-		!glBufferStorage &&
-		!glIsVertexArray &&
-		!glNamedBufferSubData &&
-		!glDeleteProgram &&
-		!glVertexAttribDivisor)
+	if (modeParam == K_RENDERING_MODE_CULL_FACE_DISABLE)
 	{
-		std::cout << "(!) ERROR - It was not possible to load GL extension: " << glGetError() << "\n" << std::endl;
+		glDisable(GL_CULL_FACE);
+		return;
 	}
+
+	glEnable(GL_CULL_FACE);
+
+	switch (modeParam)
+	{
+	case K_RENDERING_MODE_CULL_FACE_FRONT:
+		glCullFace(GL_FRONT);
+		break;
+
+	case K_RENDERING_MODE_CULL_FACE_BACK:
+		glCullFace(GL_BACK);
+		break;
+
+	case K_RENDERING_MODE_CULL_FACE_FRONT_AND_BACK:
+		glCullFace(GL_FRONT_AND_BACK);
+		break;
+	}
+}
+
+
+void kengine::renderingsystem::setViewport(int x, int y, int width, int height) const
+{
+	glViewport(x, y, width, height);
 }

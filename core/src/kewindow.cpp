@@ -2,7 +2,7 @@
 	K-Engine Window Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -24,153 +24,62 @@
 */
 
 #include <kewindow.h>
+#include <keconstants.h>
 #include <kewinapiwrapper.h>
-#include <iostream>
+#include <keaux.h>
 
-// ****************************************************************************
-//  Constructors and Destructors
-// ****************************************************************************
-KEWindow::KEWindow(KEWINAPIWrapper* apiWrapper)
-	: apiWrapper(apiWrapper), x(0), y(0), width(640), height(640), name("K-ENGINE DEFAULT NAME!"), style(K_WINDOW_DEFAULT)
+
+kengine::window::window(kengine::win32wrapper* w)
+	: win(w), x(0), y(0), width(640), height(480), name("K-ENGINE DEFAULT NAME!"), style(K_WINDOW_DEFAULT)
 {
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::window constructor[" << this << "]")
 }
 
-KEWindow::KEWindow(KEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style)
-	: apiWrapper(apiWrapper), x(x), y(y), width(width), height(height), name(name), style(style)
+
+kengine::window::~window()
 {
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::window destructor[" << this << "]")
 }
 
-// ****************************************************************************
-//  Public Methods
-// ****************************************************************************
-int KEWindow::create()
-{	
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible create a window: no apiwrapper.\n" << std::endl;
+
+int kengine::window::create()
+{
+	if (!win)
 		return 0;
-	}
 
-	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-	// apontando para o objeto. Fazer essa validação!
-	return apiWrapper->createWindow(x, y, width, height, name, style);
+	return win->create(x, y, width, height, name, style);
 }
 
-int KEWindow::create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam)
-{
-	this->x = xParam;
-	this->y = yParam;
-	this->width = widthParam;
-	this->height = heightParam;
-	this->name = nameParam;
-	this->style = styleParam;
 
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible create a window: no apiwrapper.\n" << std::endl;
+int kengine::window::create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam)
+{
+	x = xParam;
+	y = yParam;
+	width = widthParam;
+	height = heightParam;
+	name = nameParam;
+	style = styleParam;
+
+	if (!win)
 		return 0;
-	}
 
-	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-	// apontando para o objeto. Fazer essa validação!
-	return apiWrapper->createWindow(x, y, width, height, name, style);
+	return win->create(x, y, width, height, name, style);
 }
 
-int KEWindow::destroy()
+
+int kengine::window::destroy()
 {
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible destroy a window: no apiwrapper.\n" << std::endl;
+	if (!win)
 		return 0;
-	}
 
-	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-	// apontando para o objeto. Fazer essa validação!
-	return apiWrapper->destroyWindow();
+	return win->destroy();
 }
 
-int KEWindow::show(int showType)
+
+int kengine::window::show(int showType)
 {
-	if(!apiWrapper)
-	{
-		std::cout << "(!) ERROR - It was not possible show a window: no apiwrapper.\n" << std::endl;
+	if (!win)
 		return 0;
-	}
 
-	// (ATENÇÃO) É possível que neste ponto, apiWrapper não esteja mais
-	// apontando para o objeto. Fazer essa validação!
-	return apiWrapper->showWindow(showType);
-}
-
-// ****************************************************************************
-//  Getters and Setters
-// ****************************************************************************
-void KEWindow::setApiWrapper(KEWINAPIWrapper* apiWrapperParam)
-{
-	this->apiWrapper = apiWrapperParam;
-}
-
-KEWINAPIWrapper* KEWindow::getApiWrapper() const
-{
-	return apiWrapper;
-}
-
-void KEWindow::setX(int xParam)
-{
-	this->x = xParam;
-}
-
-int KEWindow::getX() const
-{
-	return x;
-}
-
-void KEWindow::setY(int yParam)
-{
-	this->y = yParam;
-}
-
-int KEWindow::getY() const
-{
-	return y;
-}
-
-void KEWindow::setWidth(int widthParam)
-{
-	this->width = widthParam;
-}
-
-int KEWindow::getWidth() const
-{
-	return width;
-}
-
-void KEWindow::setHeight(int heightParam)
-{
-	this->height = heightParam;
-}
-
-int KEWindow::getHeight() const
-{
-	return height;
-}
-
-void KEWindow::setName(std::string nameParam)
-{
-	this->name = nameParam;
-}
-
-std::string KEWindow::getName() const
-{
-	return name;
-}
-
-void KEWindow::setStyle(unsigned int styleParam)
-{
-	this->style = styleParam;
-}
-
-unsigned int KEWindow::getStyle() const
-{
-	return style;
+	return win->show(showType);
 }

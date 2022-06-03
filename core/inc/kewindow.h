@@ -2,7 +2,7 @@
 	K-Engine Window Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,76 +26,39 @@
 #ifndef K_ENGINE_WINDOW_CLASS_H
 #define K_ENGINE_WINDOW_CLASS_H
 
-#include <keaux.h>
-#include <keconstants.h>
 #include <string>
 
-class KEWINAPIWrapper;
-
-// ****************************************************************************
-//  K-Engine Window Class
-// ****************************************************************************
-class KEWindow
+namespace kengine
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructors
-	// ------------------------------------------------------------------------
-	explicit KEWindow(KEWINAPIWrapper* apiWrapper);
+	class win32wrapper; // forward declaration
 
-	KEWindow(KEWINAPIWrapper* apiWrapper, int x, int y, int width, int height, std::string name, unsigned int style);
-
-	KEWindow(const KEWindow& win)
-		: apiWrapper(0), x(0), y(0), width(0), height(0), name(""), style(K_WINDOW_DEFAULT)
+	// ------------------------------------------------------------------------
+	//  k-engine window class
+	// ------------------------------------------------------------------------
+	class window
 	{
-		K_UNREFERENCED_PARAMETER(const_cast<KEWindow&>(win));
-		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		//     Pode ocorrer problemas se dois objetos apontarem para o mesmo apiWrapper.
-	}
+	public:
+		explicit window(kengine::win32wrapper *w);
+		~window();
 
-	// ------------------------------------------------------------------------
-	//  Public Methods
-	// ------------------------------------------------------------------------
-	int create();
-	int create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam);
-	int destroy();
-	int show(int showType);
-
-	// ------------------------------------------------------------------------
-	//  Getters and Setters
-	// ------------------------------------------------------------------------
-	void setApiWrapper(KEWINAPIWrapper* apiWrapper);
-	KEWINAPIWrapper* getApiWrapper() const;
-
-	void setX(int x);
-	int getX() const;
-
-	void setY(int y);
-	int getY() const;
+		window(const window& copy) = delete; // copy constructor
+		window(window&& move) noexcept = delete; // move constructor
+		window& operator=(const window& copy) = delete; // copy assignment
+		
+		int create();
+		int create(int xParam, int yParam, int widthParam, int heightParam, std::string nameParam, unsigned int styleParam);
+		int destroy();
+		int show(int showType);
 	
-	void setWidth(int width);
-	int getWidth() const;
-
-	void setHeight(int height);
-	int getHeight() const;
-
-	void setName(std::string name);
-	std::string getName() const;
-
-	void setStyle(unsigned int style);
-	unsigned int getStyle() const;
-
-	void setWindow(int x, int y, int width, int height, std::string name, unsigned int style);
-
-private:
-	KEWINAPIWrapper* apiWrapper;
-
-	int x;
-	int y;
-	int width;
-	int height;
-	std::string name;
-	unsigned int style;
-};
+	private:
+		kengine::win32wrapper* win;
+		int x;
+		int y;
+		int width;
+		int height;
+		std::string name;
+		unsigned int style;
+	};
+}
 
 #endif

@@ -2,7 +2,7 @@
 	K-Engine Win32 API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,88 +23,74 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_WIN32_API_WRAPPER_CLASS_H
-#define K_ENGINE_WIN32_API_WRAPPER_CLASS_H
+#ifndef K_ENGINE_WIN32_API_WRAPPER_H
+#define K_ENGINE_WIN32_API_WRAPPER_H
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include <keaux.h>
 #include <string>
 
-class KEEventHandler;
-
-// ****************************************************************************
-//  Win32 Window Class
-// ****************************************************************************
 #define WINDOWCLASSNAME LPCSTR("KWINDOWCLASS")
 
-// ****************************************************************************
-//  Win32 Window Procedure
-// ****************************************************************************
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-// ****************************************************************************
-//  K-Engine Win32 API Wrapper Class
-// ****************************************************************************
-class KEWINAPIWrapper
+namespace kengine
 {
-public:
-	// ------------------------------------------------------------------------
-	//  Constructors and Destructor
-	// ------------------------------------------------------------------------
-	KEWINAPIWrapper();
-	~KEWINAPIWrapper();
-
-	KEWINAPIWrapper(const KEWINAPIWrapper& api)
-		: hWindow(NULL), hDC(NULL), hRC(NULL)
-	{
-		K_UNREFERENCED_PARAMETER(const_cast<KEWINAPIWrapper&>(api));
-
-		// (!) Tenha cuidado com chamada implícica do construtor de cópia.
-		// Pode ocorrer problemas se dois objetos apontarem para hWindow,
-		// hDC e hRC.
-	}
-
 	// ------------------------------------------------------------------------
 	//  CPU's stuff
 	// ------------------------------------------------------------------------
-	long long getHighResolutionTimerCounter() const;
-	long long getHighResolutionTimerFrequency() const;
+	long long getHighResolutionTimerCounter();
+	long long getHighResolutionTimerFrequency();
+
 
 	// ------------------------------------------------------------------------
-	//  Window System's stuff
+	//  message events handling (message pump)
 	// ------------------------------------------------------------------------
-	int createWindow(int x, int y, int width, int height, std::string name, unsigned int style);
-	int destroyWindow();
-	int showWindow(int showType) const;
+	void handleSystemMessages();
+	
+
+	// --------------------------------------------------------------------
+	//  set global event handler
+	// --------------------------------------------------------------------
+	class eventhandler;
+	void setGlobalEventHandler(kengine::eventhandler* evt);
+
 
 	// ------------------------------------------------------------------------
-	//  Message Events Handling (Message Pump)
+	//  creating new console for debug
 	// ------------------------------------------------------------------------
-	void handleSystemMessages() const;
+	int createDebugConsole();
+	int closeDebugConsole();
+
 
 	// ------------------------------------------------------------------------
-	//  OPENGL REDENRING's stuff
+	//  kengine win32 window class
 	// ------------------------------------------------------------------------
-	int initializeRenderingSystem();
-	int swapBuffers() const;
+	class win32wrapper
+	{
+	public:
+		win32wrapper();
+		~win32wrapper();
 
-	// ------------------------------------------------------------------------
-	//  Creating new Console for Debug
-	// ------------------------------------------------------------------------
-	int createDebugConsole() const;
-	int closeDebugConsole() const;
+		win32wrapper(const win32wrapper& copy) = delete; // copy constructor
+		win32wrapper& operator=(const win32wrapper& copy) = delete; // copy assignment
+		win32wrapper(win32wrapper&& move) noexcept = delete;  // move constructor
 
-	// ------------------------------------------------------------------------
-	//  Set Global Event Handler
-	// ------------------------------------------------------------------------
-	void setGlobalEventHandler(KEEventHandler *eventHandler);
+		// win32 window's stuff
+		int create(int x, int y, int width, int height, std::string name, unsigned int style);
+		int destroy();
+		int show(int showType) const;
 
-private:
-	HWND hWindow;
-	HDC hDC;
-	HGLRC hRC;
-};
+		//  opengl rendering's stuff
+		int initializeRenderingSystem();
+		int swapBuffers() const;
+
+	private:
+		HWND hWindow;
+		HDC hDC;
+		HGLRC hRC;
+	};
+}
 
 #endif

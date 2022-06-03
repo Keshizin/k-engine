@@ -2,7 +2,7 @@
 	K-Engine Geometric Model
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@
 #ifndef K_ENGINE_MODEL_H
 #define K_ENGINE_MODEL_H
 
-//#include <iostream>
-
 namespace kengine
 {
 	// ------------------------------------------------------------------------
@@ -44,15 +42,12 @@ namespace kengine
 		vattrib()
 			: attributeArray{ nullptr }, arraySize{ 0 }, count{ 0 }
 		{
-			//std::cout << "> kengine::vattrib default constructor - [" << this << "]" << std::endl;
 		}
 
 		// copy constructor
 		vattrib(const vattrib& va)
 			: attributeArray{ nullptr }, arraySize{ 0 }, count{ 0 }
 		{
-			//std::cout << "> kengine::vattrib copy constructor - [" << this << "]" << std::endl;
-
 			if (va.arraySize)
 			{
 				arraySize = va.arraySize;
@@ -70,8 +65,6 @@ namespace kengine
 		vattrib(TYPE* array, size_t size, size_t c)
 			: attributeArray{ new TYPE[size] }, arraySize{ size }, count{ c }
 		{
-			//std::cout << "> kengine::vattrib constructor with arguments - [" << this << "]" << std::endl;
-
 			for (size_t i = 0; i < size; i++)
 			{
 				attributeArray[i] = array[i];
@@ -82,7 +75,6 @@ namespace kengine
 		vattrib(vattrib&& va) noexcept
 			: attributeArray{ va.attributeArray }, arraySize{ va.arraySize }, count{ va.count }
 		{
-			//std::cout << "> kengine::vattrib move constructor - [" << this << "]" << std::endl;
 			va.attributeArray = nullptr;
 			va.arraySize = 0;
 			va.count = 0;
@@ -91,14 +83,12 @@ namespace kengine
 		// destrcutor
 		~vattrib()
 		{
-			//std::cout << "> kengine::vattrib destructor - [" << this << "]" << std::endl;
 			delete attributeArray;
 		}
 
+		// = operator overload
 		vattrib& operator=(const vattrib& va)
 		{
-			//std::cout << "> kengine::vattrib = operator overload - [" << this << "]" << std::endl;
-
 			delete attributeArray;
 
 			if (va.arraySize)
@@ -125,7 +115,7 @@ namespace kengine
 		size_t getSizeinBytes() const { return arraySize * sizeof(TYPE); }
 		size_t getSize() const { return arraySize / count; }
 		
-		void release()
+		void clear()
 		{
 			delete attributeArray;
 			attributeArray = nullptr;
@@ -135,36 +125,41 @@ namespace kengine
 	};
 
 	// ------------------------------------------------------------------------
-	//  model class is a container for a geometric vertex data
-	//     *default constructor and load method must be disabled to avoid
-	//     unnecessary copying of data
+	//  (!) kengine::model class
+	// 
+	//  This is a container for a geometric vertex data
 	// ------------------------------------------------------------------------
 	class model
 	{
 	public:
-		//model(); // default constructor
-		model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<unsigned int>& i);
+		//model(); // default constructor disabled to avoid unncessary copying of data
+		model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i);
 		model(const model& m); // copy constructor
 		model(model&& m) noexcept; // move constructor
 		~model();
 		
 		model& operator=(const model& m); // copy assigment
 
-		//void load(const struct vattrib<float> &v);
+		//void load(const struct vattrib<float> &v); // disabled to avoid unncessary copying of data
 		void dump() const;
-		size_t getSizeInBytes() const { return coords.getSizeinBytes() + colors.getSizeinBytes(); }
+		size_t getSizeInBytes() const { return coords.getSizeinBytes() + colors.getSizeinBytes() + texCoords.getSizeinBytes(); }
 		void release();
 
 		const struct vattrib<float> * getCoords() const { return &coords; }
 		const struct vattrib<float> * getColors() const { return &colors; }
+		const struct vattrib<float>* getTexCoords() const { return &texCoords; }
 		const struct vattrib<unsigned int> * getIndices() const { return &indices; }
 
 	private:
 		struct vattrib<float> coords;
 		struct vattrib<float> colors;
+		struct vattrib<float> texCoords;
 		struct vattrib<unsigned int>  indices;
 	};
 
+	// ------------------------------------------------------------------------
+	//  functions to create basic geometric models
+	// ------------------------------------------------------------------------
 	model triangle(float size);
 	model quad(float size);
 	model cube(float size);

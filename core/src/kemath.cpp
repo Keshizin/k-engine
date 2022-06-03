@@ -2,7 +2,7 @@
 	K-Engine Mathematics Library
 	This file is part of the K-Engine.
 
-	Copyright (C) 2021 Fabio Takeshi Ishikawa
+	Copyright (C) 2022 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,10 @@
 	SOFTWARE.
 */
 
+
 #include <kemath.h>
 #include <cmath>
+
 
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::translate(float x, float y, float z)
@@ -35,6 +37,7 @@ kengine::matrix kengine::translate(float x, float y, float z)
 	t.m[14] = z;
 	return t;
 }
+
 
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::rotate(float x, float y, float z)
@@ -77,6 +80,7 @@ kengine::matrix kengine::rotate(float x, float y, float z)
 	return r;
 }
 
+
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::scale(float x, float y, float z)
 {
@@ -86,6 +90,7 @@ kengine::matrix kengine::scale(float x, float y, float z)
 	s.m[10] = z;
 	return s;
 }
+
 
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::frustum(const float left, const float right, const float bottom, const float top, const float near, const float far)
@@ -104,6 +109,7 @@ kengine::matrix kengine::frustum(const float left, const float right, const floa
 	return p;
 }
 
+
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
@@ -120,63 +126,55 @@ kengine::matrix kengine::ortho(const float left, const float right, const float 
 	return p;
 }
 
-void kengine::lookAt()
-{
-}
 
-/*
-*	kengine::matrix class method's definition
-*/
+// ----------------------------------------------------------------------------
+//  kengine::matrix class method's definition
+// ----------------------------------------------------------------------------
 kengine::matrix::matrix()
 	: m{ new float[16] }
 {
-	//std::cout << "> kengine::matrix default constructor - [" << this << "]" << std::endl;
-
 	m[ 0] = 0.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
 	m[ 4] = 0.0f; m[ 5] = 0.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
 	m[ 8] = 0.0f; m[ 9] = 0.0f; m[10] = 0.0f; m[11] = 0.0f;
 	m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 0.0f;
 }
 
-kengine::matrix::matrix(int identity)
+
+kengine::matrix::matrix(float identity)
 	: m{ new float[16] }
 {
-	//std::cout << "> kengine::matrix constructor with argument - [" << this << "]" << std::endl;
-
-	m[ 0] = 1.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
-	m[ 4] = 0.0f; m[ 5] = 1.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
-	m[ 8] = 0.0f; m[ 9] = 0.0f; m[10] = 1.0f; m[11] = 0.0f;
-	m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 1.0f;
+	m[0] = identity; m[1] = 0.0f; m[2] = 0.0f; m[3] = 0.0f;
+	m[4] = 0.0f; m[5] = identity; m[6] = 0.0f; m[7] = 0.0f;
+	m[8] = 0.0f; m[9] = 0.0f; m[10] = identity; m[11] = 0.0f;
+	m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = identity;
 }
+
 
 kengine::matrix::matrix(const matrix& copy)
 	: m{ new float[16] }
 {
-	//std::cout << "> kengine::matrix copy constructor - [" << this << "]" << std::endl;
-
 	for (int i = 0; i < 16; i++)
 	{
 		m[i] = copy.m[i];
 	}
 }
 
+
 kengine::matrix::matrix(matrix&& move) noexcept
 	: m{ move.m }
 {
-	//std::cout << "> kengine::matrix move constructor - [" << this << "]" << std::endl;
 	move.m = nullptr;
 }
 
+
 kengine::matrix::~matrix()
 {
-	//std::cout << "> kengine::matrix destructor - [" << this << "]" << std::endl;
 	delete m;
 }
 
+
 kengine::matrix kengine::matrix::operator*(const matrix& right)
 {
-	//std::cout << "> kengine::matrix * operator overloading - [" << this << "]" << std::endl;
-
 	kengine::matrix result;
 	int indices = 0;
 
@@ -197,10 +195,9 @@ kengine::matrix kengine::matrix::operator*(const matrix& right)
 	return result;
 }
 
+
 kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
 {
-	//std::cout << "> kengine::matrix = operator overloading - [" << this << "]" << std::endl;
-
 	delete m;
 	m = new float[16];
 
@@ -211,21 +208,3 @@ kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
 
 	return *this;
 }
-
-// void getCirclePoints(double **vector, int numberOfPoints)
-// {
-// 	double radAngle = 0.0;
-
-// 	for (int points = 0; points < numberOfPoints; points++)
-// 	{
-// 		radAngle = 2 * K_PI * points / numberOfPoints;
-
-// 		vector[points][0] = cos(cos(radAngle));
-// 		vector[points][1] = sin(cos(radAngle));
-// 	}
-// }
-
-// int center(int a, int b)
-// {
-// 	return (a - b) / 2;
-// }

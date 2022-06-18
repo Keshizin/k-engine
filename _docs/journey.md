@@ -12,9 +12,29 @@ Espero que este devlog seja útil de alguma forma e que possa inspirar outras pe
 
 
 ## Rendering System
-### Mesh e o layout de memória
+
 ### Visualização e Projeção
+
+Como funciona o mapeamento dos modelos definidos em um sistema de coordenada tridimensional para o sistema de coordenadas do monitor.
+O que são normalized homogenous coordinates [-1.0, 1.0] e normalized device coordinates (NDC)
+
+1. modeling transformation (eye space)
+2. viewing transformation (eye space)
+3. projection transformation
+4. viewport transformation
+
+Transformações Lineares e Matrizes
+a importância das coordenadas homogeneas para projeção perspectiva (clip coordinates)
+
+Viewing frustum e Orthographic Viewing model
+
+
 ### Camera
+
+Implementação de LookAt
+- operações matematicas para criar o sistema de coordenadas local
+  - algebra linear (vetores, normalização, dot product, cross product, soma e subtração de vetores)
+- Construção de matriz 4x4 para transformações lineares da camera
 
 
 # References

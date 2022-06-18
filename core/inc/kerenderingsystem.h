@@ -27,7 +27,7 @@
 #define K_ENGINE_RENDERING_SYSTEM_H
 
 #include <keglwrapper.h>
-#include <kemodel.h>
+#include <kemesh.h>
 #include <kemath.h>
 #include <keraw.h>
 
@@ -124,7 +124,7 @@ namespace kengine
 	public:
 		static constexpr int VBO_COUNT = 2;
 
-		explicit modelnode(kengine::model& m);
+		explicit modelnode(kengine::mesh& m);
 		~modelnode();
 
 		modelnode(const modelnode& copy) = delete; // copy constructor
@@ -146,7 +146,7 @@ namespace kengine
 	class instancedmodelnode : public modelnode
 	{
 	public:
-		instancedmodelnode(int size, kengine::model& m);
+		instancedmodelnode(int size, kengine::mesh& m);
 		~instancedmodelnode();
 
 		instancedmodelnode(const instancedmodelnode& copy) = delete; // copy constructor
@@ -182,15 +182,37 @@ namespace kengine
 	};
 
 
+	// ------------------------------------------------------------------------
+	//  kengine::viewing_window class
+	// ------------------------------------------------------------------------
+	class viewing_window
+	{
+	public:
+		viewing_window();
+		~viewing_window();
+
+		viewing_window(const viewing_window& copy) = delete; // copy constructor
+		viewing_window(viewing_window&& move) noexcept = delete; // move constructor
+		viewing_window& operator=(const viewing_window& copy) = delete; // copy assignment
+
+		float _near;
+		float _far;
+		kengine::rect window;
+		kengine::matrix projection;
+	};
+
 	// ---------------------------------------------------------------------------
 	//  kengine::renderingsystem class
 	// ---------------------------------------------------------------------------
 	class win32wrapper;
 
+	enum class RENDER_CONTEXT { RENDER_CONTEXT_2D, RENDER_CONTEXT_3D_ORTHO, RENDER_CONTEXT_3D_FRUSTUM };
+
 	class renderingsystem
 	{
 	public:
 		explicit renderingsystem(kengine::win32wrapper* w);
+		renderingsystem(kengine::win32wrapper* w, RENDER_CONTEXT context);
 		~renderingsystem();
 
 		renderingsystem(const renderingsystem& copy) = delete; // copy constructor
@@ -205,8 +227,17 @@ namespace kengine
 		void setCullFace(int mode) const;
 		void setViewport(int x, int y, int width, int height) const;
 
+		void setViewingWindow(int width, int height, float left, float right, float top, float bottom, float nearPlane, float farPlane);
+		void setViewingWindow(int width, int height);
+		const kengine::matrix& getProjection() const;
+
+		// getters and setters
+		void setRenderContext(RENDER_CONTEXT context) { renderContext = context; }
+
 	private:
-		kengine::win32wrapper* win;
+		RENDER_CONTEXT renderContext;
+		kengine::win32wrapper* api;
+		kengine::viewing_window viewingWindow;
 	};
 }
 

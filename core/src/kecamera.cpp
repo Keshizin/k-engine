@@ -1,5 +1,5 @@
 /*
-	K-Engine Entity
+	K-Engine Camera Class
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -23,26 +23,53 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_ENTITY_H
-#define K_ENGINE_ENTITY_H
+#include <kecamera.h>
 
-namespace kengine
+// ----------------------------------------------------------------------------
+//  kengine::camera class - member class definition
+// ----------------------------------------------------------------------------
+kengine::camera::camera()
+	: 
+		right{ 0.0f, 0.0f, 0.0f},
+		up{ 0.0f, 0.0f, 0.0f },
+		forward{ 0.0f, 0.0f, 0.0f },
+		from{ 0.0f, 0.0f, 0.0f },
+		viewingTransformation{ 1 }
 {
-	// ----------------------------------------------------------------------------
-	//  kengine::entity class
-	// ----------------------------------------------------------------------------
-	class entity
-	{
-	public:
-		entity() {}
-		virtual ~entity() {}
-
-		entity(const entity& copy) = delete; // copy constructor
-		entity(entity&& move) noexcept = delete; // move constructor
-		entity& operator=(const entity& copy) = delete; // copy assignment
-
-		virtual void update(double frameTime) = 0;
-	};
 }
 
-#endif
+
+kengine::camera::~camera()
+{
+}
+
+
+void kengine::camera::update(double frameTime)
+{
+}
+
+
+void kengine::camera::lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam)
+{
+	from = fromParam;
+
+	// computing forward vector
+	forward = toParam - fromParam;
+	forward.normalize();
+
+	// computing right vector
+	kengine::vec3<float> temp(0.0f, 1.0f, 0.0f);
+	temp.normalize();
+	right = temp.crossProduct(forward);
+
+	// computing up vector
+	up = forward.crossProduct(right);
+
+	viewingTransformation = kengine::lookAt(right, up, forward, from);
+}
+
+
+const kengine::matrix& kengine::camera::get() const
+{
+	return viewingTransformation;
+}

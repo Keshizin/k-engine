@@ -1,5 +1,5 @@
 /*
-	K-Engine Geometric Model
+	K-Engine Geometric Mesh
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -23,7 +23,7 @@
 	SOFTWARE.
 */
 
-#include <kemodel.h>
+#include <kemesh.h>
 #include <keaux.h>
 #include <iostream>
 
@@ -31,34 +31,34 @@
 // ----------------------------------------------------------------------------
 //  k-engine model class constructors & destructor
 // ----------------------------------------------------------------------------
-kengine::model::model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i)
+kengine::mesh::mesh(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i)
 	: coords{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model constructor with arguments - [" << this << "]")
 }
 
 
-kengine::model::model(const model& m)
+kengine::mesh::mesh(const mesh& m)
 	: coords{ m.coords }, colors{ m.colors }, texCoords{ m.texCoords }, indices{ m.indices }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model copy constructor - [" << this << "]")
 }
 
 
-kengine::model::model(model&& m) noexcept
+kengine::mesh::mesh(mesh&& m) noexcept
 	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, texCoords{ std::move(m.texCoords) }, indices{ std::move(m.indices) }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model move constructor - [" << this << "]")
 }
 
 
-kengine::model::~model()
+kengine::mesh::~mesh()
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model destructor - [" << this << "]")
 }
 
 
-kengine::model& kengine::model::operator=(const model& m)
+kengine::mesh& kengine::mesh::operator=(const mesh& m)
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> kengine::model = operator overload - [" << this << "]")
 
@@ -70,7 +70,7 @@ kengine::model& kengine::model::operator=(const model& m)
 }
 
 
-void kengine::model::dump() const
+void kengine::mesh::dump() const
 {
 	std::cout << "\n> kengine::model object [0x" << this << "]" << std::endl;
 	
@@ -116,7 +116,7 @@ void kengine::model::dump() const
 }
 
 
-void kengine::model::release()
+void kengine::mesh::release()
 {
 	coords.clear();
 	colors.clear();
@@ -128,7 +128,7 @@ void kengine::model::release()
 // ------------------------------------------------------------------------
 //  functions to create basic geometric models
 // ------------------------------------------------------------------------
-kengine::model kengine::triangle(float size)
+kengine::mesh kengine::triangle(float size)
 {
 	float vertex_positions[] =
 	{
@@ -179,12 +179,12 @@ kengine::model kengine::triangle(float size)
 		1
 	};
 
-	kengine::model q(v, c, t, i);
+	kengine::mesh q(v, c, t, i);
 	return q;
 }
 
 
-kengine::model kengine::quad(float size)
+kengine::mesh kengine::quad(float size)
 {
 	float half = size / 2.0f;
 
@@ -241,12 +241,12 @@ kengine::model kengine::quad(float size)
 		1
 	};
 
-	kengine::model q(v, c, t, i);
+	kengine::mesh q(v, c, t, i);
 	return q;
 }
 
 
-kengine::model kengine::cube(float size)
+kengine::mesh kengine::cube(float size)
 {
 	float half = size / 2.0f;
 
@@ -316,6 +316,6 @@ kengine::model kengine::cube(float size)
 		1
 	};
 
-	kengine::model cube3D(v, c, t, i);
+	kengine::mesh cube3D(v, c, t, i);
 	return cube3D;
 }

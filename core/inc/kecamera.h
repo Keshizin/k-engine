@@ -1,5 +1,5 @@
 /*
-	K-Engine Entity
+	K-Engine Camera Class
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -23,25 +23,38 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_ENTITY_H
-#define K_ENGINE_ENTITY_H
+
+#ifndef K_ENGINE_CAMERA_H
+#define K_ENGINE_CAMERA_H
+
+#include <keentity.h>
+#include <kemath.h>
 
 namespace kengine
 {
-	// ----------------------------------------------------------------------------
-	//  kengine::entity class
-	// ----------------------------------------------------------------------------
-	class entity
+	// ------------------------------------------------------------------------
+	//  (!) kengine::camera class
+	// ------------------------------------------------------------------------
+	class camera : public kengine::entity
 	{
 	public:
-		entity() {}
-		virtual ~entity() {}
+		camera();
+		~camera();
 
-		entity(const entity& copy) = delete; // copy constructor
-		entity(entity&& move) noexcept = delete; // move constructor
-		entity& operator=(const entity& copy) = delete; // copy assignment
+		camera(const camera& copy) = delete; // copy constructor
+		camera(camera&& move) noexcept = delete; // move constructor
+		camera& operator=(const camera& copy) = delete; // copy assignment
 
-		virtual void update(double frameTime) = 0;
+		void update(double frameTime);
+		void lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam);
+		const kengine::matrix& get() const;
+
+	private:
+		kengine::vec3<float> right;		// x-xis
+		kengine::vec3<float> up;		// y-axis
+		kengine::vec3<float> forward;	// z-axis
+		kengine::vec3<float> from;      // camera position
+		kengine::matrix viewingTransformation;
 	};
 }
 

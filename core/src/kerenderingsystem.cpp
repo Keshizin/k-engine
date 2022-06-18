@@ -216,7 +216,7 @@ void kengine::TransformProgram::setProjection(kengine::matrix& p)
 // ------------------------------------------------------------------------
 //  kengine::modelnode class
 // ------------------------------------------------------------------------
-kengine::modelnode::modelnode(kengine::model& m)
+kengine::modelnode::modelnode(kengine::mesh& m)
 	: vao{ 0 }, vbo{ 0 }, count{ 0 }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode constructor with argument - [" << this << "]")
@@ -310,7 +310,7 @@ void kengine::modelnode::draw()
 // ----------------------------------------------------------------------------
 //  kengine::instancedmodelnode class
 // ----------------------------------------------------------------------------
-kengine::instancedmodelnode::instancedmodelnode(int size, kengine::model& m)
+kengine::instancedmodelnode::instancedmodelnode(int size, kengine::mesh& m)
 	: modelnode{ m }, max_size{ size }, modelview_vbo{ 0 }
 {
 	glCreateBuffers(1, &modelview_vbo);
@@ -410,11 +410,41 @@ void kengine::texture::bindTexture(int unit, int texture)
 }
 
 
+// ------------------------------------------------------------------------
+//  kengine::viewing_window member class definition
+// ------------------------------------------------------------------------
+kengine::viewing_window::viewing_window()
+	:
+		_near{ -1.0f },
+		_far{ 1.0f },
+		window{ 0.0f, 0.0f, 0.0f, 0.0f },
+		projection{ 1 }
+{
+}
+
+
+kengine::viewing_window::~viewing_window()
+{
+}
+
+
 // ----------------------------------------------------------------------------
 //  kengine::rendersystem class
 // ----------------------------------------------------------------------------
 kengine::renderingsystem::renderingsystem(kengine::win32wrapper* w)
-	: win(w)
+	:
+		renderContext{ kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D },
+		api{ w },
+		viewingWindow{}
+{
+}
+
+
+kengine::renderingsystem::renderingsystem(kengine::win32wrapper* w, RENDER_CONTEXT context)
+	:
+		renderContext { context },
+		api{ w },
+		viewingWindow{}
 {
 }
 
@@ -426,12 +456,12 @@ kengine::renderingsystem::~renderingsystem()
 
 int kengine::renderingsystem::startup()
 {
-	if (!win)
+	if (!api)
 	{
 		return 0;
 	}
 
-	win->initializeRenderingSystem();
+	api->initializeRenderingSystem();
 	getProcedureAddress();
 
 	return 1;
@@ -516,4 +546,82 @@ void kengine::renderingsystem::setCullFace(int modeParam) const
 void kengine::renderingsystem::setViewport(int x, int y, int width, int height) const
 {
 	glViewport(x, y, width, height);
+}
+
+
+void kengine::renderingsystem::setViewingWindow(int width, int height, float left, float right, float top, float bottom, float nearPlane, float farPlane)
+{
+	viewingWindow.window.left = left;
+	viewingWindow.window.right = right;
+	viewingWindow.window.bottom = bottom;
+	viewingWindow.window.top = top;
+	viewingWindow._near = nearPlane;
+	viewingWindow._far = farPlane;
+
+	float aspectRatio = 1.0f;
+	kengine::rect window = viewingWindow.window;
+
+	if (width <= height)
+	{
+		aspectRatio = static_cast<float>(height) / static_cast<float>(width);
+		window.bottom *= aspectRatio;
+		window.top *= aspectRatio;
+	}
+	else
+	{
+		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+		window.left *= aspectRatio;
+		window.right *= aspectRatio;
+	}
+
+	if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D)
+	{
+		viewingWindow.projection = kengine::ortho(
+			window.left,
+			window.right,
+			window.bottom,
+			window.top,
+			-1.0f,
+			1.0f);
+	}
+	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_ORTHO)
+	{
+		viewingWindow.projection = kengine::ortho(
+			window.left,
+			window.right,
+			window.bottom,
+			window.top,
+			viewingWindow._near,
+			viewingWindow._far);
+	}
+	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_FRUSTUM)
+	{
+		viewingWindow.projection = kengine::frustum(
+			window.left,
+			window.right,
+			window.bottom,
+			window.top,
+			viewingWindow._near,
+			viewingWindow._far);
+	}
+}
+
+
+void kengine::renderingsystem::setViewingWindow(int width, int height)
+{
+	setViewingWindow(
+		width,
+		height,
+		viewingWindow.window.left,
+		viewingWindow.window.right,
+		viewingWindow.window.bottom,
+		viewingWindow.window.top,
+		viewingWindow._near,
+		viewingWindow._far);
+}
+
+
+const kengine::matrix& kengine::renderingsystem::getProjection() const
+{
+	return viewingWindow.projection;
 }

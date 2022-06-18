@@ -27,14 +27,21 @@
 #include <keaux.h>
 #include <kerenderingsystem.h>
 #include <keentity.h>
+#include <kecamera.h>
 
-#define WINDOW_WIDTH  640
-#define WINDOW_HEIGHT 480
-#define TOTAL_ENTITY 1
+#include <ctime>
+
+#define MONITOR_WIDTH	2560
+#define MONITOR_HEIGHT	1080
+
+#define WINDOW_WIDTH	800
+#define WINDOW_HEIGHT	800
+
+#define TOTAL_ENTITY	1
 
 
-// ----------------------------------------------------------------------------
-//  Game Entity
+// ---------------------------------------------------------------------------
+//  GameObejct class
 // ----------------------------------------------------------------------------
 class GameObject : public kengine::entity
 {
@@ -46,12 +53,25 @@ public:
 	GameObject(GameObject&& move) noexcept = delete; // move constructor
 	GameObject& operator=(const GameObject& copy) = delete; // copy assignment
 
-	void update(double frameTime) { K_UNREFERENCED_PARAMETER(frameTime); }
+	void update(double frameTime)
+	{
+		K_UNREFERENCED_PARAMETER(frameTime);
 
-private:
-	kengine::transform<float> translate;
-	kengine::transform<float> rotate;
-	kengine::transform<float> scale;
+		static float angle = 0.0f;
+
+		angle += 0.01f;
+
+		if (angle > 360.0f)
+			angle = 0.0f;
+
+		rotate.x = angle;
+		rotate.y = angle;
+		rotate.z = angle;
+	}
+
+	kengine::vec3<float> translate;
+	kengine::vec3<float> rotate;
+	kengine::vec3<float> scale;
 };
 
 
@@ -94,6 +114,9 @@ kengine::instancedmodelnode* myInstancedNode;
 GameObject* entityList;
 GLfloat* modelViewData;
 
+// camera object
+kengine::camera camera;
+
 // texture object
 kengine::texture* myTexture;
 
@@ -108,11 +131,18 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 	K_UNREFERENCED_PARAMETER(nCmdShow);
 
-	GameEventHandler my_events;
-	myCore = new kengine::core(&my_events);
-	myCore->getGameWindow()->create(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, "K-ENGINE DEMO", K_WINDOW_COMPLETE);
+	GameEventHandler myEvents;
+	myCore = new kengine::core(&myEvents);
 	
-	myRenderingSystem = new kengine::renderingsystem(myCore->getWin32api());
+	myCore->getGameWindow()->create(
+		(MONITOR_WIDTH / 2) - (WINDOW_WIDTH / 2),
+		(MONITOR_HEIGHT / 2) - (WINDOW_WIDTH / 2),
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		"K-ENGINE DEMO",
+		K_WINDOW_COMPLETE);
+	
+	myRenderingSystem = new kengine::renderingsystem(myCore->getWin32api(), kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_FRUSTUM);
 	myRenderingSystem->startup();
 	myRenderingSystem->setVSync(0);
 	
@@ -131,6 +161,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	return 1;
 }
 
+
 // ----------------------------------------------------------------------------
 //  GameEventHandler method's definition
 // ----------------------------------------------------------------------------
@@ -141,8 +172,12 @@ void GameEventHandler::createWindowEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
+	srand(time(nullptr));
 	myRenderingSystem->printInfo();
-	myRenderingSystem->setPolygonMode(K_RENDERING_MODE_FILL);
+	myRenderingSystem->setPolygonMode(K_RENDERING_MODE_LINE);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	myShader = new kengine::TransformProgram;
 
@@ -154,16 +189,27 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	myShader->loadShaders(shaders);
 
-	kengine::model m = kengine::quad(1.0f);
+	kengine::mesh m = kengine::cube(1.0f);
 	myInstancedNode = new kengine::instancedmodelnode(TOTAL_ENTITY, m);
 
-	kengine::raw_img img;
-	img.loadfile("../../../../shaders/shisa.png.KRAW");
-	myTexture = new kengine::texture(img);
-	myTexture->bindTexture(0, 1);
+	//kengine::raw_img img;
+	//img.loadfile("../../../../shaders/shisa.png.KRAW");
+	//myTexture = new kengine::texture(img);
+	//myTexture->bindTexture(0, 1);	
 
 	entityList = new GameObject[TOTAL_ENTITY];
 	modelViewData = new GLfloat[TOTAL_ENTITY * 16];
+
+	// SET VIEWING WINDOW HERE!
+	myRenderingSystem->setViewingWindow(WINDOW_WIDTH, WINDOW_HEIGHT, -5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 100.0f);
+
+	myShader->useProgram();
+	kengine::matrix p = myRenderingSystem->getProjection();
+	myShader->setProjection(p);
+
+	kengine::vec3<float> from(0.0f, 0.0f, -2.0f);
+	kengine::vec3<float> to(0.0f, 0.0f, 0.0f);
+	camera.lookAt(from, to);
 }
 
 
@@ -188,9 +234,15 @@ void GameEventHandler::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
 
-	static const float bkgColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	static const float bkgColor[] = { 0.0f, 1.0f, 1.0f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, bkgColor);
 
+	kengine::matrix v(1);
+
+	// setting camera matrix
+	camera.update(frameTime);
+	kengine::matrix c = camera.get(); 
+	
 	// updating entities
 	int index = 0;
 
@@ -199,16 +251,33 @@ void GameEventHandler::frameEvent(double frameTime)
 		entityList[i].update(frameTime);
 		kengine::matrix m(1.0f);
 
+		kengine::matrix r1 = kengine::rotate(
+			entityList[i].rotate.x,
+			0.0f,
+			0.0f);
+
+		kengine::matrix r2 = kengine::rotate(
+			0.0f,
+			entityList[i].rotate.y,
+			0.0f);
+
+		kengine::matrix r3 = kengine::rotate(
+			0.0f,
+			0.0f,
+			entityList[i].rotate.z);
+
+		m = r1 * r2 * r3;
+
+		v = c * m;
+		
 		for (int j = 0; j < 16; j++)
 		{
-			modelViewData[index++] = m.value()[j];
+			modelViewData[index++] = v.value()[j];
 		}
 	}
 
 	// draw objects
 	myShader->useProgram();
-	kengine::matrix p = kengine::ortho(-2.0f, 2.0f, -2.0, 2.0f, -1.0f, 1.0f);
-	myShader->setProjection(p);
 	myInstancedNode->update(TOTAL_ENTITY, modelViewData);
 	myInstancedNode->draw(TOTAL_ENTITY);
 }
@@ -216,7 +285,7 @@ void GameEventHandler::frameEvent(double frameTime)
 
 void GameEventHandler::resumeEvent()
 {
-}
+} 
 
 
 void GameEventHandler::pauseEvent()
@@ -263,7 +332,16 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 {
 	K_UNREFERENCED_PARAMETER(width);
 	K_UNREFERENCED_PARAMETER(height);
-	myRenderingSystem->setViewport(0, 0, width, height);
+
+	if (myShader)
+	{
+		myRenderingSystem->setViewport(0, 0, width, height);
+
+		myRenderingSystem->setViewingWindow(width, height);
+		kengine::matrix p = myRenderingSystem->getProjection();
+		myShader->useProgram();
+		myShader->setProjection(p);
+	}
 }
 
 

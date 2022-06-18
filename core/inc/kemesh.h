@@ -1,5 +1,5 @@
 /*
-	K-Engine Geometric Model
+	K-Engine Geometric Mesh
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -23,8 +23,8 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_MODEL_H
-#define K_ENGINE_MODEL_H
+#ifndef K_ENGINE_MESH_H
+#define K_ENGINE_MESH_H
 
 namespace kengine
 {
@@ -129,16 +129,16 @@ namespace kengine
 	// 
 	//  This is a container for a geometric vertex data
 	// ------------------------------------------------------------------------
-	class model
+	class mesh
 	{
 	public:
 		//model(); // default constructor disabled to avoid unncessary copying of data
-		model(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i);
-		model(const model& m); // copy constructor
-		model(model&& m) noexcept; // move constructor
-		~model();
+		mesh(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i);
+		mesh(const mesh& m); // copy constructor
+		mesh(mesh&& m) noexcept; // move constructor
+		~mesh();
 		
-		model& operator=(const model& m); // copy assigment
+		mesh& operator=(const mesh& m); // copy assigment
 
 		//void load(const struct vattrib<float> &v); // disabled to avoid unncessary copying of data
 		void dump() const;
@@ -160,9 +160,9 @@ namespace kengine
 	// ------------------------------------------------------------------------
 	//  functions to create basic geometric models
 	// ------------------------------------------------------------------------
-	model triangle(float size);
-	model quad(float size);
-	model cube(float size);
+	mesh triangle(float size);
+	mesh quad(float size);
+	mesh cube(float size);
 }
 
 #endif

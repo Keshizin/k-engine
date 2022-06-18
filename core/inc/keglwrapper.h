@@ -149,8 +149,12 @@ extern PFNGLISSAMPLERPROC									glIsSampler;
 extern PFNGLDELETESAMPLERSPROC								glDeleteSamplers;
 extern PFNGLACTIVETEXTUREPROC								glActiveTexture;
 extern PFNGLTEXSTORAGE2DPROC								glTexStorage2D;
-//extern PFNGLCOPYBUFFERSUBDATAPROC							glCopyBufferSubData;
-//extern PFNGLBUFFERSTORAGEPROC								glBufferStorage;
-//extern PFNGLDEPTHRANGEFPROC								glDepthRangef;
+extern PFNGLBLENDFUNCSEPARATEPROC							glBlendFuncSeparate;
+extern PFNGLBLENDFUNCIPROC									glBlendFunci;
+extern PFNGLBLENDFUNCSEPARATEIPROC							glBlendFuncSeparatei;
+extern PFNGLBLENDEQUATIONPROC								glBlendEquation;
+extern PFNGLBLENDEQUATIONSEPARATEPROC						glBlendEquationSeparate;
+extern PFNGLBLENDEQUATIONIPROC								glBlendEquationi;
+extern PFNGLBLENDEQUATIONSEPARATEIPROC						glBlendEquationSeparatei;
 
 #endif

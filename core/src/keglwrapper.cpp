@@ -135,9 +135,14 @@ PFNGLISSAMPLERPROC										glIsSampler = 0;
 PFNGLDELETESAMPLERSPROC									glDeleteSamplers = 0;
 PFNGLACTIVETEXTUREPROC									glActiveTexture = 0;
 PFNGLTEXSTORAGE2DPROC									glTexStorage2D = 0;
-//PFNGLCOPYBUFFERSUBDATAPROC       glCopyBufferSubData = 0;
-//PFNGLBUFFERSTORAGEPROC           glBufferStorage = 0;
-//PFNGLDEPTHRANGEFPROC             glDepthRangef = 0;
+PFNGLBLENDFUNCSEPARATEPROC								glBlendFuncSeparate = 0;
+PFNGLBLENDFUNCIPROC										glBlendFunci = 0;
+PFNGLBLENDFUNCSEPARATEIPROC								glBlendFuncSeparatei = 0;
+PFNGLBLENDEQUATIONPROC									glBlendEquation = 0;
+PFNGLBLENDEQUATIONSEPARATEPROC							glBlendEquationSeparate = 0;
+PFNGLBLENDEQUATIONIPROC									glBlendEquationi = 0;
+PFNGLBLENDEQUATIONSEPARATEIPROC							glBlendEquationSeparatei = 0;
+
 
 void getProcedureAddress()
 {
@@ -249,9 +254,13 @@ void getProcedureAddress()
 	glDeleteSamplers = (PFNGLDELETESAMPLERSPROC)wglGetProcAddress("glDeleteSamplers");
 	glActiveTexture = (PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture");
 	glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)wglGetProcAddress("glTexStorage2D");
-	//	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)wglGetProcAddress("glCopyBufferSubData");
-	//	glBufferStorage = (PFNGLBUFFERSTORAGEPROC)wglGetProcAddress("glBufferStorage");
-	//	glDepthRangef = (PFNGLDEPTHRANGEFPROC)wglGetProcAddress("glDepthRangef");
+	glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)wglGetProcAddress("glBlendFuncSeparate");
+	glBlendFunci = (PFNGLBLENDFUNCIPROC)wglGetProcAddress("glBlendFunci");
+	glBlendFuncSeparatei = (PFNGLBLENDFUNCSEPARATEIPROC)wglGetProcAddress("glBlendFuncSeparatei");
+	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
+	glBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)wglGetProcAddress("glBlendEquationSeparate");
+	glBlendEquationi = (PFNGLBLENDEQUATIONIPROC)wglGetProcAddress("glBlendEquationi");
+	glBlendEquationSeparatei = (PFNGLBLENDEQUATIONSEPARATEIPROC)wglGetProcAddress("glBlendEquationSeparatei");
 
 #pragma warning(default: 4191)
 
@@ -360,10 +369,14 @@ void getProcedureAddress()
 		!glIsSampler &&
 		!glDeleteSamplers &&
 		!glActiveTexture &&
-		!glTexStorage2D)
-		//		!glCopyBufferSubData &&
-		//		!glBufferStorage &&
-		//		!glDepthRangef)
+		!glTexStorage2D &&
+		!glBlendFuncSeparate &&
+		!glBlendFunci &&
+		!glBlendFuncSeparatei &&
+		!glBlendEquation &&
+		!glBlendEquationSeparate &&
+		!glBlendEquationi &&
+		!glBlendEquationSeparatei)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to load GL extension: " << glGetError())
 	}

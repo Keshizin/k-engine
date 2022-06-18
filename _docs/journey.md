@@ -10,8 +10,16 @@ Neste devlog, pretendo incluir as minhas ideias e explicar os motivos de ter tom
 
 Espero que este devlog seja útil de alguma forma e que possa inspirar outras pessoas que tem o desejo de criar um motor de jogo do zero.
 
+
+## Rendering System
+### Mesh e o layout de memória
+### Visualização e Projeção
+### Camera
+
+
 # References
 
 - Gregory, J. Game Engine Architecture. 3rd ed. Boca Raton: CRC Press, 2018.
 - Kessenich, J. Sellers, G. Shreiner, D. OpenGL Programming Guide. 9th ed. Addison-Wesley, 2016.
 - Stroustrup, B. The C++ Programming Language. 4th ed. MA: Addison-Wesley, 2013.
+- Scratchapixel 2.0. Disponível em https://www.scratchapixel.com/.

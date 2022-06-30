@@ -8,6 +8,6 @@ include_directories(
 	"${PROJECT_SOURCE_DIR}/core/inc"
 	"${PROJECT_SOURCE_DIR}/core/src")
 
-add_definitions(-DK_DEBUG)
+#add_definitions(-DK_DEBUG)
 
 add_library(kengine STATIC ${SOURCE})

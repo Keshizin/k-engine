@@ -79,6 +79,9 @@
 #define K_MOUSE_MIDDLE_BUTTON 1
 #define K_MOUSE_RIGHT_BUTTON  2
 
+#define K_MOUSE_DOWN	1
+#define K_MOUSE_UP		0
+
 
 // ----------------------------------------------------------------------------
 //  Common Colors

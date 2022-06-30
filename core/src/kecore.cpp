@@ -33,7 +33,6 @@ kengine::core::core(kengine::eventhandler* evt)
 		eventHandler{ nullptr },
 		win32api{ nullptr },
 		gameWindow{ nullptr },
-
 		timeHandler{},
 		profileLog{ MAX_LOG_SIZE }
 {

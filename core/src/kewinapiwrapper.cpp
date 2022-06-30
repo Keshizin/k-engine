@@ -624,27 +624,27 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		break;
 
 	case WM_LBUTTONDOWN:
-		globalEventHandler->mouseEvent(0, 1, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_LEFT_BUTTON, K_MOUSE_DOWN, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_LBUTTONUP:
-		globalEventHandler->mouseEvent(0, 0, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_LEFT_BUTTON, K_MOUSE_UP, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_MBUTTONDOWN:
-		globalEventHandler->mouseEvent(1, 1, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_MIDDLE_BUTTON, K_MOUSE_DOWN, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_MBUTTONUP:
-		globalEventHandler->mouseEvent(1, 0, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_MIDDLE_BUTTON, K_MOUSE_UP, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_RBUTTONDOWN:
-		globalEventHandler->mouseEvent(2, 1, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_RIGHT_BUTTON, K_MOUSE_DOWN, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_RBUTTONUP:
-		globalEventHandler->mouseEvent(2, 0, LOWORD(lParam), HIWORD(lParam));
+		globalEventHandler->mouseEvent(K_MOUSE_RIGHT_BUTTON, K_MOUSE_UP, LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	// case WM_NCMOUSELEAVE:

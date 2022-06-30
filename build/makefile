@@ -35,7 +35,7 @@ $(LIBNAME): $(OBJ_LIST)
 	lib $^ /OUT:$@
 
 %.obj: $(CORE_SRC_DIR)/%.cpp
-	CL /c $< $(MSVCFLAGS) $(DK_DEBUG)
+	CL /c $< $(MSVCFLAGS) $(APP_FLAGS)
 
 clean:
 	del *.lib

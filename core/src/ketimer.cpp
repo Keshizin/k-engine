@@ -34,6 +34,16 @@ kengine::timer::timer()
 }
 
 
+kengine::timer::timer(long long stopTimeParam)
+	:
+		stopTime{ stopTimeParam * (getHighResolutionTimerFrequency() / 1000) },
+		startTimer{ 0 },
+		stopWatch{ 0 },
+		isRunning{ false }
+{
+}
+
+
 kengine::timer::timer(const kengine::timer& copy)
 	: stopTime{ copy.stopTime }, startTimer{ copy.startTimer }, stopWatch{ copy.stopWatch }, isRunning{ copy.isRunning }
 {

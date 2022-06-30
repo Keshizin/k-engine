@@ -29,38 +29,38 @@
 
 
 // ----------------------------------------------------------------------------
-//  k-engine model class constructors & destructor
+//  k-engine mesh class constructors & destructor
 // ----------------------------------------------------------------------------
-kengine::mesh::mesh(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i)
+kengine::mesh::mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i)
 	: coords{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model constructor with arguments - [" << this << "]")
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh constructor with arguments - [" << this << "]")
 }
 
 
 kengine::mesh::mesh(const mesh& m)
 	: coords{ m.coords }, colors{ m.colors }, texCoords{ m.texCoords }, indices{ m.indices }
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model copy constructor - [" << this << "]")
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh copy constructor - [" << this << "]")
 }
 
 
 kengine::mesh::mesh(mesh&& m) noexcept
 	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, texCoords{ std::move(m.texCoords) }, indices{ std::move(m.indices) }
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model move constructor - [" << this << "]")
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh move constructor - [" << this << "]")
 }
 
 
 kengine::mesh::~mesh()
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::model destructor - [" << this << "]")
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh destructor - [" << this << "]")
 }
 
 
 kengine::mesh& kengine::mesh::operator=(const mesh& m)
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> kengine::model = operator overload - [" << this << "]")
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> kengine::mesh = operator overload - [" << this << "]")
 
 	coords = m.coords;
 	colors = m.colors;
@@ -72,7 +72,7 @@ kengine::mesh& kengine::mesh::operator=(const mesh& m)
 
 void kengine::mesh::dump() const
 {
-	std::cout << "\n> kengine::model object [0x" << this << "]" << std::endl;
+	std::cout << "\n> kengine::mesh object [0x" << this << "]" << std::endl;
 	
 	std::cout
 		<< "   - coords.attributeArray memory address [0x" << coords.attributeArray << "]\n"
@@ -116,7 +116,7 @@ void kengine::mesh::dump() const
 }
 
 
-void kengine::mesh::release()
+void kengine::mesh::clear()
 {
 	coords.clear();
 	colors.clear();
@@ -126,7 +126,7 @@ void kengine::mesh::release()
 
 
 // ------------------------------------------------------------------------
-//  functions to create basic geometric models
+//  functions to create basic geometric mesh
 // ------------------------------------------------------------------------
 kengine::mesh kengine::triangle(float size)
 {

@@ -156,5 +156,7 @@ extern PFNGLBLENDEQUATIONPROC								glBlendEquation;
 extern PFNGLBLENDEQUATIONSEPARATEPROC						glBlendEquationSeparate;
 extern PFNGLBLENDEQUATIONIPROC								glBlendEquationi;
 extern PFNGLBLENDEQUATIONSEPARATEIPROC						glBlendEquationSeparatei;
+extern PFNGLTEXTUREPARAMETERFVPROC							glTextureParameterfv;
+extern PFNGLTEXTUREPARAMETERIPROC							glTextureParameteri;
 
 #endif

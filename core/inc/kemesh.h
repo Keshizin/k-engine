@@ -29,20 +29,33 @@
 namespace kengine
 {
 	// ------------------------------------------------------------------------
-	//  struct for store vertex attributes (i.e. positions, colors, etc) 
+	//  (!) kengine::vattrib class
+	// 
+	//  Class for store vertex attributes
+	// 
+	//  Note: vertex attributes is a term used in OpenGL to represent array of
+	//        vertex data (i.e. positions, colors, uv, etc)
 	// ------------------------------------------------------------------------
 	template <typename TYPE>
-	struct vattrib
+	class vattrib
 	{
+	public:
+		// array of vertex data (heap allocation)
 		TYPE*  attributeArray;
+
+		// array size in bytes
 		size_t arraySize;
-		size_t count; // count of elements per attribute (i.e. must be 4 for RGBA)
+
+		// count of elements per attribute (i.e. must be 4 for RGBA)
+		size_t count;
+
 
 		// default constructor
 		vattrib()
 			: attributeArray{ nullptr }, arraySize{ 0 }, count{ 0 }
 		{
 		}
+
 
 		// copy constructor
 		vattrib(const vattrib& va)
@@ -61,6 +74,7 @@ namespace kengine
 			}
 		}
 
+
 		// constructor with arguments
 		vattrib(TYPE* array, size_t size, size_t c)
 			: attributeArray{ new TYPE[size] }, arraySize{ size }, count{ c }
@@ -71,6 +85,7 @@ namespace kengine
 			}
 		}
 
+
 		// move constructor
 		vattrib(vattrib&& va) noexcept
 			: attributeArray{ va.attributeArray }, arraySize{ va.arraySize }, count{ va.count }
@@ -80,11 +95,13 @@ namespace kengine
 			va.count = 0;
 		}
 
+
 		// destrcutor
 		~vattrib()
 		{
 			delete attributeArray;
 		}
+
 
 		// = operator overload
 		vattrib& operator=(const vattrib& va)
@@ -112,9 +129,19 @@ namespace kengine
 			return *this;
 		}
 
-		size_t getSizeinBytes() const { return arraySize * sizeof(TYPE); }
-		size_t getSize() const { return arraySize / count; }
+
+		size_t getSizeinBytes() const
+		{
+			return arraySize * sizeof(TYPE);
+		}
+
+
+		size_t getSize() const
+		{
+			return arraySize / count;
+		}
 		
+
 		void clear()
 		{
 			delete attributeArray;
@@ -124,37 +151,39 @@ namespace kengine
 		}
 	};
 
+
 	// ------------------------------------------------------------------------
-	//  (!) kengine::model class
+	//  (!) kengine::mesh class
 	// 
 	//  This is a container for a geometric vertex data
+	// 
+	//  Note: default constructor must be deleted to avoid unncessary copying
+	//        of data
 	// ------------------------------------------------------------------------
 	class mesh
 	{
 	public:
-		//model(); // default constructor disabled to avoid unncessary copying of data
-		mesh(struct vattrib<float>& v, struct vattrib<float>& c, struct vattrib<float>& t, struct vattrib<unsigned int>& i);
+		mesh() = delete;
+		mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i);
 		mesh(const mesh& m); // copy constructor
 		mesh(mesh&& m) noexcept; // move constructor
 		~mesh();
 		
 		mesh& operator=(const mesh& m); // copy assigment
 
-		//void load(const struct vattrib<float> &v); // disabled to avoid unncessary copying of data
 		void dump() const;
-		size_t getSizeInBytes() const { return coords.getSizeinBytes() + colors.getSizeinBytes() + texCoords.getSizeinBytes(); }
-		void release();
+		void clear();
 
-		const struct vattrib<float> * getCoords() const { return &coords; }
-		const struct vattrib<float> * getColors() const { return &colors; }
-		const struct vattrib<float>* getTexCoords() const { return &texCoords; }
-		const struct vattrib<unsigned int> * getIndices() const { return &indices; }
+		const vattrib<float> * getCoords() const { return &coords; }
+		const vattrib<float> * getColors() const { return &colors; }
+		const vattrib<float>* getTexCoords() const { return &texCoords; }
+		const vattrib<unsigned int> * getIndices() const { return &indices; }
 
 	private:
-		struct vattrib<float> coords;
-		struct vattrib<float> colors;
-		struct vattrib<float> texCoords;
-		struct vattrib<unsigned int>  indices;
+		vattrib<float> coords;
+		vattrib<float> colors;
+		vattrib<float> texCoords;
+		vattrib<unsigned int> indices;
 	};
 
 	// ------------------------------------------------------------------------

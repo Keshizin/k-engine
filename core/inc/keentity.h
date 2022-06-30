@@ -26,6 +26,8 @@
 #ifndef K_ENGINE_ENTITY_H
 #define K_ENGINE_ENTITY_H
 
+#include <ketimer.h>
+
 namespace kengine
 {
 	// ----------------------------------------------------------------------------
@@ -42,6 +44,34 @@ namespace kengine
 		entity& operator=(const entity& copy) = delete; // copy assignment
 
 		virtual void update(double frameTime) = 0;
+	};
+
+
+	enum class ANIMATION_TYPE { CONTINUOUS, FINITE };
+
+	// ------------------------------------------------------------------------
+	//  kengine::animation2D
+	// ------------------------------------------------------------------------
+	class animation2D
+	{
+	public:
+		animation2D(ANIMATION_TYPE typeParam, int frame, int totalFramesParam, long long frameTime);
+		~animation2D();
+
+		animation2D(const animation2D& copy) = delete; // copy constructor
+		animation2D(animation2D&& move) noexcept = delete; // move constructor
+		animation2D& operator=(const animation2D& copy) = delete; // copy assignment
+
+		void start();
+		void update();
+		int getCurrentFrame() const;
+
+	private:
+		ANIMATION_TYPE	type;
+		kengine::timer	timer;
+		int				startFrame;
+		int				currentFrame;
+		int				totalFrames;
 	};
 }
 

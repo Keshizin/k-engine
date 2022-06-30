@@ -216,7 +216,7 @@ void kengine::TransformProgram::setProjection(kengine::matrix& p)
 // ------------------------------------------------------------------------
 //  kengine::modelnode class
 // ------------------------------------------------------------------------
-kengine::modelnode::modelnode(kengine::mesh& m)
+kengine::meshnode::meshnode(const kengine::mesh& m)
 	: vao{ 0 }, vbo{ 0 }, count{ 0 }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode constructor with argument - [" << this << "]")
@@ -228,7 +228,7 @@ kengine::modelnode::modelnode(kengine::mesh& m)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
 	}
 
-	//  store elements in VBO
+	// store indices in VBO
 	const kengine::vattrib<unsigned int>* indices = m.getIndices();
 	glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
 
@@ -240,7 +240,12 @@ kengine::modelnode::modelnode(kengine::mesh& m)
 	}
 
 	//  store vertex attributes in VBO
-	glNamedBufferStorage(vbo[1], static_cast<GLsizeiptr>(m.getSizeInBytes()), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+	const kengine::vattrib<float>* colorsPTR = m.getColors();
+	const kengine::vattrib<float>* texCoordsPTR = m.getTexCoords();
+
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes() + texCoordsPTR->getSizeinBytes());
+	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	error = glGetError();
 
@@ -248,14 +253,9 @@ kengine::modelnode::modelnode(kengine::mesh& m)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
 	}
-
-	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+	
 	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), coordsPTR->attributeArray);
-
-	const kengine::vattrib<float>* colorsPTR = m.getColors();
 	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(colorsPTR->getSizeinBytes()), colorsPTR->attributeArray);
-
-	const kengine::vattrib<float>* texCoordsPTR = m.getTexCoords();
 	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(texCoordsPTR->getSizeinBytes()), texCoordsPTR->attributeArray);
 
 	//  creating VAO
@@ -273,7 +273,7 @@ kengine::modelnode::modelnode(kengine::mesh& m)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
 	}
 
-	//  Shader Plumbing
+	//  shader plumbing
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
@@ -289,7 +289,7 @@ kengine::modelnode::modelnode(kengine::mesh& m)
 }
 
 
-kengine::modelnode::~modelnode()
+kengine::meshnode::~meshnode()
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]")
 
@@ -300,7 +300,7 @@ kengine::modelnode::~modelnode()
 }
 
 
-void kengine::modelnode::draw()
+void kengine::meshnode::draw()
 {
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
@@ -308,10 +308,10 @@ void kengine::modelnode::draw()
 
 
 // ----------------------------------------------------------------------------
-//  kengine::instancedmodelnode class
+//  kengine::instancedmeshnode class
 // ----------------------------------------------------------------------------
-kengine::instancedmodelnode::instancedmodelnode(int size, kengine::mesh& m)
-	: modelnode{ m }, max_size{ size }, modelview_vbo{ 0 }
+kengine::instancedmeshnode::instancedmeshnode(int size, kengine::mesh& m)
+	: meshnode{ m }, max_size{ size }, modelview_vbo{ 0 }
 {
 	glCreateBuffers(1, &modelview_vbo);
 	glNamedBufferStorage(modelview_vbo, static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat)), nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -327,18 +327,147 @@ kengine::instancedmodelnode::instancedmodelnode(int size, kengine::mesh& m)
 	}
 }
 
-kengine::instancedmodelnode::~instancedmodelnode()
+
+kengine::instancedmeshnode::~instancedmeshnode()
 {
 	glInvalidateBufferData(modelview_vbo);
 	glDeleteBuffers(1, &modelview_vbo);
 }
 
-void kengine::instancedmodelnode::update(const long long int size, float* data) const
+
+void kengine::instancedmeshnode::update(const long long int size, float* data) const
 {
 	glNamedBufferSubData(modelview_vbo, 0, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
 }
 
-void kengine::instancedmodelnode::draw(int size) const
+
+void kengine::instancedmeshnode::draw(int size) const
+{
+	if (size < 0)
+		size = 0;
+
+	glBindVertexArray(vao);
+	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
+}
+
+
+// ------------------------------------------------------------------------
+//  (!) kengine::instanceduvmeshnode class
+// ------------------------------------------------------------------------
+kengine::instanceduvmeshnode::instanceduvmeshnode(const size_t size, const kengine::mesh& m)
+	: max_size{ size }, vao { 0 }, vbo{ { 0 } }
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::batch constructor with argument - [" << this << "]")
+
+	glCreateBuffers(TOTAL_VBO, vbo);
+
+	if (glGetError() == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
+	}
+
+	// store indices in VBO
+	const kengine::vattrib<unsigned int>* indices = m.getIndices();
+	glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
+
+	GLuint error = glGetError();
+
+	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+	}
+
+	// store vertex attributes in VBO
+	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes());
+	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	error = glGetError();
+
+	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
+	}
+
+	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), coordsPTR->attributeArray);
+
+	// store vertex attributes for texture coordinates and modelview matrix
+	GLsizeiptr matrixSize = static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat));
+	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(GLfloat)));
+	glNamedBufferStorage(vbo[2], matrixSize + uvSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	// creating VAO
+	glCreateVertexArrays(1, &vao);
+
+	if (glGetError() == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create vao: " << glGetError())
+	}
+
+	glBindVertexArray(vao);
+
+	if (glGetError() == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
+	}
+
+	//  shader plumbing
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)(uvSize + sizeof(float) * 4 * i));
+		glEnableVertexAttribArray(3UL + i);
+		glVertexAttribDivisor(3UL + i, 1);
+	}
+
+	count = static_cast<GLsizei>(m.getIndices()->getSize());
+}
+
+
+kengine::instanceduvmeshnode::~instanceduvmeshnode()
+{
+	glInvalidateBufferData(vbo[0]);
+	glInvalidateBufferData(vbo[1]);
+	glInvalidateBufferData(vbo[2]);
+	glDeleteBuffers(TOTAL_VBO, vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+
+void kengine::instanceduvmeshnode::updateModelView(size_t size, float* modelview) const
+{
+	if (size > max_size)
+		size = max_size;
+
+	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(float)));
+	glNamedBufferSubData(vbo[2], uvSize, static_cast<GLsizeiptr>(size * 16 * sizeof(GLfloat)), modelview);
+}
+
+
+void kengine::instanceduvmeshnode::updateUV(size_t size, float* uv) const
+{
+	if (size > max_size)
+		size = max_size;
+
+	glNamedBufferSubData(vbo[2], 0, static_cast<GLsizeiptr>(size * (8 * sizeof(float))), uv);
+}
+
+
+void kengine::instanceduvmeshnode::draw(int size) const
 {
 	if (size < 0)
 		size = 0;
@@ -351,8 +480,8 @@ void kengine::instancedmodelnode::draw(int size) const
 // ---------------------------------------------------------------------------
 //  kengine::texture class
 // ---------------------------------------------------------------------------
-kengine::texture::texture(const kengine::raw_img& img)
-	: id{0}
+kengine::texture::texture(const kengine::raw_img& img, GLuint textureUnit)
+	: id{ 0 }, texUnit{ textureUnit }
 {
 	glCreateTextures(GL_TEXTURE_2D, 1, &id);
 
@@ -378,6 +507,13 @@ kengine::texture::texture(const kengine::raw_img& img)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to specify texture subimage: " << error)
 	}
+
+	glBindTextureUnit(texUnit, id);
+
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 
@@ -394,12 +530,12 @@ kengine::texture::~texture()
 }
 
 
-void kengine::texture::bindTexture(int unit, int texture)
+void kengine::texture::bindTexture(int texture)
 {
 	if (texture)
-		glBindTextureUnit(static_cast<GLuint>(unit), id);
+		glBindTextureUnit(texUnit, id);
 	else
-		glBindTextureUnit(static_cast<GLuint>(unit), 0);
+		glBindTextureUnit(texUnit, 0);
 
 	GLenum error = glGetError();
 
@@ -407,6 +543,69 @@ void kengine::texture::bindTexture(int unit, int texture)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind texture unit: " << error)
 	}
+}
+
+
+// ---------------------------------------------------------------------------
+//  kengine::atlas class
+// ---------------------------------------------------------------------------
+kengine::atlas::atlas(std::string filename, const size_t frames, GLuint textureUnit)
+	: tex{ nullptr }, uv{ nullptr }
+{
+	kengine::raw_img img;
+
+	if (img.loadfile(filename))
+	{
+		tex = new kengine::texture(img, textureUnit);
+
+		uv = new float[8 * frames];
+
+		float x_start_offset = 0.0f;
+		float x_offset = 1.0f / static_cast<float>(frames);
+
+		for (size_t i = 0; i < frames; i++)
+		{
+			uv[(i * 8) + 0] = x_start_offset;
+			uv[(i * 8) + 1] = 0.0f;
+
+			uv[(i * 8) + 2] = x_start_offset;
+			uv[(i * 8) + 3] = 1.0f;
+
+			uv[(i * 8) + 4] = x_start_offset + x_offset;
+			uv[(i * 8) + 5] = 1.0f;
+
+			uv[(i * 8) + 6] = x_start_offset + x_offset;
+			uv[(i * 8) + 7] = 0.0f;
+
+			x_start_offset += x_offset;
+		}
+	}
+}
+
+
+kengine::atlas::~atlas()
+{
+	delete tex;
+	delete uv;
+}
+
+
+void kengine::atlas::bindTexture(int texture)
+{
+	tex->bindTexture(texture);
+}
+
+
+void kengine::atlas::copyFrame(const int frame, float* buffer)
+{
+	*(buffer + 0) = uv[frame * 8 + 0];
+	*(buffer + 1) = uv[frame * 8 + 1];
+	*(buffer + 2) = uv[frame * 8 + 2];
+	*(buffer + 3) = uv[frame * 8 + 3];
+	*(buffer + 4) = uv[frame * 8 + 4];
+	*(buffer + 5) = uv[frame * 8 + 5];
+	*(buffer + 6) = uv[frame * 8 + 6];
+	*(buffer + 7) = uv[frame * 8 + 7];
 }
 
 
@@ -464,6 +663,8 @@ int kengine::renderingsystem::startup()
 	api->initializeRenderingSystem();
 	getProcedureAddress();
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	return 1;
 }
 
@@ -475,22 +676,31 @@ void kengine::renderingsystem::printInfo() const
 	const GLubyte* version = glGetString(GL_VERSION);
 	const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
+	int maxVertexAttribs;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+
 	int maxTextureImageUnits;
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
 
 	int maxCombinedTexImageUnits;
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTexImageUnits);
 
+	int maxTextureBufferSize;
+	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxTextureBufferSize);
+
+	int maxTextureSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+
 	std::cout << "> Rendering System: OpenGL\n"
 		<< "  renderer: " << renderer << "\n"
 		<< "  vendor: " << vendor << "\n"
 		<< "  version: " << version << "\n"
 		<< "  GLSL Version: " << glslVersion << "\n"
-		<< "  max vertex attribs: " << GL_MAX_VERTEX_ATTRIBS << "\n"
+		<< "  max vertex attribs: " << maxVertexAttribs << "\n"
 		<< "  max texture units: " << maxTextureImageUnits << "\n"
 		<< "  max combined texture units: " << maxCombinedTexImageUnits << "\n"
-		<< "  max texture buffer size: " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n"
-		//<< "  max texture size: " << GL_MAX_TEXTURE_SIZE << "\n"
+		<< "  max texture buffer size: " << maxTextureBufferSize << "\n"
+		<< "  max texture size: " << maxTextureSize << "\n"
 		//<< "  max uniform block size: " << GL_MAX_UNIFORM_BLOCK_SIZE << "\n"
 		//<< "  max shader storage block size: " << GL_MAX_SHADER_STORAGE_BLOCK_SIZE << "\n"
 		<< std::endl;
@@ -543,13 +753,31 @@ void kengine::renderingsystem::setCullFace(int modeParam) const
 }
 
 
+void kengine::renderingsystem::setDepthTest(int mode) const
+{
+	if (mode)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+}
+
+
+void kengine::renderingsystem::setBlendingTest(int mode) const
+{
+	if (mode)
+		glEnable(GL_BLEND);
+	else
+		glDisable(GL_BLEND);
+}
+
+
 void kengine::renderingsystem::setViewport(int x, int y, int width, int height) const
 {
 	glViewport(x, y, width, height);
 }
 
 
-void kengine::renderingsystem::setViewingWindow(int width, int height, float left, float right, float top, float bottom, float nearPlane, float farPlane)
+void kengine::renderingsystem::setViewingWindow(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane)
 {
 	viewingWindow.window.left = left;
 	viewingWindow.window.right = right;

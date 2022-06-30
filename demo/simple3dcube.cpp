@@ -28,69 +28,20 @@
 #include <kerenderingsystem.h>
 #include <keentity.h>
 #include <kecamera.h>
-#include <ketimer.h>
 
-#include <list>
+#include <ctime>
 
 #define MONITOR_WIDTH	2560
 #define MONITOR_HEIGHT	1080
+
 #define WINDOW_WIDTH	800
 #define WINDOW_HEIGHT	800
+
 #define TOTAL_ENTITY	1
 
 
 // ----------------------------------------------------------------------------
-//  kengine::sprite class
-// 
-// (!) Esta classe é candidata para fazer parte de core
-// ----------------------------------------------------------------------------
-class sprite : public kengine::entity
-{
-public:
-	sprite(kengine::atlas* a)
-		:
-			atlas{ a },
-			visible{ true },
-			anim{ kengine::ANIMATION_TYPE::CONTINUOUS, 0, 10, 50 }
-	{}
-
-	~sprite() {}
-
-	sprite(const sprite& copy) = delete; // copy constructor
-	sprite(sprite&& move) noexcept = delete; // move constructor
-	sprite& operator=(const sprite& copy) = delete; // copy assignment
-
-	void copyFrame(float* uv)
-	{
-		atlas->copyFrame(anim.getCurrentFrame(), uv);
-	}
-
-	void start()
-	{
-		anim.start();
-	}
-
-	void update(double frameTime)
-	{
-		K_UNREFERENCED_PARAMETER(frameTime);
-		anim.update();
-	}
-
-	kengine::vec3<float> translate;
-	kengine::vec3<float> rotate;
-	kengine::vec3<float> scale;
-
-private:
-	kengine::atlas* atlas;
-	bool visible;
-	kengine::animation2D anim;
-};
-
-
-// ----------------------------------------------------------------------------
 //  GameObejct class
-// 
-// (!) Esta classe é candidata para fazer parte de core
 // ----------------------------------------------------------------------------
 class GameObject : public kengine::entity
 {
@@ -105,6 +56,17 @@ public:
 	void update(double frameTime)
 	{
 		K_UNREFERENCED_PARAMETER(frameTime);
+
+		static float angle = 0.0f;
+
+		angle += 0.01f;
+
+		if (angle > 360.0f)
+			angle = 0.0f;
+
+		rotate.x = angle;
+		rotate.y = angle;
+		rotate.z = angle;
 	}
 
 	kengine::vec3<float> translate;
@@ -146,22 +108,17 @@ kengine::renderingsystem* myRenderingSystem;
 kengine::TransformProgram* myShader;
 
 // instanced model node
-kengine::instanceduvmeshnode* myBatch;
-
-GLfloat* modelViewData;
-GLfloat* uvData;
-
-std::list<kengine::entity*> entityList;
+kengine::instancedmodelnode* myInstancedNode;
 
 // entity list and model view buffer object data
-sprite* mySprite;
+GameObject* entityList;
+GLfloat* modelViewData;
 
 // camera object
 kengine::camera camera;
 
 // texture object
 kengine::texture* myTexture;
-kengine::atlas* myAtlas;
 
 // ----------------------------------------------------------------------------
 //  Point Entry Execution
@@ -175,7 +132,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	GameEventHandler myEvents;
 	myCore = new kengine::core(&myEvents);
-	
+
 	myCore->getGameWindow()->create(
 		(MONITOR_WIDTH / 2) - (WINDOW_WIDTH / 2),
 		(MONITOR_HEIGHT / 2) - (WINDOW_WIDTH / 2),
@@ -183,26 +140,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		WINDOW_HEIGHT,
 		"K-ENGINE DEMO",
 		K_WINDOW_COMPLETE);
-	
-	myRenderingSystem = new kengine::renderingsystem(myCore->getWin32api(), kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D);
+
+	myRenderingSystem = new kengine::renderingsystem(myCore->getWin32api(), kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_ORTHO);
 	myRenderingSystem->startup();
 	myRenderingSystem->setVSync(0);
-	
+
 	myCore->getGameWindow()->show(nCmdShow);
 	myCore->setFrameRate(0);
 	myCore->startMainLoop();
 
 	delete myTexture;
 	delete[] modelViewData;
-	delete[] uvData;
-
-	for (auto e : entityList)
-	{
-		delete e;
-	}
-
-	//delete mySprite;
-	delete myBatch;
+	delete[] entityList;
+	delete myInstancedNode;
 	delete myShader;
 	delete myRenderingSystem;
 	delete myCore;
@@ -221,13 +171,11 @@ void GameEventHandler::createWindowEvent()
 
 void GameEventHandler::beforeMainLoopEvent()
 {
-	// setting up rendering system
+	srand(time(nullptr));
 	myRenderingSystem->printInfo();
-	myRenderingSystem->setPolygonMode(K_RENDERING_MODE_FILL);
+	myRenderingSystem->setPolygonMode(K_RENDERING_MODE_LINE);
 	myRenderingSystem->setBlendingTest(1);
 
-
-	// setting up shaders
 	myShader = new kengine::TransformProgram;
 
 	kengine::ShaderInfo shaders[] = {
@@ -238,35 +186,27 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	myShader->loadShaders(shaders);
 
+	kengine::mesh m = kengine::cube(1.0f);
+	myInstancedNode = new kengine::instancedmodelnode(TOTAL_ENTITY, m);
 
-	// setting up mesh
-	kengine::mesh m = kengine::quad(40.0f);
-	myBatch = new kengine::instanceduvmeshnode(TOTAL_ENTITY, m);
+	//kengine::raw_img img;
+	//img.loadfile("../../../../shaders/shisa.png.KRAW");
+	//myTexture = new kengine::texture(img);
+	//myTexture->bindTexture(0, 1);	
+
+	entityList = new GameObject[TOTAL_ENTITY];
 	modelViewData = new GLfloat[TOTAL_ENTITY * 16];
-	uvData = new GLfloat[TOTAL_ENTITY * 8];
 
+	// SET VIEWING WINDOW HERE!
+	myRenderingSystem->setViewingWindow(WINDOW_WIDTH, WINDOW_HEIGHT, -5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 500.0f);
 
-	// setting up textures
-	myAtlas = new kengine::atlas("../../../../assets/moeda.png.KRAW", 10, 0);
-	
-
-	// setting up game objects
-	mySprite = new sprite(myAtlas);
-	entityList.push_back(mySprite);
-	mySprite->copyFrame(uvData);
-
-
-	// setting up the viewing window
-	myRenderingSystem->setViewingWindow(WINDOW_WIDTH, WINDOW_HEIGHT, -304.0f, 304.0f, -304.0f, 304.0f, 1.0f, 1000.0f);
 	myShader->useProgram();
 	kengine::matrix p = myRenderingSystem->getProjection();
 	myShader->setProjection(p);
 
-
-	// setting up camera position
 	camera.lookAt(
-		{0.0f, 0.0f, -1.0f}, // camera position
-		{0.0f, 0.0f,  0.0f} // camera looking at position
+		{ 0.0f, 0.0f, -5.0f }, // camera position
+		{ 0.0f, 0.0f,  0.0f } // camera looking at position
 	);
 }
 
@@ -299,41 +239,51 @@ void GameEventHandler::frameEvent(double frameTime)
 
 	// setting camera matrix
 	camera.update(frameTime);
-	kengine::matrix c = camera.get(); 
+	kengine::matrix c = camera.get();
 
 	// updating entities
 	int index = 0;
 
-	for (auto e : entityList)
+	for (int i = 0; i < TOTAL_ENTITY; i++)
 	{
-		e->update(frameTime);
-
+		entityList[i].update(frameTime);
 		kengine::matrix m(1.0f);
+
+		kengine::matrix r1 = kengine::rotate(
+			entityList[i].rotate.x,
+			0.0f,
+			0.0f);
+
+		kengine::matrix r2 = kengine::rotate(
+			0.0f,
+			entityList[i].rotate.y,
+			0.0f);
+
+		kengine::matrix r3 = kengine::rotate(
+			0.0f,
+			0.0f,
+			entityList[i].rotate.z);
+
+		m = r1 * r2 * r3;
 
 		v = c * m;
 
-		// copying model view data from entities
 		for (int j = 0; j < 16; j++)
 		{
 			modelViewData[index++] = v.value()[j];
 		}
-
-		// copying uv from entitties
-		mySprite->copyFrame(uvData);
 	}
 
 	// draw objects
 	myShader->useProgram();
-
-	myBatch->updateModelView(entityList.size(), modelViewData);
-	myBatch->updateUV(TOTAL_ENTITY, uvData);
-	myBatch->draw(static_cast<int>(entityList.size()));
+	myInstancedNode->update(TOTAL_ENTITY, modelViewData);
+	myInstancedNode->draw(TOTAL_ENTITY);
 }
 
 
 void GameEventHandler::resumeEvent()
 {
-} 
+}
 
 
 void GameEventHandler::pauseEvent()
@@ -348,15 +298,15 @@ void GameEventHandler::mouseEvent(int button, int state, int x, int y)
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
 
-	//if (state == K_MOUSE_DOWN)
-	//{
-	//	camera.setNavigation(button, x, y);
-	//}
-	//
-	//if (state == K_MOUSE_UP)
-	//{
-	//	camera.clearNavigation();
-	//}
+	if (state == K_MOUSE_DOWN)
+	{
+		camera.setNavigation(button, x, y);
+	}
+
+	if (state == K_MOUSE_UP)
+	{
+		camera.clearNavigation();
+	}
 }
 
 
@@ -365,7 +315,7 @@ void GameEventHandler::mouseMotionEvent(int x, int y)
 	K_UNREFERENCED_PARAMETER(x);
 	K_UNREFERENCED_PARAMETER(y);
 
-	//camera.updateNavigation(x, y);
+	camera.updateNavigation(x, y);
 }
 
 
@@ -374,26 +324,9 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
-	if(key == 27 && state)
+	if (key == 27 && state)
 	{
 		myCore->getGameWindow()->destroy();
-	}
-
-	if (key == '1' && state)
-	{
-		myAtlas->copyFrame(0, uvData);
-		myBatch->updateUV(TOTAL_ENTITY, uvData);
-	}
-
-	if (key == '2' && state)
-	{
-		myAtlas->copyFrame(1, uvData);
-		myBatch->updateUV(TOTAL_ENTITY, uvData);
-	}
-
-	if (key == '0' && state)
-	{
-		mySprite->start();
 	}
 }
 

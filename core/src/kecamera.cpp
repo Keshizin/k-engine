@@ -24,6 +24,52 @@
 */
 
 #include <kecamera.h>
+#include <keaux.h>
+#include <keconstants.h>
+
+
+// ----------------------------------------------------------------------------
+//  (!) kengine::cam_navigation class - member class definition
+// ----------------------------------------------------------------------------
+kengine::camera_navigation::camera_navigation()
+	:
+		mouse_x_init{ 0 },
+		mouse_y_init{ 0 },
+		mouse_button{ -1 },
+		camera_pos_init{ 0.0f, 0.0f, 0.0f },
+		camera_rotate_init{ 0.0f, 0.0f, 0.0f },
+		sensor_rotate{ 5.0f },
+		sensor_camera{ 15.0f },
+		sensor_translate{ 3.0f }
+{
+}
+
+
+kengine::camera_navigation::~camera_navigation()
+{
+}
+
+
+void kengine::camera_navigation::set(int button, int x, int y, const kengine::vec3<float>& from, const kengine::vec3<float>& rotate)
+{
+	mouse_x_init = x;
+	mouse_y_init = y;
+	mouse_button = button;
+	camera_pos_init = from;
+	camera_rotate_init = rotate;
+	
+}
+
+
+void kengine::camera_navigation::clear()
+{
+	mouse_x_init = 0;
+	mouse_y_init = 0;
+	mouse_button = -1;
+	camera_pos_init = { 0.0f, 0.0f, 0.0f };
+	camera_rotate_init = { 0.0f, 0.0f, 0.0f };
+}
+
 
 // ----------------------------------------------------------------------------
 //  kengine::camera class - member class definition
@@ -34,7 +80,7 @@ kengine::camera::camera()
 		up{ 0.0f, 0.0f, 0.0f },
 		forward{ 0.0f, 0.0f, 0.0f },
 		from{ 0.0f, 0.0f, 0.0f },
-		viewingTransformation{ 1 }
+		viewingMatrix{ 1 }
 {
 }
 
@@ -46,12 +92,14 @@ kengine::camera::~camera()
 
 void kengine::camera::update(double frameTime)
 {
+	K_UNREFERENCED_PARAMETER(frameTime);
 }
 
 
 void kengine::camera::lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam)
 {
 	from = fromParam;
+	to = toParam;
 
 	// computing forward vector
 	forward = toParam - fromParam;
@@ -65,11 +113,64 @@ void kengine::camera::lookAt(kengine::vec3<float> fromParam, kengine::vec3<float
 	// computing up vector
 	up = forward.crossProduct(right);
 
-	viewingTransformation = kengine::lookAt(right, up, forward, from);
+	viewingMatrix = kengine::lookAt(right, up, forward, from);
+}
+
+
+void kengine::camera::setNavigation(int button, int x, int y)
+{
+	navigation.set(button, x, y, from, rotate);
+}
+
+
+void kengine::camera::clearNavigation()
+{
+	navigation.clear();
+}
+
+
+void kengine::camera::updateNavigation(int x, int y)
+{
+	if (navigation.mouse_button == K_MOUSE_LEFT_BUTTON)
+	{
+		float deltaX = navigation.camera_pos_init.x - static_cast<float>(x);
+		float deltaY = navigation.camera_pos_init.y - static_cast<float>(x);
+
+		rotate.y = navigation.camera_rotate_init.y - deltaX / navigation.sensor_rotate;
+		rotate.x = navigation.camera_rotate_init.x - deltaY / navigation.sensor_rotate;
+
+		setViewingMatrix();
+	}
+
+	if (navigation.mouse_button == K_MOUSE_RIGHT_BUTTON)
+	{
+		float deltaZ = navigation.camera_pos_init.y - static_cast<float>(y);
+		from.z = navigation.camera_pos_init.z + deltaZ / navigation.sensor_camera;
+
+		setViewingMatrix();
+	}
 }
 
 
 const kengine::matrix& kengine::camera::get() const
 {
-	return viewingTransformation;
+	return viewingMatrix;
+}
+
+
+void kengine::camera::setViewingMatrix()
+{
+	lookAt(from, to);
+
+	kengine::matrix rx = kengine::rotate(
+		rotate.x,
+		0.0f,
+		0.0f);
+
+	kengine::matrix ry = kengine::rotate(
+		0.0f,
+		rotate.y,
+		0.0f);
+
+	viewingMatrix = viewingMatrix * ry * rx;
 }

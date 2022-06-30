@@ -32,6 +32,38 @@
 
 namespace kengine
 {
+	// ----------------------------------------------------------------------------
+	//  (!) kengine::camera_navigation class
+	// ----------------------------------------------------------------------------
+	class camera_navigation
+	{
+		friend class camera;
+
+	public:
+		camera_navigation();
+		~camera_navigation();
+
+		camera_navigation(const camera_navigation& copy) = delete; // copy constructor
+		camera_navigation(camera_navigation&& move) noexcept = delete; // move constructor
+		camera_navigation& operator=(const camera_navigation& copy) = delete; // copy assignment
+
+		void set(int button, int x, int y, const kengine::vec3<float>& from, const kengine::vec3<float>& rotate);
+		void clear();
+		
+	private:
+		int mouse_x_init;
+		int mouse_y_init;
+		int mouse_button;
+
+		kengine::vec3<float> camera_pos_init;
+		kengine::vec3<float> camera_rotate_init;
+
+		float sensor_rotate;
+		float sensor_camera;
+		float sensor_translate;
+	};
+
+
 	// ------------------------------------------------------------------------
 	//  (!) kengine::camera class
 	// ------------------------------------------------------------------------
@@ -47,14 +79,25 @@ namespace kengine
 
 		void update(double frameTime);
 		void lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam);
+
+		void setNavigation(int button, int x, int y);
+		void clearNavigation();
+		void updateNavigation(int x, int y);
+		
 		const kengine::matrix& get() const;
+		void setViewingMatrix();
 
 	private:
 		kengine::vec3<float> right;		// x-xis
 		kengine::vec3<float> up;		// y-axis
 		kengine::vec3<float> forward;	// z-axis
-		kengine::vec3<float> from;      // camera position
-		kengine::matrix viewingTransformation;
+		kengine::vec3<float> from;		// camera position
+		kengine::vec3<float> to;		// camera looking at position
+		kengine::vec3<float> rotate;	// camera rotate
+
+		kengine::matrix viewingMatrix;	// camera matrix for linear transformation
+
+		camera_navigation navigation;
 	};
 }
 

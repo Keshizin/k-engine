@@ -1,5 +1,5 @@
 /*
-	K-Engine Timer Class
+	K-Engine Entity
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -23,36 +23,57 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_TIMER_H
-#define K_ENGINE_TIMER_H
+#include <keentity.h>
 
-namespace kengine
+
+kengine::animation2D::animation2D(ANIMATION_TYPE typeParam, int frame, int totalFramesParam, long long frameTime)
+	:
+		type{ typeParam },
+		timer{ frameTime },
+		startFrame{ frame },
+		currentFrame{ frame },
+		totalFrames{ totalFramesParam }
 {
-	// ----------------------------------------------------------------------------
-	//  kengine::timer class
-	// ----------------------------------------------------------------------------
-	class timer
-	{
-	public:
-		timer();
-		explicit timer(long long stopTimeParam);
-
-		timer(const timer& copy); // copy constructor
-		timer(timer&& move) noexcept = delete; // move constructor
-		timer& operator=(const timer& copy) = delete; // copy assignment
-
-		void setTimerInMs(long long stopTimeParam);
-		void start();
-		int isDone();
-		void stop();
-		int isDoneAndRestart();
-
-	private:
-		long long stopTime;
-		long long startTimer;
-		long long stopWatch;
-		bool isRunning;
-	};
 }
 
-#endif
+
+kengine::animation2D::~animation2D()
+{
+}
+
+
+void kengine::animation2D::start()
+{
+	timer.start();
+	currentFrame = startFrame;
+}
+
+
+void kengine::animation2D::update()
+{
+	if (currentFrame == -1)
+		return;
+
+	if (timer.isDoneAndRestart())
+	{
+		currentFrame++;
+
+		if (currentFrame > totalFrames - 1)
+		{
+			if (type == ANIMATION_TYPE::CONTINUOUS)
+				currentFrame = startFrame;
+
+			if (type == ANIMATION_TYPE::FINITE)
+				currentFrame = -1;
+		}
+	}
+}
+
+
+int kengine::animation2D::getCurrentFrame() const
+{
+	if (currentFrame == -1)
+		return totalFrames - 1;
+
+	return currentFrame;
+}

@@ -115,21 +115,20 @@ namespace kengine
 
 
 	// ------------------------------------------------------------------------
-	//  kengine::modelnode class
+	//  (!) kengine::meshnode class
 	// ------------------------------------------------------------------------
-	class modelnode
+	class meshnode
 	{
-		friend class instancedmodelnode;
-
-	public:
+		friend class instancedmeshnode;
 		static constexpr int VBO_COUNT = 2;
 
-		explicit modelnode(kengine::mesh& m);
-		~modelnode();
+	public:
+		explicit meshnode(const kengine::mesh& m);
+		~meshnode();
 
-		modelnode(const modelnode& copy) = delete; // copy constructor
-		modelnode(modelnode&& move) noexcept = delete; // move constructor
-		modelnode& operator=(const modelnode& copy) = delete; // copy assignment
+		meshnode(const meshnode& copy) = delete; // copy constructor
+		meshnode(meshnode&& move) noexcept = delete; // move constructor
+		meshnode& operator=(const meshnode& copy) = delete; // copy assignment
 		
 		void draw();
 
@@ -140,18 +139,18 @@ namespace kengine
 	};
 
 
-	// ------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 	//  kengine::instancedmodelnode class
-	// ------------------------------------------------------------------------
-	class instancedmodelnode : public modelnode
+	// ---------------------------------------------------------------------------
+	class instancedmeshnode : public meshnode
 	{
 	public:
-		instancedmodelnode(int size, kengine::mesh& m);
-		~instancedmodelnode();
+		instancedmeshnode(int size, kengine::mesh& m);
+		~instancedmeshnode();
 
-		instancedmodelnode(const instancedmodelnode& copy) = delete; // copy constructor
-		instancedmodelnode(instancedmodelnode&& move) noexcept = delete; // move constructor
-		instancedmodelnode& operator=(const instancedmodelnode& copy) = delete; // copy assignment
+		instancedmeshnode(const instancedmeshnode& copy) = delete; // copy constructor
+		instancedmeshnode(instancedmeshnode&& move) noexcept = delete; // move constructor
+		instancedmeshnode& operator=(const instancedmeshnode& copy) = delete; // copy assignment
 
 		void update(const long long int size, float* data) const;
 		void draw(int size) const;
@@ -162,23 +161,70 @@ namespace kengine
 	};
 
 
+	// ------------------------------------------------------------------------
+	//  (!) kengine::instanceduvmeshnode class
+	// ------------------------------------------------------------------------
+	class instanceduvmeshnode
+	{
+		static constexpr int TOTAL_VBO = 3;
+
+	public:
+		explicit instanceduvmeshnode(const size_t size, const kengine::mesh& m);
+		~instanceduvmeshnode();
+
+		instanceduvmeshnode(const instanceduvmeshnode& copy) = delete; // copy constructor
+		instanceduvmeshnode(instanceduvmeshnode&& move) noexcept = delete; // move constructor
+		instanceduvmeshnode& operator=(const instanceduvmeshnode& copy) = delete; // copy assignment
+
+		void updateModelView(size_t size, float* modelview) const;
+		void updateUV(size_t size, float* uv) const;
+
+		void draw(int size) const;
+
+	private:
+		size_t max_size;
+		GLuint vao;
+		GLuint vbo[TOTAL_VBO];
+		GLsizei count;
+	};
+
+
 	// ---------------------------------------------------------------------------
 	//  kengine::texture class
 	// ---------------------------------------------------------------------------
 	class texture
 	{
 	public:
-		texture(const kengine::raw_img& img);
+		texture(const kengine::raw_img& img, GLuint textureUnit);
 		~texture();
 
 		texture(const texture& copy) = delete; // copy constructor
 		texture(texture&& move) noexcept = delete; // move constructor
 		texture& operator=(const texture& copy) = delete; // copy assignment
 
-		void bindTexture(int unit, int texture);
+		void bindTexture(int texture);
 
 	private:
 		GLuint id;
+		GLuint texUnit;
+	};
+
+
+	// ---------------------------------------------------------------------------
+	//  kengine::atlas class
+	// ---------------------------------------------------------------------------
+	class atlas
+	{
+	public:
+		atlas(std::string filename, const size_t frames, GLuint textureUnit);
+		~atlas();
+
+		void bindTexture(int texture);
+		void copyFrame(const int frame, float* buffer);
+
+	private:
+		kengine::texture* tex;
+		float* uv;
 	};
 
 
@@ -225,9 +271,11 @@ namespace kengine
 		int setVSync(int vsync);
 		void setPolygonMode(int mode) const;
 		void setCullFace(int mode) const;
+		void setDepthTest(int mode) const;
+		void setBlendingTest(int mode) const;
 		void setViewport(int x, int y, int width, int height) const;
-
-		void setViewingWindow(int width, int height, float left, float right, float top, float bottom, float nearPlane, float farPlane);
+		
+		void setViewingWindow(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 		void setViewingWindow(int width, int height);
 		const kengine::matrix& getProjection() const;
 

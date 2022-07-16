@@ -183,7 +183,7 @@ void kengine::GLSLprogram::useProgram()
 //		- matriz de projeção (uniform matrix)
 // ------------------------------------------------------------------------
 kengine::TransformProgram::TransformProgram()
-	:projectionView_location{ -1 }
+	:projectionViewLocation{ -1 }
 {
 }
 
@@ -198,7 +198,7 @@ bool kengine::TransformProgram::loadShaders(kengine::ShaderInfo* shaders)
 	if (!GLSLprogram::loadShaders(shaders))
 		return false;
 
-	projectionView_location = glGetUniformLocation(programID, "projectionView");
+	projectionViewLocation = glGetUniformLocation(programID, "projectionView");
 
 	return true;
 }
@@ -206,17 +206,17 @@ bool kengine::TransformProgram::loadShaders(kengine::ShaderInfo* shaders)
 
 void kengine::TransformProgram::setProjection(kengine::matrix& p)
 {
-	if (projectionView_location != -1)
+	if (projectionViewLocation != -1)
 	{
-		glUniformMatrix4fv(projectionView_location, 1, GL_FALSE, p.value());
+		glUniformMatrix4fv(projectionViewLocation, 1, GL_FALSE, p.value());
 	}
 }
 
 
 // ------------------------------------------------------------------------
-//  kengine::modelnode class
+//  (!) kengine::meshnode class
 // ------------------------------------------------------------------------
-kengine::meshnode::meshnode(const kengine::mesh& m)
+kengine::mesh_node::mesh_node(const kengine::mesh& m)
 	: vao{ 0 }, vbo{ 0 }, count{ 0 }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode constructor with argument - [" << this << "]")
@@ -289,7 +289,7 @@ kengine::meshnode::meshnode(const kengine::mesh& m)
 }
 
 
-kengine::meshnode::~meshnode()
+kengine::mesh_node::~mesh_node()
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]")
 
@@ -300,7 +300,7 @@ kengine::meshnode::~meshnode()
 }
 
 
-void kengine::meshnode::draw()
+void kengine::mesh_node::draw()
 {
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
@@ -308,10 +308,10 @@ void kengine::meshnode::draw()
 
 
 // ----------------------------------------------------------------------------
-//  kengine::instancedmeshnode class
+//  kengine::instanced_mesh_node class
 // ----------------------------------------------------------------------------
-kengine::instancedmeshnode::instancedmeshnode(int size, kengine::mesh& m)
-	: meshnode{ m }, max_size{ size }, modelview_vbo{ 0 }
+kengine::instanced_mesh_node::instanced_mesh_node(int size, kengine::mesh& m)
+	: mesh_node{ m }, max_size{ size }, modelview_vbo{ 0 }
 {
 	glCreateBuffers(1, &modelview_vbo);
 	glNamedBufferStorage(modelview_vbo, static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat)), nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -328,20 +328,20 @@ kengine::instancedmeshnode::instancedmeshnode(int size, kengine::mesh& m)
 }
 
 
-kengine::instancedmeshnode::~instancedmeshnode()
+kengine::instanced_mesh_node::~instanced_mesh_node()
 {
 	glInvalidateBufferData(modelview_vbo);
 	glDeleteBuffers(1, &modelview_vbo);
 }
 
 
-void kengine::instancedmeshnode::update(const long long int size, float* data) const
+void kengine::instanced_mesh_node::update(const long long int size, float* data) const
 {
 	glNamedBufferSubData(modelview_vbo, 0, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
 }
 
 
-void kengine::instancedmeshnode::draw(int size) const
+void kengine::instanced_mesh_node::draw(int size) const
 {
 	if (size < 0)
 		size = 0;
@@ -352,9 +352,9 @@ void kengine::instancedmeshnode::draw(int size) const
 
 
 // ------------------------------------------------------------------------
-//  (!) kengine::instanceduvmeshnode class
+//  (!) kengine::instanced_uv_mesh_node class
 // ------------------------------------------------------------------------
-kengine::instanceduvmeshnode::instanceduvmeshnode(const size_t size, const kengine::mesh& m)
+kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const kengine::mesh& m)
 	: max_size{ size }, vao { 0 }, vbo{ { 0 } }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::batch constructor with argument - [" << this << "]")
@@ -438,7 +438,7 @@ kengine::instanceduvmeshnode::instanceduvmeshnode(const size_t size, const kengi
 }
 
 
-kengine::instanceduvmeshnode::~instanceduvmeshnode()
+kengine::instanced_uv_mesh_node::~instanced_uv_mesh_node()
 {
 	glInvalidateBufferData(vbo[0]);
 	glInvalidateBufferData(vbo[1]);
@@ -448,7 +448,7 @@ kengine::instanceduvmeshnode::~instanceduvmeshnode()
 }
 
 
-void kengine::instanceduvmeshnode::updateModelView(size_t size, float* modelview) const
+void kengine::instanced_uv_mesh_node::updateModelView(size_t size, float* modelview) const
 {
 	if (size > max_size)
 		size = max_size;
@@ -458,7 +458,7 @@ void kengine::instanceduvmeshnode::updateModelView(size_t size, float* modelview
 }
 
 
-void kengine::instanceduvmeshnode::updateUV(size_t size, float* uv) const
+void kengine::instanced_uv_mesh_node::updateUV(size_t size, float* uv) const
 {
 	if (size > max_size)
 		size = max_size;
@@ -467,13 +467,135 @@ void kengine::instanceduvmeshnode::updateUV(size_t size, float* uv) const
 }
 
 
-void kengine::instanceduvmeshnode::draw(int size) const
+void kengine::instanced_uv_mesh_node::draw(int size) const
 {
 	if (size < 0)
 		size = 0;
 
 	glBindVertexArray(vao);
 	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
+}
+
+
+// ---------------------------------------------------------------------------
+// 
+//  (!) kengine::primitive_mesh_batch class
+//
+//      - member class definition
+// 
+// ---------------------------------------------------------------------------
+kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRIMITIVE_TYPE primType, const float* color)
+	: batchSize{ size }, mode{ 0 }, vbo{ 0 }, vao{ 0 }
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::primitive_mesh_batch constructor with argument - [" << this << "]");
+
+	glCreateBuffers(TOTAL_VBO, vbo);
+
+	GLuint error = glGetError();
+
+	if (error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to create VBO: " << glGetError())
+	}
+
+	// ---------------------------------------------------------------------------
+
+	GLsizeiptr coordsSize = static_cast<GLsizeiptr>(batchSize * sizeof(GLfloat));
+	GLsizeiptr colorSize = static_cast<GLsizeiptr>(4LL * sizeof(GLfloat));
+
+	glNamedBufferStorage(vbo[0], coordsSize + colorSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	error = glGetError();
+
+	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to allocate space for VBO: " << glGetError())
+	}
+
+	glNamedBufferSubData(vbo[0], coordsSize, colorSize, color);
+
+	// ---------------------------------------------------------------------------
+
+	glCreateVertexArrays(1, &vao);
+
+	if (glGetError() == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to create vao: " << glGetError())
+	}
+
+	glBindVertexArray(vao);
+
+	if (glGetError() == GL_INVALID_OPERATION)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to bind VAO : " << glGetError())
+	}
+
+	// ---------------------------------------------------------------------------
+
+	// shader plumbing
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)coordsSize);
+	glVertexAttribDivisor(1, 1);
+
+	// ---------------------------------------------------------------------------
+
+	switch (primType)
+	{
+	case PRIMITIVE_TYPE::PRIMITIVE_POINT:
+		mode = GL_POINTS;
+		break;
+
+	case PRIMITIVE_TYPE::PRIMITIVE_LINE:
+		mode = GL_LINES;
+		break;
+	}
+}
+
+
+kengine::primitive_mesh_batch::~primitive_mesh_batch()
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::primitive_mesh_batch destructor - [" << this << "]");
+	glInvalidateBufferData(vbo[0]);
+	glDeleteBuffers(TOTAL_VBO, vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+
+void kengine::primitive_mesh_batch::setPointSize(const float pointSize)
+{
+	glPointSize(pointSize);
+}
+
+
+void kengine::primitive_mesh_batch::setLineWidth(const float width)
+{
+	glLineWidth(width);
+}
+
+
+void kengine::primitive_mesh_batch::update(size_t size, float* data) const
+{
+	if (size > batchSize)
+		size = batchSize;
+
+	glNamedBufferSubData(vbo[0], 0, static_cast<GLsizeiptr>(size * sizeof(float)), data);
+}
+
+
+void kengine::primitive_mesh_batch::draw(int size) const
+{
+	if (size < 0)
+	{
+		return;
+	}
+
+	glBindVertexArray(vao);
+	glDrawArrays(mode, 0, size);
 }
 
 

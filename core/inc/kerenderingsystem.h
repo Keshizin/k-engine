@@ -37,10 +37,10 @@
 namespace kengine
 {
 	// ------------------------------------------------------------------------
+	// 
 	//  (!) struct kengine::ShaderInfo
 	//
-	//	Esta struct serve para passar uma lista de shaders que podem ser
-	//  compilados.
+	//	This struct is used to pass a list of shaders that can be compiled.
 	// 
 	//		- GL_VERTEX_SHADER
 	//		- GL_GEOMETRY_SHADER
@@ -48,6 +48,7 @@ namespace kengine
 	//		- GL_TESS_CONTROL_SHADER
 	//		- GL_COMPUTE_SHADER
 	//		- GL_FRAGMENT_SHADER
+	// 
 	// ------------------------------------------------------------------------
 	struct ShaderInfo
 	{
@@ -57,16 +58,20 @@ namespace kengine
 
 
 	// ------------------------------------------------------------------------
-	//  função para compilar shader GLSL
+	// 
+	//  (!) Helper function to compile GLSL shader.
+	// 
 	// ------------------------------------------------------------------------
 	GLuint compileShader(GLuint shader_type, std::string filename);
 
 
 	// ------------------------------------------------------------------------
-	//  (!) kengine::GLSLprogram class
 	// 
-	//  Esta classe fornece a base para criar shaders mais complexos que
-	//  utilizam uniform variables, uniform blocks etc.
+	//  (!) kengine::GLSLprogram class
+	//
+	//  This class provides the basis for creating more complex shader program
+	//  that use uniform variables, uniform blocks, etc.
+	// 
 	// ------------------------------------------------------------------------
 	class GLSLprogram
 	{
@@ -80,7 +85,6 @@ namespace kengine
 
 		bool loadShaders(kengine::ShaderInfo* shaders);
 		void useProgram();
-		GLuint getProgram() const { return programID; }
 
 	protected:
 		GLuint programID;
@@ -88,13 +92,14 @@ namespace kengine
 
 
 	// ------------------------------------------------------------------------
-	//  (!) kengine::TransformProgram class
 	// 
-	//  Esta classe é um shader herdade de GLSLprogram que possui:
-	//		- cores (vertex attributes)
-	//		- coordenadas de textura UV (vertex attributes)
-	//		- matrizes de visualização (vertex attributes)
-	//		- matriz de projeção (uniform matrix)
+	//  (!) kengine::TransformProgram class
+	//
+	//  This class is a shader inherited from GLSLprogram that has the
+	//  following uniform variables:
+	// 
+	//		- projection view matrix (uniform matrix)
+	// 
 	// ------------------------------------------------------------------------
 	class TransformProgram : public GLSLprogram
 	{
@@ -110,25 +115,25 @@ namespace kengine
 		void setProjection(kengine::matrix& p);
 
 	private:
-		GLint projectionView_location;
+		GLint projectionViewLocation;
 	};
 
 
 	// ------------------------------------------------------------------------
 	//  (!) kengine::meshnode class
 	// ------------------------------------------------------------------------
-	class meshnode
+	class mesh_node
 	{
-		friend class instancedmeshnode;
+		friend class instanced_mesh_node;
 		static constexpr int VBO_COUNT = 2;
 
 	public:
-		explicit meshnode(const kengine::mesh& m);
-		~meshnode();
+		explicit mesh_node(const kengine::mesh& m);
+		~mesh_node();
 
-		meshnode(const meshnode& copy) = delete; // copy constructor
-		meshnode(meshnode&& move) noexcept = delete; // move constructor
-		meshnode& operator=(const meshnode& copy) = delete; // copy assignment
+		mesh_node(const mesh_node& copy) = delete; // copy constructor
+		mesh_node(mesh_node&& move) noexcept = delete; // move constructor
+		mesh_node& operator=(const mesh_node& copy) = delete; // copy assignment
 		
 		void draw();
 
@@ -140,17 +145,17 @@ namespace kengine
 
 
 	// ---------------------------------------------------------------------------
-	//  kengine::instancedmodelnode class
+	//  (!) kengine::instanced_mesh_node class
 	// ---------------------------------------------------------------------------
-	class instancedmeshnode : public meshnode
+	class instanced_mesh_node : public mesh_node
 	{
 	public:
-		instancedmeshnode(int size, kengine::mesh& m);
-		~instancedmeshnode();
+		instanced_mesh_node(int size, kengine::mesh& m);
+		~instanced_mesh_node();
 
-		instancedmeshnode(const instancedmeshnode& copy) = delete; // copy constructor
-		instancedmeshnode(instancedmeshnode&& move) noexcept = delete; // move constructor
-		instancedmeshnode& operator=(const instancedmeshnode& copy) = delete; // copy assignment
+		instanced_mesh_node(const instanced_mesh_node& copy) = delete; // copy constructor
+		instanced_mesh_node(instanced_mesh_node&& move) noexcept = delete; // move constructor
+		instanced_mesh_node& operator=(const instanced_mesh_node& copy) = delete; // copy assignment
 
 		void update(const long long int size, float* data) const;
 		void draw(int size) const;
@@ -162,19 +167,19 @@ namespace kengine
 
 
 	// ------------------------------------------------------------------------
-	//  (!) kengine::instanceduvmeshnode class
+	//  (!) kengine::instanced_uv_mesh_node class
 	// ------------------------------------------------------------------------
-	class instanceduvmeshnode
+	class instanced_uv_mesh_node
 	{
 		static constexpr int TOTAL_VBO = 3;
 
 	public:
-		explicit instanceduvmeshnode(const size_t size, const kengine::mesh& m);
-		~instanceduvmeshnode();
+		explicit instanced_uv_mesh_node(const size_t size, const kengine::mesh& m);
+		~instanced_uv_mesh_node();
 
-		instanceduvmeshnode(const instanceduvmeshnode& copy) = delete; // copy constructor
-		instanceduvmeshnode(instanceduvmeshnode&& move) noexcept = delete; // move constructor
-		instanceduvmeshnode& operator=(const instanceduvmeshnode& copy) = delete; // copy assignment
+		instanced_uv_mesh_node(const instanced_uv_mesh_node& copy) = delete; // copy constructor
+		instanced_uv_mesh_node(instanced_uv_mesh_node&& move) noexcept = delete; // move constructor
+		instanced_uv_mesh_node& operator=(const instanced_uv_mesh_node& copy) = delete; // copy assignment
 
 		void updateModelView(size_t size, float* modelview) const;
 		void updateUV(size_t size, float* uv) const;
@@ -186,6 +191,44 @@ namespace kengine
 		GLuint vao;
 		GLuint vbo[TOTAL_VBO];
 		GLsizei count;
+	};
+
+
+	// ---------------------------------------------------------------------------
+	// 
+	//  (!) kengine::primitive_mesh_batch class
+	//
+	//  This is a abstract opengl batch class to store and draw N primitive
+	//  objects like points, lines, quadrilaterals, and etc.
+	//
+	//  Note: max_size is a quan
+	// 
+	// ---------------------------------------------------------------------------
+	enum class PRIMITIVE_TYPE { PRIMITIVE_POINT, PRIMITIVE_LINE };
+
+	class primitive_mesh_batch
+	{
+		static constexpr int TOTAL_VBO = 1;
+
+	public:
+		primitive_mesh_batch(const size_t size, const PRIMITIVE_TYPE primType, const float* color);
+		~primitive_mesh_batch();
+
+		primitive_mesh_batch(const primitive_mesh_batch& copy) = delete; // copy constructor
+		primitive_mesh_batch(primitive_mesh_batch&& move) noexcept = delete; // move constructor
+		primitive_mesh_batch& operator=(const primitive_mesh_batch& copy) = delete; // copy assignment
+
+		void setPointSize(const float pointSize);
+		void setLineWidth(const float width);
+
+		void update(size_t size, float* data) const;
+		void draw(int size) const;
+
+	private:
+		size_t batchSize;
+		GLenum mode;
+		GLuint vbo[TOTAL_VBO];
+		GLuint vao;
 	};
 
 

@@ -26,9 +26,10 @@ Espero que este devlog seja útil de alguma forma e que possa te inspirar para c
 
 - Algebra Linear
 - Geometria
+- Trigonometria
 
 
-## Capítulo 2 - Sistema de Renderização
+## Capítulo 3 - Sistema de Renderização
 
 - [draft] OpenGL
 - [draft] Organização dos dados: meshes, instanced rendering, batch rendering, layout de memória, etc

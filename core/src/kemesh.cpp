@@ -32,21 +32,21 @@
 //  k-engine mesh class constructors & destructor
 // ----------------------------------------------------------------------------
 kengine::mesh::mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i)
-	: coords{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
+	: position{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh constructor with arguments - [" << this << "]")
 }
 
 
 kengine::mesh::mesh(const mesh& m)
-	: coords{ m.coords }, colors{ m.colors }, texCoords{ m.texCoords }, indices{ m.indices }
+	: position{ m.position }, colors{ m.colors }, texCoords{ m.texCoords }, indices{ m.indices }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh copy constructor - [" << this << "]")
 }
 
 
 kengine::mesh::mesh(mesh&& m) noexcept
-	: coords{ std::move(m.coords) }, colors{ std::move(m.colors) }, texCoords{ std::move(m.texCoords) }, indices{ std::move(m.indices) }
+	: position{ std::move(m.position) }, colors{ std::move(m.colors) }, texCoords{ std::move(m.texCoords) }, indices{ std::move(m.indices) }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh move constructor - [" << this << "]")
 }
@@ -62,7 +62,7 @@ kengine::mesh& kengine::mesh::operator=(const mesh& m)
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> kengine::mesh = operator overload - [" << this << "]")
 
-	coords = m.coords;
+	position = m.position;
 	colors = m.colors;
 	texCoords = m.texCoords;
 	indices = m.indices;
@@ -75,12 +75,12 @@ void kengine::mesh::dump() const
 	std::cout << "\n> kengine::mesh object [0x" << this << "]" << std::endl;
 	
 	std::cout
-		<< "   - coords.attributeArray memory address [0x" << coords.attributeArray << "]\n"
-		<< "   - coords.arraySize: " << coords.arraySize << "\n"
-		<< "   - coords.count: " << coords.count << "\n" << std::endl;
+		<< "   - position.attributeArray memory address [0x" << position.attributeArray << "]\n"
+		<< "   - position.arraySize: " << position.arraySize << "\n"
+		<< "   - position.count: " << position.count << "\n" << std::endl;
 	
-	for (size_t i = 0; i < coords.arraySize; i++)
-		std::cout << "     coords.attributeArray[" << i << "]: " << coords.attributeArray[i] << std::endl;
+	for (size_t i = 0; i < position.arraySize; i++)
+		std::cout << "     position.attributeArray[" << i << "]: " << position.attributeArray[i] << std::endl;
 	
 	std::cout << std::endl;
 
@@ -118,7 +118,7 @@ void kengine::mesh::dump() const
 
 void kengine::mesh::clear()
 {
-	coords.clear();
+	position.clear();
 	colors.clear();
 	texCoords.clear();
 	indices.clear();

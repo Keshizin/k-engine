@@ -176,20 +176,21 @@ void kengine::GLSLprogram::useProgram()
 // ------------------------------------------------------------------------
 //  (!) kengine::TransformProgram class
 // 
-//  Esta classe é um shader herdade de GLSLprogram que possui:
-//		- cores (vertex attributes)
-//		- coordenadas de textura UV (vertex attributes)
-//		- matrizes de visualização (vertex attributes)
-//		- matriz de projeção (uniform matrix)
+//  This class is a shader inherited from GLSLprogram that has the
+//  following uniform variables:
+// 
+//		- projection view matrix (uniform matrix)
+// 
 // ------------------------------------------------------------------------
 kengine::TransformProgram::TransformProgram()
-	:projectionViewLocation{ -1 }
+	: uniformLocations{ nullptr }
 {
 }
 
 
 kengine::TransformProgram::~TransformProgram()
 {
+	delete[] uniformLocations;
 }
 
 
@@ -198,17 +199,94 @@ bool kengine::TransformProgram::loadShaders(kengine::ShaderInfo* shaders)
 	if (!GLSLprogram::loadShaders(shaders))
 		return false;
 
-	projectionViewLocation = glGetUniformLocation(programID, "projectionView");
+	// getting the list of active uniform variables
+	GLint numUniforms = 0;
+	glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+
+	if (numUniforms > 0)
+	{
+		uniformLocations = new GLint[static_cast<size_t>(numUniforms)];
+
+		GLenum properties[] = { GL_LOCATION, GL_BLOCK_INDEX };
+
+		for (auto i = 0; i < numUniforms; i++)
+		{
+			GLint results[2];
+			glGetProgramResourceiv(programID, GL_UNIFORM, static_cast<GLuint>(i), 2, properties, 2, nullptr, results);
+
+			// skip uniforms in blocks
+			if (results[1] != -1)
+				continue;
+
+			uniformLocations[i] = results[0];
+		}
+	}
 
 	return true;
 }
 
 
-void kengine::TransformProgram::setProjection(kengine::matrix& p)
+void kengine::TransformProgram::setUniformMatrix(const int location, kengine::matrix& m)
 {
-	if (projectionViewLocation != -1)
+	if (uniformLocations != nullptr && location >= 0)
 	{
-		glUniformMatrix4fv(projectionViewLocation, 1, GL_FALSE, p.value());
+		glUniformMatrix4fv(uniformLocations[location], 1, GL_FALSE, m.value());
+	}
+}
+
+
+void kengine::TransformProgram::print() const
+{
+	// getting the list of active attribute variables
+	GLint numAttribs;
+	glGetProgramInterfaceiv(programID, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
+
+	if (numAttribs > 0)
+	{
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
+
+		std::cout << "> TransformProgram object info [" << this << "]\n"
+			<< "  active attribute variables:\n";
+
+		for (auto i = 0; i < numAttribs; i++)
+		{
+			GLint results[3];
+			glGetProgramResourceiv(programID, GL_PROGRAM_INPUT, static_cast<GLuint>(i), 3, properties, 3, nullptr, results);
+
+			GLint nameBuffSize = results[0] + 1;
+			char* name = new char[static_cast<size_t>(nameBuffSize)];
+
+			glGetProgramResourceName(programID, GL_PROGRAM_INPUT, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
+
+			std::cout << "    - name: " << name << "\n    - type: " << results[1] << "\n    - location: " << results[2] << "\n\n";
+			delete[] name;
+		}
+
+		std::cout << "\n  active uniform variables:\n";
+	}
+
+	GLint numUniforms = 0;
+	glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+
+	if (numUniforms > 0)
+	{
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
+
+		for (auto i = 0; i < numUniforms; i++)
+		{
+			GLint results[4];
+			glGetProgramResourceiv(programID, GL_UNIFORM, static_cast<GLuint>(i), 4, properties, 4, nullptr, results);
+
+			GLsizei nameBuffSize = results[0] + 1;
+			char* name = new char[static_cast<size_t>(nameBuffSize)];
+
+			glGetProgramResourceName(programID, GL_UNIFORM, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
+
+			std::cout << "    - name: " << name << "\n    - type: " << results[1] << "\n    - location: " << results[2] << "\n    - block index: " << results[3] << "\n\n";
+			delete[] name;
+		}
+
+		std::cout << std::endl;
 	}
 }
 
@@ -240,11 +318,11 @@ kengine::mesh_node::mesh_node(const kengine::mesh& m)
 	}
 
 	//  store vertex attributes in VBO
-	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+	const kengine::vattrib<float>* positionPTR = m.getPosition();
 	const kengine::vattrib<float>* colorsPTR = m.getColors();
 	const kengine::vattrib<float>* texCoordsPTR = m.getTexCoords();
 
-	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes() + texCoordsPTR->getSizeinBytes());
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes() + texCoordsPTR->getSizeinBytes());
 	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	error = glGetError();
@@ -254,9 +332,9 @@ kengine::mesh_node::mesh_node(const kengine::mesh& m)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
 	}
 	
-	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), coordsPTR->attributeArray);
-	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(colorsPTR->getSizeinBytes()), colorsPTR->attributeArray);
-	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(texCoordsPTR->getSizeinBytes()), texCoordsPTR->attributeArray);
+	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), positionPTR->attributeArray);
+	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), static_cast<GLsizeiptr>(colorsPTR->getSizeinBytes()), colorsPTR->attributeArray);
+	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(texCoordsPTR->getSizeinBytes()), texCoordsPTR->attributeArray);
 
 	//  creating VAO
 	glCreateVertexArrays(1, &vao);
@@ -282,8 +360,8 @@ kengine::mesh_node::mesh_node(const kengine::mesh& m)
 	glEnableVertexAttribArray(2);
 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)coordsPTR->getSizeinBytes());
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(coordsPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)positionPTR->getSizeinBytes());
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()));
 
 	count = static_cast<GLsizei>(m.getIndices()->getSize());
 }
@@ -378,9 +456,9 @@ kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const
 	}
 
 	// store vertex attributes in VBO
-	const kengine::vattrib<float>* coordsPTR = m.getCoords();
+	const kengine::vattrib<float>* positionPTR = m.getPosition();
 
-	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes());
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positionPTR->getSizeinBytes());
 	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	error = glGetError();
@@ -390,7 +468,7 @@ kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
 	}
 
-	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(coordsPTR->getSizeinBytes()), coordsPTR->attributeArray);
+	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), positionPTR->attributeArray);
 
 	// store vertex attributes for texture coordinates and modelview matrix
 	GLsizeiptr matrixSize = static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat));
@@ -552,6 +630,10 @@ kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRI
 
 	case PRIMITIVE_TYPE::PRIMITIVE_LINE:
 		mode = GL_LINES;
+		break;
+
+	case PRIMITIVE_TYPE::PRIMITIVE_LINE_LOOP:
+		mode = GL_LINE_LOOP;
 		break;
 	}
 }

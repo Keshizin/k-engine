@@ -29,7 +29,6 @@
 #include <keentity.h>
 #include <kecamera.h>
 #include <ketimer.h>
-#include <kemath.h>
 
 #include <list>
 
@@ -50,9 +49,9 @@ class sprite : public kengine::entity
 public:
 	sprite(kengine::atlas* a)
 		:
-			atlas{ a },
-			visible{ true },
-			anim{ kengine::ANIMATION_TYPE::CONTINUOUS, 0, 10, 50 }
+		atlas{ a },
+		visible{ true },
+		anim{ kengine::ANIMATION_TYPE::CONTINUOUS, 0, 10, 50 }
 	{}
 
 	~sprite() {}
@@ -150,7 +149,6 @@ kengine::TransformProgram* myShader;
 kengine::instanced_uv_mesh_node* myBatch;
 
 // point mesh batch
-#define TOTAL_POINTS 32
 kengine::primitive_mesh_batch* primPoint;
 kengine::primitive_mesh_batch* primLine;
 
@@ -183,7 +181,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	GameEventHandler myEvents;
 	myCore = new kengine::core(&myEvents);
-	
+
 	myCore->getGameWindow()->create(
 		(MONITOR_WIDTH / 2) - (WINDOW_WIDTH / 2),
 		(MONITOR_HEIGHT / 2) - (WINDOW_WIDTH / 2),
@@ -191,11 +189,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		WINDOW_HEIGHT,
 		"K-ENGINE DEMO",
 		K_WINDOW_COMPLETE);
-	
+
 	myRenderingSystem = new kengine::renderingsystem(myCore->getWin32api(), kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D);
 	myRenderingSystem->startup();
 	myRenderingSystem->setVSync(0);
-	
+
 	myCore->getGameWindow()->show(nCmdShow);
 	myCore->setFrameRate(0);
 	myCore->startMainLoop();
@@ -256,6 +254,7 @@ void GameEventHandler::beforeMainLoopEvent()
 
 	myShader[1].loadShaders(shaders2);
 
+
 	// setting up mesh
 	kengine::mesh m = kengine::quad(0.5f);
 
@@ -265,28 +264,29 @@ void GameEventHandler::beforeMainLoopEvent()
 	uvData = new GLfloat[TOTAL_ENTITY * 8];
 
 	float blueColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	primPoint = new kengine::primitive_mesh_batch(1 * 4, kengine::PRIMITIVE_TYPE::PRIMITIVE_POINT, blueColor);
+	pointsData = new GLfloat[1 * 4];
+	pointsData[0] = 0.5f;
+	pointsData[1] = 0.0f;
+	pointsData[2] = 0.0f;
+	pointsData[3] = 1.0f;
 
-	primPoint = new kengine::primitive_mesh_batch(TOTAL_POINTS * 4, kengine::PRIMITIVE_TYPE::PRIMITIVE_LINE_LOOP, blueColor);
-	pointsData = new GLfloat[TOTAL_POINTS * 4];
-
-	kengine::fillCirclePoints(TOTAL_POINTS, pointsData);
-	
 	float redColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 	primLine = new kengine::primitive_mesh_batch(1 * 8, kengine::PRIMITIVE_TYPE::PRIMITIVE_LINE, redColor);
 	linesData = new GLfloat[1 * 8];
 	linesData[0] = -2.0f;
-	linesData[1] =  0.0f;
-	linesData[2] =  0.0f;
-	linesData[3] =  1.0f;
-	linesData[4] =  2.0f;
-	linesData[5] =  0.0f;
-	linesData[6] =  0.0f;
-	linesData[7] =  1.0f;
+	linesData[1] = 0.0f;
+	linesData[2] = 0.0f;
+	linesData[3] = 1.0f;
+	linesData[4] = 2.0f;
+	linesData[5] = 0.0f;
+	linesData[6] = 0.0f;
+	linesData[7] = 1.0f;
 
 
 	// setting up textures
 	myAtlas = new kengine::atlas("../../../../assets/moeda.png.KRAW", 10, 0);
-	
+
 
 	// setting up game objects
 	mySprite = new sprite(myAtlas);
@@ -298,15 +298,15 @@ void GameEventHandler::beforeMainLoopEvent()
 	myRenderingSystem->setViewingWindow(WINDOW_WIDTH, WINDOW_HEIGHT, -2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 1000.0f);
 	myShader[0].useProgram();
 	kengine::matrix p = myRenderingSystem->getProjection();
-	myShader[0].setUniformMatrix(0, p);
+	myShader[0].setProjection(p);
 
 	myShader[1].useProgram();
-	myShader[1].setUniformMatrix(0, p);
+	myShader[1].setProjection(p);
 
 	// setting up camera position
 	camera.lookAt(
-		{0.0f, 0.0f, -1.0f}, // camera position
-		{0.0f, 0.0f,  0.0f} // camera looking at position
+		{ 0.0f, 0.0f, -1.0f }, // camera position
+		{ 0.0f, 0.0f,  0.0f } // camera looking at position
 	);
 }
 
@@ -341,16 +341,16 @@ void GameEventHandler::frameEvent(double frameTime)
 	{
 		e->update(frameTime);
 	}
-	
+
 	// colision detection between all game objects
 	// colision reaction
-	
+
 	// update the camera
 	camera.update(frameTime);
 	kengine::matrix c = camera.get();
-	
+
 	// update the HUD
-	
+
 	// draw the scene
 	//static const float bkgColor[] = { 0.0f, 1.0f, 1.0f, 1.0f };
 	static const float bkgColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -370,7 +370,7 @@ void GameEventHandler::frameEvent(double frameTime)
 		v = c * m;
 
 		// --------------------------------------------------------------------
-		
+
 		// copying model view data from entities
 		for (int j = 0; j < 16; j++)
 		{
@@ -383,24 +383,24 @@ void GameEventHandler::frameEvent(double frameTime)
 
 	// draw objects
 	myShader[0].useProgram();
-	
+
 	myBatch->updateModelView(entityList.size(), modelViewData);
 	myBatch->updateUV(TOTAL_ENTITY, uvData);
 	myBatch->draw(static_cast<int>(entityList.size()));
 
 	myShader[1].useProgram();
 
-	primPoint->update(TOTAL_POINTS * 4, pointsData);
-	primPoint->draw(TOTAL_POINTS);
+	primPoint->update(1 * 4, pointsData);
+	primPoint->draw(1);
 
-	//primLine->update(1 * 8, linesData);
-	//primLine->draw(2);
+	primLine->update(1 * 8, linesData);
+	primLine->draw(2);
 }
 
 
 void GameEventHandler::resumeEvent()
 {
-} 
+}
 
 
 void GameEventHandler::pauseEvent()
@@ -441,7 +441,7 @@ void GameEventHandler::keyboardEvent(unsigned long long key, int state)
 	K_UNREFERENCED_PARAMETER(key);
 	K_UNREFERENCED_PARAMETER(state);
 
-	if(key == 27 && state)
+	if (key == 27 && state)
 	{
 		myCore->getGameWindow()->destroy();
 	}
@@ -496,9 +496,9 @@ void GameEventHandler::resizeWindowEvent(int width, int height)
 		myRenderingSystem->setViewingWindow(width, height);
 		kengine::matrix p = myRenderingSystem->getProjection();
 		myShader[0].useProgram();
-		myShader[0].setUniformMatrix(0, p);
+		myShader[0].setProjection(p);
 		myShader[1].useProgram();
-		myShader[1].setUniformMatrix(0, p);
+		myShader[1].setProjection(p);
 	}
 }
 

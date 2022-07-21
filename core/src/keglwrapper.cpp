@@ -144,6 +144,7 @@ PFNGLBLENDEQUATIONIPROC									glBlendEquationi = 0;
 PFNGLBLENDEQUATIONSEPARATEIPROC							glBlendEquationSeparatei = 0;
 PFNGLTEXTUREPARAMETERFVPROC								glTextureParameterfv = 0;
 PFNGLTEXTUREPARAMETERIPROC								glTextureParameteri = 0;
+PFNGLGETSTRINGIPROC										glGetStringi = 0;
 
 
 void getProcedureAddress()
@@ -265,6 +266,7 @@ void getProcedureAddress()
 	glBlendEquationSeparatei = (PFNGLBLENDEQUATIONSEPARATEIPROC)wglGetProcAddress("glBlendEquationSeparatei");
 	glTextureParameterfv = (PFNGLTEXTUREPARAMETERFVPROC)wglGetProcAddress("glTextureParameterfv");
 	glTextureParameteri = (PFNGLTEXTUREPARAMETERIPROC)wglGetProcAddress("glTextureParameteri");
+	glGetStringi = (PFNGLGETSTRINGIPROC)wglGetProcAddress("glGetStringi");
 
 #pragma warning(default: 4191)
 
@@ -382,7 +384,8 @@ void getProcedureAddress()
 		!glBlendEquationi &&
 		!glBlendEquationSeparatei &&
 		!glTextureParameterfv &&
-		!glTextureParameteri)
+		!glTextureParameteri &&
+		!glGetStringi)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to load GL extension: " << glGetError())
 	}

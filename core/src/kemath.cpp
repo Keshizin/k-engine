@@ -25,7 +25,7 @@
 
 
 #include <kemath.h>
-#include <cmath>
+#include <keaux.h>
 
 
 // matrix memory layout
@@ -318,4 +318,25 @@ kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
 	}
 
 	return *this;
+}
+
+
+// ----------------------------------------------------------------------------
+//  (!) function to generate circle points
+// ----------------------------------------------------------------------------
+void kengine::fillCirclePoints(int count, float* points)
+{
+	float radAngle = 0.0;
+	float increment = static_cast<float>(M_PI) * 2.0f / static_cast<float>(count);
+	int index = 0;
+
+	for (int c = 0; c < count; c++)
+	{
+		*(points + index++) = std::cos(radAngle);	// x axis
+		*(points + index++) = std::sin(radAngle);	// y axis
+		*(points + index++) = 0.0f;					// z axis
+		*(points + index++) = 1.0f;					// w (homogeneous coordinate
+
+		radAngle += increment;
+	}
 }

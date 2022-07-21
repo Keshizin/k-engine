@@ -174,13 +174,13 @@ namespace kengine
 		void dump() const;
 		void clear();
 
-		const vattrib<float> * getCoords() const { return &coords; }
+		const vattrib<float> * getPosition() const { return &position; }
 		const vattrib<float> * getColors() const { return &colors; }
 		const vattrib<float>* getTexCoords() const { return &texCoords; }
 		const vattrib<unsigned int> * getIndices() const { return &indices; }
 
 	private:
-		vattrib<float> coords;
+		vattrib<float> position;
 		vattrib<float> colors;
 		vattrib<float> texCoords;
 		vattrib<unsigned int> indices;

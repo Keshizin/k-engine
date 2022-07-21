@@ -112,10 +112,11 @@ namespace kengine
 		TransformProgram& operator=(const TransformProgram& copy) = delete; // copy assignment
 
 		bool loadShaders(kengine::ShaderInfo* shaders);
-		void setProjection(kengine::matrix& p);
+		void setUniformMatrix(const int location, kengine::matrix& m);
+		void print() const;
 
 	private:
-		GLint projectionViewLocation;
+		GLint* uniformLocations;
 	};
 
 
@@ -204,7 +205,12 @@ namespace kengine
 	//  Note: max_size is a quan
 	// 
 	// ---------------------------------------------------------------------------
-	enum class PRIMITIVE_TYPE { PRIMITIVE_POINT, PRIMITIVE_LINE };
+	enum class PRIMITIVE_TYPE
+	{
+		PRIMITIVE_POINT,
+		PRIMITIVE_LINE,
+		PRIMITIVE_LINE_LOOP,
+	};
 
 	class primitive_mesh_batch
 	{

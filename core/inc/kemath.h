@@ -27,6 +27,7 @@
 #ifndef K_ENGINE_MATH_H
 #define K_ENGINE_MATH_H
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 // (!) constant used to convert angle to radian (PI / 180º)
@@ -230,6 +231,12 @@ namespace kengine
 		float top;
 		float bottom;
 	} rect;
+
+
+	// ----------------------------------------------------------------------------
+	//  (!) function to generate circle points
+	// ----------------------------------------------------------------------------
+	void fillCirclePoints(int count, float *points);
 }
 
 #endif

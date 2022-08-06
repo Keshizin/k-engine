@@ -34,6 +34,8 @@
 #include <keprofile.h>
 #include <keconstants.h>
 
+#include <kerenderingsystem.h>
+
 namespace kengine
 {
 	// ------------------------------------------------------------------------
@@ -42,6 +44,7 @@ namespace kengine
 	class core
 	{
 	public:
+		core();
 		explicit core(kengine::eventhandler* evt);
 		~core();
 
@@ -55,11 +58,13 @@ namespace kengine
 		void resumeGameLoop();
 		void setFrameRate(unsigned int framePerSecond);
 
+		void setDefaultEventHandler();
 		void setEventHandler(kengine::eventhandler* evt);
 
 		kengine::win32wrapper* getWin32api() const { return win32api; }
 		kengine::window* const getGameWindow() const;
 		kengine::log* getProfileLog() { return &profileLog; }
+		kengine::renderingsystem* getRenderingSystem() { return renderingSystem; }
 
 	private:
 		int runningStatus;
@@ -68,6 +73,7 @@ namespace kengine
 		kengine::window* gameWindow;
 		kengine::timehandler timeHandler;
 		kengine::log profileLog;
+		kengine::renderingsystem* renderingSystem;
 	};
 }
 

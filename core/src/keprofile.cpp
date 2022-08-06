@@ -79,6 +79,9 @@ kengine::profile::profile(const kengine::profile& copy)
 // copy assignment
 kengine::profile& kengine::profile::operator=(const profile& copy)
 {
+	if(timer != nullptr)
+		delete timer;
+
 	framesPerSecond = copy.framesPerSecond;
 	frameTime = copy.frameTime;
 	framesCounter = copy.framesCounter;

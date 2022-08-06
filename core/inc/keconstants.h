@@ -71,6 +71,17 @@
 
 
 // ----------------------------------------------------------------------------
+//  K-Engine Key Codes
+// 
+//  Note: Estes definem devem ser substituidos por enum
+// ----------------------------------------------------------------------------
+#ifdef WIN32
+	#define K_KEY_ESCAPE VK_ESCAPE
+	#define K_KEY_RETURN VK_RETURN
+#endif
+
+
+// ----------------------------------------------------------------------------
 //  K-Engine Mouse
 // 
 //  Note: Estes definem devem ser substituidos por enum

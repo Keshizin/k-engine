@@ -31,7 +31,7 @@
 #include <tchar.h>
 #include <iostream>
 
-static kengine::eventhandler* globalEventHandler = 0;
+static kengine::eventhandler* globalEventHandler = nullptr;
 
 
 // ----------------------------------------------------------------------------
@@ -169,7 +169,7 @@ int kengine::win32wrapper::create(int x, int y, int width, int height, std::stri
 	switch (style)
 	{
 	case K_WINDOW_SPLASH:
-		dwStyle = WS_POPUP | WS_BORDER;
+		dwStyle = WS_POPUP;
 		break;
 
 	case K_WINDOW_DEFAULT:
@@ -508,8 +508,8 @@ int kengine::win32wrapper::swapBuffers() const
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// prevent the null pointer exception!
-	if(!globalEventHandler)
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	//if(globalEventHandler == nullptr)
+	//	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 	switch(uMsg)
 	{

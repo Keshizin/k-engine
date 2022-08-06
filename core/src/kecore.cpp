@@ -26,6 +26,34 @@
 #include <kecore.h>
 #include <keaux.h>
 
+kengine::scene defaultScene(nullptr, nullptr);
+
+// ------------------------------------------------------------------------
+//  kengine::core - members class definition
+// ------------------------------------------------------------------------
+kengine::core::core()
+	:
+	runningStatus{ K_STOPPED },
+	eventHandler{ nullptr },
+	win32api{ nullptr },
+	gameWindow{ nullptr },
+	timeHandler{},
+	profileLog{ MAX_LOG_SIZE },
+	renderingSystem{ nullptr }
+{
+#ifdef K_DEBUG
+	createDebugConsole();
+#endif
+
+	defaultScene.setEngine(this);
+	setEventHandler(&defaultScene);
+	timeHandler.setPerfomanceFrequency(getHighResolutionTimerFrequency());
+
+	win32api = new kengine::win32wrapper();
+	gameWindow = new kengine::window(win32api);
+	renderingSystem = new kengine::renderingsystem(win32api);
+}
+
 
 kengine::core::core(kengine::eventhandler* evt)
 	:
@@ -34,7 +62,8 @@ kengine::core::core(kengine::eventhandler* evt)
 		win32api{ nullptr },
 		gameWindow{ nullptr },
 		timeHandler{},
-		profileLog{ MAX_LOG_SIZE }
+		profileLog{ MAX_LOG_SIZE },
+		renderingSystem{ nullptr }
 {
 #ifdef K_DEBUG
 	createDebugConsole();
@@ -45,6 +74,7 @@ kengine::core::core(kengine::eventhandler* evt)
 
 	win32api = new kengine::win32wrapper();
 	gameWindow = new kengine::window(win32api);
+	renderingSystem = new kengine::renderingsystem(win32api);
 }
 
 
@@ -55,15 +85,18 @@ kengine::core::~core()
 	closeDebugConsole();
 #endif
 
-	delete win32api;
+	delete renderingSystem;
 	delete gameWindow;
-
+	delete win32api;
 	setEventHandler(nullptr);
 }
 
 
 void kengine::core::startMainLoop()
 {
+	if (eventHandler == nullptr)
+		return;
+
 	long long startTime = 0;
 	long long endTime = 0;
 	long long frameTime = 0;
@@ -99,7 +132,6 @@ void kengine::core::startMainLoop()
 		if (runningStatus == K_RUNNING)
 		{
 			eventHandler->frameEvent(timeHandler.getFrameTimeInSeconds());
-			// renderingSystem->renderFrame();
 			win32api->swapBuffers();
 		}
 
@@ -155,6 +187,12 @@ void kengine::core::setFrameRate(unsigned int framePerSecond)
 	{
 		timeHandler.setFrameTimeLimit(getHighResolutionTimerFrequency() / framePerSecond);
 	}
+}
+
+
+void kengine::core::setDefaultEventHandler()
+{
+	setEventHandler(&defaultScene);
 }
 
 

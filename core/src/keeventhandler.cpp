@@ -166,8 +166,10 @@ void kengine::scene_manager::removeScene(size_t pos)
 		return;
 
 	kengine::scene* s = scenes[pos];
-	delete s;
+	//delete s;
 	scenes.erase(scenes.begin() + pos);
+	delete s;
+
 }
 
 

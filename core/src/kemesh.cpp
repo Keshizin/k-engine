@@ -29,12 +29,24 @@
 
 
 // ----------------------------------------------------------------------------
-//  k-engine mesh class constructors & destructor
+//  k-engine mesh - member class definition
 // ----------------------------------------------------------------------------
+kengine::mesh::mesh(vattrib<float>& v)
+	: position{ std::move(v) }
+{
+}
+
+
 kengine::mesh::mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i)
 	: position{ std::move(v) }, colors{ std::move(c) }, texCoords{ std::move(t) }, indices{ std::move(i) }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "> (!) kengine::mesh constructor with arguments - [" << this << "]")
+}
+
+
+kengine::mesh::mesh(vattrib<float>& v, vattrib<unsigned int>& i)
+	: position{ std::move(v) }, colors{}, texCoords{}, indices{ std::move(i) }
+{
 }
 
 
@@ -190,18 +202,18 @@ kengine::mesh kengine::quad(float size)
 
 	float vertex_positions[] =
 	{
-		-half,  half,  0.0f, 1.0f,
-		-half, -half,  0.0f, 1.0f,
-		 half, -half,  0.0f, 1.0f,
-		 half,  half,  0.0f, 1.0f
+		-half,  half,  0.0f,
+		-half, -half,  0.0f,
+		 half, -half,  0.0f,
+		 half,  half,  0.0f
 	};
 
 	float vertex_colors[] =
 	{
+		0.0f, 0.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.8f, 0.2f, 0.5f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
 	};
 
 	float texture_coordinates[] =
@@ -219,8 +231,8 @@ kengine::mesh kengine::quad(float size)
 
 	kengine::vattrib<float> v = {
 		vertex_positions,
-		16,
-		4
+		12,
+		3
 	};
 
 	kengine::vattrib<float> c = {

@@ -190,6 +190,7 @@ kengine::TransformProgram::TransformProgram()
 
 kengine::TransformProgram::~TransformProgram()
 {
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::TransformProgram destructor - [" << this << "]");
 	delete[] uniformLocations;
 }
 
@@ -292,12 +293,37 @@ void kengine::TransformProgram::print() const
 
 
 // ------------------------------------------------------------------------
-//  (!) kengine::meshnode class
+//  (!) kengine::mesh_node - member class definition
 // ------------------------------------------------------------------------
+kengine::mesh_node::mesh_node()
+	: max_size{ 1 }, vao{ 0 }, vbo{ 0 }, count{ 0 }, offset_to_modelview_buffer{ 0 }
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode defult constructor - [" << this << "]")
+}
+
+
 kengine::mesh_node::mesh_node(const kengine::mesh& m)
-	: vao{ 0 }, vbo{ 0 }, count{ 0 }
+	: max_size{ 1 }, vao{ 0 }, vbo{ 0 }, count{ 0 }, offset_to_modelview_buffer{ 0 }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode constructor with argument - [" << this << "]")
+	load(m, max_size);
+}
+
+
+kengine::mesh_node::~mesh_node()
+{
+	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]");
+
+	glInvalidateBufferData(vbo[0]);
+	glInvalidateBufferData(vbo[1]);
+	glDeleteBuffers(VBO_COUNT, vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+
+void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
+{
+	max_size = size;
 
 	glCreateBuffers(VBO_COUNT, vbo);
 
@@ -306,37 +332,57 @@ kengine::mesh_node::mesh_node(const kengine::mesh& m)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
 	}
 
+	// ------------------------------------------------------------------------
+	//  storing vertex attributes
+	// ------------------------------------------------------------------------
+
 	// store indices in VBO
 	const kengine::vattrib<unsigned int>* indices = m.getIndices();
-	glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
+
+	if (indices->attributeArray != nullptr)
+	{
+		glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
+
+		GLuint error = glGetError();
+
+		if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+		{
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+		}
+
+		count = static_cast<GLsizei>(m.getIndices()->getSize());
+	}
+
+	//  store vertex attributes in VBO
+	const kengine::vattrib<float>* positions = m.getPosition();
+	const kengine::vattrib<float>* colors = m.getColors();
+	const kengine::vattrib<float>* texCoords = m.getTexCoords();
+
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes() + (max_size * 16LL * sizeof(GLfloat)));
+	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	GLuint error = glGetError();
 
 	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
 	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
-	}
-
-	//  store vertex attributes in VBO
-	const kengine::vattrib<float>* positionPTR = m.getPosition();
-	const kengine::vattrib<float>* colorsPTR = m.getColors();
-	const kengine::vattrib<float>* texCoordsPTR = m.getTexCoords();
-
-	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes() + texCoordsPTR->getSizeinBytes());
-	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-	error = glGetError();
-
-	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
-	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
 	}
-	
-	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), positionPTR->attributeArray);
-	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), static_cast<GLsizeiptr>(colorsPTR->getSizeinBytes()), colorsPTR->attributeArray);
-	glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()), static_cast<GLsizeiptr>(texCoordsPTR->getSizeinBytes()), texCoordsPTR->attributeArray);
 
+	if (positions->attributeArray != nullptr)
+		glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positions->getSizeinBytes()), positions->attributeArray);
+
+	if (colors->attributeArray != nullptr)
+		glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positions->getSizeinBytes()), static_cast<GLsizeiptr>(colors->getSizeinBytes()), colors->attributeArray);
+
+	if (texCoords->attributeArray != nullptr)
+		glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes()), static_cast<GLsizeiptr>(texCoords->getSizeinBytes()), texCoords->attributeArray);
+
+	offset_to_modelview_buffer = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes());
+
+
+	// ------------------------------------------------------------------------
 	//  creating VAO
+	// ------------------------------------------------------------------------
 	glCreateVertexArrays(1, &vao);
 
 	if (glGetError() == GL_INVALID_VALUE)
@@ -351,79 +397,64 @@ kengine::mesh_node::mesh_node(const kengine::mesh& m)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
 	}
 
+
+	// ------------------------------------------------------------------------
 	//  shader plumbing
+	// ------------------------------------------------------------------------
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)positionPTR->getSizeinBytes());
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(positionPTR->getSizeinBytes() + colorsPTR->getSizeinBytes()));
+	if (colors->attributeArray != nullptr)
+	{
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)positions->getSizeinBytes());
+	}
 
-	count = static_cast<GLsizei>(m.getIndices()->getSize());
+	if (texCoords->attributeArray != nullptr)
+	{
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(positions->getSizeinBytes() + colors->getSizeinBytes()));
+	}
+
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)),
+			(const GLvoid*)(offset_to_modelview_buffer + (sizeof(float) * 4 * i)));
+
+		glEnableVertexAttribArray(3UL + i);
+		glVertexAttribDivisor(3UL + i, 1);
+	}
+
+	if (indices->attributeArray == nullptr)
+		count = static_cast<GLsizei>(positions->getSize());
 }
 
 
-kengine::mesh_node::~mesh_node()
+void kengine::mesh_node::updateModelView(const long long int size, const float* data) const
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]")
-
-	glInvalidateBufferData(vbo[0]);
-	glInvalidateBufferData(vbo[1]);
-	glDeleteBuffers(VBO_COUNT, vbo);
-	glDeleteVertexArrays(1, &vao);
+	glNamedBufferSubData(vbo[1], offset_to_modelview_buffer, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
 }
 
 
-void kengine::mesh_node::draw()
+void kengine::mesh_node::draw() const
 {
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine::instanced_mesh_node class
-// ----------------------------------------------------------------------------
-kengine::instanced_mesh_node::instanced_mesh_node(int size, kengine::mesh& m)
-	: mesh_node{ m }, max_size{ size }, modelview_vbo{ 0 }
+void kengine::mesh_node::drawArrays() const
 {
-	glCreateBuffers(1, &modelview_vbo);
-	glNamedBufferStorage(modelview_vbo, static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat)), nullptr, GL_DYNAMIC_STORAGE_BIT);
-
 	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, modelview_vbo);
-
-	for (unsigned int i = 0; i < 4; i++)
-	{
-		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)(sizeof(float) * 4 * i));
-		glEnableVertexAttribArray(3UL + i);
-		glVertexAttribDivisor(3UL + i, 1);
-	}
+	glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
 
-kengine::instanced_mesh_node::~instanced_mesh_node()
+void kengine::mesh_node::drawInstanced(GLsizei size) const
 {
-	glInvalidateBufferData(modelview_vbo);
-	glDeleteBuffers(1, &modelview_vbo);
-}
-
-
-void kengine::instanced_mesh_node::update(const long long int size, float* data) const
-{
-	glNamedBufferSubData(modelview_vbo, 0, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
-}
-
-
-void kengine::instanced_mesh_node::draw(int size) const
-{
-	if (size < 0)
-		size = 0;
-
 	glBindVertexArray(vao);
 	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
 }
@@ -436,6 +467,7 @@ kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const
 	: max_size{ size }, vao { 0 }, vbo{ { 0 } }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::batch constructor with argument - [" << this << "]")
+	GLuint error;
 
 	glCreateBuffers(TOTAL_VBO, vbo);
 
@@ -446,13 +478,19 @@ kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const
 
 	// store indices in VBO
 	const kengine::vattrib<unsigned int>* indices = m.getIndices();
-	glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
 
-	GLuint error = glGetError();
-
-	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+	if (indices->attributeArray != nullptr)
 	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+		glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
+
+		error = glGetError();
+
+		if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+		{
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+		}
+
+		count = static_cast<GLsizei>(m.getIndices()->getSize());
 	}
 
 	// store vertex attributes in VBO
@@ -511,8 +549,6 @@ kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const
 		glEnableVertexAttribArray(3UL + i);
 		glVertexAttribDivisor(3UL + i, 1);
 	}
-
-	count = static_cast<GLsizei>(m.getIndices()->getSize());
 }
 
 
@@ -684,9 +720,35 @@ void kengine::primitive_mesh_batch::draw(int size) const
 // ---------------------------------------------------------------------------
 //  kengine::texture class
 // ---------------------------------------------------------------------------
+kengine::texture::texture()
+	: id{ 0 }, texUnit{ 0 }
+{
+}
+
 kengine::texture::texture(const kengine::raw_img& img, GLuint textureUnit)
 	: id{ 0 }, texUnit{ textureUnit }
 {
+	load(img, texUnit);
+}
+
+
+kengine::texture::~texture()
+{
+	glDeleteTextures(1, &id);
+
+	GLenum error = glGetError();
+
+	if (error == GL_INVALID_VALUE)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete texture object: " << error)
+	}
+}
+
+
+void kengine::texture::load(const kengine::raw_img& img, GLuint textureUnit)
+{
+	texUnit = textureUnit;
+
 	glCreateTextures(GL_TEXTURE_2D, 1, &id);
 
 	GLenum error = glGetError();
@@ -718,19 +780,6 @@ kengine::texture::texture(const kengine::raw_img& img, GLuint textureUnit)
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-
-kengine::texture::~texture()
-{
-	glDeleteTextures(1, &id);
-
-	GLenum error = glGetError();
-
-	if (error == GL_INVALID_VALUE)
-	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete texture object: " << error)
-	}
 }
 
 

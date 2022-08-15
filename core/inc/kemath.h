@@ -236,7 +236,7 @@ namespace kengine
 	// ----------------------------------------------------------------------------
 	//  (!) function to generate circle points
 	// ----------------------------------------------------------------------------
-	void fillCirclePoints(int count, float *points);
+	void fillCirclePoints(int count, float *points, float offset);
 }
 
 #endif

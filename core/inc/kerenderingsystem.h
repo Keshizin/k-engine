@@ -121,7 +121,16 @@ namespace kengine
 
 
 	// ------------------------------------------------------------------------
-	//  (!) kengine::meshnode class
+	//  (!) kengine::mesh_node class
+	// 
+	//	This class is a complete storage for vertex attributes:
+	// 
+	//		- vertex positions
+	//		- vertex colors
+	//		- vertex UV coordinates
+	//		- vertex normals
+	//		- vertex indices
+	// 
 	// ------------------------------------------------------------------------
 	class mesh_node
 	{
@@ -129,41 +138,28 @@ namespace kengine
 		static constexpr int VBO_COUNT = 2;
 
 	public:
+		mesh_node();
 		explicit mesh_node(const kengine::mesh& m);
 		~mesh_node();
 
 		mesh_node(const mesh_node& copy) = delete; // copy constructor
 		mesh_node(mesh_node&& move) noexcept = delete; // move constructor
 		mesh_node& operator=(const mesh_node& copy) = delete; // copy assignment
+
+		void updateModelView(const long long int size, const float* data) const;
 		
-		void draw();
+		void load(const kengine::mesh& m, size_t size);
+		void draw() const;
+		void drawArrays() const;
+		void drawInstanced(GLsizei size) const;
 
 	private:
+		size_t max_size;
 		GLuint vao;
 		GLuint vbo[VBO_COUNT];
 		GLsizei count;
-	};
 
-
-	// ---------------------------------------------------------------------------
-	//  (!) kengine::instanced_mesh_node class
-	// ---------------------------------------------------------------------------
-	class instanced_mesh_node : public mesh_node
-	{
-	public:
-		instanced_mesh_node(int size, kengine::mesh& m);
-		~instanced_mesh_node();
-
-		instanced_mesh_node(const instanced_mesh_node& copy) = delete; // copy constructor
-		instanced_mesh_node(instanced_mesh_node&& move) noexcept = delete; // move constructor
-		instanced_mesh_node& operator=(const instanced_mesh_node& copy) = delete; // copy assignment
-
-		void update(const long long int size, float* data) const;
-		void draw(int size) const;
-
-	private:
-		int max_size;
-		GLuint modelview_vbo;
+		GLsizeiptr offset_to_modelview_buffer;
 	};
 
 
@@ -244,6 +240,7 @@ namespace kengine
 	class texture
 	{
 	public:
+		texture();
 		texture(const kengine::raw_img& img, GLuint textureUnit);
 		~texture();
 
@@ -251,6 +248,7 @@ namespace kengine
 		texture(texture&& move) noexcept = delete; // move constructor
 		texture& operator=(const texture& copy) = delete; // copy assignment
 
+		void load(const kengine::raw_img& img, GLuint textureUnit);
 		void bindTexture(int texture);
 
 	private:

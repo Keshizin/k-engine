@@ -84,3 +84,52 @@ const unsigned char* const kengine::raw_img::getPixels() const
 {
 	return pixels;
 }
+
+
+// ----------------------------------------------------------------------------
+//  kengine::raw_mesh class
+// ----------------------------------------------------------------------------
+kengine::mesh kengine::kraw_load_obj(std::string filename)
+{
+	std::ifstream filestream(filename, std::ios::in | std::ios::binary);
+
+	if (!filestream)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Fail to load file (RAW OBJ): " << filename);
+		// throw std::exception("This file cannot be opened.\n");
+	}
+
+	//filestream.seekg(0, std::ios::end);
+	//std::streamoff fileSize = filestream.tellg();
+	//filestream.seekg(0, std::ios::beg);
+
+	char sign[4] = {};
+	filestream.read(sign, sizeof(sign));
+
+	// reading kengine::vattrib vertex positions!
+	size_t count;
+	filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+	size_t arraySize;
+	filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+
+	float* vertexPosition = new float[arraySize];
+
+	for (size_t i = 0; i < arraySize; i++)
+	{
+		float data = 0;
+		filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
+		vertexPosition[i] = data;
+	}
+
+	kengine::vattrib<float> v = {
+		vertexPosition,
+		arraySize,
+		count
+	};
+
+	kengine::mesh m(v);
+
+	delete[] vertexPosition;
+
+	return m;
+}

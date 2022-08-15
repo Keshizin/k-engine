@@ -26,12 +26,13 @@
 #ifndef K_ENGINE_RAW_H
 #define K_ENGINE_RAW_H
 
+#include <kemesh.h>
 #include <string>
 
 namespace kengine
 {
 	// ----------------------------------------------------------------------------
-	//  kengine::timer class
+	//  kengine::raw_img class
 	// ----------------------------------------------------------------------------
 	class raw_img
 	{
@@ -54,6 +55,12 @@ namespace kengine
 		int height;
 		unsigned char* pixels;
 	};
+
+
+	// ----------------------------------------------------------------------------
+	//  kengine::kraw_load_obj
+	// ----------------------------------------------------------------------------
+	kengine::mesh kraw_load_obj(std::string filename);
 }
 
 #endif

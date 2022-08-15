@@ -324,7 +324,7 @@ kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
 // ----------------------------------------------------------------------------
 //  (!) function to generate circle points
 // ----------------------------------------------------------------------------
-void kengine::fillCirclePoints(int count, float* points)
+void kengine::fillCirclePoints(int count, float* points, float offset)
 {
 	float radAngle = 0.0;
 	float increment = static_cast<float>(M_PI) * 2.0f / static_cast<float>(count);
@@ -332,8 +332,8 @@ void kengine::fillCirclePoints(int count, float* points)
 
 	for (int c = 0; c < count; c++)
 	{
-		*(points + index++) = std::cos(radAngle);	// x axis
-		*(points + index++) = std::sin(radAngle);	// y axis
+		*(points + index++) = std::cos(radAngle) * offset;	// x axis
+		*(points + index++) = std::sin(radAngle) * offset;	// y axis
 		*(points + index++) = 0.0f;					// z axis
 		*(points + index++) = 1.0f;					// w (homogeneous coordinate
 

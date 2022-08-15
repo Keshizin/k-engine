@@ -43,7 +43,7 @@ namespace kengine
 		// array of vertex data (heap allocation)
 		TYPE*  attributeArray;
 
-		// array size in bytes
+		// array size (number of elements)
 		size_t arraySize;
 
 		// count of elements per attribute (i.e. must be 4 for RGBA)
@@ -164,6 +164,10 @@ namespace kengine
 	{
 	public:
 		mesh() = delete;
+
+		explicit mesh(vattrib<float>& v);
+		mesh(vattrib<float>& v, vattrib<unsigned int>& i);
+
 		mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i);
 		mesh(const mesh& m); // copy constructor
 		mesh(mesh&& m) noexcept; // move constructor

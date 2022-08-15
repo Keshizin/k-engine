@@ -27,6 +27,7 @@
 #define K_ENGINE_SPLASH_H
 
 #include <game.h>
+#include <ketimer.h>
 
 namespace game
 {
@@ -35,6 +36,9 @@ namespace game
 	// ------------------------------------------------------------------------
 	class SplashScene : public kengine::scene
 	{
+		static constexpr int TOTAL_ENTITIES = 1;
+		static constexpr int TOTAL_POINTS = 16;
+
 	public:
 		SplashScene(kengine::core* engine, kengine::scene_manager* sceneManager);
 		~SplashScene();
@@ -63,6 +67,13 @@ namespace game
 	private:
 		int windowWidth;
 		int windowHeight;
+		kengine::TransformProgram program;
+		kengine::TransformProgram primProgram;
+		kengine::mesh_node node;
+		kengine::primitive_mesh_batch* prim;
+		kengine::texture tex;
+		kengine::timer t;
+		float* circlePoints;
 	};
 }
 

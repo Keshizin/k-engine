@@ -27,12 +27,12 @@
 #define K_ENGINE_CONSTANTS_H
 
 
-// ----------------------------------------------------------------------------
-//  K-Engine Window Style
-// 
-//  Note: This constants were based on Win32 API.
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  K-Engine Window Style
+* 
+*  This constants were based on Win32 API.
+*/
 #define K_WINDOW_SPLASH              0x01
 #define K_WINDOW_DEFAULT             0x02
 #define K_WINDOW_NO_SYS              0x03
@@ -40,74 +40,74 @@
 #define K_WINDOW_COMPLETE            0x05
 
 
-// ----------------------------------------------------------------------------
-//  K-Engine Window Show Types
-// 
-//  Note: This constants were based on Win32 API.
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  K-Engine Window Show Types
+* 
+*  This constants were based on Win32 API.
+* 
+*/
 #define K_WINDOW_SHOW          0x05
 #define K_WINDOW_FORCEMINIMIZE 0x0B
 
 
-// ----------------------------------------------------------------------------
-//  K-Engine Runtime States
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  K-Engine Runtime States
+* 
+*/
 #define K_RUNNING 0x01
 #define K_STOPPED 0x02
 #define K_PAUSED  0x03
 
 
-// ----------------------------------------------------------------------------
-//  Rendering System Context (2D or 3D)
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
-#define K_CONTEXT_2D 0x01
-#define K_CONTEXT_3D_PERSPECTIVE 0x02
-#define K_CONTEXT_3D_ORTHOGRAPHIC 0x03
+/*
+* 
+*  Rendering System Context (2D or 3D)
+* 
+*/
+#define K_CONTEXT_2D				0x01
+#define K_CONTEXT_3D_PERSPECTIVE	0x02
+#define K_CONTEXT_3D_ORTHOGRAPHIC	0x03
 
 
-// ----------------------------------------------------------------------------
-//  K-Engine Key Codes
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  K-Engine Key Codes
+* 
+*/
 #ifdef WIN32
 	#define K_KEY_ESCAPE VK_ESCAPE
 	#define K_KEY_RETURN VK_RETURN
 #endif
 
 
-// ----------------------------------------------------------------------------
-//  K-Engine Mouse
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  K-Engine Mouse
+* 
+*/
 #define K_MOUSE_LEFT_BUTTON   0
 #define K_MOUSE_MIDDLE_BUTTON 1
 #define K_MOUSE_RIGHT_BUTTON  2
-
 #define K_MOUSE_DOWN	1
 #define K_MOUSE_UP		0
 
 
-// ----------------------------------------------------------------------------
-//  Common Colors
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  Common Colors
+* 
+*/
 #define K_YELLOW_SHISA          0xF7C217
 #define K_DARK_AUBERGINE_UBUNTU 0x2C001E
 
 
-// ----------------------------------------------------------------------------
-//  Rendering modes
-// 
-//  Note: Estes definem devem ser substituidos por enum
-// ----------------------------------------------------------------------------
+/*
+* 
+*  Rendering modes
+* 
+*/
 #define K_RENDERING_MODE_POINT 0x01
 #define K_RENDERING_MODE_LINE  0x02
 #define K_RENDERING_MODE_FILL  0x03

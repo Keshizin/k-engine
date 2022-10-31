@@ -27,16 +27,17 @@
 #include <fstream>
 
 
-// ------------------------------------------------------------------------
-//  método para ler arquivos de texto
-// ------------------------------------------------------------------------
+/*
+*
+*  metodo para ler arquivos de texto
+*
+*/
 std::string kengine::readFromFile(std::string filename)
 {
 	std::ifstream filestream(filename, std::ios::in | std::ios::binary);
 
 	if (!filestream)
 	{
-		// throw std::exception("This file cannot be opened.\n");
 		return "";
 	}
 

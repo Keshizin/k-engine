@@ -30,12 +30,14 @@
 
 namespace kengine
 {
-	// ----------------------------------------------------------------------------
-	//  kengine::eventhandler class
-	// 
-	//  This class has methods (callback events) that will be called by the core.
-	//  Use this class to create your custom callback events.
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::eventhandler class
+	* 
+	*  This class has methods (callback events) that will be called by the core.
+	*  Use this class to create your custom callback events.
+	* 
+	*/
 	class eventhandler
 	{
 	public:
@@ -57,15 +59,18 @@ namespace kengine
 		virtual void moveWindowEvent(int x, int y) = 0;
 	};
 
+
 	class core; // forward declaration
 	class scene_manager; // forward declaration
 
-	// ----------------------------------------------------------------------------
-	//  kengine::scene class
-	// 
-	//  This class defines a "scene" in the k-engine context. A scene is used to
-	//  encapsulate callback events and make switching scenes easier.
-	// ----------------------------------------------------------------------------
+
+	/*
+	* 
+	*  kengine::scene class
+	* 
+	*  This class defines a "scene" in the k-engine context. A scene is used to
+	*  encapsulate callback events and make switching scenes easier.
+	*/
 	class scene : public eventhandler
 	{
 	public:
@@ -77,6 +82,8 @@ namespace kengine
 		scene& operator=(const scene& copy) = delete; // copy assignment
 
 		void setEngine(core* engine);
+
+		// scene::set - set the core events with this member class
 		virtual void set();
 
 		virtual void createWindowEvent();
@@ -100,11 +107,13 @@ namespace kengine
 	};
 
 
-	// ----------------------------------------------------------------------------
-	//  kengine::scene_manager class
-	// 
-	//  This class manages scene switching.
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::scene_manager class
+	* 
+	*  This class manages scene switching.
+	* 
+	*/
 	class scene_manager
 	{
 	public:

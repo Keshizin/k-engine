@@ -30,64 +30,100 @@
 #include <keutils.h>
 
 #include <iostream>
+#include <vector>
 
 
-// ----------------------------------------------------------------------------
-//  função para compilar shader GLSL
-// ----------------------------------------------------------------------------
+/*
+* 
+*  Helper function to compile GLSL shader.
+* 
+*/
 GLuint kengine::compileShader(GLuint shader_type, std::string filename)
 {
-	GLuint shader = glCreateShader(shader_type);
+	GLuint shaderObject = glCreateShader(shader_type);
 
-	if (!shader)
+	if (!shaderObject)
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create a vertex shader!")
 		return 0;
 	}
 
-	std::string source = readFromFile(filename);
+	std::string sourceString = readFromFile(filename);
 
-	if (source == "")
+	if (sourceString[0] == '\0')
 	{
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "This file " << filename << " cannot be opened.")
-		glDeleteShader(shader);
+		glDeleteShader(shaderObject);
 		return 0;
 	}
 
-	const GLchar* vertexSource = source.c_str();
+	const GLchar* source = sourceString.c_str();
 
-	glShaderSource(shader, 1, &vertexSource, nullptr);
-	glCompileShader(shader);
+	glShaderSource(shaderObject, 1, &source, nullptr);
+	glCompileShader(shaderObject);
 
-	GLint param = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &param);
+	GLint status = 0;
+	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &status);
 
-	if (param == GL_FALSE)
+	if (status == GL_FALSE)
 	{
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &param);
+		std::string log = "It was not possible to compile a shader [" + getShaderType(shader_type) + "]";
 
-		if (param > 0)
+		GLint logLength;
+		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
+
+		if (logLength > 0)
 		{
-			std::string infoLog(static_cast<unsigned int>(param), ' ');
-			GLsizei length;
-			glGetShaderInfoLog(shader, param, &length, &infoLog[0]);
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to compile a shader [" << shader_type << "]:\n" << infoLog)
+			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+			GLsizei logWrittenLength;
+
+			glGetShaderInfoLog(shaderObject, logLength, &logWrittenLength, &infoLog[0]);
+			log += ": " + infoLog;
+
 		}
 
-		glDeleteShader(shader);
+		glDeleteShader(shaderObject);
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, log);
 		return 0;
 	}
 
-	return shader;
+	return shaderObject;
 }
 
 
-// ------------------------------------------------------------------------
-//  (!) kengine::GLSLprogram class
-// 
-//  Esta classe fornece a base para criar shaders mais complexos que
-//  utilizam uniform variables, uniform blocks etc.
-// ------------------------------------------------------------------------
+std::string kengine::getShaderType(GLuint shader_type)
+{
+	switch (shader_type)
+	{
+	case GL_VERTEX_SHADER:
+		return "GL_VERTEX_SHADER";
+
+	case GL_GEOMETRY_SHADER:
+		return "GL_GEOMETRY_SHADER";
+
+	case GL_TESS_EVALUATION_SHADER:
+		return "GL_TESS_EVALUATION_SHADER";
+
+	case GL_TESS_CONTROL_SHADER:
+		return "GL_TESS_CONTROL_SHADER";
+
+	case GL_COMPUTE_SHADER:
+		return "GL_COMPUTE_SHADER";
+
+	case GL_FRAGMENT_SHADER:
+		return "GL_FRAGMENT_SHADER";
+
+	default:
+		return "";
+	}
+}
+
+
+/*
+*
+*  kengine::GLSLprogram class - member class definition
+*
+*/
 kengine::GLSLprogram::GLSLprogram()
 	: programID{ 0 }
 {
@@ -120,7 +156,7 @@ bool kengine::GLSLprogram::loadShaders(kengine::ShaderInfo* shaderInfo)
 
 		if (!programID)
 		{
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create a shader program!")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create a shader program!");
 			return false;
 		}
 
@@ -134,22 +170,28 @@ bool kengine::GLSLprogram::loadShaders(kengine::ShaderInfo* shaderInfo)
 
 		glLinkProgram(programID);
 
-		GLint param;
-		glGetProgramiv(programID, GL_LINK_STATUS, &param);
+		GLint status;
+		glGetProgramiv(programID, GL_LINK_STATUS, &status);
 
-		if (param == GL_FALSE)
+		if (status == GL_FALSE)
 		{
-			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &param);
+			std::string log = "It was not possible to link a shader program";
 
-			if (param > 0)
+			GLint logLength;
+			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
+
+			if (logLength > 0)
 			{
-				std::string infoLog(static_cast<unsigned int>(param), ' ');
-				GLsizei length;
-				glGetProgramInfoLog(programID, param, &length, &infoLog[0]);
-				K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to link a shader program: \n" << infoLog)
+				std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+				GLsizei logWrittenLength;
+				glGetProgramInfoLog(programID, logLength, &logWrittenLength, &infoLog[0]);
+				log += ": " + infoLog;
 			}
+
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, log);
 		}
 
+		// clean up shader objects
 		for (int index = 0; index < 6; index++)
 		{
 			if (shaders[index])
@@ -166,88 +208,391 @@ bool kengine::GLSLprogram::loadShaders(kengine::ShaderInfo* shaderInfo)
 }
 
 
-void kengine::GLSLprogram::useProgram()
+void kengine::GLSLprogram::setUniform(std::string name, kengine::matrix& m)
 {
-	if (programID)
-		glUseProgram(programID);
-}
+	GLint location = glGetUniformLocation(programID, name.c_str());
 
-
-// ------------------------------------------------------------------------
-//  (!) kengine::TransformProgram class
-// 
-//  This class is a shader inherited from GLSLprogram that has the
-//  following uniform variables:
-// 
-//		- projection view matrix (uniform matrix)
-// 
-// ------------------------------------------------------------------------
-kengine::TransformProgram::TransformProgram()
-	: uniformLocations{ nullptr }
-{
-}
-
-
-kengine::TransformProgram::~TransformProgram()
-{
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::TransformProgram destructor - [" << this << "]");
-	delete[] uniformLocations;
-}
-
-
-bool kengine::TransformProgram::loadShaders(kengine::ShaderInfo* shaders)
-{
-	if (!GLSLprogram::loadShaders(shaders))
-		return false;
-
-	// getting the list of active uniform variables
-	GLint numUniforms = 0;
-	glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
-
-	if (numUniforms > 0)
+	if (location == -1)
 	{
-		uniformLocations = new GLint[static_cast<size_t>(numUniforms)];
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::matrix): " << name.c_str());
+		return;
+	}
+	
+	glUniformMatrix4fv(location, 1, GL_FALSE, m.value());
+}
 
-		GLenum properties[] = { GL_LOCATION, GL_BLOCK_INDEX };
 
-		for (auto i = 0; i < numUniforms; i++)
-		{
-			GLint results[2];
-			glGetProgramResourceiv(programID, GL_UNIFORM, static_cast<GLuint>(i), 2, properties, 2, nullptr, results);
+void kengine::GLSLprogram::setUniform(std::string name, int value)
+{
+	GLint location = glGetUniformLocation(programID, name.c_str());
 
-			// skip uniforms in blocks
-			if (results[1] != -1)
-				continue;
+	if (location == -1)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (int): " << name.c_str());
+		return;
+	}
+	
+	glUniform1i(location, value);
+}
 
-			uniformLocations[i] = results[0];
-		}
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::phong_light& l)
+{
+	GLint location;
+
+	location = glGetUniformLocation(programID, (name + ".source_type").c_str());
+
+	if (location != -1)
+	{
+		GLint i = static_cast<int>(l.type);
+		glUniform1i(location, i);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".source_type").c_str());
 	}
 
-	return true;
-}
+	location = glGetUniformLocation(programID, (name + ".position").c_str());
 
-
-void kengine::TransformProgram::setUniformMatrix(const int location, kengine::matrix& m)
-{
-	if (uniformLocations != nullptr && location >= 0)
+	if (location != -1)
 	{
-		glUniformMatrix4fv(uniformLocations[location], 1, GL_FALSE, m.value());
+		glUniform3f(location, l.position.x, l.position.y, l.position.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".position").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".La").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.La.x, l.La.y, l.La.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".La").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".Ld").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.Ld.x, l.Ld.y, l.Ld.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".Ld").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".Ls").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.Ls.x, l.Ls.y, l.Ls.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".Ls").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".spot_direction").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.spot_direction.x, l.spot_direction.y, l.spot_direction.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".spot_direction").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".spot_cutoff").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, l.spot_cutoff);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".spot_cutoff").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".spot_exponent").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, l.spot_exponent);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_light): " << (name + ".spot_exponent").c_str());
 	}
 }
 
 
-void kengine::TransformProgram::print() const
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::phong_material& m)
 {
+	GLint location = glGetUniformLocation(programID, (name + ".Ka").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, m.Ka.x, m.Ka.y, m.Ka.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_material): " << (name + ".Ka").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".Kd").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, m.Kd.x, m.Kd.y, m.Kd.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_material): " << (name + ".Kd").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".Ks").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, m.Ks.x, m.Ks.y, m.Ks.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_material): " << (name + ".Ks").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".shininess").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, m.shininess);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::phong_material): " << (name + ".shininess").c_str());
+	}
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::lighting_model& lm)
+{
+	GLint location = glGetUniformLocation(programID, (name + ".non_local_viewer").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, lm.nonLocalViewer);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::lighting_model): " << (name + ".non_local_viewer").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".is_two_sided").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, lm.twoSidedShading);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::lighting_model): " << (name + ".is_two_sided").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".flat_shading").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, lm.flatShading);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::lighting_model): " << (name + ".flat_shading").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".model_type").c_str());
+
+	if (location != -1)
+	{
+		GLint type = static_cast<GLint>(lm.modelType);
+		glUniform1i(location, type);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::lighting_model): " << (name + ".model_type").c_str());
+	}
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::toon_shading_info& tsi)
+{
+	GLint location = glGetUniformLocation(programID, (name + ".levels").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, tsi.levels);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::toon_shading_info): " << (name + ".levels").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".scale_factor").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, tsi.scaleFactor);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::toon_shading_info): " << (name + ".scale_factor").c_str());
+	}
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::fog_info& fi)
+{
+	GLint location = glGetUniformLocation(programID, (name + ".max_distance").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, fi.max_distance);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::fog_info): " << (name + ".max_distance").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".min_distance").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, fi.min_distance);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::fog_info): " << (name + ".min_distance").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".color").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, fi.color.x, fi.color.y, fi.color.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::fog_info): " << (name + ".color").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".enable").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, fi.enable);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::fog_info): " << (name + ".enable").c_str());
+	}
+
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::pbr_light& l)
+{
+	GLint location = glGetUniformLocation(programID, (name + ".position").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.position.x, l.position.y, l.position.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::pbr_light): " << (name + ".position").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".L").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, l.L.x, l.L.y, l.L.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::pbr_light): " << (name + ".L").c_str());
+	}
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, const kengine::pbr_material& m)
+{
+	GLint location = glGetUniformLocation(programID, (name + ".rough").c_str());
+
+	if (location != -1)
+	{
+		glUniform1f(location, m.rough);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::pbr_material): " << (name + ".rough").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".metal").c_str());
+
+	if (location != -1)
+	{
+		glUniform1i(location, m.metal);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::pbr_material): " << (name + ".metal").c_str());
+	}
+
+	location = glGetUniformLocation(programID, (name + ".color").c_str());
+
+	if (location != -1)
+	{
+		glUniform3f(location, m.color.x, m.color.y, m.color.z);
+	}
+	else
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (kengine::pbr_material): " << (name + ".color").c_str());
+	}
+}
+
+
+void kengine::GLSLprogram::setUniform(std::string name, GLsizei size, float* data)
+{
+	GLint location = glGetUniformLocation(programID, name.c_str());
+
+	if (location == -1)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "Failed to set uniform (float*): " << name.c_str());
+		return;
+	}
+	
+	glUniform3fv(location, size, data);
+}
+
+
+void kengine::GLSLprogram::print() const
+{
+	std::cout << "> GLSLprogram object info [" << this << "]\n\n";
+
 	// getting the list of active attribute variables
-	GLint numAttribs;
+	GLint numAttribs = 0;
 	glGetProgramInterfaceiv(programID, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
 
 	if (numAttribs > 0)
 	{
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
 
-		std::cout << "> TransformProgram object info [" << this << "]\n"
-			<< "  active attribute variables:\n";
+		std::cout << "  active attribute variables:\n";
 
 		for (auto i = 0; i < numAttribs; i++)
 		{
@@ -259,18 +604,23 @@ void kengine::TransformProgram::print() const
 
 			glGetProgramResourceName(programID, GL_PROGRAM_INPUT, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
 
-			std::cout << "    - name: " << name << "\n    - type: " << results[1] << "\n    - location: " << results[2] << "\n\n";
+			std::cout
+				<< "	- name: "		<< name					<< "\n"
+				<< "	- type: "		<< getType(results[1])	<< "\n"
+				<< "	- location: "	<< results[2]			<< "\n"
+				<< std::endl;
+
 			delete[] name;
 		}
-
-		std::cout << "\n  active uniform variables:\n";
 	}
 
+	// getting a list of active uniform variables
 	GLint numUniforms = 0;
 	glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
 
 	if (numUniforms > 0)
 	{
+		std::cout << "\n  active uniform variables:\n";
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
 
 		for (auto i = 0; i < numUniforms; i++)
@@ -283,7 +633,13 @@ void kengine::TransformProgram::print() const
 
 			glGetProgramResourceName(programID, GL_UNIFORM, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
 
-			std::cout << "    - name: " << name << "\n    - type: " << results[1] << "\n    - location: " << results[2] << "\n    - block index: " << results[3] << "\n\n";
+			std::cout
+				<< "	- name: " << name << "\n"
+				<< "	- type: " << getType(results[1]) << "\n"
+				<< "	- location: " << results[2] << "\n"
+				<< "	- block index : " << results[3] << "\n"
+				<< std::endl;
+
 			delete[] name;
 		}
 
@@ -292,11 +648,57 @@ void kengine::TransformProgram::print() const
 }
 
 
-// ------------------------------------------------------------------------
-//  (!) kengine::mesh_node - member class definition
-// ------------------------------------------------------------------------
+
+void kengine::GLSLprogram::useProgram()
+{
+	if (programID)
+		glUseProgram(programID);
+}
+
+
+std::string kengine::GLSLprogram::getType(GLint type) const
+{
+	switch (type)
+	{
+	case GL_INT:
+		return "int";
+
+	case GL_FLOAT:
+		return "float";
+
+	case GL_FLOAT_VEC2:
+		return "vec2";
+
+	case GL_FLOAT_VEC3:
+		return "vec3";
+
+	case GL_FLOAT_VEC4:
+		return "vec4";
+
+	case GL_FLOAT_MAT4:
+		return "mat4";
+
+	case GL_SAMPLER_2D:
+		return "sampler2D";
+
+	default:
+		return "" + type;
+	}
+}
+
+
+/*
+*
+*  kengine::mesh_node class - member class definition
+*
+*/
 kengine::mesh_node::mesh_node()
-	: max_size{ 1 }, vao{ 0 }, vbo{ 0 }, count{ 0 }, offset_to_modelview_buffer{ 0 }
+	:
+		max_size{ 1 },
+		vao{ 0 },
+		vbo{ 0 },
+		count{ 0 },
+		offset_to_modelview_buffer{ 0 }
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode defult constructor - [" << this << "]")
 }
@@ -314,8 +716,11 @@ kengine::mesh_node::~mesh_node()
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::modelnode destructor - [" << this << "]");
 
-	glInvalidateBufferData(vbo[0]);
-	glInvalidateBufferData(vbo[1]);
+	for (int i = 0; i < VBO_COUNT; i++)
+	{
+		glInvalidateBufferData(vbo[i]);
+	}
+
 	glDeleteBuffers(VBO_COUNT, vbo);
 	glDeleteVertexArrays(1, &vao);
 }
@@ -323,6 +728,12 @@ kengine::mesh_node::~mesh_node()
 
 void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 {
+	if (m.getPosition()->attributeArray == nullptr)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to load mesh_node: mesh is empty.");
+		return;
+	}
+
 	max_size = size;
 
 	glCreateBuffers(VBO_COUNT, vbo);
@@ -332,9 +743,9 @@ void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
 	}
 
-	// ------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 	//  storing vertex attributes
-	// ------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 
 	// store indices in VBO
 	const kengine::vattrib<unsigned int>* indices = m.getIndices();
@@ -357,8 +768,9 @@ void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 	const kengine::vattrib<float>* positions = m.getPosition();
 	const kengine::vattrib<float>* colors = m.getColors();
 	const kengine::vattrib<float>* texCoords = m.getTexCoords();
+	const kengine::vattrib<float>* normals = m.getNormals();
 
-	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes() + (max_size * 16LL * sizeof(GLfloat)));
+	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes() + normals->getSizeinBytes() + (max_size * 16LL * sizeof(GLfloat)));
 	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	GLuint error = glGetError();
@@ -377,11 +789,39 @@ void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 	if (texCoords->attributeArray != nullptr)
 		glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes()), static_cast<GLsizeiptr>(texCoords->getSizeinBytes()), texCoords->attributeArray);
 
-	offset_to_modelview_buffer = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes());
+	if(normals->attributeArray != nullptr)
+		glNamedBufferSubData(vbo[1], static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes()), static_cast<GLsizeiptr>(normals->getSizeinBytes()), normals->attributeArray);
+
+	offset_to_modelview_buffer = static_cast<GLsizeiptr>(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes() + normals->getSizeinBytes());
+
+	GLfloat* modelviewData = new float[max_size * 16LL];
+
+	for (size_t i = 0; i < max_size; i++)
+	{
+		modelviewData[i +  0] = 1.0f;
+		modelviewData[i +  1] = 0.0f;
+		modelviewData[i +  2] = 0.0f;
+		modelviewData[i +  3] = 0.0f;
+		modelviewData[i +  4] = 0.0f;
+		modelviewData[i +  5] = 1.0f;
+		modelviewData[i +  6] = 0.0f;
+		modelviewData[i +  7] = 0.0f;
+		modelviewData[i +  8] = 0.0f;
+		modelviewData[i +  9] = 0.0f;
+		modelviewData[i + 10] = 1.0f;
+		modelviewData[i + 11] = 0.0f;
+		modelviewData[i + 12] = 0.0f;
+		modelviewData[i + 13] = 0.0f;
+		modelviewData[i + 14] = 0.0f;
+		modelviewData[i + 15] = 1.0f;
+	}
+
+	glNamedBufferSubData(vbo[1], offset_to_modelview_buffer, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), modelviewData);
+	delete[] modelviewData;
 
 
 	// ------------------------------------------------------------------------
-	//  creating VAO
+	//  creating Vertex Array Object (VAO)
 	// ------------------------------------------------------------------------
 	glCreateVertexArrays(1, &vao);
 
@@ -419,13 +859,19 @@ void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(positions->getSizeinBytes() + colors->getSizeinBytes()));
 	}
 
+	if (normals->attributeArray != nullptr)
+	{
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(positions->getSizeinBytes() + colors->getSizeinBytes() + texCoords->getSizeinBytes()));
+	}
+
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)),
+		glVertexAttribPointer(4UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)),
 			(const GLvoid*)(offset_to_modelview_buffer + (sizeof(float) * 4 * i)));
 
-		glEnableVertexAttribArray(3UL + i);
-		glVertexAttribDivisor(3UL + i, 1);
+		glEnableVertexAttribArray(4UL + i);
+		glVertexAttribDivisor(4UL + i, 1);
 	}
 
 	if (indices->attributeArray == nullptr)
@@ -433,16 +879,12 @@ void kengine::mesh_node::load(const kengine::mesh& m, size_t size)
 }
 
 
-void kengine::mesh_node::updateModelView(const long long int size, const float* data) const
+void kengine::mesh_node::updateModelMatrix(size_t size, const float* data) const
 {
+	if (size > max_size)
+		size = max_size;
+
 	glNamedBufferSubData(vbo[1], offset_to_modelview_buffer, static_cast<GLsizeiptr>(size * 16LL * sizeof(GLfloat)), data);
-}
-
-
-void kengine::mesh_node::draw() const
-{
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 }
 
 
@@ -453,7 +895,22 @@ void kengine::mesh_node::drawArrays() const
 }
 
 
-void kengine::mesh_node::drawInstanced(GLsizei size) const
+void kengine::mesh_node::drawElements() const
+{
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+}
+
+
+
+void kengine::mesh_node::drawArraysInstanced(GLsizei size) const
+{
+	glBindVertexArray(vao);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, count, size);
+}
+
+
+void kengine::mesh_node::drawElementsInstanced(GLsizei size) const
 {
 	glBindVertexArray(vao);
 	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
@@ -463,145 +920,177 @@ void kengine::mesh_node::drawInstanced(GLsizei size) const
 // ------------------------------------------------------------------------
 //  (!) kengine::instanced_uv_mesh_node class
 // ------------------------------------------------------------------------
-kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const kengine::mesh& m)
-	: max_size{ size }, vao { 0 }, vbo{ { 0 } }
+//kengine::instanced_uv_mesh_node::instanced_uv_mesh_node(const size_t size, const kengine::mesh& m)
+//	: max_size{ size }, vao { 0 }, vbo{ { 0 } }
+//{
+//	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::batch constructor with argument - [" << this << "]")
+//	GLuint error;
+//
+//	glCreateBuffers(TOTAL_VBO, vbo);
+//
+//	if (glGetError() == GL_INVALID_VALUE)
+//	{
+//		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
+//	}
+//
+//	// store indices in VBO
+//	const kengine::vattrib<unsigned int>* indices = m.getIndices();
+//
+//	if (indices->attributeArray != nullptr)
+//	{
+//		glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
+//
+//		error = glGetError();
+//
+//		if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+//		{
+//			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
+//		}
+//
+//		count = static_cast<GLsizei>(m.getIndices()->getSize());
+//	}
+//
+//	// store vertex attributes in VBO
+//	const kengine::vattrib<float>* positionPTR = m.getPosition();
+//
+//	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positionPTR->getSizeinBytes());
+//	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
+//
+//	error = glGetError();
+//
+//	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
+//	{
+//		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
+//	}
+//
+//	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), positionPTR->attributeArray);
+//
+//	// store vertex attributes for texture coordinates and modelview matrix
+//	GLsizeiptr matrixSize = static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat));
+//	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(GLfloat)));
+//	glNamedBufferStorage(vbo[2], matrixSize + uvSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+//
+//	// creating VAO
+//	glCreateVertexArrays(1, &vao);
+//
+//	if (glGetError() == GL_INVALID_VALUE)
+//	{
+//		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create vao: " << glGetError())
+//	}
+//
+//	glBindVertexArray(vao);
+//
+//	if (glGetError() == GL_INVALID_OPERATION)
+//	{
+//		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
+//	}
+//
+//	//  shader plumbing
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+//
+//	glEnableVertexAttribArray(0);
+//
+//	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+//
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+//
+//	glEnableVertexAttribArray(2);
+//	glEnableVertexAttribArray(3);
+//
+//	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+//
+//	for (unsigned int i = 0; i < 4; i++)
+//	{
+//		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)(uvSize + sizeof(float) * 4 * i));
+//		glEnableVertexAttribArray(3UL + i);
+//		glVertexAttribDivisor(3UL + i, 1);
+//	}
+//}
+//
+//
+//kengine::instanced_uv_mesh_node::~instanced_uv_mesh_node()
+//{
+//	glInvalidateBufferData(vbo[0]);
+//	glInvalidateBufferData(vbo[1]);
+//	glInvalidateBufferData(vbo[2]);
+//	glDeleteBuffers(TOTAL_VBO, vbo);
+//	glDeleteVertexArrays(1, &vao);
+//}
+//
+//
+//void kengine::instanced_uv_mesh_node::updateModelView(size_t size, float* modelview) const
+//{
+//	if (size > max_size)
+//		size = max_size;
+//
+//	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(float)));
+//	glNamedBufferSubData(vbo[2], uvSize, static_cast<GLsizeiptr>(size * 16 * sizeof(GLfloat)), modelview);
+//}
+//
+//
+//void kengine::instanced_uv_mesh_node::updateUV(size_t size, float* uv) const
+//{
+//	if (size > max_size)
+//		size = max_size;
+//
+//	glNamedBufferSubData(vbo[2], 0, static_cast<GLsizeiptr>(size * (8 * sizeof(float))), uv);
+//}
+//
+//
+//void kengine::instanced_uv_mesh_node::draw(int size) const
+//{
+//	if (size < 0)
+//		size = 0;
+//
+//	glBindVertexArray(vao);
+//	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
+//}
+
+
+/*
+* 
+*  kengine::prim_mesh_node class - member class definition
+* 
+*/
+kengine::prim_mesh_node::prim_mesh_node()
+	:
+		max_size{ 0 },
+		vao{ 0 },
+		vbo{ 0 },
+		mode{ 0 }
 {
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::batch constructor with argument - [" << this << "]")
-	GLuint error;
-
-	glCreateBuffers(TOTAL_VBO, vbo);
-
-	if (glGetError() == GL_INVALID_VALUE)
-	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create VBO : " << glGetError())
-	}
-
-	// store indices in VBO
-	const kengine::vattrib<unsigned int>* indices = m.getIndices();
-
-	if (indices->attributeArray != nullptr)
-	{
-		glNamedBufferStorage(vbo[0], static_cast<GLsizeiptr>(indices->getSizeinBytes()), indices->attributeArray, 0);
-
-		error = glGetError();
-
-		if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
-		{
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (index): " << glGetError())
-		}
-
-		count = static_cast<GLsizei>(m.getIndices()->getSize());
-	}
-
-	// store vertex attributes in VBO
-	const kengine::vattrib<float>* positionPTR = m.getPosition();
-
-	GLsizeiptr sizeInBytes = static_cast<GLsizeiptr>(positionPTR->getSizeinBytes());
-	glNamedBufferStorage(vbo[1], sizeInBytes, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-	error = glGetError();
-
-	if (error == GL_OUT_OF_MEMORY || error == GL_INVALID_VALUE || error == GL_INVALID_OPERATION)
-	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to allocate space for VBO (vertex attributes): " << glGetError())
-	}
-
-	glNamedBufferSubData(vbo[1], 0, static_cast<GLsizeiptr>(positionPTR->getSizeinBytes()), positionPTR->attributeArray);
-
-	// store vertex attributes for texture coordinates and modelview matrix
-	GLsizeiptr matrixSize = static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat));
-	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(GLfloat)));
-	glNamedBufferStorage(vbo[2], matrixSize + uvSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-	// creating VAO
-	glCreateVertexArrays(1, &vao);
-
-	if (glGetError() == GL_INVALID_VALUE)
-	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create vao: " << glGetError())
-	}
-
-	glBindVertexArray(vao);
-
-	if (glGetError() == GL_INVALID_OPERATION)
-	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to bind VAO : " << glGetError())
-	}
-
-	//  shader plumbing
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-
-	glEnableVertexAttribArray(2);
-	glEnableVertexAttribArray(3);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	for (unsigned int i = 0; i < 4; i++)
-	{
-		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)(uvSize + sizeof(float) * 4 * i));
-		glEnableVertexAttribArray(3UL + i);
-		glVertexAttribDivisor(3UL + i, 1);
-	}
 }
 
 
-kengine::instanced_uv_mesh_node::~instanced_uv_mesh_node()
+kengine::prim_mesh_node::prim_mesh_node(const size_t size, const PRIMITIVE_TYPE primType, const float* color)
+	:
+		max_size{ 0 },
+		vao{ 0 },
+		vbo{ 0 },
+		mode{ 0 }
+{
+	load(size, primType, color);
+}
+
+
+kengine::prim_mesh_node::~prim_mesh_node()
 {
 	glInvalidateBufferData(vbo[0]);
-	glInvalidateBufferData(vbo[1]);
-	glInvalidateBufferData(vbo[2]);
 	glDeleteBuffers(TOTAL_VBO, vbo);
 	glDeleteVertexArrays(1, &vao);
 }
 
 
-void kengine::instanced_uv_mesh_node::updateModelView(size_t size, float* modelview) const
+void kengine::prim_mesh_node::load(const size_t size, const PRIMITIVE_TYPE primType, const float* color)
 {
-	if (size > max_size)
-		size = max_size;
+	if (!size)
+	{
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[prim_mesh_node mesh batch::load] It was not possible to load - size is: " << size);
+		return;
+	}
 
-	GLsizeiptr uvSize = static_cast<GLsizeiptr>(max_size * (8 * sizeof(float)));
-	glNamedBufferSubData(vbo[2], uvSize, static_cast<GLsizeiptr>(size * 16 * sizeof(GLfloat)), modelview);
-}
-
-
-void kengine::instanced_uv_mesh_node::updateUV(size_t size, float* uv) const
-{
-	if (size > max_size)
-		size = max_size;
-
-	glNamedBufferSubData(vbo[2], 0, static_cast<GLsizeiptr>(size * (8 * sizeof(float))), uv);
-}
-
-
-void kengine::instanced_uv_mesh_node::draw(int size) const
-{
-	if (size < 0)
-		size = 0;
-
-	glBindVertexArray(vao);
-	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, size);
-}
-
-
-// ---------------------------------------------------------------------------
-// 
-//  (!) kengine::primitive_mesh_batch class
-//
-//      - member class definition
-// 
-// ---------------------------------------------------------------------------
-kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRIMITIVE_TYPE primType, const float* color)
-	: batchSize{ size }, mode{ 0 }, vbo{ 0 }, vao{ 0 }
-{
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::primitive_mesh_batch constructor with argument - [" << this << "]");
+	max_size = size;
 
 	glCreateBuffers(TOTAL_VBO, vbo);
 
@@ -609,12 +1098,10 @@ kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRI
 
 	if (error == GL_INVALID_VALUE)
 	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to create VBO: " << glGetError())
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch::load] It was not possible to create VBO: " << glGetError());
 	}
 
-	// ---------------------------------------------------------------------------
-
-	GLsizeiptr coordsSize = static_cast<GLsizeiptr>(batchSize * sizeof(GLfloat));
+	GLsizeiptr coordsSize = static_cast<GLsizeiptr>(max_size * 3LL * sizeof(GLfloat));
 	GLsizeiptr colorSize = static_cast<GLsizeiptr>(4LL * sizeof(GLfloat));
 
 	glNamedBufferStorage(vbo[0], coordsSize + colorSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -628,8 +1115,7 @@ kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRI
 
 	glNamedBufferSubData(vbo[0], coordsSize, colorSize, color);
 
-	// ---------------------------------------------------------------------------
-
+	// creating VAO
 	glCreateVertexArrays(1, &vao);
 
 	if (glGetError() == GL_INVALID_VALUE)
@@ -644,19 +1130,15 @@ kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRI
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "[primitive mesh batch] It was not possible to bind VAO : " << glGetError())
 	}
 
-	// ---------------------------------------------------------------------------
-
 	// shader plumbing
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)coordsSize);
 	glVertexAttribDivisor(1, 1);
-
-	// ---------------------------------------------------------------------------
 
 	switch (primType)
 	{
@@ -675,37 +1157,28 @@ kengine::primitive_mesh_batch::primitive_mesh_batch(const size_t size, const PRI
 }
 
 
-kengine::primitive_mesh_batch::~primitive_mesh_batch()
-{
-	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::primitive_mesh_batch destructor - [" << this << "]");
-	glInvalidateBufferData(vbo[0]);
-	glDeleteBuffers(TOTAL_VBO, vbo);
-	glDeleteVertexArrays(1, &vao);
-}
-
-
-void kengine::primitive_mesh_batch::setPointSize(const float pointSize)
+void kengine::prim_mesh_node::setPointSize(const float pointSize)
 {
 	glPointSize(pointSize);
 }
 
 
-void kengine::primitive_mesh_batch::setLineWidth(const float width)
+void kengine::prim_mesh_node::setLineWidth(const float width)
 {
 	glLineWidth(width);
 }
 
 
-void kengine::primitive_mesh_batch::update(size_t size, float* data) const
+void kengine::prim_mesh_node::update(size_t size, float* data) const
 {
-	if (size > batchSize)
-		size = batchSize;
+	if (size > max_size)
+		size = max_size;
 
-	glNamedBufferSubData(vbo[0], 0, static_cast<GLsizeiptr>(size * sizeof(float)), data);
+	glNamedBufferSubData(vbo[0], 0, static_cast<GLsizeiptr>(size * 3ULL * sizeof(float)), data);
 }
 
 
-void kengine::primitive_mesh_batch::draw(int size) const
+void kengine::prim_mesh_node::draw(int size) const
 {
 	if (size < 0)
 	{
@@ -717,9 +1190,11 @@ void kengine::primitive_mesh_batch::draw(int size) const
 }
 
 
-// ---------------------------------------------------------------------------
-//  kengine::texture class
-// ---------------------------------------------------------------------------
+/*
+*
+*  kengine::texture class
+*
+*/
 kengine::texture::texture()
 	: id{ 0 }, texUnit{ 0 }
 {
@@ -740,12 +1215,18 @@ kengine::texture::~texture()
 
 	if (error == GL_INVALID_VALUE)
 	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete texture object: " << error)
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete texture object: " << error);
 	}
 }
 
 
 void kengine::texture::load(const kengine::raw_img& img, GLuint textureUnit)
+{
+	load(img.getWidth(), img.getHeight(), img.getPixels(), textureUnit);
+}
+
+
+void kengine::texture::load(const int width, const int height, const unsigned char* pixels, GLuint textureUnit)
 {
 	texUnit = textureUnit;
 
@@ -758,7 +1239,7 @@ void kengine::texture::load(const kengine::raw_img& img, GLuint textureUnit)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create texture object: " << error)
 	}
 
-	glTextureStorage2D(id, 1, GL_RGBA8, img.getWidth(), img.getHeight());
+	glTextureStorage2D(id, 1, GL_RGBA8, width, height);
 
 	error = glGetError();
 
@@ -767,7 +1248,7 @@ void kengine::texture::load(const kengine::raw_img& img, GLuint textureUnit)
 		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to storage texture object: " << error)
 	}
 
-	glTextureSubImage2D(id, 0, 0, 0, img.getWidth(), img.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, img.getPixels());
+	glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	if (error == GL_INVALID_OPERATION || error == GL_INVALID_ENUM || error == GL_INVALID_VALUE)
 	{
@@ -777,9 +1258,11 @@ void kengine::texture::load(const kengine::raw_img& img, GLuint textureUnit)
 	glBindTextureUnit(texUnit, id);
 
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//glBindTextureUnit(texUnit, 0);
 }
 
 
@@ -799,9 +1282,11 @@ void kengine::texture::bindTexture(int texture)
 }
 
 
-// ---------------------------------------------------------------------------
-//  kengine::atlas class
-// ---------------------------------------------------------------------------
+/*
+*
+*  kengine::atlas class
+*
+*/
 kengine::atlas::atlas(std::string filename, const size_t frames, GLuint textureUnit)
 	: tex{ nullptr }, uv{ nullptr }
 {
@@ -862,41 +1347,13 @@ void kengine::atlas::copyFrame(const int frame, float* buffer)
 }
 
 
-// ------------------------------------------------------------------------
-//  kengine::viewing_window member class definition
-// ------------------------------------------------------------------------
-kengine::viewing_window::viewing_window()
-	:
-		_near{ -1.0f },
-		_far{ 1.0f },
-		window{ 0.0f, 0.0f, 0.0f, 0.0f },
-		projection{ 1 }
-{
-}
-
-
-kengine::viewing_window::~viewing_window()
-{
-}
-
-
-// ----------------------------------------------------------------------------
-//  kengine::rendersystem class
-// ----------------------------------------------------------------------------
+/*
+*
+*  kengine::renderingsystem class
+*
+*/
 kengine::renderingsystem::renderingsystem(kengine::win32wrapper* w)
-	:
-		renderContext{ kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D },
-		api{ w },
-		viewingWindow{}
-{
-}
-
-
-kengine::renderingsystem::renderingsystem(kengine::win32wrapper* w, RENDER_CONTEXT context)
-	:
-		renderContext { context },
-		api{ w },
-		viewingWindow{}
+	: api{ w }
 {
 }
 
@@ -1024,85 +1481,13 @@ void kengine::renderingsystem::setBlendingTest(int mode) const
 }
 
 
+void kengine::renderingsystem::clearBuffers() const
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
 void kengine::renderingsystem::setViewport(int x, int y, int width, int height) const
 {
 	glViewport(x, y, width, height);
-}
-
-
-void kengine::renderingsystem::setViewingWindow(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane)
-{
-	viewingWindow.window.left = left;
-	viewingWindow.window.right = right;
-	viewingWindow.window.bottom = bottom;
-	viewingWindow.window.top = top;
-	viewingWindow._near = nearPlane;
-	viewingWindow._far = farPlane;
-
-	float aspectRatio = 1.0f;
-	kengine::rect window = viewingWindow.window;
-
-	if (width <= height)
-	{
-		aspectRatio = static_cast<float>(height) / static_cast<float>(width);
-		window.bottom *= aspectRatio;
-		window.top *= aspectRatio;
-	}
-	else
-	{
-		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-		window.left *= aspectRatio;
-		window.right *= aspectRatio;
-	}
-
-	if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D)
-	{
-		viewingWindow.projection = kengine::ortho(
-			window.left,
-			window.right,
-			window.bottom,
-			window.top,
-			-1.0f,
-			1.0f);
-	}
-	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_ORTHO)
-	{
-		viewingWindow.projection = kengine::ortho(
-			window.left,
-			window.right,
-			window.bottom,
-			window.top,
-			viewingWindow._near,
-			viewingWindow._far);
-	}
-	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_FRUSTUM)
-	{
-		viewingWindow.projection = kengine::frustum(
-			window.left,
-			window.right,
-			window.bottom,
-			window.top,
-			viewingWindow._near,
-			viewingWindow._far);
-	}
-}
-
-
-void kengine::renderingsystem::setViewingWindow(int width, int height)
-{
-	setViewingWindow(
-		width,
-		height,
-		viewingWindow.window.left,
-		viewingWindow.window.right,
-		viewingWindow.window.bottom,
-		viewingWindow.window.top,
-		viewingWindow._near,
-		viewingWindow._far);
-}
-
-
-const kengine::matrix& kengine::renderingsystem::getProjection() const
-{
-	return viewingWindow.projection;
 }

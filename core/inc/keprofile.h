@@ -32,12 +32,14 @@ namespace kengine
 {
 	class timer; // forward declaration
 
-	// ----------------------------------------------------------------------------
-	//  kengine::profile class
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::profile class
+	* 
+	*/
 	class profile
 	{
-		friend class log;
+		friend class profile_log;
 
 	public:
 		profile();
@@ -48,7 +50,7 @@ namespace kengine
 
 		void start();
 		bool update(long long frameTime);
-		void print();
+		void print() const;
 
 	private:
 		kengine::timer* timer;
@@ -63,16 +65,26 @@ namespace kengine
 		long long frameTimeTotal;
 	};
 
-#define MAX_LOG_SIZE 300
 
-	// ----------------------------------------------------------------------------
-	//  kengine::log class
-	// ----------------------------------------------------------------------------
-	class log
+	/*
+	*
+	*  kengine::log class
+	* 
+	*  This class consists of a vector of snapshots of runtime core engine
+	*  information (i.e. frames per second, frame time, etc).
+	* 
+	*/
+	class profile_log
 	{
+		static constexpr int MAX_PROFILES = 300;
+
 	public:
-		log(size_t size);
-		~log();
+		profile_log(size_t size);
+		~profile_log();
+
+		profile_log(const profile_log& copy) = delete; // copy constructor
+		profile_log(profile_log&& move) noexcept = delete; // move constructor
+		profile_log& operator=(const profile_log& copy) = delete; // copy assignment
 
 		void restart() { index = 0; }
 		void copy(const kengine::profile& copy);
@@ -81,7 +93,7 @@ namespace kengine
 		void writeToFile();
 
 	private:
-		std::vector<kengine::profile> profileArray;
+		std::vector<kengine::profile> profiles;
 		size_t index;
 	};
 }

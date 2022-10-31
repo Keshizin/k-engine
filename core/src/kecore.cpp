@@ -28,9 +28,12 @@
 
 kengine::scene defaultScene(nullptr, nullptr);
 
-// ------------------------------------------------------------------------
-//  kengine::core - members class definition
-// ------------------------------------------------------------------------
+
+/*
+*
+*  kengine::core class - member class definition
+* 
+*/
 kengine::core::core()
 	:
 	runningStatus{ K_STOPPED },
@@ -38,7 +41,7 @@ kengine::core::core()
 	win32api{ nullptr },
 	gameWindow{ nullptr },
 	timeHandler{},
-	profileLog{ MAX_LOG_SIZE },
+	profiles{ 0 },
 	renderingSystem{ nullptr }
 {
 #ifdef K_DEBUG
@@ -62,7 +65,7 @@ kengine::core::core(kengine::eventhandler* evt)
 		win32api{ nullptr },
 		gameWindow{ nullptr },
 		timeHandler{},
-		profileLog{ MAX_LOG_SIZE },
+		profiles{ 0 },
 		renderingSystem{ nullptr }
 {
 #ifdef K_DEBUG
@@ -103,7 +106,7 @@ void kengine::core::startMainLoop()
 
 	runningStatus = K_RUNNING;
 	eventHandler->beforeMainLoopEvent();
-	
+
 	kengine::profile profile;
 	profile.start();
 
@@ -113,38 +116,56 @@ void kengine::core::startMainLoop()
 	{
 		startTime = getHighResolutionTimerCounter();
 
-		// --------------------------------------------------------------------
-		//  profiling stuff
-		// --------------------------------------------------------------------
+		/*
+		* 
+		*  profiling stuff
+		* 
+		*/
 		if (profile.update(timeHandler.getFrameTime()))
 		{
-			profileLog.copy(profile);
+			profiles.copy(profile);
+
+#ifdef K_DEBUG
+			profile.print();
+#endif
 		}
 
-		// --------------------------------------------------------------------
-		//  win32 message pump
-		// --------------------------------------------------------------------
+
+		/*
+		* 
+		*  win32 message pump
+		* 
+		*/
 		handleSystemMessages();
 
-		// --------------------------------------------------------------------
-		//  start game loop
-		// --------------------------------------------------------------------
+
+		/*
+		* 
+		*  start game loop
+		* 
+		*/
 		if (runningStatus == K_RUNNING)
 		{
 			eventHandler->frameEvent(timeHandler.getFrameTimeInSeconds());
 			win32api->swapBuffers();
 		}
 
-		// --------------------------------------------------------------------
-		//  end game loop
-		// --------------------------------------------------------------------
+
+		/*
+		* 
+		*  end game loop
+		* 
+		*/
 		frameTime = startTime - endTime;
 		endTime = getHighResolutionTimerCounter();
 		frameTime += (endTime - startTime);
 
-		// --------------------------------------------------------------------
-		//  frame rate governing
-		// --------------------------------------------------------------------
+
+		/*
+		* 
+		*  frame rate governing
+		* 
+		*/
 		while (frameTime <= timeHandler.getFrameTimeLimit())
 		{
 			startTime = endTime;

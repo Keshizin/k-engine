@@ -27,9 +27,12 @@
 #include <game.h>
 #include <keaux.h>
 
-// ----------------------------------------------------------------------------
-//  Point Entry Execution
-// ----------------------------------------------------------------------------
+
+/*
+* 
+*  Point Entry Execution
+* 
+*/
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	K_UNREFERENCED_PARAMETER(hInstance);
@@ -37,14 +40,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	K_UNREFERENCED_PARAMETER(lpCmdLine);
 	K_UNREFERENCED_PARAMETER(nCmdShow);
 
+	// instancing the heart of kengine! <3
 	kengine::core* engine = new kengine::core();
+
+	// this is a scene manager but probably will disapear in the near future :')
 	kengine::scene_manager* sceneManager = new kengine::scene_manager;
 
+	// adding a splash scene! do u wanna see the kengine pet?
 	size_t splashScene = sceneManager->addScene(new game::SplashScene(engine, sceneManager));
+
+	// hmm this is a example of poor design... the main loop is started here... i need to change this as soon possible!
+	// please check the "set" method from SplashScene class
 	sceneManager->setScene(splashScene);
+
+	// hmm this is another example of poor design... when the scene splash is over and main loop is stopped, we came back here magically
 	sceneManager->removeScene(splashScene);
 
+	// adding "THE GAME" scene!
 	size_t gameScene = sceneManager->addScene(new game::GameScene(engine, sceneManager));
+
+	// and here we go again !!! please check the "set" method from GameScene class
 	sceneManager->setScene(gameScene);
 
 	delete sceneManager;

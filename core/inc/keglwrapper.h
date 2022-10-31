@@ -34,15 +34,20 @@
 #include <GLEXT/wglext.h>
 #include <GLEXT/glext.h>
 
-// ----------------------------------------------------------------------------
-//  runtime function to get opengl procedures extension
-// ----------------------------------------------------------------------------
+
+/*
+* 
+*  runtime function to get opengl procedures extension
+* 
+*/
 void getProcedureAddress();
 
 
-// ----------------------------------------------------------------------------
-//  OpenGL Procedures Extension for Win32
-// ----------------------------------------------------------------------------
+/*
+* 
+*  OpenGL Procedures Extension for Win32
+* 
+*/
 extern PFNWGLSWAPINTERVALEXTPROC							wglSwapIntervalEXT;
 extern PFNGLCLEARBUFFERFVPROC								glClearBufferfv;
 extern PFNGLCREATEBUFFERSPROC								glCreateBuffers;
@@ -159,5 +164,11 @@ extern PFNGLBLENDEQUATIONSEPARATEIPROC						glBlendEquationSeparatei;
 extern PFNGLTEXTUREPARAMETERFVPROC							glTextureParameterfv;
 extern PFNGLTEXTUREPARAMETERIPROC							glTextureParameteri;
 extern PFNGLGETSTRINGIPROC									glGetStringi;
+extern PFNGLGETSUBROUTINEINDEXPROC							glGetSubroutineIndex;
+extern PFNGLUNIFORMSUBROUTINESUIVPROC						glUniformSubroutinesuiv;
+extern PFNGLUNIFORM1IPROC									glUniform1i;
+extern PFNGLUNIFORM3FVPROC									glUniform3fv;
+extern PFNGLUNIFORM3FPROC									glUniform3f;
+extern PFNGLUNIFORM1FPROC									glUniform1f;
 
 #endif

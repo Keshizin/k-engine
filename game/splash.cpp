@@ -26,41 +26,37 @@
 #include <splash.h>
 #include <keaux.h>
 #include <keraw.h>
+#include <game_constants.h>
 
-float red[] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
-// ------------------------------------------------------------------------
-//  SplashScene class
-// ------------------------------------------------------------------------
 game::SplashScene::SplashScene(kengine::core* engine, kengine::scene_manager* sceneManager)
 	: scene{ engine, sceneManager },
 	windowWidth{ 640 },
 	windowHeight{ 480 },
-	program{},
-	primProgram{},
-	node{},
-	prim{ nullptr },
-	tex{},
-	t{},
-	circlePoints{ nullptr }
+	circlePoints{ nullptr },
+	splashShader{},
+	logoNode{},
+	logoTexture{},
+	circleTimer{},
+	sceneTimer{}
 {
 }
 
 
 game::SplashScene::~SplashScene()
 {
-	delete prim;
 	delete[] circlePoints;
 }
 
 
 void game::SplashScene::set()
 {
-	if (engineHandle == nullptr)
+	if (engineHandle == nullptr || sceneManagerHandle == nullptr)
 		return;
 
 	scene::set();
 
+	// setting up window
 	engineHandle->getGameWindow()->create(
 		(MONITOR_WIDTH / 2) - (windowWidth / 2),
 		(MONITOR_HEIGHT / 2) - (windowHeight / 2),
@@ -71,16 +67,16 @@ void game::SplashScene::set()
 
 	engineHandle->setFrameRate(0);
 
+	// setting up the rendering system
 	kengine::renderingsystem* renderingSystemHandle = engineHandle->getRenderingSystem();
-
-	renderingSystemHandle->setRenderContext(kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D);
-	renderingSystemHandle->setViewingWindow(windowWidth, windowHeight, -810.0f, 810.0f, -810.0f, 810.0f, 1.0f, 1000.0f);
 	renderingSystemHandle->startup();
 	renderingSystemHandle->setBlendingTest(1);
 	renderingSystemHandle->setVSync(0);
 	renderingSystemHandle->printInfo();
 
 	engineHandle->getGameWindow()->show(SW_SHOW);
+
+	// starting the main loop
 	engineHandle->startMainLoop();
 }
 
@@ -92,51 +88,57 @@ void game::SplashScene::beforeMainLoopEvent()
 {
 	glClearColor(50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f, 1.0f); // gray background
 
-	// ---------------------------------------------------------------------------
-	//  setting the shaders
-	// ---------------------------------------------------------------------------
-
+	/*
+	*  setting up the shaders
+	*/
 	kengine::ShaderInfo shaders[] = {
-		{GL_VERTEX_SHADER, "../../../../shaders/main_vert.vert"},
-		{GL_FRAGMENT_SHADER, "../../../../shaders/main_frag.frag"},
+		{GL_VERTEX_SHADER, "../../../../shaders/main.vert"},
+		{GL_FRAGMENT_SHADER, "../../../../shaders/main.frag"},
 		{GL_NONE, ""}
 	};
 
-	kengine::ShaderInfo primShader[] = {
-		{GL_VERTEX_SHADER, "../../../../shaders/prim_vert.vert"},
-		{GL_FRAGMENT_SHADER, "../../../../shaders/prim_frag.frag"},
-		{GL_NONE, ""}
-	};
+	splashShader.loadShaders(shaders);
+	//splashShader.print();
 
-	program.loadShaders(shaders);
-	primProgram.loadShaders(primShader);
+	/*
+	*  setting up the camera
+	*/
+	cam.viewingInfo.set(windowWidth, windowHeight, -810.0f, 810.0f, -810.0f, 810.0f, 39.6f, 2.0f, 1000.0f);
+	kengine::matrix projectionMatrix = cam.getProjectionMatrix();
+	kengine::matrix viewMatrix(1);
 
-	kengine::matrix p = engineHandle->getRenderingSystem()->getProjection();
-	
-	program.useProgram();
-	program.setUniformMatrix(0, p);
-	primProgram.useProgram();
-	primProgram.setUniformMatrix(0, p);
+	splashShader.useProgram();
+	splashShader.setUniform("projectionMatrix", projectionMatrix);
+	splashShader.setUniform("viewMatrix", viewMatrix);
+	splashShader.setUniform("isTexture", 1);
 
-	// ------------------------------------------------------------------------
-	//  setting the mesh and batch rendering
-	// ------------------------------------------------------------------------
 
+	/*
+	* 
+	*  setting up the mesh and batch rendering
+	* 
+	*/
 	kengine::mesh quad = kengine::quad(1080.0f);
-	node.load(quad, TOTAL_ENTITIES);
+	logoNode.load(quad, 1);
 
 	kengine::raw_img img;
-	img.loadfile("../../../../assets/bshisa.KRAW");
-	tex.load(img, 0);
+	img.loadfile("../../../../assets/shisap.kraw");
+	logoTexture.load(img, 0);
 
-	circlePoints = new float[TOTAL_POINTS * 4];
-	kengine::fillCirclePoints(TOTAL_POINTS, circlePoints, 10.0f);
 
-	t.setTimerInMs(20);
-	t.start();
+	/*
+	* 
+	*  Setting up the timers and generate circle points for translating
+	* 
+	*/
+	circlePoints = new float[(TOTAL_POINTS + 1) * 2];
+	kengine::generateCirclePoints(TOTAL_POINTS + 1, circlePoints, 10.0f);
 
-	prim = new kengine::primitive_mesh_batch(TOTAL_POINTS * 4, kengine::PRIMITIVE_TYPE::PRIMITIVE_POINT, red);
-	prim->update(TOTAL_POINTS * 4, circlePoints);
+	circleTimer.setTimerInMs(20);
+	circleTimer.start();
+
+	sceneTimer.setTimerInMs(5000);
+	sceneTimer.start();
 }
 
 
@@ -158,30 +160,31 @@ void game::SplashScene::finishAfterEvent()
 void game::SplashScene::frameEvent(double frameTime)
 {
 	K_UNREFERENCED_PARAMETER(frameTime);
-	glClear(GL_COLOR_BUFFER_BIT);
 
-	program.useProgram();
+	if (sceneTimer.isDone())
+	{
+		engineHandle->getGameWindow()->destroy();
+	}
+
+	splashShader.useProgram();
 
 	static int point_index = 0;
 
-	if (t.isDoneAndRestart())
+	if (circleTimer.isDoneAndRestart())
 	{
-		point_index += 4;
+		point_index += 2;
 
-		if (point_index > TOTAL_POINTS * 4)
+		if (point_index > TOTAL_POINTS * 2)
 		{
 			point_index = 0;
 		}
 	}
 
 	kengine::matrix t_ = kengine::translate(circlePoints[point_index], circlePoints[point_index + 1], 0.0f);
-	node.updateModelView(TOTAL_ENTITIES, t_.value());
+	logoNode.updateModelMatrix(1, t_.value());
 
-	tex.bindTexture(1);
-	node.draw();
-
-	//primProgram.useProgram();
-	//prim->draw(TOTAL_POINTS);
+	glClear(GL_COLOR_BUFFER_BIT);
+	logoNode.drawElements();
 }
 
 

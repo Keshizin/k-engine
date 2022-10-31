@@ -23,13 +23,16 @@
 	SOFTWARE.
 */
 
+
 #ifndef K_ENGINE_AUX_H
 #define K_ENGINE_AUX_H
 
 
-// ----------------------------------------------------------------------------
-//  This macro provide std output for debug only
-// ----------------------------------------------------------------------------
+/*
+* 
+*  This macro provide std output for debug only
+* 
+*/
 #ifdef K_DEBUG
 
 	#define K_DEBUG_ERROR "(x) ERROR"
@@ -43,9 +46,12 @@
 #endif
 
 
-// ----------------------------------------------------------------------------
-//  This macro is used for avoid non-used parameter warning
-// ----------------------------------------------------------------------------
+/*
+* 
+*  This macro is used for avoid non-used parameter warning
+* 
+*/
 #define K_UNREFERENCED_PARAMETER(p) reinterpret_cast<void*>(&p)
+
 
 #endif

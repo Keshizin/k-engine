@@ -30,49 +30,49 @@
 #include <kemesh.h>
 #include <kemath.h>
 #include <keraw.h>
+#include <kelight.h>
 
 #include <string>
 
-
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	// 
-	//  (!) struct kengine::ShaderInfo
-	//
-	//	This struct is used to pass a list of shaders that can be compiled.
-	// 
-	//		- GL_VERTEX_SHADER
-	//		- GL_GEOMETRY_SHADER
-	//		- GL_TESS_EVALUATION_SHADER
-	//		- GL_TESS_CONTROL_SHADER
-	//		- GL_COMPUTE_SHADER
-	//		- GL_FRAGMENT_SHADER
-	// 
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  struct kengine::ShaderInfo
+	* 
+	*  This struct is used to pass a list of shaders that can be compiled.
+	* 
+	*		- GL_VERTEX_SHADER
+	*		- GL_GEOMETRY_SHADER
+	*		- GL_TESS_EVALUATION_SHADER
+	*		- GL_TESS_CONTROL_SHADER
+	*		- GL_COMPUTE_SHADER
+	*		- GL_FRAGMENT_SHADER
+	* 
+	*/
 	struct ShaderInfo
 	{
 		GLuint type;
 		std::string filename;
 	};
 
-
-	// ------------------------------------------------------------------------
-	// 
-	//  (!) Helper function to compile GLSL shader.
-	// 
-	// ------------------------------------------------------------------------
+	
+	/*
+	* 
+	*  Helper function to compile GLSL shader.
+	* 
+	*/
 	GLuint compileShader(GLuint shader_type, std::string filename);
+	std::string getShaderType(GLuint shader_type);
 
 
-	// ------------------------------------------------------------------------
-	// 
-	//  (!) kengine::GLSLprogram class
-	//
-	//  This class provides the basis for creating more complex shader program
-	//  that use uniform variables, uniform blocks, etc.
-	// 
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::GLSLprogram class
+	* 
+	*  This class represents a GLSL program.
+	* 
+	*/
 	class GLSLprogram
 	{
 	public:
@@ -84,57 +84,47 @@ namespace kengine
 		GLSLprogram& operator=(const GLSLprogram& copy) = delete; // copy assignment
 
 		bool loadShaders(kengine::ShaderInfo* shaders);
+
+		void setUniform(std::string name, kengine::matrix& m);
+		void setUniform(std::string name, int value);
+		void setUniform(std::string name, const kengine::phong_light& l);
+		void setUniform(std::string name, const kengine::phong_material& m);
+		void setUniform(std::string name, const kengine::lighting_model& lm);
+		void setUniform(std::string name, const kengine::toon_shading_info& tsi); // deprecated
+		void setUniform(std::string name, const kengine::fog_info& fi);
+		void setUniform(std::string name, const kengine::pbr_light& l);
+		void setUniform(std::string name, const kengine::pbr_material& m);
+
+		// the parameter size specifies the number of array elements. this should be 1 if the targeted uniform variable is not an array
+		void setUniform(std::string name, GLsizei size, float* data);
+
+		void print() const;
 		void useProgram();
 
 	protected:
 		GLuint programID;
-	};
-
-
-	// ------------------------------------------------------------------------
-	// 
-	//  (!) kengine::TransformProgram class
-	//
-	//  This class is a shader inherited from GLSLprogram that has the
-	//  following uniform variables:
-	// 
-	//		- projection view matrix (uniform matrix)
-	// 
-	// ------------------------------------------------------------------------
-	class TransformProgram : public GLSLprogram
-	{
-	public:
-		TransformProgram();
-		~TransformProgram();
-
-		TransformProgram(const TransformProgram& copy) = delete; // copy constructor
-		TransformProgram(TransformProgram&& move) = delete; // move constructor
-		TransformProgram& operator=(const TransformProgram& copy) = delete; // copy assignment
-
-		bool loadShaders(kengine::ShaderInfo* shaders);
-		void setUniformMatrix(const int location, kengine::matrix& m);
-		void print() const;
 
 	private:
-		GLint* uniformLocations;
+		std::string getType(GLint type) const;
 	};
 
 
-	// ------------------------------------------------------------------------
-	//  (!) kengine::mesh_node class
-	// 
-	//	This class is a complete storage for vertex attributes:
-	// 
-	//		- vertex positions
-	//		- vertex colors
-	//		- vertex UV coordinates
-	//		- vertex normals
-	//		- vertex indices
-	// 
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::mesh_node class
+	* 
+	*  This class is a complete storage for OpenGL vertex attributes:
+	* 
+	*		- vertex positions
+	*		- vertex colors
+	*		- vertex UV coordinates
+	*		- vertex normals
+	*		- modelview matrices
+	*		- vertex indices
+	* 
+	*/
 	class mesh_node
 	{
-		friend class instanced_mesh_node;
 		static constexpr int VBO_COUNT = 2;
 
 	public:
@@ -146,61 +136,23 @@ namespace kengine
 		mesh_node(mesh_node&& move) noexcept = delete; // move constructor
 		mesh_node& operator=(const mesh_node& copy) = delete; // copy assignment
 
-		void updateModelView(const long long int size, const float* data) const;
-		
 		void load(const kengine::mesh& m, size_t size);
-		void draw() const;
+		void updateModelMatrix(size_t size, const float* data) const;
+
 		void drawArrays() const;
-		void drawInstanced(GLsizei size) const;
+		void drawElements() const;
+		void drawArraysInstanced(GLsizei size) const;
+		void drawElementsInstanced(GLsizei size) const;
 
 	private:
 		size_t max_size;
 		GLuint vao;
 		GLuint vbo[VBO_COUNT];
 		GLsizei count;
-
 		GLsizeiptr offset_to_modelview_buffer;
 	};
 
 
-	// ------------------------------------------------------------------------
-	//  (!) kengine::instanced_uv_mesh_node class
-	// ------------------------------------------------------------------------
-	class instanced_uv_mesh_node
-	{
-		static constexpr int TOTAL_VBO = 3;
-
-	public:
-		explicit instanced_uv_mesh_node(const size_t size, const kengine::mesh& m);
-		~instanced_uv_mesh_node();
-
-		instanced_uv_mesh_node(const instanced_uv_mesh_node& copy) = delete; // copy constructor
-		instanced_uv_mesh_node(instanced_uv_mesh_node&& move) noexcept = delete; // move constructor
-		instanced_uv_mesh_node& operator=(const instanced_uv_mesh_node& copy) = delete; // copy assignment
-
-		void updateModelView(size_t size, float* modelview) const;
-		void updateUV(size_t size, float* uv) const;
-
-		void draw(int size) const;
-
-	private:
-		size_t max_size;
-		GLuint vao;
-		GLuint vbo[TOTAL_VBO];
-		GLsizei count;
-	};
-
-
-	// ---------------------------------------------------------------------------
-	// 
-	//  (!) kengine::primitive_mesh_batch class
-	//
-	//  This is a abstract opengl batch class to store and draw N primitive
-	//  objects like points, lines, quadrilaterals, and etc.
-	//
-	//  Note: max_size is a quan
-	// 
-	// ---------------------------------------------------------------------------
 	enum class PRIMITIVE_TYPE
 	{
 		PRIMITIVE_POINT,
@@ -208,18 +160,25 @@ namespace kengine
 		PRIMITIVE_LINE_LOOP,
 	};
 
-	class primitive_mesh_batch
+	/*
+	*
+	*  kengine::prim_mesh_node class
+	*
+	*/
+	class prim_mesh_node
 	{
 		static constexpr int TOTAL_VBO = 1;
 
 	public:
-		primitive_mesh_batch(const size_t size, const PRIMITIVE_TYPE primType, const float* color);
-		~primitive_mesh_batch();
+		prim_mesh_node();
+		prim_mesh_node(const size_t size, const PRIMITIVE_TYPE primType, const float* color);
+		~prim_mesh_node();
 
-		primitive_mesh_batch(const primitive_mesh_batch& copy) = delete; // copy constructor
-		primitive_mesh_batch(primitive_mesh_batch&& move) noexcept = delete; // move constructor
-		primitive_mesh_batch& operator=(const primitive_mesh_batch& copy) = delete; // copy assignment
+		prim_mesh_node(const prim_mesh_node& copy) = delete; // copy constructor
+		prim_mesh_node(prim_mesh_node&& move) noexcept = delete; // move constructor
+		prim_mesh_node& operator=(const prim_mesh_node& copy) = delete; // copy assignment
 
+		void load(const size_t size, const PRIMITIVE_TYPE primType, const float* color);
 		void setPointSize(const float pointSize);
 		void setLineWidth(const float width);
 
@@ -227,16 +186,48 @@ namespace kengine
 		void draw(int size) const;
 
 	private:
-		size_t batchSize;
-		GLenum mode;
-		GLuint vbo[TOTAL_VBO];
+		size_t max_size;
 		GLuint vao;
+		GLuint vbo[TOTAL_VBO];
+		GLenum mode;
 	};
 
 
-	// ---------------------------------------------------------------------------
-	//  kengine::texture class
-	// ---------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::instanced_uv_mesh_node class
+	* 
+	*/
+	//class instanced_uv_mesh_node
+	//{
+	//	static constexpr int TOTAL_VBO = 3;
+
+	//public:
+	//	explicit instanced_uv_mesh_node(const size_t size, const kengine::mesh& m);
+	//	~instanced_uv_mesh_node();
+
+	//	instanced_uv_mesh_node(const instanced_uv_mesh_node& copy) = delete; // copy constructor
+	//	instanced_uv_mesh_node(instanced_uv_mesh_node&& move) noexcept = delete; // move constructor
+	//	instanced_uv_mesh_node& operator=(const instanced_uv_mesh_node& copy) = delete; // copy assignment
+
+	//	void updateModelView(size_t size, float* modelview) const;
+	//	void updateUV(size_t size, float* uv) const;
+
+	//	void draw(int size) const;
+
+	//private:
+	//	size_t max_size;
+	//	GLuint vao;
+	//	GLuint vbo[TOTAL_VBO];
+	//	GLsizei count;
+	//};
+
+
+	/*
+	* 
+	*  kengine::texture class
+	* 
+	*/
 	class texture
 	{
 	public:
@@ -249,6 +240,8 @@ namespace kengine
 		texture& operator=(const texture& copy) = delete; // copy assignment
 
 		void load(const kengine::raw_img& img, GLuint textureUnit);
+		void load(const int width, const int height, const unsigned char* pixels, GLuint textureUnit);
+
 		void bindTexture(int texture);
 
 	private:
@@ -257,9 +250,11 @@ namespace kengine
 	};
 
 
-	// ---------------------------------------------------------------------------
-	//  kengine::atlas class
-	// ---------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::atlas class
+	* 
+	*/
 	class atlas
 	{
 	public:
@@ -275,37 +270,18 @@ namespace kengine
 	};
 
 
-	// ------------------------------------------------------------------------
-	//  kengine::viewing_window class
-	// ------------------------------------------------------------------------
-	class viewing_window
-	{
-	public:
-		viewing_window();
-		~viewing_window();
-
-		viewing_window(const viewing_window& copy) = delete; // copy constructor
-		viewing_window(viewing_window&& move) noexcept = delete; // move constructor
-		viewing_window& operator=(const viewing_window& copy) = delete; // copy assignment
-
-		float _near;
-		float _far;
-		kengine::rect window;
-		kengine::matrix projection;
-	};
-
-	// ---------------------------------------------------------------------------
-	//  kengine::renderingsystem class
-	// ---------------------------------------------------------------------------
 	class win32wrapper;
 
-	enum class RENDER_CONTEXT { RENDER_CONTEXT_2D, RENDER_CONTEXT_3D_ORTHO, RENDER_CONTEXT_3D_FRUSTUM };
 
+	/*
+	* 
+	*  kengine::renderingsystem class
+	* 
+	*/
 	class renderingsystem
 	{
 	public:
 		explicit renderingsystem(kengine::win32wrapper* w);
-		renderingsystem(kengine::win32wrapper* w, RENDER_CONTEXT context);
 		~renderingsystem();
 
 		renderingsystem(const renderingsystem& copy) = delete; // copy constructor
@@ -320,19 +296,11 @@ namespace kengine
 		void setCullFace(int mode) const;
 		void setDepthTest(int mode) const;
 		void setBlendingTest(int mode) const;
+		void clearBuffers() const;
 		void setViewport(int x, int y, int width, int height) const;
-		
-		void setViewingWindow(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane);
-		void setViewingWindow(int width, int height);
-		const kengine::matrix& getProjection() const;
-
-		// getters and setters
-		void setRenderContext(RENDER_CONTEXT context) { renderContext = context; }
 
 	private:
-		RENDER_CONTEXT renderContext;
 		kengine::win32wrapper* api;
-		kengine::viewing_window viewingWindow;
 	};
 }
 

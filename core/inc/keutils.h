@@ -31,9 +31,11 @@
 
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	//  método para ler arquivos de texto
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  metodo para ler arquivos de texto
+	* 
+	*/
 	std::string readFromFile(std::string filename);
 }
 

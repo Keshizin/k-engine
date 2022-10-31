@@ -28,14 +28,16 @@
 
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	//  (!) kengine::vattrib class
-	// 
-	//  Class for store vertex attributes
-	// 
-	//  Note: vertex attributes is a term used in OpenGL to represent array of
-	//        vertex data (i.e. positions, colors, uv, etc)
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::vattrib class
+	* 
+	*  Class for store vertex attributes.
+	* 
+	*  Note: "vertex attributes" is a term used in OpenGL to represent array of
+	*  vertex data (i.e. positions, colors, uv, etc).
+	* 
+	*/
 	template <typename TYPE>
 	class vattrib
 	{
@@ -151,24 +153,19 @@ namespace kengine
 		}
 	};
 
-
-	// ------------------------------------------------------------------------
-	//  (!) kengine::mesh class
-	// 
-	//  This is a container for a geometric vertex data
-	// 
-	//  Note: default constructor must be deleted to avoid unncessary copying
-	//        of data
-	// ------------------------------------------------------------------------
+	
+	/*
+	* 
+	*  kengine::mesh class
+	* 
+	*  This is a container for a geometric vertex data.
+	* 
+	*/
 	class mesh
 	{
 	public:
-		mesh() = delete;
-
-		explicit mesh(vattrib<float>& v);
-		mesh(vattrib<float>& v, vattrib<unsigned int>& i);
-
-		mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<unsigned int>& i);
+		mesh();
+		mesh(vattrib<float>& v, vattrib<float>& c, vattrib<float>& t, vattrib<float>& n, vattrib<unsigned int>& i);
 		mesh(const mesh& m); // copy constructor
 		mesh(mesh&& m) noexcept; // move constructor
 		~mesh();
@@ -178,24 +175,38 @@ namespace kengine
 		void dump() const;
 		void clear();
 
+		void setPosition(vattrib<float>& v) { position = v; }
 		const vattrib<float> * getPosition() const { return &position; }
+
+		void setColors(vattrib<float>& c) { colors = c; }
 		const vattrib<float> * getColors() const { return &colors; }
+
+		void setTexCoords(vattrib<float>& t) { texCoords = t; }
 		const vattrib<float>* getTexCoords() const { return &texCoords; }
+
+		void setNormals(vattrib<float>& n) { normals = n; }
+		const vattrib<float>* getNormals() const { return &normals; }
+
+		void setIndices(vattrib<unsigned int>& i) { indices = i; }
 		const vattrib<unsigned int> * getIndices() const { return &indices; }
 
 	private:
 		vattrib<float> position;
 		vattrib<float> colors;
 		vattrib<float> texCoords;
+		vattrib<float> normals;
 		vattrib<unsigned int> indices;
 	};
 
-	// ------------------------------------------------------------------------
-	//  functions to create basic geometric models
-	// ------------------------------------------------------------------------
+
+	/*
+	* 
+	*  functions to create basic geometric models
+	* 
+	*/
+
 	mesh triangle(float size);
 	mesh quad(float size);
-	mesh cube(float size);
 }
 
 #endif

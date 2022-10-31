@@ -32,9 +32,12 @@ namespace kengine
 {
 	class win32wrapper; // forward declaration
 
-	// ------------------------------------------------------------------------
-	//  k-engine window class
-	// ------------------------------------------------------------------------
+
+	/*
+	*
+	*  kengine::window class
+	*
+	*/
 	class window
 	{
 	public:

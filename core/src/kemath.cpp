@@ -1,5 +1,5 @@
 /*
-	K-Engine Mathematics Library
+	K-Engine Mathematic Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -28,21 +28,18 @@
 #include <keaux.h>
 
 
-// matrix memory layout
-// [  0 ] [  1 ] [  2 ] [  3 ]
-// [  4 ] [  5 ] [  6 ] [  7 ]
-// [  8 ] [  9 ] [ 10 ] [ 11 ]
-// [ 12 ] [ 13 ] [ 14 ] [ 15 ]
-
-
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::translate(float x, float y, float z)
 {
-	// translate matrix in column-major order
-	// [ 1.0 ] [ 0.0 ] [ 0.0 ] [ 0.0 ]
-	// [ 0.0 ] [ 1.0 ] [ 0.0 ] [ 0.0 ]
-	// [ 0.0 ] [ 0.0 ] [ 1.0 ] [ 0.0 ]
-	// [  x  ] [  y  ] [  z  ] [ 1.0 ]
+	/*
+	*  translate matrix in column-major order
+	* 
+	*	[ 1.0 ] [ 0.0 ] [ 0.0 ] [ 0.0 ]
+	*	[ 0.0 ] [ 1.0 ] [ 0.0 ] [ 0.0 ]
+	*	[ 0.0 ] [ 0.0 ] [ 1.0 ] [ 0.0 ]
+	*	[  x  ] [  y  ] [  z  ] [ 1.0 ]
+	* 
+	*/
 
 	kengine::matrix t(1);
 	t.m[12] = x;
@@ -99,11 +96,15 @@ kengine::matrix kengine::rotate(float x, float y, float z)
 		// convert to radians
 		x *= K_PI_TO_RADIAN;
 
-		// rotate in x axis (column-major order)
-		// [ 1.0 ] [   0.0   ] [  0.0   ] [ 0.0 ]
-		// [ 0.0 ] [  cos(x) ] [ sin(x) ] [ 0.0 ]
-		// [ 0.0 ] [ -sin(x) ] [ cos(x) ] [ 0.0 ]
-		// [ 0.0 ] [   0.0   ] [  0.0   ] [ 1.0 ]
+		/*
+		*  rotate in x axis (column-major order)
+		*
+		*	[ 1.0 ] [   0.0   ] [  0.0   ] [ 0.0 ]
+		*	[ 0.0 ] [  cos(x) ] [ sin(x) ] [ 0.0 ]
+		*	[ 0.0 ] [ -sin(x) ] [ cos(x) ] [ 0.0 ]
+		*	[ 0.0 ] [   0.0   ] [  0.0   ] [ 1.0 ]
+		*
+		*/
 
 		r.m[5] = std::cos(x);
 		r.m[6] = std::sin(x);
@@ -116,11 +117,15 @@ kengine::matrix kengine::rotate(float x, float y, float z)
 		// convert to radians
 		y *= K_PI_TO_RADIAN;
 
-		// rotate in y axis (column-major order)
-		// [ cos(y) ] [ 0.0 ] [ -sin(y) ] [ 0.0 ]
-		// [  0.0   ] [ 1.0 ] [   0.0   ] [ 0.0 ]
-		// [ sin(y) ] [ 0.0 ] [  cos(y) ] [ 0.0 ]
-		// [  0.0   ] [ 0.0 ] [   0.0   ] [ 1.0 ]
+		/*
+		*  rotate in y axis (column-major order)
+		*
+		*	[ cos(y) ] [ 0.0 ] [ -sin(y) ] [ 0.0 ]
+		*	[  0.0   ] [ 1.0 ] [   0.0   ] [ 0.0 ]
+		*	[ sin(y) ] [ 0.0 ] [  cos(y) ] [ 0.0 ]
+		*	[  0.0   ] [ 0.0 ] [   0.0   ] [ 1.0 ]
+		*
+		*/
 	
 		r.m[0] = std::cos(y);
 		r.m[2] = -std::sin(y);
@@ -132,12 +137,16 @@ kengine::matrix kengine::rotate(float x, float y, float z)
 	{
 		// convert to radians
 		z *= K_PI_TO_RADIAN;
-		
-		// rotate in z axis (column-major order)
-		// [  cos(z) ] [ sin(z) ] [ 0.0 ] [ 0.0 ]
-		// [ -sin(z) ] [ cos(z) ] [ 0.0 ] [ 0.0 ]
-		// [   0.0   ] [  0.0   ] [ 1.0 ] [ 0.0 ]
-		// [   0.0   ] [  0.0   ] [ 0.0 ] [ 1.0 ]
+
+		/*
+		*  rotate in z axis (column-major order)
+		*
+		*	[  cos(z) ] [ sin(z) ] [ 0.0 ] [ 0.0 ]
+		*	[ -sin(z) ] [ cos(z) ] [ 0.0 ] [ 0.0 ]
+		*	[   0.0   ] [  0.0   ] [ 1.0 ] [ 0.0 ]
+		*	[   0.0   ] [  0.0   ] [ 0.0 ] [ 1.0 ]
+		*
+		*/
 
 		r.m[0] = std::cos(z);
 		r.m[1] = std::sin(z);
@@ -152,11 +161,15 @@ kengine::matrix kengine::rotate(float x, float y, float z)
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::scale(float x, float y, float z)
 {
-	// scale matrix in column-major order
-	// [  x  ] [ 0.0 ] [ 0.0 ] [ 0.0 ]
-	// [ 0.0 ] [  y  ] [ 0.0 ] [ 0.0 ]
-	// [ 0.0 ] [ 0.0 ] [  z  ] [ 0.0 ]
-	// [ 0.0 ] [ 0.0 ] [ 0.0 ] [ 1.0 ]
+	/*
+	*  scale matrix in column-major order
+	*
+	*	[  x  ] [ 0.0 ] [ 0.0 ] [ 0.0 ]
+	*	[ 0.0 ] [  y  ] [ 0.0 ] [ 0.0 ]
+	*	[ 0.0 ] [ 0.0 ] [  z  ] [ 0.0 ]
+	*	[ 0.0 ] [ 0.0 ] [ 0.0 ] [ 1.0 ]
+	*
+	*/
 
 	kengine::matrix s(1);
 	s.m[0] = x;
@@ -169,14 +182,17 @@ kengine::matrix kengine::scale(float x, float y, float z)
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::frustum(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
+	/*
+	*  frustum matrix in column-major order
+	*
+	*	[   (2.0f * n) / (right - left)   ] [              0.0                ] [           0.0             ] [  0.0 ]
+	*	[              0.0                ] [   (2.0f * n) / (top - bottom)   ] [           0.0             ] [  0.0 ]
+	*	[ (right + left) / (right - left) ] [ (top + bottom) / (top - bottom) ] [    -(f + n) / (f - n)     ] [ -1.0 ]
+	*	[              0.0                ] [              0.0                ] [ -(2.0f * f * n) / (f - n) ] [  0.0 ]
+	*
+	*/
+
 	kengine::matrix p(1);
-
-	// frustum matrix in column-major order
-	// [ (2.0f * n) / (right - left)     ] [ 0.0                             ] [ 0.0                       ] [  0.0 ]
-	// [ 0.0                             ] [ (2.0f * n) / (top - bottom)     ] [ 0.0                       ] [  0.0 ]
-	// [ (right + left) / (right - left) ] [ (top + bottom) / (top - bottom) ] [ -(f + n) / (f - n)        ] [ -1.0 ]
-	// [ 0.0                             ] [  0.0                            ] [ -(2.0f * f * n) / (f - n) ] [  0.0 ]
-
 	p.m[0] = (2.0f * near) / (right - left);
 	p.m[5] = (2.0f * near) / (top - bottom);
 	p.m[8] = (right + left) / (right - left);
@@ -185,7 +201,6 @@ kengine::matrix kengine::frustum(const float left, const float right, const floa
 	p.m[11] = -1.0f;
 	p.m[14] = -(2.0f * far * near) / (far - near);
 	p.m[15] = 0.0f;
-
 	return p;
 }
 
@@ -193,6 +208,16 @@ kengine::matrix kengine::frustum(const float left, const float right, const floa
 // (!) this function set the matrix in coloumn-major order
 kengine::matrix kengine::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
+	/*
+	*  frustum matrix in column-major order
+	*
+	*	[     (2.0f) / (right - left)      ] [               0.0                ] [         0.0        ] [ 0.0 ]
+	*	[               0.0                ] [     (2.0f) / (top - bottom)      ] [         0.0        ] [ 0.0 ]
+	*	[               0.0                ] [               0.0                ] [   -2.0f / (f - n)  ] [ 0.0 ]
+	*	[ -(right + left) / (right - left) ] [ -(top + bottom) / (top - bottom) ] [ -(f + n) / (f - n) ] [ 1.0 ]
+	*
+	*/
+
 	kengine::matrix p;
 		
 	p.m[0] = 2.0f / (right - left);
@@ -207,39 +232,74 @@ kengine::matrix kengine::ortho(const float left, const float right, const float 
 }
 
 
-kengine::matrix kengine::lookAt(const vec3<float>& right, const vec3<float>& up, const vec3<float>& forward, const vec3<float>& from)
+// (!) this function set the matrix in coloumn-major order
+kengine::matrix kengine::perspective(float fovy, float aspectRatio, float near, float far)
 {
-	kengine::matrix l(1);
+	float xmax, ymax;
 
-	// look at matrix in column-major order
-	// [ rightX   ] [ rightY   ] [ rightZ   ] [  0.0 ]
-	// [ upX      ] [ upY      ] [ upZ      ] [  0.0 ]
-	// [ forwardX ] [ forwardY ] [ forwardZ ] [  0.0 ]
-	// [ fromX    ] [ fromY    ] [ fromZ    ] [  1.0 ]
+	ymax = near * tanf(fovy * static_cast<float>(M_PI) / 360.0f);
+	xmax = ymax * aspectRatio;
 
-	l.m[0] = right.x;
-	l.m[1] = right.y;
-	l.m[2] = right.z;
-
-	l.m[4] = up.x;
-	l.m[5] = up.y;
-	l.m[6] = up.z;
-
-	l.m[ 8] = forward.x;
-	l.m[ 9] = forward.y;
-	l.m[10] = forward.z;
-
-	l.m[12] = from.x;
-	l.m[13] = from.y;
-	l.m[14] = from.z;
-
-	return l;
+	return frustum(-xmax, xmax, -ymax, ymax, near, far);
 }
 
 
-// ----------------------------------------------------------------------------
-//  (!) kengine::matrix class - member class definition
-// ----------------------------------------------------------------------------
+kengine::matrix kengine::lookAt(kengine::vec3<float> eye, kengine::vec3<float> center, kengine::vec3<float> up)
+{
+	eye.z = -eye.z;
+
+	// computing forward vector
+	kengine::vec3<float> forward = center - eye;
+	forward.normalize();
+
+	// computing right vector
+	kengine::vec3<float> right = forward.crossProduct(up);
+	right.normalize();
+
+	// computing the true up vector
+	up = right.crossProduct(forward);
+	up.normalize();
+
+	kengine::matrix lookMatrix(1);
+
+	// look at matrix in column-major order and right-hand coordinate system
+	// 
+	// [ rightX ] [ upX ] [ forwardX ] [ 0.0 ]
+	// [ rightY ] [ upY ] [ forwardY ] [ 0.0 ]
+	// [ rightZ ] [ upZ ] [ forwardZ ] [ 0.0 ]
+	// [  0.0   ] [ 0.0 ] [   0.0    ] [ 1.0 ]
+
+	lookMatrix.m[0] = right.x;
+	lookMatrix.m[1] = up.x;
+	lookMatrix.m[2] = -forward.x;
+	lookMatrix.m[3] = 0.0f;
+	
+	lookMatrix.m[4] = right.y;
+	lookMatrix.m[5] = up.y;
+	lookMatrix.m[6] = -forward.y;
+	lookMatrix.m[7] = 0.0f;
+
+	lookMatrix.m[8] = right.z;
+	lookMatrix.m[9] = up.z;
+	lookMatrix.m[10] = -forward.z;
+	lookMatrix.m[11] = 0.0f;
+
+	lookMatrix.m[12] = 0.0f;
+	lookMatrix.m[13] = 0.0f;
+	lookMatrix.m[14] = 0.0f;
+	lookMatrix.m[15] = 1.0f;
+
+	kengine::matrix t = kengine::translate(-eye.x, -eye.y, -eye.z);
+
+	return lookMatrix * t;
+}
+
+
+/*
+*
+*  kengine::matrix class - member class definition
+*
+*/
 kengine::matrix::matrix()
 	: m{ new float[16] }
 {
@@ -321,10 +381,17 @@ kengine::matrix& kengine::matrix::operator=(const kengine::matrix& right)
 }
 
 
-// ----------------------------------------------------------------------------
-//  (!) function to generate circle points
-// ----------------------------------------------------------------------------
-void kengine::fillCirclePoints(int count, float* points, float offset)
+/*
+*
+*  function to generate circle points (x, y).
+*
+*  params:
+*	- count: the number of circle points.
+*	- points: the buffer where the points will be stored.
+*	- offset: the offset to x and y coordinates.
+*
+*/
+void kengine::generateCirclePoints(int count, float* points, float offset)
 {
 	float radAngle = 0.0;
 	float increment = static_cast<float>(M_PI) * 2.0f / static_cast<float>(count);
@@ -334,8 +401,7 @@ void kengine::fillCirclePoints(int count, float* points, float offset)
 	{
 		*(points + index++) = std::cos(radAngle) * offset;	// x axis
 		*(points + index++) = std::sin(radAngle) * offset;	// y axis
-		*(points + index++) = 0.0f;					// z axis
-		*(points + index++) = 1.0f;					// w (homogeneous coordinate
+		//*(points + index++) = 0.0f;							// z axis
 
 		radAngle += increment;
 	}

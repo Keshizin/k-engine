@@ -26,17 +26,18 @@
 #ifndef K_ENGINE_SPLASH_H
 #define K_ENGINE_SPLASH_H
 
-#include <game.h>
+#include <kecore.h>
 #include <ketimer.h>
 
 namespace game
 {
-	// ------------------------------------------------------------------------
-	//  SplashScene class
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  SplashScene class
+	* 
+	*/
 	class SplashScene : public kengine::scene
 	{
-		static constexpr int TOTAL_ENTITIES = 1;
 		static constexpr int TOTAL_POINTS = 16;
 
 	public:
@@ -67,13 +68,13 @@ namespace game
 	private:
 		int windowWidth;
 		int windowHeight;
-		kengine::TransformProgram program;
-		kengine::TransformProgram primProgram;
-		kengine::mesh_node node;
-		kengine::primitive_mesh_batch* prim;
-		kengine::texture tex;
-		kengine::timer t;
 		float* circlePoints;
+		kengine::GLSLprogram splashShader;
+		kengine::mesh_node logoNode;
+		kengine::texture logoTexture;
+		kengine::timer circleTimer;
+		kengine::timer sceneTimer;
+		kengine::camera cam;
 	};
 }
 

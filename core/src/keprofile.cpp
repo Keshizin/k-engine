@@ -30,10 +30,11 @@
 #include <iostream>
 #include <fstream>
 
-
-// ----------------------------------------------------------------------------
-//  kengine::profile class
-// ----------------------------------------------------------------------------
+/*
+*
+*  kengine::profile class - member class definition
+* 
+*/
 kengine::profile::profile()
 	:
 		timer{ nullptr },
@@ -135,7 +136,6 @@ bool kengine::profile::update(long long frameTimeParam)
 		framesCounter = 0;
 		frameTimeTotal = 0;
 
-		print();
 		return true;
 	}
 
@@ -143,57 +143,61 @@ bool kengine::profile::update(long long frameTimeParam)
 }
 
 
-void kengine::profile::print()
+void kengine::profile::print() const
 {
 	std::cout
-		<< "> KENGINE PROFILE"   << "\n"
-		<< "              fps: " << framesPerSecond    << "\n"
-		<< "          max fps: " << maxFramesPerSecond << "\n"
-		<< "          min fps: " << minFramesPerSecond << "\n"
-		<< "       frame time: " << frameTime          << "\n"
-		<< "   max frame time: " << maxFrameTime       << "\n"
-		<< "   min frame time: " << minFrameTime       << "\n"
-		<< "  mean frame time: " << meanFrameTime      << "\n"
+		<< "> kengine::core profile"   << "\n"
+		<< "                    fps: " << framesPerSecond    << "\n"
+		<< "                max fps: " << maxFramesPerSecond << "\n"
+		<< "                min fps: " << minFramesPerSecond << "\n"
+		<< "             frame time: " << frameTime          << "\n"
+		<< "         max frame time: " << maxFrameTime       << "\n"
+		<< "         min frame time: " << minFrameTime       << "\n"
+		<< "        mean frame time: " << meanFrameTime      << "\n"
 		<< std::endl;
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine::log class
-// ----------------------------------------------------------------------------
-kengine::log::log(size_t size)
-	: profileArray(size), index{ 0 }
+/*
+*
+*  kengine::log class - members class definition
+* 
+* ----------------------------------------------------------------------------
+*/
+
+kengine::profile_log::profile_log(size_t size)
+	: profiles(size), index{ 0 }
 {
 }
 
 
-kengine::log::~log()
+kengine::profile_log::~profile_log()
 {
 }
 
 
-void kengine::log::print()
+void kengine::profile_log::print()
 {
 	int i = 0;
 
-	for (kengine::profile p : profileArray)
+	for (const kengine::profile& p : profiles)
 	{
-		std::cout << "> LOG | profile[ " << i++ << "]: " << std::endl;
+		std::cout << "> [profile log] | frame[ " << i++ << "]: " << std::endl;
 		p.print();
 	}
 }
 
 
-void kengine::log::copy(const kengine::profile& copy)
+void kengine::profile_log::copy(const kengine::profile& copy)
 {
-	if (index < MAX_LOG_SIZE)
+	if (index < profiles.size() && index < MAX_PROFILES)
 	{
-		profileArray[index++] = copy;
+		profiles.push_back(copy);
 	}
 }
 
 
-void kengine::log::writeToFile()
+void kengine::profile_log::writeToFile()
 {
 	std::ofstream logFile("kprofile.log");
 
@@ -201,16 +205,16 @@ void kengine::log::writeToFile()
 	{
 		int i = 0;
 
-		for (auto& profile : profileArray)
+		for (const auto& p : profiles)
 		{
-			logFile << ">     LOG | profile[" << i++ << "]:" << std::endl;
-			logFile << "> PROFILE |             fps: " << profile.framesPerSecond << std::endl;
-			logFile << "> PROFILE |         max fps: " << profile.maxFramesPerSecond << std::endl;
-			logFile << "> PROFILE |         min fps: " << profile.minFramesPerSecond << std::endl;
-			logFile << "> PROFILE |      frame time: " << profile.frameTime << std::endl;
-			logFile << "> PROFILE |  max frame time: " << profile.maxFrameTime << std::endl;
-			logFile << "> PROFILE |  min frame time: " << profile.minFrameTime << std::endl;
-			logFile << "> PROFILE | mean frame time: " << profile.meanFrameTime << std::endl;
+			logFile << "> [profile log] | profile[" << i++ << "]:" << std::endl;
+			logFile << "> [profile log] |             fps: " << p.framesPerSecond << std::endl;
+			logFile << "> [profile log] |         max fps: " << p.maxFramesPerSecond << std::endl;
+			logFile << "> [profile log] |         min fps: " << p.minFramesPerSecond << std::endl;
+			logFile << "> [profile log] |      frame time: " << p.frameTime << std::endl;
+			logFile << "> [profile log] |  max frame time: " << p.maxFrameTime << std::endl;
+			logFile << "> [profile log] |  min frame time: " << p.minFrameTime << std::endl;
+			logFile << "> [profile log] | mean frame time: " << p.meanFrameTime << std::endl;
 			logFile << std::endl;
 		}
 

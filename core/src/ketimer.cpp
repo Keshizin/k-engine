@@ -28,6 +28,12 @@
 #include <keaux.h>
 
 
+
+/*
+*
+*  kengine::timer class - member class definition
+*
+*/
 kengine::timer::timer()
 	: stopTime{ 0 }, startTimer{ 0 }, stopWatch{ 0 }, isRunning{ false }
 {

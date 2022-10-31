@@ -28,19 +28,22 @@
 #include <keconstants.h>
 
 
-// ----------------------------------------------------------------------------
-//  (!) kengine::cam_navigation class - member class definition
-// ----------------------------------------------------------------------------
+/*
+*
+*  kengine::camera_navigation class - member class definition
+*
+*/
+
 kengine::camera_navigation::camera_navigation()
 	:
-		mouse_x_init{ 0 },
-		mouse_y_init{ 0 },
-		mouse_button{ -1 },
-		camera_pos_init{ 0.0f, 0.0f, 0.0f },
-		camera_rotate_init{ 0.0f, 0.0f, 0.0f },
-		sensor_rotate{ 5.0f },
-		sensor_camera{ 15.0f },
-		sensor_translate{ 3.0f }
+	mouse_x_init{ 0 },
+	mouse_y_init{ 0 },
+	mouse_active_button{ -1 },
+	rotate_init{ 1 },
+	sensor_rotate{ 5.0f }
+	//	camera_pos_init{ 0.0f, 0.0f, 0.0f },
+	//	sensor_camera{ 15.0f },
+	//	sensor_translate{ 3.0f }
 {
 }
 
@@ -50,14 +53,36 @@ kengine::camera_navigation::~camera_navigation()
 }
 
 
-void kengine::camera_navigation::set(int button, int x, int y, const kengine::vec3<float>& from, const kengine::vec3<float>& rotate)
+void kengine::camera_navigation::set(int activeButton, int x, int y)
 {
 	mouse_x_init = x;
 	mouse_y_init = y;
-	mouse_button = button;
-	camera_pos_init = from;
-	camera_rotate_init = rotate;
-	
+	mouse_active_button = activeButton;
+
+	//	mouse_button = button;
+	//	camera_pos_init = from;
+	//	camera_rotate_init = rotate;
+}
+
+
+kengine::matrix kengine::camera_navigation::update(int x, int y)
+{
+	kengine::matrix r(1);
+
+	if (mouse_active_button != -1)
+	{
+		int deltax = mouse_x_init - x;
+		int deltay = mouse_y_init - y;
+		
+		float _y = rotate_init.y - static_cast<float>(deltax) / sensor_rotate;
+		float _x = rotate_init.x - static_cast<float>(deltay) / sensor_rotate;
+
+		kengine::matrix ry = kengine::rotate(0.0f, _y, 0.0f);
+		kengine::matrix rx = kengine::rotate(_x, 0.0f, 0.0f);
+		r = ry * rx;
+	}
+
+	return r;
 }
 
 
@@ -65,112 +90,164 @@ void kengine::camera_navigation::clear()
 {
 	mouse_x_init = 0;
 	mouse_y_init = 0;
-	mouse_button = -1;
-	camera_pos_init = { 0.0f, 0.0f, 0.0f };
-	camera_rotate_init = { 0.0f, 0.0f, 0.0f };
+	mouse_active_button = -1;
+	//camera_pos_init = { 0.0f, 0.0f, 0.0f };
+	//camera_rotate_init = { 0.0f, 0.0f, 0.0f };
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine::camera class - member class definition
-// ----------------------------------------------------------------------------
-kengine::camera::camera()
-	: 
-		right{ 0.0f, 0.0f, 0.0f},
-		up{ 0.0f, 0.0f, 0.0f },
-		forward{ 0.0f, 0.0f, 0.0f },
-		from{ 0.0f, 0.0f, 0.0f },
-		viewingMatrix{ 1 }
+/*
+*
+*  kengine::viewing_info class - member class definition
+*
+*/
+kengine::viewing_info::viewing_info()
+	:
+	plane_size{ -1.0f, 1.0f, -1.0f, 1.0f },
+	window_width{ 640 },
+	window_height{ 480 },
+	near_plane{ 0.1f },
+	far_plane{ 1000.0f },
+	fovy{ 39.6f }
 {
+}
+
+
+kengine::viewing_info::~viewing_info()
+{
+}
+
+
+void kengine::viewing_info::set(int width, int height, float left, float right, float bottom, float top, float fovyParam, float nearPlane, float farPlane)
+{
+	window_width = width;
+	window_height = height;
+	plane_size.left = left;
+	plane_size.right = right;
+	plane_size.bottom = bottom;
+	plane_size.top = top;
+	near_plane = nearPlane;
+	far_plane = farPlane;
+	fovy = fovyParam;
+}
+
+
+/*
+*
+*  kengine::camera class - member class definition
+*
+*/
+kengine::camera::camera()
+	:
+	eye{ 0.0f, 0.0f, 0.0f },
+	center{ 0.0f, 0.0f, 0.0f },
+	viewingInfo{},
+	renderContext{ RENDER_CONTEXT::RENDER_CONTEXT_2D },
+	viewMatrix{ 1 },
+	navigation{ nullptr }
+{
+	navigation = new kengine::camera_navigation;
 }
 
 
 kengine::camera::~camera()
 {
+	delete navigation;
 }
 
 
-void kengine::camera::update(double frameTime)
+void kengine::camera::lookAt()
 {
-	K_UNREFERENCED_PARAMETER(frameTime);
+	viewMatrix = kengine::lookAt(eye, center, { 0.0f, 1.0f, 0.0f });
 }
 
 
-void kengine::camera::lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam)
+void kengine::camera::lookAt(kengine::vec3<float> eyeParam, kengine::vec3<float> centerParam, kengine::vec3<float> upParam)
 {
-	from = fromParam;
-	to = toParam;
-
-	// computing forward vector
-	forward = toParam - fromParam;
-	forward.normalize();
-
-	// computing right vector
-	kengine::vec3<float> temp(0.0f, 1.0f, 0.0f);
-	temp.normalize();
-	right = temp.crossProduct(forward);
-
-	// computing up vector
-	up = forward.crossProduct(right);
-
-	viewingMatrix = kengine::lookAt(right, up, forward, from);
+	eye = eyeParam;
+	center = centerParam;
+	
+	viewMatrix = kengine::lookAt(eye, center, upParam);
 }
 
 
 void kengine::camera::setNavigation(int button, int x, int y)
 {
-	navigation.set(button, x, y, from, rotate);
-}
-
-
-void kengine::camera::clearNavigation()
-{
-	navigation.clear();
+	navigation->set(button, x, y);
 }
 
 
 void kengine::camera::updateNavigation(int x, int y)
 {
-	if (navigation.mouse_button == K_MOUSE_LEFT_BUTTON)
-	{
-		float deltaX = navigation.camera_pos_init.x - static_cast<float>(x);
-		float deltaY = navigation.camera_pos_init.y - static_cast<float>(x);
+	kengine::matrix r = navigation->update(x, y);
+	viewMatrix = viewMatrix * r;
+}
 
-		rotate.y = navigation.camera_rotate_init.y - deltaX / navigation.sensor_rotate;
-		rotate.x = navigation.camera_rotate_init.x - deltaY / navigation.sensor_rotate;
 
-		setViewingMatrix();
-	}
-
-	if (navigation.mouse_button == K_MOUSE_RIGHT_BUTTON)
-	{
-		float deltaZ = navigation.camera_pos_init.y - static_cast<float>(y);
-		from.z = navigation.camera_pos_init.z + deltaZ / navigation.sensor_camera;
-
-		setViewingMatrix();
-	}
+void kengine::camera::clearNavigation()
+{
+	navigation->clear();
 }
 
 
 const kengine::matrix& kengine::camera::get() const
 {
-	return viewingMatrix;
+	return viewMatrix;
 }
 
 
-void kengine::camera::setViewingMatrix()
+kengine::matrix kengine::camera::getProjectionMatrix() const
 {
-	lookAt(from, to);
+	kengine::matrix projection(1);
 
-	kengine::matrix rx = kengine::rotate(
-		rotate.x,
-		0.0f,
-		0.0f);
+	float aspectRatio;
+	kengine::rect window = viewingInfo.plane_size;
 
-	kengine::matrix ry = kengine::rotate(
-		0.0f,
-		rotate.y,
-		0.0f);
+	if (viewingInfo.window_width <= viewingInfo.window_height)
+	{
+		aspectRatio = static_cast<float>(viewingInfo.window_height) / static_cast<float>(viewingInfo.window_width);
+		window.bottom *= aspectRatio;
+		window.top *= aspectRatio;
+	}
+	else
+	{
+		aspectRatio = static_cast<float>(viewingInfo.window_width) / static_cast<float>(viewingInfo.window_height);
+		window.left *= aspectRatio;
+		window.right *= aspectRatio;
+	}
 
-	viewingMatrix = viewingMatrix * ry * rx;
+	if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D)
+	{
+		projection = kengine::ortho(
+			window.left,
+			window.right,
+			window.bottom,
+			window.top,
+			-1.0f,
+			1.0f);
+	}
+	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_ORTHO)
+	{
+		projection = kengine::ortho(
+			window.left,
+			window.right,
+			window.bottom,
+			window.top,
+			viewingInfo.near_plane,
+			viewingInfo.far_plane);
+	}
+	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_FRUSTUM)
+	{
+		projection = kengine::perspective(viewingInfo.fovy, aspectRatio, viewingInfo.near_plane, viewingInfo.far_plane);
+
+		//projection = kengine::frustum(
+		//	window.left,
+		//	window.right,
+		//	window.bottom,
+		//	window.top,
+		//	viewingWindow._near,
+		//	viewingWindow._far);
+	}
+
+	return projection;
 }

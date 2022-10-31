@@ -37,36 +37,46 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	//  CPU's stuff
-	// ------------------------------------------------------------------------
+	/*
+	*
+	*  CPU's stuff
+	*
+	*/
 	long long getHighResolutionTimerCounter();
 	long long getHighResolutionTimerFrequency();
 
 
-	// ------------------------------------------------------------------------
-	//  message events handling (message pump)
-	// ------------------------------------------------------------------------
+	/*
+	*
+	*  message events handling (message pump)
+	*
+	*/
 	void handleSystemMessages();
 	
 
-	// --------------------------------------------------------------------
-	//  set global event handler
-	// --------------------------------------------------------------------
+	/*
+	*
+	*  set global event handler
+	*
+	*/
 	class eventhandler;
 	void setGlobalEventHandler(kengine::eventhandler* evt);
 
 
-	// ------------------------------------------------------------------------
-	//  creating new console for debug
-	// ------------------------------------------------------------------------
+	/*
+	*
+	*  creating new console for debug
+	*
+	*/
 	int createDebugConsole();
 	int closeDebugConsole();
 
 
-	// ------------------------------------------------------------------------
-	//  kengine win32 window class
-	// ------------------------------------------------------------------------
+	/*
+	*
+	*  kengine::win32wrapper class
+	*
+	*/
 	class win32wrapper
 	{
 	public:

@@ -1,5 +1,5 @@
 /*
-	K-Engine Mathematics Library
+	K-Engine Mathematic Library
 	This file is part of the K-Engine.
 
 	Copyright (C) 2022 Fabio Takeshi Ishikawa
@@ -30,45 +30,25 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+
 // (!) constant used to convert angle to radian (PI / 180º)
 #define K_PI_TO_RADIAN 0.0174532925f
 
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	//  (!) kengine::vec3 class
-	//  
-	// This class represent a mathematic vector (analytic geometry)
-	// 
-	// The vector itself indicates not only the direction of point B from A but
-	// also can be used to find the distance between A and B.
-	// 
-	// - vector's length (norm or magnitude)
-	// 
-	//		||V|| = sqrt( x^2 + y^2 + z^2 )
-	// 
-	// - a normalised vector is a vector whose length is 1. Such a vector is also
-	//   called a unit vector.
-	// 
-	//		V^ = V / ||V||
-	// 
-	// - the dot product or scalar product requires two vectors A and B and can
-	//   be seen as the projection of one vector onto the other. 
-	// 
-	//		<A,B>
-	// 
-	//   the dot product between two vectors is an extremely important and common
-	//   operation in any 3D application because the result of this operation
-	//   relates to the cosine of the angle between the two vectors.
-	// 
-	// - the cross product is also an operation on two vectors, but to the
-	//   difference of the dot product which returns a number, the cross product
-	//   returns a vector. The particularity of this operation is that the vector
-	//   resulting from the cross product is perpendicular to the other two.
-	// 
-	//		C = A x B
-	// 
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::vec3 class
+	* 
+	*  This class represent a mathematic vector (analytic geometry).
+	*
+	*		- length (norm or magnitude) - ||V|| = sqrt( x^2 + y^2 + z^2 )
+	*		- dot
+	*		- dot product (scalar product) - <A, B>
+	*		- cross product - C = A x B
+	*		- normalize (a unit vector) - V^ = V / ||V||
+	*
+	*/
 	template <typename TYPE>
 	class vec3
 	{
@@ -189,11 +169,13 @@ namespace kengine
 	};
 
 
-	// ----------------------------------------------------------------------------
-	//  (!) kengine::matrix class
-	// 
-	//  This class stores the matrix in column-major order
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::matrix class
+	* 
+	*  This class stores the 4x4 matrix in column-major order.
+	* 
+	*/
 	class matrix {
 		friend kengine::matrix translate(float x, float y, float z);
 		friend kengine::matrix rotate(float angle, float x, float y, float z);
@@ -201,7 +183,8 @@ namespace kengine
 		friend kengine::matrix scale(float x, float y, float z);
 		friend kengine::matrix frustum(const float left, const float right, const float bottom, const float top, const float near, const float far);
 		friend kengine::matrix ortho(const float left, const float right, const float bottom, const float top, const float near, const float far);
-		friend kengine::matrix lookAt(const vec3<float>& right, const vec3<float>& up, const vec3<float>& forward, const vec3<float>& from);
+		friend kengine::matrix perspective(float fovy, float aspectRatio, float near, float far);
+		friend kengine::matrix lookAt(kengine::vec3<float> eye, kengine::vec3<float> center, kengine::vec3<float> up);
 
 	public:
 		static size_t size() { return 16 * sizeof(float); }
@@ -217,14 +200,20 @@ namespace kengine
 		
 		const float * const value() { return m; }
 
+		//void inverse(float* mat);
+		//void transpose(float* mat);
+		//void inverseTranspose(float* matrix);
+
 	private:
 		float* m;
 	};
 
 
-	// ----------------------------------------------------------------------------
-	//  (!) struct for rectangle
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  struct for rectangle
+	* 
+	*/
 	typedef struct {
 		float left;
 		float right;
@@ -233,10 +222,17 @@ namespace kengine
 	} rect;
 
 
-	// ----------------------------------------------------------------------------
-	//  (!) function to generate circle points
-	// ----------------------------------------------------------------------------
-	void fillCirclePoints(int count, float *points, float offset);
+	/*
+	* 
+	*  function to generate circle points (x, y).
+	* 
+	*  params:
+	*	- count: the number of circle points.
+	*	- points: the buffer where the points will be stored.
+	*	- offset: the offset to x and y coordinates.
+	* 
+	*/
+	void generateCirclePoints(int count, float *points, float offset);
 }
 
 #endif

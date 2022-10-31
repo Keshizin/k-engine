@@ -28,16 +28,17 @@
 
 #include <kecore.h>
 
-#define MONITOR_WIDTH	2560
-#define MONITOR_HEIGHT	1080
-
 namespace game
 {
-	// ------------------------------------------------------------------------
-	//  GameScene class
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  GameScene class
+	* 
+	*/
 	class GameScene : public kengine::scene
 	{
+		static constexpr int TOTAL_ENTITIES = 350000;
+
 	public:
 		GameScene(kengine::core* engine, kengine::scene_manager* sceneManager);
 		~GameScene();
@@ -66,6 +67,10 @@ namespace game
 	private:
 		int windowWidth;
 		int windowHeight;
+		kengine::GLSLprogram gameShaders;
+		kengine::mesh_node gameObjectMesh;
+		kengine::mesh_node planeMesh;
+		kengine::camera cam;
 	};
 }
 

@@ -29,18 +29,21 @@
 #include <keeventhandler.h>
 #include <kewinapiwrapper.h>
 #include <kewindow.h>
-
 #include <ketimehandler.h>
 #include <keprofile.h>
 #include <keconstants.h>
-
 #include <kerenderingsystem.h>
+#include <kecamera.h>
 
 namespace kengine
 {
-	// ------------------------------------------------------------------------
-	//  kengine::core class
-	// ------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::core class
+	* 
+	*  This class orchestrates all core engine componentes.
+	*
+	*/
 	class core
 	{
 	public:
@@ -63,7 +66,7 @@ namespace kengine
 
 		kengine::win32wrapper* getWin32api() const { return win32api; }
 		kengine::window* const getGameWindow() const;
-		kengine::log* getProfileLog() { return &profileLog; }
+		kengine::profile_log* getProfileLog() { return &profiles; }
 		kengine::renderingsystem* getRenderingSystem() { return renderingSystem; }
 
 	private:
@@ -72,7 +75,7 @@ namespace kengine
 		kengine::win32wrapper* win32api;
 		kengine::window* gameWindow;
 		kengine::timehandler timeHandler;
-		kengine::log profileLog;
+		kengine::profile_log profiles;
 		kengine::renderingsystem* renderingSystem;
 	};
 }

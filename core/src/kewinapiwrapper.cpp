@@ -34,9 +34,11 @@
 static kengine::eventhandler* globalEventHandler = nullptr;
 
 
-// ----------------------------------------------------------------------------
-//  CPU's stuff
-// ----------------------------------------------------------------------------
+/*
+*
+*  CPU's stuff
+*
+*/
 long long kengine::getHighResolutionTimerCounter()
 {
 	LARGE_INTEGER time;
@@ -53,9 +55,11 @@ long long kengine::getHighResolutionTimerFrequency()
 }
 
 
-// ----------------------------------------------------------------------------
-//  message events handling (message pump)
-// ----------------------------------------------------------------------------
+/*
+*
+*  message events handling (message pump)
+*
+*/
 void kengine::handleSystemMessages()
 {
 	// (!) PLEASE DONT INCLUDE I/O's STUFF HERE!
@@ -74,18 +78,22 @@ void kengine::handleSystemMessages()
 }
 
 
-// ----------------------------------------------------------------------------
-//  set global event handler
-// ----------------------------------------------------------------------------
+/*
+*
+*  set global event handler
+*
+*/
 void kengine::setGlobalEventHandler(eventhandler *evt)
 {
 	globalEventHandler = evt;
 }
 
 
-// ----------------------------------------------------------------------------
-//  creating new console for debug
-// ----------------------------------------------------------------------------
+/*
+*
+*  creating new console for debug
+*
+*/
 int kengine::createDebugConsole()
 {
 	if(!AllocConsole())
@@ -121,9 +129,11 @@ int kengine::closeDebugConsole()
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine win32window class
-// ----------------------------------------------------------------------------
+/*
+*
+*  kengine::win32wrapper class - member definition class
+*
+*/
 kengine::win32wrapper::win32wrapper()
 	: hWindow{ nullptr }, hDC{ nullptr }, hRC{ nullptr }
 {
@@ -159,7 +169,7 @@ int kengine::win32wrapper::create(int x, int y, int width, int height, std::stri
 	{
 		// (!) Write the error to the LOG Component
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to register a class window: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to register a class window: " << error << "\n");
 		return 0;
 	}
 
@@ -214,14 +224,14 @@ int kengine::win32wrapper::create(int x, int y, int width, int height, std::stri
 	if (hWindow == NULL)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the window: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the window: " << error << "\n");
 
-		BOOL ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
+		BOOL ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(nullptr));
 
 		if (!ret)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n");
 		}
 
 		return 0;
@@ -236,14 +246,14 @@ int kengine::win32wrapper::destroy()
 	BOOL ret;
 	int isSuccessful = 1;
 
-	if (hRC != NULL)
+	if (hRC != nullptr)
 	{
-		ret = wglMakeCurrent(NULL, NULL);
+		ret = wglMakeCurrent(nullptr, nullptr);
 
 		if (ret == FALSE)
 		{
 			DWORD error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the rendering context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the rendering context: " << error << "\n");
 			error = 0;
 		}
 
@@ -252,46 +262,49 @@ int kengine::win32wrapper::destroy()
 		if (ret == FALSE)
 		{
 			DWORD error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n");
 			error = 0;
 		}
 
-		hRC = NULL;
+		hRC = nullptr;
 	}
 
-	if (hDC != NULL)
+	if (hDC != nullptr)
 	{
 		ret = ReleaseDC(hWindow, hDC);
 
 		if (!ret)
 		{
 			DWORD error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n");
 			error = 0;
 		}
 
-		hDC = NULL;
+		hDC = nullptr;
 	}
 
-	ret = DestroyWindow(hWindow);
-
-	if (!ret)
+	if (hWindow != nullptr)
 	{
-		// (!) Write the error to the LOG Component
-		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy a window application: " << error << "\n")
-		isSuccessful = 0;
-	}
+		ret = DestroyWindow(hWindow);
 
-	hWindow = NULL;
+		if (!ret)
+		{
+			// (!) Write the error to the LOG Component
+			DWORD error = GetLastError();
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy a window application: " << error << "\n");
+			isSuccessful = 0;
+		}
 
-	ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(NULL));
+		hWindow = nullptr;
 
-	if (!ret)
-	{
-		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n")
-		isSuccessful = 0;
+		ret = UnregisterClass(WINDOWCLASSNAME, GetModuleHandle(nullptr));
+
+		if (!ret)
+		{
+			DWORD error = GetLastError();
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister a class window: " << error << "\n");
+			isSuccessful = 0;
+		}
 	}
 
 	return isSuccessful;
@@ -304,7 +317,7 @@ int kengine::win32wrapper::show(int showType) const
 }
 
 
-//  opengl rendering's stuff
+// opengl rendering's stuff
 int kengine::win32wrapper::initializeRenderingSystem()
 {
 	int ret;
@@ -344,7 +357,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 	if(hDC == NULL)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to get device context: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to get device context: " << error << "\n");
 		return 0;
 	}
 
@@ -353,14 +366,14 @@ int kengine::win32wrapper::initializeRenderingSystem()
 	if(!PixelFormat)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to choose an pixel format: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to choose an pixel format: " << error << "\n");
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context : " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context : " << error << "\n");
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -368,7 +381,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n");
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -376,7 +389,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n");
 		}
 
 		return 0;
@@ -387,14 +400,14 @@ int kengine::win32wrapper::initializeRenderingSystem()
 	if(ret == FALSE)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to set the format pixel: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to set the format pixel: " << error << "\n");
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n");
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -402,7 +415,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n");
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -410,7 +423,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n");
 		}
 
 		return 0;
@@ -421,14 +434,14 @@ int kengine::win32wrapper::initializeRenderingSystem()
 	if(hRC == NULL)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the rendering context: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to create the rendering context: " << error << "\n");
 
 		ret = ReleaseDC(hWindow, hDC);
 
 		if(!ret)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n");
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -436,7 +449,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n");
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -444,7 +457,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n");
 		}
 
 		return 0;
@@ -455,14 +468,14 @@ int kengine::win32wrapper::initializeRenderingSystem()
 	if(ret == FALSE)
 	{
 		DWORD error = GetLastError();
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to make current the rendering context: " << error << "\n")
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to make current the rendering context: " << error << "\n");
 
 		ret = wglDeleteContext(hRC);
 
 		if(ret == FALSE)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to delete the rendering context: " << error << "\n");
 		}
 
 		ret = ReleaseDC(hWindow, hDC);
@@ -470,7 +483,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(!ret)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to release the device context: " << error << "\n");
 		}
 
 		ret = DestroyWindow(hWindow);
@@ -478,7 +491,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to destroy the window: " << error << "\n");
 		}
 
 		ret = UnregisterClass(LPCSTR("GLWNDCLASS"), GetModuleHandle(NULL));
@@ -486,7 +499,7 @@ int kengine::win32wrapper::initializeRenderingSystem()
 		if(ret == 0)
 		{
 			error = GetLastError();
-			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n")
+			K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to unregister the window class: " << error << "\n");
 		}
 
 		return 0;
@@ -502,9 +515,11 @@ int kengine::win32wrapper::swapBuffers() const
 }
 
 
-// ----------------------------------------------------------------------------
-//  Win32 Window Procedure Definition
-// ----------------------------------------------------------------------------
+/*
+* 
+*  Win32 Window Procedure Definition
+* 
+*/
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// prevent the null pointer exception!
@@ -513,9 +528,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	switch(uMsg)
 	{
-	// --------------------------------------------------------------------
 	//  WINDOW MESSAGES
-	// --------------------------------------------------------------------
 	// case WM_GETMINMAXINFO:
 		// Informações a respeito da janela (importante para múltiplos monitores)
 		// break;
@@ -573,9 +586,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	//case WM_NCDESTROY:
 		// break;
 
-	// --------------------------------------------------------------------
 	//  INPUT QUEUE MESSAGES
-	// --------------------------------------------------------------------
 	case WM_ACTIVATE:
 		if (wParam == WA_ACTIVE)
 			globalEventHandler->resumeEvent();
@@ -598,9 +609,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	// case WM_KILLFOCUS:
 		// break;
 
-	// ********************************************************************
 	//  MOUSE MESSAGES
-	// ********************************************************************
 	// case WM_NCHITTEST:
 		// break;
 
@@ -650,9 +659,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	// case WM_NCMOUSELEAVE:
 		// break;
 
-	// ********************************************************************
 	//  KEYBOARD MESSAGES
-	// ********************************************************************
 	case WM_SYSKEYDOWN:
 		globalEventHandler->keyboardSpecialEvent(wParam, 1);
 		break;
@@ -675,9 +682,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	// case WM_SYSCOMMAND:
 		// break;
 
-	// --------------------------------------------------------------------
 	//  PAINTING AND DRAWING MESSAGES
-	// --------------------------------------------------------------------
 	// case WM_NCPAINT:
 		// break;
 
@@ -687,9 +692,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	// case WM_ERASEBKGND:
 		// break;
 
-	// --------------------------------------------------------------------
 	//  DESKTOP WINDOW MANAGER (DWM) MESSAGES
-	// --------------------------------------------------------------------
 	// case WM_DWMNCRENDERINGCHANGED:
 		// break;
 		

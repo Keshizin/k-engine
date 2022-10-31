@@ -27,9 +27,12 @@
 #include <kecore.h>
 #include <keaux.h>
 
-// ----------------------------------------------------------------------------
-//  kengine::scene - member class definition
-// ----------------------------------------------------------------------------
+
+/*
+* 
+*  kengine::scene - member class definition
+* 
+*/
 kengine::scene::scene(core* engine, scene_manager* sceneManager)
 	: engineHandle{ engine }, sceneManagerHandle{ sceneManager }
 {
@@ -137,9 +140,11 @@ void kengine::scene::moveWindowEvent(int x, int y)
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine::scene_manager - member class definition
-// ----------------------------------------------------------------------------
+/*
+* 
+*  kengine::scene_manager - member class definition
+* 
+*/
 kengine::scene_manager::scene_manager()
 	: scenes{}
 {
@@ -167,7 +172,7 @@ void kengine::scene_manager::removeScene(size_t pos)
 
 	kengine::scene* s = scenes[pos];
 	//delete s;
-	scenes.erase(scenes.begin() + pos);
+	scenes.erase(scenes.begin() + static_cast<int>(pos));
 	delete s;
 
 }

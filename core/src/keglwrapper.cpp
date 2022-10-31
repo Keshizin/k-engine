@@ -26,9 +26,12 @@
 #include <keglwrapper.h>
 #include <keaux.h>
 
-// ----------------------------------------------------------------------------
-//  OpenGL Procedures Extension for Win32
-// ----------------------------------------------------------------------------
+
+/*
+*
+*  OpenGL Procedures Extension for Win32
+*
+*/
 PFNWGLSWAPINTERVALEXTPROC								wglSwapIntervalEXT = 0;
 PFNGLCLEARBUFFERFVPROC									glClearBufferfv = 0;
 PFNGLCREATEBUFFERSPROC									glCreateBuffers = 0;
@@ -145,8 +148,19 @@ PFNGLBLENDEQUATIONSEPARATEIPROC							glBlendEquationSeparatei = 0;
 PFNGLTEXTUREPARAMETERFVPROC								glTextureParameterfv = 0;
 PFNGLTEXTUREPARAMETERIPROC								glTextureParameteri = 0;
 PFNGLGETSTRINGIPROC										glGetStringi = 0;
+PFNGLGETSUBROUTINEINDEXPROC								glGetSubroutineIndex = 0;
+PFNGLUNIFORMSUBROUTINESUIVPROC							glUniformSubroutinesuiv = 0;
+PFNGLUNIFORM1IPROC										glUniform1i = 0;
+PFNGLUNIFORM3FVPROC										glUniform3fv = 0;
+PFNGLUNIFORM3FPROC										glUniform3f = 0;
+PFNGLUNIFORM1FPROC										glUniform1f = 0;
 
 
+/*
+*
+*  runtime function to get opengl procedures extension
+*
+*/
 void getProcedureAddress()
 {
 #pragma warning(disable: 4191)
@@ -267,6 +281,12 @@ void getProcedureAddress()
 	glTextureParameterfv = (PFNGLTEXTUREPARAMETERFVPROC)wglGetProcAddress("glTextureParameterfv");
 	glTextureParameteri = (PFNGLTEXTUREPARAMETERIPROC)wglGetProcAddress("glTextureParameteri");
 	glGetStringi = (PFNGLGETSTRINGIPROC)wglGetProcAddress("glGetStringi");
+	glGetSubroutineIndex = (PFNGLGETSUBROUTINEINDEXPROC)wglGetProcAddress("glGetSubroutineIndex");
+	glUniformSubroutinesuiv = (PFNGLUNIFORMSUBROUTINESUIVPROC)wglGetProcAddress("glUniformSubroutinesuiv");
+	glUniform1i = (PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i");
+	glUniform3fv = (PFNGLUNIFORM3FVPROC)wglGetProcAddress("glUniform3fv");
+	glUniform3f = (PFNGLUNIFORM3FPROC)wglGetProcAddress("glUniform3f");
+	glUniform1f = (PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f");
 
 #pragma warning(default: 4191)
 
@@ -385,8 +405,14 @@ void getProcedureAddress()
 		!glBlendEquationSeparatei &&
 		!glTextureParameterfv &&
 		!glTextureParameteri &&
-		!glGetStringi)
+		!glGetStringi &&
+		!glGetSubroutineIndex &&
+		!glUniformSubroutinesuiv &&
+		!glUniform1i &&
+		!glUniform3fv &&
+		!glUniform3f &&
+		!glUniform1f)
 	{
-		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to load GL extension: " << glGetError())
+		K_DEBUG_OUTPUT(K_DEBUG_ERROR, "It was not possible to load GL extension: " << glGetError());
 	}
 }

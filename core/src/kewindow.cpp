@@ -29,6 +29,11 @@
 #include <keaux.h>
 
 
+/*
+*
+*  kengine::window class - member class definition
+*
+*/
 kengine::window::window(kengine::win32wrapper* w)
 	: win(w), x(0), y(0), width(640), height(480), name("K-ENGINE DEFAULT NAME!"), style(K_WINDOW_DEFAULT)
 {
@@ -39,6 +44,7 @@ kengine::window::window(kengine::win32wrapper* w)
 kengine::window::~window()
 {
 	//K_DEBUG_OUTPUT(K_DEBUG_WARNING, "kengine::window destructor[" << this << "]")
+	destroy();
 }
 
 

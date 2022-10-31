@@ -24,10 +24,15 @@
 */
 
 #include <keraw.h>
-#include <fstream>
 #include <keaux.h>
+#include <fstream>
 
 
+/*
+*
+*  kengine::raw_img class - member class definition
+*
+*/
 kengine::raw_img::raw_img()
 	: width{ 0 }, height{ 0 }, pixels{ nullptr }
 {
@@ -86,9 +91,11 @@ const unsigned char* const kengine::raw_img::getPixels() const
 }
 
 
-// ----------------------------------------------------------------------------
-//  kengine::raw_mesh class
-// ----------------------------------------------------------------------------
+/*
+*
+*  function to load obj files
+*
+*/
 kengine::mesh kengine::kraw_load_obj(std::string filename)
 {
 	std::ifstream filestream(filename, std::ios::in | std::ios::binary);
@@ -99,37 +106,136 @@ kengine::mesh kengine::kraw_load_obj(std::string filename)
 		// throw std::exception("This file cannot be opened.\n");
 	}
 
-	//filestream.seekg(0, std::ios::end);
-	//std::streamoff fileSize = filestream.tellg();
-	//filestream.seekg(0, std::ios::beg);
-
 	char sign[4] = {};
 	filestream.read(sign, sizeof(sign));
 
-	// reading kengine::vattrib vertex positions!
-	size_t count;
-	filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
-	size_t arraySize;
-	filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+	unsigned char attrib_count = 0;
+	filestream.read(reinterpret_cast<char*>(&attrib_count), sizeof(unsigned char));
 
-	float* vertexPosition = new float[arraySize];
+	kengine::mesh m;
 
-	for (size_t i = 0; i < arraySize; i++)
+	size_t count = 0;
+	size_t arraySize = 0;
+	float* vertexAttribute = nullptr;
+
+
+	/*
+	* 
+	*  reading kengine::vattrib vertex positions!
+	* 
+	*/
+
+	if (attrib_count & 0x80)
 	{
-		float data = 0;
-		filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
-		vertexPosition[i] = data;
+		filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+		filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+
+		vertexAttribute = new float[arraySize];
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			float data = 0;
+			filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
+			vertexAttribute[i] = data;
+		}
+
+		kengine::vattrib<float> v = {
+			vertexAttribute,
+			arraySize,
+			count
+		};
+
+		m.setPosition(v);
+		delete[] vertexAttribute;
 	}
 
-	kengine::vattrib<float> v = {
-		vertexPosition,
-		arraySize,
-		count
-	};
+	/*
+	* 
+	*  reading kengine::vattrib vertex colors!
+	* 
+	*/
 
-	kengine::mesh m(v);
+	if (attrib_count & 0x40)
+	{ 
+		filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+		filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+		vertexAttribute = new float[arraySize];
 
-	delete[] vertexPosition;
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			float data = 0;
+			filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
+			vertexAttribute[i] = data;
+		}
+
+		kengine::vattrib<float> c = {
+			vertexAttribute,
+			arraySize,
+			count
+		};
+
+		m.setColors(c);
+		delete[] vertexAttribute;
+	}
+
+	/*
+	* 
+	*  reading kengine::vattrib texture vertices!
+	* 
+	*/
+
+	if (attrib_count & 0x20)
+	{
+		filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+		filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+		vertexAttribute = new float[arraySize];
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			float data = 0;
+			filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
+			vertexAttribute[i] = data;
+		}
+
+		kengine::vattrib<float> t = {
+			vertexAttribute,
+			arraySize,
+			count
+		};
+
+		m.setTexCoords(t);
+		delete[] vertexAttribute;
+	}
+
+
+	/*
+	* 
+	*  reading kengine::vattrib vertex normals!
+	* 
+	*/
+
+	if (attrib_count & 0x10)
+	{
+		filestream.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+		filestream.read(reinterpret_cast<char*>(&arraySize), sizeof(size_t));
+		vertexAttribute = new float[arraySize];
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			float data = 0;
+			filestream.read(reinterpret_cast<char*>(&data), sizeof(float));
+			vertexAttribute[i] = data;
+		}
+
+		kengine::vattrib<float> n = {
+			vertexAttribute,
+			arraySize,
+			count
+		};
+
+		m.setNormals(n);
+		delete[] vertexAttribute;
+	}
 
 	return m;
 }

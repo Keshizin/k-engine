@@ -32,9 +32,12 @@
 
 namespace kengine
 {
-	// ----------------------------------------------------------------------------
-	//  (!) kengine::camera_navigation class
-	// ----------------------------------------------------------------------------
+	/*
+	* 
+	*  kengine::camera_navigation class
+	* 
+	*  (!) not finished yet
+	*/
 	class camera_navigation
 	{
 		friend class camera;
@@ -47,27 +50,72 @@ namespace kengine
 		camera_navigation(camera_navigation&& move) noexcept = delete; // move constructor
 		camera_navigation& operator=(const camera_navigation& copy) = delete; // copy assignment
 
-		void set(int button, int x, int y, const kengine::vec3<float>& from, const kengine::vec3<float>& rotate);
+		void set(int activeButton, int x, int y);
+		kengine::matrix update(int x, int y);
 		void clear();
 		
 	private:
 		int mouse_x_init;
 		int mouse_y_init;
-		int mouse_button;
+		int mouse_active_button;
 
-		kengine::vec3<float> camera_pos_init;
-		kengine::vec3<float> camera_rotate_init;
-
+		kengine::vec3<float> rotate_init;
 		float sensor_rotate;
-		float sensor_camera;
-		float sensor_translate;
+
+		//kengine::vec3<float> camera_pos_init;
+		//float sensor_camera;
+		//float sensor_translate;
 	};
 
 
-	// ------------------------------------------------------------------------
-	//  (!) kengine::camera class
-	// ------------------------------------------------------------------------
-	class camera : public kengine::entity
+	/*
+	*
+	*  Enum for render context
+	*
+	*/
+	enum class RENDER_CONTEXT
+	{
+		RENDER_CONTEXT_2D,
+		RENDER_CONTEXT_3D_ORTHO,
+		RENDER_CONTEXT_3D_FRUSTUM
+	};
+
+
+	/*
+	*
+	*  kengine::viewing_info class
+	* 
+	*  This class define the properties for the following viewing models:
+	*	- perspective viewing model
+	*	- orthographic viewing model
+	*/
+	class viewing_info
+	{
+	public:
+		viewing_info();
+		~viewing_info();
+
+		viewing_info(const viewing_info& copy) = delete; // copy constructor
+		viewing_info(viewing_info&& move) noexcept = delete; // move constructor
+		viewing_info& operator=(const viewing_info& copy) = delete; // copy assignment
+
+		void set(int width, int height, float left, float right, float bottom, float top, float fovyParam, float nearPlane, float farPlane);
+
+		kengine::rect plane_size;
+		int window_width;
+		int window_height;
+		float near_plane;
+		float far_plane;
+		float fovy; // field of view in Y axis for perspective use
+	};
+
+
+	/*
+	* 
+	*  kengine::camera class
+	* 
+	*/
+	class camera
 	{
 	public:
 		camera();
@@ -77,27 +125,24 @@ namespace kengine
 		camera(camera&& move) noexcept = delete; // move constructor
 		camera& operator=(const camera& copy) = delete; // copy assignment
 
-		void update(double frameTime);
-		void lookAt(kengine::vec3<float> fromParam, kengine::vec3<float> toParam);
+		void lookAt();
+		void lookAt(kengine::vec3<float> eyeParam, kengine::vec3<float> centerParam, kengine::vec3<float> upParam);
 
 		void setNavigation(int button, int x, int y);
-		void clearNavigation();
 		void updateNavigation(int x, int y);
+		void clearNavigation();
 		
 		const kengine::matrix& get() const;
-		void setViewingMatrix();
+		kengine::matrix getProjectionMatrix() const;
+
+		kengine::vec3<float> eye; // camera position
+		kengine::vec3<float> center; // camera looking at position
+		kengine::viewing_info viewingInfo;
+		RENDER_CONTEXT renderContext;
 
 	private:
-		kengine::vec3<float> right;		// x-xis
-		kengine::vec3<float> up;		// y-axis
-		kengine::vec3<float> forward;	// z-axis
-		kengine::vec3<float> from;		// camera position
-		kengine::vec3<float> to;		// camera looking at position
-		kengine::vec3<float> rotate;	// camera rotate
-
-		kengine::matrix viewingMatrix;	// camera matrix for linear transformation
-
-		camera_navigation navigation;
+		kengine::matrix viewMatrix; // camera matrix for linear transformation
+		camera_navigation* navigation;
 	};
 }
 

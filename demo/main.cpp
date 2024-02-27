@@ -24,9 +24,10 @@
 */
 
 #include <core.hpp>
+#include <iostream>
 
 int main()
 {
-	kengine::hello_kengine();
+	std::cout << kengine::version() << std::endl;
 	return 0;
 }

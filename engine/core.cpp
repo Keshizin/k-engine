@@ -24,9 +24,7 @@
 */
 
 #include <core.hpp>
-#include <iostream>
 
 void kengine::hello_kengine()
 {
-	std::cout << "hello k-engine!" << std::endl;
 }

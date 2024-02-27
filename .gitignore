@@ -1,3 +1,4 @@
 # Ignoring Microsoft Visual Studio Stuff
 .vs
 out/
+*.json

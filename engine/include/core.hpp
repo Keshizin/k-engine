@@ -26,6 +26,8 @@
 #ifndef K_ENGINE_CORE_HPP
 #define K_ENGINE_CORE_HPP
 
+#include <k_version.hpp>
+
 namespace kengine
 {
 	void hello_kengine();

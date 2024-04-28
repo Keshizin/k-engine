@@ -1,6 +1,6 @@
 /*
-	K-Engine Demonstration
-	This file provide a template for a game created with K-Engine.
+	K-Engine profiling
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
 
@@ -23,24 +23,58 @@
 	SOFTWARE.
 */
 
-#include <demo.hpp>
+#include <profile.hpp>
 #include <iostream>
 
-int main()
+kengine::profile::profile(int  s)
+	:
+	timer{ 1000 }, // one second timer
+	frameTimes{},
+	framesPerSeconds{},
+	framesPerSecond{0},
+	frameCounter{ 0 },
+	max_size{ s }
 {
-	std::cout << "> Welcome to K-Engine Game Engine! v" << kengine::version() << std::endl;
-	kengine::infoType();
+}
 
-	kengine::core engine;
-	game::demo scene(&engine);
+void kengine::profile::init()
+{
+	frameTimes.clear();
+	framesPerSeconds.clear();
+	frameCounter = 0;
+	timer.start();
+}
 
-	auto gameWindow = engine.getWindow();
+int kengine::profile::update(int64_t frameTime)
+{
+	frameTimes.push_back(frameTime);
+	frameCounter++;
 
-	gameWindow->create(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version(), kengine::WINDOW_STYLE::DEFAULT);
-	gameWindow->show(kengine::WINDOW_SHOW_TYPE::SHOW);
+	if (timer.doneAndRestart())
+	{
+		framesPerSeconds.push_back(frameCounter);
+		frameCounter = 0;
+		frameTimes.push_back(-1);
+		return 1;
+	}
 
-	scene.start();
-
-	std::cout << "> End of K-Engine Game Engine!" << std::endl;
 	return 0;
+}
+
+int kengine::profile::size() const
+{
+	return max_size;
+}
+
+void kengine::profile::print() const
+{
+	for (size_t index = 0; index < frameTimes.size(); index++)
+	{
+		std::cout << "[" << index << "] frame time : " << std::fixed << frameTimes[index] << std::endl;
+	}
+
+	for (size_t index = 0; index < framesPerSeconds.size(); index++)
+	{
+		std::cout << "[" << index << "] FPS : " << std::fixed << framesPerSeconds[index] << std::endl;
+	}
 }

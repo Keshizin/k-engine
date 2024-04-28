@@ -1,6 +1,6 @@
 /*
-	K-Engine Demonstration
-	This file provide a template for a game created with K-Engine.
+	K-Engine constants header
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
 
@@ -23,24 +23,29 @@
 	SOFTWARE.
 */
 
-#include <demo.hpp>
-#include <iostream>
+#ifndef K_ENGINE_CONSTANTS_HPP
+#define K_ENGINE_CONSTANTS_HPP
 
-int main()
+namespace kengine
 {
-	std::cout << "> Welcome to K-Engine Game Engine! v" << kengine::version() << std::endl;
-	kengine::infoType();
+	/*
+		Enum for mouse input in the OS events handling (message pumps)
+	*/
+	enum MOUSE_BUTTON
+	{
+		LEFT = 0,
+		MIDDLE,
+		RIGHT
+	};
 
-	kengine::core engine;
-	game::demo scene(&engine);
-
-	auto gameWindow = engine.getWindow();
-
-	gameWindow->create(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version(), kengine::WINDOW_STYLE::DEFAULT);
-	gameWindow->show(kengine::WINDOW_SHOW_TYPE::SHOW);
-
-	scene.start();
-
-	std::cout << "> End of K-Engine Game Engine!" << std::endl;
-	return 0;
+	/*
+		Enum for mouse input in the OS events handling (message pumps)
+	*/
+	enum class MOUSE_ACTION
+	{
+		DOWN = 0,
+		UP
+	};
 }
+
+#endif

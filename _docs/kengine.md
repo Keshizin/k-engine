@@ -9,3 +9,6 @@ Aqui você encontrará todas as ideias de design e uma lista com todas as refer�
 ## Table of Contents
 
 - [Building](building.md)   
+- [Win32 Issues](win32_issues.md)
+
+## K-Engine Architecture

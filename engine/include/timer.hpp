@@ -1,6 +1,6 @@
 /*
-	K-Engine Demonstration
-	This file provide a template for a game created with K-Engine.
+	K-Engine Timer Class
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
 
@@ -23,24 +23,32 @@
 	SOFTWARE.
 */
 
-#include <demo.hpp>
-#include <iostream>
+#ifndef K_ENGINE_TIMER_HPP
+#define K_ENGINE_TIMER_HPP
 
-int main()
+namespace kengine
 {
-	std::cout << "> Welcome to K-Engine Game Engine! v" << kengine::version() << std::endl;
-	kengine::infoType();
+	/*
+		kengine::timer class
+	*/
+	class timer
+	{
+	public:
+		timer();
+		explicit timer(long long stopTimeInMs);
 
-	kengine::core engine;
-	game::demo scene(&engine);
+		void start();
+		int done();
+		int doneAndRestart();
 
-	auto gameWindow = engine.getWindow();
+		void setTimerInMs(long long stopTimeInMs);
+		void stop();
 
-	gameWindow->create(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version(), kengine::WINDOW_STYLE::DEFAULT);
-	gameWindow->show(kengine::WINDOW_SHOW_TYPE::SHOW);
-
-	scene.start();
-
-	std::cout << "> End of K-Engine Game Engine!" << std::endl;
-	return 0;
+	private:
+		long long stopTime;
+		long long startTimer;
+		long long stopWatch;
+	};
 }
+
+#endif

@@ -32,7 +32,7 @@
 		- platform
 
 	Notes:
-		- The build types are [release] or [debug]
+		- The build types are [Release] or [Debug]
 		- Platforms are [windows], [linux], and [android]
 */
 

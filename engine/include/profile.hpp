@@ -1,6 +1,6 @@
 /*
-	K-Engine Demonstration
-	This file provide a template for a game created with K-Engine.
+	K-Engine profiling
+	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
 
@@ -23,24 +23,33 @@
 	SOFTWARE.
 */
 
-#include <demo.hpp>
-#include <iostream>
+#ifndef K_ENGINE_PROFILE_HPP
+#define K_ENGINE_PROFILE_HPP
 
-int main()
+#include <timer.hpp>
+#include <vector>
+#include <cstdint>
+
+namespace kengine
 {
-	std::cout << "> Welcome to K-Engine Game Engine! v" << kengine::version() << std::endl;
-	kengine::infoType();
+	class profile
+	{
+	public:
+		profile(int size);
 
-	kengine::core engine;
-	game::demo scene(&engine);
+		void init();
+		int update(int64_t frameTime);
+		void print() const;
+		int size() const;
 
-	auto gameWindow = engine.getWindow();
-
-	gameWindow->create(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version(), kengine::WINDOW_STYLE::DEFAULT);
-	gameWindow->show(kengine::WINDOW_SHOW_TYPE::SHOW);
-
-	scene.start();
-
-	std::cout << "> End of K-Engine Game Engine!" << std::endl;
-	return 0;
+	private:
+		kengine::timer timer;
+		std::vector<int64_t> frameTimes;
+		std::vector<int> framesPerSeconds;
+		int framesPerSecond;
+		int frameCounter;
+		int max_size;
+	};
 }
+
+#endif

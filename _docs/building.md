@@ -1,19 +1,22 @@
 # Building K-Engine!
 
-## Pre-requisites
+Pre-requisites:
+
+- MSVC 2019 or greater for MS Windows
+- GCC compiler for Linux
 - CMake
-- Lua 5.4.6
+- Lua (binaries included with this project)
 
-## Sistema de Building
+## Building System
 
-O projeto K-Engine possui o seu próprio **CMAKE** permitindo que o projeto possa ser compilado para as plataformas **Microsoft Windows** e **Linux** (e, futuramente, para **Android**) e também para permitir configurações específicas do projeto.
+O projeto K-Engine possui o seu próprio **CMAKE** para as plataformas **Microsoft Windows** e **Linux** (e, futuramente, para **Android**) que permite realizar configurações específicas do projeto.
 
 Para cada plataforma existem scripts para realizar build do projeto.
 
-- ```build/win/win-build.bat```
-- ```build/linux/linux-build.sh```
+- ```build/win/win-build.bat [Release or Debug]```
+- ```build/linux/linux-build.sh [Release or Debug]```
 
-Estes scripts, além de executar o comando **cmake** e **make** para cada plataforma, atualiza o também arquivo de versões ```k_version.hpp``` com informações de build.
+Estes scripts, além de executar o comando **cmake** e **make** para cada plataforma, atualiza também o arquivo de versões ```k_version.hpp``` com informações de build.
 
 > **Nota**: o script executa um programa _Lua_ (```build/auto-increment.lua```) para atualizar o arquivo de versão ```k_version.hpp```. O projeto também disponibiliza o interpretador **Lua** para ambientes de desenvolvimento Microsoft Windows e Linux.
 
@@ -59,7 +62,7 @@ Ideias iniciais de pipeline de building para incrementar a versão automaticamen
   - commit (git)
   - pull request
 
-Este processo de building gera a nova versão no arquivo ```engine/include/k_version.hpp```.
+Este processo de building gera uma nova versão no arquivo ```engine/include/k_version.hpp```.
 
 - https://semver.org/
 - https://stackoverflow.com/questions/5007707/versioning-with-an-automatic-build-system

@@ -1,5 +1,5 @@
 /*
-	K-Engine Core
+	K-Engine Timer Class
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
@@ -23,54 +23,61 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_CORE_HPP
-#define K_ENGINE_CORE_HPP
-
-#include <k_version.hpp>
+#include <timer.hpp>
 #include <os_api_wrapper.hpp>
-#include <events_callback.hpp>
 
-namespace kengine
+kengine::timer::timer()
+	:
+	stopTime{ 0 },
+	startTimer{ 0 },
+	stopWatch{ 0 }
 {
-	/*
-		k-engine runtime states
-	*/
-	enum class K_RUNTIME_STATE
-	{
-		RUNNING,
-		STOPPED,
-		PAUSED
-	};
-
-	/*
-		kengine::core class orchestrates all core engine components
-	*/
-	class core
-	{
-	public:
-		core();
-		explicit core(events_callback* eventsCallback);
-		~core();
-
-		void startMainLoop();
-		void stopMainLoop();
-		void pauseGameLoop();
-		void resumeGameLoop();
-
-		void setEventsCallback(events_callback* eventsCallback);
-
-		os_window* getWindow() { return &window; };
-
-	private:
-		K_RUNTIME_STATE mainLoopState;
-		events_callback* userEventsCallback;
-		os_window window;
-	};
-
-	/*
-		Print platform data type sizes
-	*/
-	void infoType();
 }
 
-#endif
+kengine::timer::timer(long long stopTimeInMs)
+	:
+	stopTime{ stopTimeInMs * (kengine::getHighResolutionTimerFrequency() / 1000) },
+	startTimer{ 0 },
+	stopWatch{ 0 }
+{
+}
+
+void kengine::timer::start()
+{
+	stopWatch = stopTime;
+	startTimer = getHighResolutionTimerCounter();
+}
+
+int kengine::timer::done()
+{
+	long long internalTimer = getHighResolutionTimerCounter();
+
+	if ((internalTimer - startTimer) >= stopTime)
+		return 1;
+	else
+		return 0;
+}
+
+void kengine::timer::stop()
+{
+	stopWatch = 0;
+}
+
+int kengine::timer::doneAndRestart()
+{
+	long long internalTimer = getHighResolutionTimerCounter();
+
+	if (internalTimer - startTimer >= stopWatch)
+	{
+		// (!) dont put code before the next instruction!
+		stopWatch += stopTime;
+		return 1;
+	}
+	else
+		return 0;
+}
+
+void kengine::timer::setTimerInMs(long long stopTimeInMs)
+{
+	stopTime = stopTimeInMs * (getHighResolutionTimerFrequency() / 1000); // convert from milliseconds to perfomance counter (high resolution < 1us)
+}

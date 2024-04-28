@@ -6,8 +6,15 @@ file (GLOB SOURCE "*.cpp")
 
 add_executable(${APPNAME} ${SOURCE})
 
-target_link_libraries(${APPNAME} ${LIBNAME})
+set_target_properties(${APPNAME} PROPERTIES WIN32_EXECUTABLE $<CONFIG:Release>)
+
+if(UNIX)
+	target_link_libraries(${APPNAME} ${LIBNAME} X11 GL GLU)
+else()
+	target_link_libraries(${APPNAME} ${LIBNAME})
+endif()
 
 target_include_directories(${APPNAME} PUBLIC
 	"${PROJECT_SOURCE_DIR}/engine/include"
+	"${PROJECT_SOURCE_DIR}/demo"
 )

@@ -4,9 +4,25 @@
 
 The main motivation for this project is to study game engine architectures and its technologies, as well as understand other fields of game development and computer science in a deeper way.
 
-## Getting Starting
+## Building the project
 
-## How to use K-Engine!
+How to build for MSVC:
+
+```
+  > cd build/win
+  win-build.bat [Release or Debug]
+```
+
+How to build for GCC:
+
+```
+  $ cd build/linux
+  $ linux-build.sh [Release or Debug]
+```
+
+For more details, check [Building](_docs/building.md)   
+
+## Getting Starting
 
 ## License
 

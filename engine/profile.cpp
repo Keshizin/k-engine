@@ -24,57 +24,103 @@
 */
 
 #include <profile.hpp>
-#include <iostream>
+#include <os_api_wrapper.hpp>
 
-kengine::profile::profile(int  s)
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <ctime>
+
+kengine::profile::profile()
 	:
 	timer{ 1000 }, // one second timer
-	frameTimes{},
-	framesPerSeconds{},
-	framesPerSecond{0},
+	framesPerSecond{},
+	meanFrameTime{ 0.0 },
+	maxFrameTime{ 0 },
+	minFrameTime{ 0 },
+	maxFramesPerSecond{ 0 },
+	minFramesPerSecond{ 0 },
 	frameCounter{ 0 },
-	max_size{ s }
+	totalFrameTime{ 0 },
+	isProfilingEnd{ false }
 {
 }
 
 void kengine::profile::init()
 {
-	frameTimes.clear();
-	framesPerSeconds.clear();
+	framesPerSecond.clear();
+	meanFrameTime = 0.0;
+	maxFrameTime = 0;
+	minFrameTime = 0;
+	maxFramesPerSecond = 0;
+	minFramesPerSecond = 0;
 	frameCounter = 0;
+	totalFrameTime = 0;
+	isProfilingEnd = false;
 	timer.start();
 }
 
-int kengine::profile::update(int64_t frameTime)
+void kengine::profile::end()
 {
-	frameTimes.push_back(frameTime);
+	isProfilingEnd = true;
+}
+
+void kengine::profile::update(int64_t frameTime)
+{
+	if (isProfilingEnd)
+		return;
+
+	//std::cout << "frametime: " << frameTime << std::endl;
 	frameCounter++;
+	totalFrameTime += frameTime;
+
+	if (frameTime > maxFrameTime)
+		maxFrameTime = frameTime;
+
+	if (!minFrameTime || frameTime < minFrameTime)
+		minFrameTime = frameTime;
 
 	if (timer.doneAndRestart())
 	{
-		framesPerSeconds.push_back(frameCounter);
+		framesPerSecond.push_back(frameCounter);
+		
+		if (frameCounter > maxFramesPerSecond)
+			maxFramesPerSecond = frameCounter;
+
+		if (frameCounter < minFramesPerSecond)
+			minFramesPerSecond = frameCounter;
+
+		if (!minFramesPerSecond || frameCounter < minFramesPerSecond)
+			minFramesPerSecond = frameCounter;
+
+		meanFrameTime = static_cast<double>(totalFrameTime) / frameCounter;
+		totalFrameTime = 0;
+
+		std::cout << "> FPS: " << frameCounter << std::endl;
 		frameCounter = 0;
-		frameTimes.push_back(-1);
-		return 1;
 	}
-
-	return 0;
 }
 
-int kengine::profile::size() const
+void kengine::profile::save() const
 {
-	return max_size;
-}
+	std::ofstream logFile;
 
-void kengine::profile::print() const
-{
-	for (size_t index = 0; index < frameTimes.size(); index++)
+	logFile.open("profile.txt");
+
+	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+	logFile << "> K-Engine Profile LOG - " << std::ctime(&currentTime) << std::endl;
+	logFile << "> CLOCK FREQUENCY: " << kengine::getHighResolutionTimerFrequency() << std::endl;;
+	logFile << "> MEAN FRAMETIME: " << meanFrameTime << std::endl;
+	logFile << "> MAX FRAMETIME: " << maxFrameTime << std::endl;
+	logFile << "> MIN FRAMETIME: " << minFrameTime << "\n" << std::endl;
+	logFile << "> MAX FRAMES PER SECOND: " << maxFramesPerSecond << std::endl;
+	logFile << "> MIN FRAMES PER SECOND: " << minFramesPerSecond << "\n" << std::endl;
+	
+	for (auto fps : framesPerSecond)
 	{
-		std::cout << "[" << index << "] frame time : " << std::fixed << frameTimes[index] << std::endl;
+		logFile << "- FPS: " << fps << std::endl;
 	}
 
-	for (size_t index = 0; index < framesPerSeconds.size(); index++)
-	{
-		std::cout << "[" << index << "] FPS : " << std::fixed << framesPerSeconds[index] << std::endl;
-	}
+	logFile.close();
 }

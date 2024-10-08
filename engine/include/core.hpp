@@ -52,6 +52,11 @@ namespace kengine
 		explicit core(events_callback* eventsCallback);
 		~core();
 
+		core(const core& copy) = delete; // copy constructor
+		core& operator=(const core& copy) = delete; // copy assignment
+		core(core&& move) noexcept = delete;  // move constructor
+		core& operator=(core&&) = delete; // move assigment
+
 		void startMainLoop();
 		void stopMainLoop();
 		void pauseGameLoop();
@@ -59,18 +64,15 @@ namespace kengine
 
 		void setEventsCallback(events_callback* eventsCallback);
 
-		os_window* getWindow() { return &window; };
-
 	private:
 		K_RUNTIME_STATE mainLoopState;
 		events_callback* userEventsCallback;
-		os_window window;
 	};
 
 	/*
 		Print platform data type sizes
 	*/
-	void infoType();
+	std::string infoType();
 }
 
 #endif

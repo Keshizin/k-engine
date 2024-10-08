@@ -33,6 +33,8 @@
 
 namespace kengine
 {
+	class window; // forward declaration
+
 	/*
 		This is an abstract class that contains user's callback methods that will be called by the kengine core.
 	*/
@@ -53,14 +55,14 @@ namespace kengine
 		virtual void update(int64_t frameTime) = 0;
 
 		/*
-			Callback event called before the finish event starts
+			Callback event called when the user clicks the window's close button
 		*/
-		virtual void beforeFinishEvent() = 0;
+		virtual void closeButtonEvent() = 0;
 
 		/*
-			Callback event called after the finish event ends
+			Callback event called when the apllication is being terminated
 		*/
-		virtual void afterFinishEvent() = 0;
+		virtual void onFinishEvent() = 0;
 
 		/*
 			Callback event called when the window is activated
@@ -68,7 +70,7 @@ namespace kengine
 		virtual void onResumeEvent() = 0;
 
 		/*
-			Callback event called when the window is deactivated
+			Callback event called when the window is deactivated (e.g. minimized window)
 		*/
 		virtual void onPauseEvent() = 0;
 
@@ -101,6 +103,16 @@ namespace kengine
 			Callback event called on special keyboard keys event like shift, ctrl, etc
 		*/
 		virtual void onKeyboardSpecialEvent(unsigned long long key, int state) = 0;
+
+		/*
+			Callback event called when the window is ready for use (e.g. ANativeWindow (Android plaform) is created implicitly)
+		*/
+		virtual void onWindowReady(window* window) = 0;
+
+		/*
+			Callback event called when the window is being destroyed
+		*/
+		virtual void onWindowDestroy() = 0;
 
 		/*
 			Callback event for debug message

@@ -7,6 +7,12 @@ Para evitar conflitos de nomes, é melhor utilizar ```_WIN32``` em vez de ```WIN
 - ```WIN32``` is defined by the SDK or build environment
 - ```_WIN32``` is defined by the compiler
 
+```
+  #ifdef _WIN32
+    // your WIN32 API code here
+  #endif
+```
+
 Referências:
   - https://stackoverflow.com/questions/662084/whats-the-difference-between-the-win32-and-win32-defines-in-c
   - https://sourceforge.net/p/predef/wiki/OperatingSystems/
@@ -61,6 +67,22 @@ Referências:
 - https://cmake.org/cmake/help/latest/prop_tgt/WIN32_EXECUTABLE.html#prop_tgt:WIN32_EXECUTABLE
 - https://stackoverflow.com/questions/18709403/winmain-vs-main-c
 - https://stackoverflow.com/questions/15543571/allocconsole-not-displaying-cout
+
+# Inclusão de WIN32_LEAN_AND_MEAN para remover os warnings de compilação para MSVC 2019
+
+A constante ```WIN32_LEAN_AND_MEAN``` foi introduzida para remover headers dentro do arquivo windows.h diminuindo o seu tamanho e aumentando a velocidade de compilação. Para obter mais detalhes de quais headers são removidos, basta verificar o arquivo windows.h e procurar pela constante ```WIN32_LEAN_AND_MEAN```.
+Além disso, a constante remove diversos warnings no processo de compilação.
+
+```
+  #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
+```
+
+FonteS: https://devblogs.microsoft.com/oldnewthing/20091130-00/?p=15863#:~:text=The%20WIN32_LEAN_AND_MEAN%20symbol%20was%20introduced,a%20look%20at%20your%20windows.&text=The%20symbol%20was%20added%20as,Windows%20to%2032%2Dbit%20Windows.
+
+# Diferenças de nomes para windows.h
+
+Fonte: https://stackoverflow.com/questions/15466613/lowercase-windows-h-and-uppercase-windows-h-difference#:~:text=3%20Answers&text=There%20is%20no%20difference%2C%20and,(NTFS)%20are%20case%20insensitive.&text=Note%20that%20both%20modes%20preserve,to%20locate%20an%20existing%20file.
 
 
 ## Ordem de eventos das mensagens em MS Windows
@@ -135,3 +157,16 @@ Referências:
 # Quiting application
 
 The application must be destroy the Window before terminate the application. Error, unregisterWindow in Win32 because the windows was not destroyed
+
+
+# OpenGL in MS Windows platform
+
+On Windows, including Windows.h before including GL.h is required.
+
+```
+  #include <windows.h>
+  #include <GL/gl.h>
+```
+
+Reference:
+- https://stackoverflow.com/questions/75948278/why-is-windows-h-required-for-the-use-of-opengl-functions

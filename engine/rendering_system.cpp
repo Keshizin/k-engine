@@ -1,5 +1,5 @@
 /*
-	K-Engine profiling
+	K-Engine Rendering System
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
@@ -23,37 +23,55 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_PROFILE_HPP
-#define K_ENGINE_PROFILE_HPP
+#include <rendering_system.hpp>
+#include <os_api_wrapper.hpp>
 
-#include <timer.hpp>
-#include <vector>
-#include <cstdint>
+#include <cassert>
 
-namespace kengine
+/*
+	kengine::rendering_system class - member class definition
+*/
+
+kengine::rendering_system::rendering_system()
+	: type{ RENDERING_TYPE::OPENGL }
 {
-	class profile
-	{
-	public:
-		explicit profile();
-
-		void init();
-		void end();
-		void update(int64_t frameTime);
-		void save() const;
-
-	private:
-		kengine::timer timer;
-		std::vector<int> framesPerSecond;
-		double meanFrameTime;
-		int64_t maxFrameTime;
-		int64_t minFrameTime;
-		int maxFramesPerSecond;
-		int minFramesPerSecond;
-		int frameCounter;
-		int64_t totalFrameTime;
-		bool isProfilingEnd;
-	};
 }
 
-#endif
+kengine::rendering_system::~rendering_system()
+{
+	delete context;
+}
+
+int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType)
+{
+	type = renderingType;
+
+	if (context != nullptr)
+		delete context;
+
+	context = kengine::renderingContextInstance(win);
+	context->create();
+	
+//#if defined(__ANDROID__)
+//	context->create();
+//	context->makeCurrent(true);
+//#endif
+
+	return 1;
+}
+
+void kengine::rendering_system::finish()
+{
+	//context->makeCurrent(false);
+	delete context;
+	context = nullptr;
+}
+
+int kengine::rendering_system::swapBuffers()
+{
+	if (context == nullptr)
+		return 0;
+
+	context->swapBuffers();
+	return 1;
+}

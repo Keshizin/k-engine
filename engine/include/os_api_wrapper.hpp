@@ -26,32 +26,132 @@
 #ifndef K_ENGINE_OS_API_WRAPPER_HPP
 #define K_ENGINE_OS_API_WRAPPER_HPP
 
+// k-engine headers
 #include <events_callback.hpp>
-
+// std headers
 #include <cstdint>
 #include <string>
-
-#ifdef _WIN32
+// os headers
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#endif
-
-#ifdef __linux__
+#include <GL/gl.h>
+#include <GL/wglext.h>
+#elif defined(__ANDROID__)
+#include <android/log.h>
+#include <android_native_app_glue.h>
+#include <EGL/egl.h>
+#elif defined(__linux__)
 #include <X11/Xlib.h>
+#include <GL/glx.h>
+#include <GL/glxext.h>
 #endif
 
-#ifdef _WIN32
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow);
-#endif
 
 /*
-	C++ program entry point
-	This global function must be defined by the user's main() function.
+	This macro provide std output for debug only
+	Note: este bloco de codigo deve ser movido para o header de log
 */
-int main();
 
+#ifdef K_ENGINE_DEBUG
+#if defined(__ANDROID__)
+#define MODULE_NAME "K-ENGINE"
+#define K_LOG_OUTPUT_RAW(message) __android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message)
+#else
+#include <iostream>
+#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
+#endif
+#else
+#define K_LOG_OUTPUT_RAW(message)
+#endif
+
+
+/*
+	K-Engine public interface for OS API functions
+*/
 namespace kengine
 {
+	/*
+		This class is an abstract class for the application window
+	*/
+	class window
+	{
+	public:
+		virtual ~window() {} // call the derivated class destructor
+
+		virtual bool create(int x, int y, int width, int height, const std::string& name) = 0;
+		virtual int destroy() = 0;
+		virtual int show() = 0;
+		virtual int hide() = 0;
+		virtual int swapBuffers() const = 0;
+
+	protected:
+		std::string name; // window bar title
+		int x = 0; // position in X axis (in pixels units)
+		int y = 0; // position in Y axis (in pixels units)
+		int width = 640; // window width in pixels size
+		int height = 480; // window height in pixels size
+	};
+
+	window* windowInstance();
+
+	class rendering_context_info
+	{
+	public:
+		int major;
+		int minor;
+	};
+
+	/*
+		Supported rendering API:
+			- OpenGL (WGL)
+			- OpenGL (GLX)
+			- OpenGL (EGL)
+
+		Ideas:
+			- obrigatoriamente é necessário ter uma janela de aplicação associada a este contexto
+			- não deve ser possível criar um contexto sem uma janela de aplicação associada
+			- não permitir copy and move semantics sem tratamentos devidos
+	*/
+	class rendering_context
+	{
+	public:
+		virtual ~rendering_context() {} // call the derivated class destructor
+
+		virtual int create() = 0;
+		virtual int destroy() = 0;
+		virtual int makeCurrent(bool enable) = 0;
+		virtual int swapBuffers() = 0;
+
+		void setRenderingContextInfo(int major, int minor) { info.major = major; info.minor = minor; }
+
+	private:
+		rendering_context_info info;
+	};
+
+	rendering_context* renderingContextInstance(window* windowParam);
+
+	/*
+		Global App Manager Class
+	*/
+	class global_app_manager
+	{
+	public:
+		global_app_manager() {};
+		~global_app_manager() {};
+
+		global_app_manager(const global_app_manager& copy) = delete; // copy constructor
+		global_app_manager& operator=(const global_app_manager& copy) = delete; // copy assignment
+		global_app_manager(global_app_manager&& move) noexcept = delete;  // move constructor
+		global_app_manager& operator=(global_app_manager&&) = delete; // move assigment
+
+		void setCallbackCalls(bool enable) { m_callback_calls_enable = enable; }
+		bool isCallbackCallsEnabled() const { return m_callback_calls_enable; }
+
+	private:
+		bool m_callback_calls_enable = true;
+	};
+
 	/*
 		Retrieves the current value of the perfomance counter, which is a high resolution (<1us) time stamp that can be used for time-interval measurements.
 	*/
@@ -73,13 +173,16 @@ namespace kengine
 	int closeDebugConsole();
 
 	/*
-		OS initialization
+		OSInitialize is used to initialize global objects from OS API (e.g. Win32, XLib and Android NDK)
 		This function must be called only one time in the application life
 	*/
 	int osInitialize();
 
 	/*
-		OS finish
+		OSFinish is used to finish and release the global objects from OS API (e.g. Win32, XLib and Android NDK)
+		This function must be called only one time in the application life
+
+		Nota: Esta função deve ser obrigatoriamente usada como RAII
 	*/
 	int osFinish();
 
@@ -104,6 +207,16 @@ namespace kengine
 	int getNumberOfMonitors();
 
 	/*
+		Get DPI (dots per inch) value for the specified window
+	*/
+	//unsigned int getDPI(const window* win);
+
+	/*
+		Send QUIT message to indicate to the system that a thread has made a request to terminate (quit).
+	*/
+	void quitApplication(int returnCode);
+
+	/*
 		Set global user events callback
 	*/
 	void setGlobalUserEventsCallback(events_callback* evt);
@@ -114,75 +227,14 @@ namespace kengine
 	void handleSystemMessages();
 
 	/*
-		window styles
-			- splash (no caption, no resize, no move)
-			- default (caption, sys menu, minimize box, maximize box, resize, can move)
-			- minimal (caption, sys menu, no resize, can move)
-			- minimal no sys menu (caption, no resize, can move)
+		Getting an OpenGL function address
 	*/
-	enum class WINDOW_STYLE
-	{
-		SPLASH,
-		MINIMAL,
-		MINIMAL_NO_SYS,
-		WINDOWED_FULLSCREEN,
-		DEFAULT
-	};
-
-	enum WINDOW_ADDITIONAL_STYLE
-	{
-#ifdef _WIN32
-		ACCEPT_FILES = WS_EX_ACCEPTFILES,
-		APPWINDOW = WS_EX_APPWINDOW,
-		COMPOSITED = WS_EX_COMPOSITED,
-		NOACTIVATE = WS_EX_NOACTIVATE,
-		TOOLWINDOW = WS_EX_TOOLWINDOW,
-		TOPMOST = WS_EX_TOPMOST
-#else
-		ACCEPT_FILES,
-		APPWINDOW,
-		COMPOSITED,
-		NOACTIVATE,
-		TOOLWINDOW,
-		TOPMOST
-#endif
-	};
-
-	enum WINDOW_SHOW_TYPE
-	{
-#ifdef _WIN32
-		SHOW = SW_SHOW,
-		HIDE = SW_HIDE
-#else
-		SHOW,
-		HIDE
-#endif
-	};
+	void* getGLFunctionAddress(std::string name);
 
 	/*
-		OS Window Wrapper
+		Getting all OpenGL functions
 	*/
-	class os_window
-	{
-	public:
-		bool create(int x, int y, int width, int height, std::string name, WINDOW_STYLE style, unsigned long additional = WINDOW_ADDITIONAL_STYLE::APPWINDOW);
-		int destroy();
-		int show(int showType) const;
-		void setWindowText(std::string text);
-
-		int swapBuffers() const;
-
-	private:
-#ifdef _WIN32
-		HWND hWindow = nullptr;
-		HDC hDC = nullptr;
-		//HGLRC hRC;
-#endif
-
-#ifdef __linux__
-		Window hWindow;
-#endif
-	};
+	int getAllGLProcedureAddress();
 }
 
 #endif

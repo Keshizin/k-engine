@@ -87,3 +87,33 @@ Arquivos necessários para utilizar k-engine em seus projetos:
 
 - ```kengine.lib```
 - arquivos headers (.hpp) em ```core/inc/```
+
+## Compiler Warnings from MSVC
+
+Apesar de não ser necessário incluir nomes de parâmetros em declarações de funções. É melhor colocá-los para questão de legibilidade. Imagina que o usuario vai consultar o arquivo header e ele consegue identificar o significado de cada parametro pelo seu nome.
+
+A configuração padrão de CMAKE para MSVC 2019 estava habilitando a flag -EHsc que corresponde ao modelo de tratamento de exceções em MVSC.
+
+Segundo a documentação da Microsoft (MSDN), a opção "c" faz com que o compilador assuma que as funções declaradas como "extern C" nunca irão lançar uma exceção.
+
+Com a configuração padrão, o compilador estava exibindo warning sobre a função TpSetCallbackCleanupGroup que poderia ser lançada uma exceção:
+
+warning C5039: 'TpSetCallbackCleanupGroup': pointer or reference to potentially throwing function passed to 'extern "C"' function under -EHc. Undefined behavior may occur if this function throws an exception.
+
+Como correção, a opção "c" foi desabilitada no CMAKE para a MSVC:
+
+set (CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /GR /EHs -Wall")
+
+Para o compilador MSVC foi necessário desativar alguns tipos de warnings. Segue a lista de significado de cada warning desabilitada:
+
+Compiler Warning (level 4) C4514 - 'function' : unreferenced inline function has been removed.
+Compiler Warning (level 4) C4710 - the given function was selected for inline expansion, but the compiler did not perform the inlining.
+Compiler Warning (level 1) C4711 - the compiler performed inlining on the given function, although it was not marked for inlining.
+Compiler Warning (level 4) C4820 - the type and order of elements caused the compiler to add padding to the end of a struct.
+Fontes das referências:
+https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4514?view=msvc-160
+https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4710?view=msvc-160
+https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4711?view=msvc-160
+https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4820?view=msvc-160
+
+Nota: É necessário uma forma de realizar essa desabilitação no CMAKE. Atualmente está sendo editada diretamente na flag CMAKE_CXX_FLAGS como por exemplo usar target_compile_options ou pragmas dentro do código.

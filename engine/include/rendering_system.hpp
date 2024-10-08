@@ -1,5 +1,5 @@
 /*
-	K-Engine profiling
+	K-Engine Rendering System
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
@@ -23,37 +23,52 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_PROFILE_HPP
-#define K_ENGINE_PROFILE_HPP
-
-#include <timer.hpp>
-#include <vector>
-#include <cstdint>
+#include <gl_wrapper.hpp>
 
 namespace kengine
 {
-	class profile
+	class rendering_context;
+	class window;
+
+	/*
+		kengine::rendering_system class
+
+		Support to:
+			- OpenGL
+			- Vulkan (not implemented yet)
+			- DirectX (not implemented yet)
+
+		Ideas:
+			- inicialização do contexto
+				- escolher entre tipos de renderizador (OpenGL, Vulkan, DirectX, etc)
+				- inicialização apropriada do contexto de acordo com o renderizador e a janela de aplicação
+			- possibilidade de gerenciar múltiplos contextos? (future)
+	*/
+
+	enum class RENDERING_TYPE
+	{
+		OPENGL,
+		OPENGL_ES,
+		VULKAN
+	};
+
+	class rendering_system
 	{
 	public:
-		explicit profile();
+		rendering_system();
+		~rendering_system();
 
-		void init();
-		void end();
-		void update(int64_t frameTime);
-		void save() const;
+		rendering_system(const rendering_system& copy) = delete; // copy constructor
+		rendering_system(rendering_system&& move) noexcept = delete; // move constructor
+		rendering_system& operator=(const rendering_system& copy) = delete; // copy assignment
+		rendering_system& operator=(rendering_system&&) = delete; // move assigment
 
+		int init(window* win, RENDERING_TYPE type);
+		void finish();
+		int swapBuffers();
+		
 	private:
-		kengine::timer timer;
-		std::vector<int> framesPerSecond;
-		double meanFrameTime;
-		int64_t maxFrameTime;
-		int64_t minFrameTime;
-		int maxFramesPerSecond;
-		int minFramesPerSecond;
-		int frameCounter;
-		int64_t totalFrameTime;
-		bool isProfilingEnd;
+		RENDERING_TYPE type;
+		rendering_context* context = nullptr;
 	};
 }
-
-#endif

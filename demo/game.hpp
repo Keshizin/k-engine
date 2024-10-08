@@ -28,15 +28,24 @@
 
 #include <core.hpp>
 #include <profile.hpp>
+#include <rendering_system.hpp>
 
-namespace game
+namespace demo
 {
-	class demo : public kengine::events_callback
+	class game : public kengine::events_callback
 	{
 	public:
-		explicit demo(kengine::core* engine);
+		explicit game(kengine::core* engine);
+		~game();
+
+		game(const game& copy) = delete; // copy constructor
+		game(game&& move) noexcept = delete; // move constructor
+		game& operator=(const game& copy) = delete; // copy assignment
+		game& operator=(game&&) = delete; // move assigment
 
 		void start();
+		void createWindow(int x, int y, int width, int height, const std::string& name);
+		void showWindow();
 
 		/*
 			Callback event called before the main loop event starts
@@ -52,12 +61,12 @@ namespace game
 		/*
 			Callback event called before the finish event starts
 		*/
-		void beforeFinishEvent();
+		void closeButtonEvent();
 
 		/*
 			Callback event called after the finish event ends
 		*/
-		void afterFinishEvent();
+		void onFinishEvent();
 
 		/*
 			Callback event called when the window is activated
@@ -100,13 +109,25 @@ namespace game
 		void onKeyboardSpecialEvent(unsigned long long key, int state);
 
 		/*
+			Callback event called when the window is ready for use (e.g. ANativeWindow in Android plaform)
+		*/
+		void onWindowReady(kengine::window* window);
+		
+		/*
+			Callback event called when the window was destroyed
+		*/
+		void onWindowDestroy();
+
+		/*
 			Callback event for debug message
 		*/
 		void debugMessage(const std::string& msg);
 
 	private:
-		kengine::core* m_engine;
+		kengine::core* m_engine = nullptr;
+		kengine::window* m_window = nullptr;
 		kengine::profile m_profile;
+		kengine::rendering_system m_renderingSystem;
 	};
 }
 

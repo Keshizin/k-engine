@@ -38,11 +38,9 @@ kengine::core::core()
 kengine::core::core(events_callback* eventsCallback)
 	:
 	mainLoopState{ K_RUNTIME_STATE::STOPPED },
-	userEventsCallback { eventsCallback }
+	userEventsCallback { nullptr }
 {
-	assert(!(eventsCallback == nullptr));
-
-	kengine::setGlobalUserEventsCallback(eventsCallback);
+	setEventsCallback(eventsCallback);
 	osInitialize();
 }
 
@@ -70,16 +68,16 @@ void kengine::core::startMainLoop()
 		int64_t startTime = getHighResolutionTimerCounter();
 
 		/*
-			win32 message pump
+			message pump
 		*/
+
 		handleSystemMessages();
 
 		/*
 			user's update
 		*/
-		// frame time in seconds
+
 		userEventsCallback->update(frameTime);
-		//window.swapBuffers();
 
 
 		/*
@@ -110,16 +108,15 @@ void kengine::core::resumeGameLoop()
 void kengine::core::setEventsCallback(events_callback* eventsCallback)
 {
 	assert(!(eventsCallback == nullptr));
-
 	userEventsCallback = eventsCallback;
 	kengine::setGlobalUserEventsCallback(eventsCallback);
 }
 
-void kengine::infoType()
+std::string kengine::infoType()
 {
-	std::cout << "> k-engine data types:"
-		<< "\n\t- int: " << sizeof(int)
-		<< "\n\t- long int: " << sizeof(long int)
-		<< "\n\t- int64_t: " << sizeof(int64_t)
-		<< "\n" << std::endl;
+	return std::string("> k-engine data types:") +
+		"\n\t- int: " + std::to_string(sizeof(int)) +
+		"\n\t- long int: " + std::to_string(sizeof(long int)) +
+		"\n\t- int64_t: " + std::to_string(sizeof(int64_t)) +
+		"\n";
 }

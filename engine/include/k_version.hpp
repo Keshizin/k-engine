@@ -31,6 +31,8 @@
 		- build-type.build-increment.build date
 		- platform
 
+			M.N.P-hash-[release or debug or undefined]-[platform]
+
 	Notes:
 		- The build types are [Release] or [Debug]
 		- Platforms are [windows], [linux], and [android]
@@ -42,10 +44,16 @@
 
 // (!) the lines below are automatically updated by external building tool
 #define K_ENGINE_GIT_HASHCODE 0
-#define K_ENGINE_BUILD_TYPE 2
+#define K_ENGINE_BUILD_TYPE 1
 #define K_ENGINE_VERSION_BUILD_INCREMENT 0
 #define K_ENGINE_BUILD_DATE 0
 #define K_ENGINE_BUILD_PLATFORM 2
+
+/*
+	OpenGL version
+*/
+#define KENGINE_OPENGL_MAJOR_VERSION 4
+#define KENGINE_OPENGL_MINOR_VERSION 5
 
 #include <string>
 

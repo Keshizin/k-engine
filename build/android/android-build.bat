@@ -1,0 +1,19 @@
+set arg1=%1
+
+mkdir "../temp"
+cd "../temp"
+
+set ABI=arm64-v8a
+set MINSDKVERSION=24
+
+cmake ../.. ^
+    -DCMAKE_BUILD_TYPE=%arg1% ^
+    -DCMAKE_TOOLCHAIN_FILE=%ANDROID_NDK%/build/cmake/android.toolchain.cmake ^
+    -DANDROID_ABI=%ABI% ^
+    -DANDROID_NDK=%ANDROID_NDK% ^
+    -DANDROID_PLATFORM=android-%MINSDKVERSION% ^
+    -DCMAKE_ANDROID_ARCH_ABI=%ABI% ^
+    -DCMAKE_ANDROID_NDK=%ANDROID_NDK% ^
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
+    -DCMAKE_SYSTEM_NAME=Android ^
+    -DCMAKE_SYSTEM_VERSION=%MINSDKVERSION%

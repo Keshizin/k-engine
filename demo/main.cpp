@@ -23,24 +23,37 @@
 	SOFTWARE.
 */
 
-#include <demo.hpp>
-#include <iostream>
+#include <game.hpp>
 
 int main()
 {
-	std::cout << "> Welcome to K-Engine Game Engine! v" << kengine::version() << std::endl;
-	kengine::infoType();
+	K_LOG_OUTPUT_RAW("> Welcome to K-Engine Game Engine! v" + kengine::version() + "\n");
+
+	/*
+		Platform info
+	*/
+	K_LOG_OUTPUT_RAW(kengine::infoType());
 
 	kengine::core engine;
-	game::demo scene(&engine);
+	demo::game scene(&engine);
 
-	auto gameWindow = engine.getWindow();
+	/*
+		On Android platforms, the window is created (and destroyed) implicitly by Android Surface Object
+	*/
 
-	gameWindow->create(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version(), kengine::WINDOW_STYLE::DEFAULT);
-	gameWindow->show(kengine::WINDOW_SHOW_TYPE::SHOW);
+#ifndef __ANDROID__
+	scene.createWindow(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version());
+	scene.showWindow();
+#endif
+
+	/*
+		Nota: É recomendável que o sistema de renderização seja criado no evento "onWindowReady".
+		Nas plataformas Android, a janela é criada implicitamente pelo Android Surface. Portanto,
+		este evento foi criado especificamente para notificafar o usuário quando a janela estiver disponível.
+	*/
 
 	scene.start();
 
-	std::cout << "> End of K-Engine Game Engine!" << std::endl;
+	K_LOG_OUTPUT_RAW("> End of K-Engine Game Engine!\n");
 	return 0;
 }

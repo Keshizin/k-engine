@@ -23,26 +23,391 @@
 	SOFTWARE.
 */
 
+#ifndef __ANDROID__
 #ifdef __linux__
 
+// k-engine headers
 #include <os_api_wrapper.hpp>
-
-#include <iostream>
+#include <k_version.hpp>
+// std headers
 #include <cassert>
-
+#include <iostream>
+// linux headers
 #include <time.h>
+
+
+/*
+	Global Objects
+*/
+
 #define LINUX_TIME_RESOLUTION 1000000000L
 
 static kengine::events_callback* globalUserEventsCallback = nullptr;
-static Display* g_display = nullptr;
 
-static unsigned int g_event_mask =
-	StructureNotifyMask |
-	FocusChangeMask |
-	KeyPressMask | KeyReleaseMask |
-	ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
+
+/*
+	LIBX API Global Objects
+*/
 
 int xWindowProcedure(const XEvent& event);
+
+
+/*
+	OpenGL Procedures Extension for LibX (GLX)
+*/
+
+typedef GLXContext(*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
+glXCreateContextAttribsARBProc glXCreateContextAttribsARB = 0;
+
+
+/*
+ ****************************************************************************
+  K-Engine public interface for OS API functions
+ ****************************************************************************
+*/
+
+namespace kengine
+{
+	/*
+	*/
+	class xlib_global_app_manager : public global_app_manager
+	{
+	public:
+		xlib_global_app_manager() {
+			m_display = XOpenDisplay(nullptr);
+
+			if (m_display == nullptr)
+			{
+				assert(!(globalUserEventsCallback == nullptr));
+				globalUserEventsCallback->debugMessage("It was not possible to connect to X server");
+			}
+		};
+
+		~xlib_global_app_manager() {
+			XCloseDisplay(m_display);
+		};
+
+		xlib_global_app_manager(const xlib_global_app_manager& copy) = delete; // copy constructor
+		xlib_global_app_manager& operator=(const xlib_global_app_manager& copy) = delete; // copy assignment
+		xlib_global_app_manager(xlib_global_app_manager&& move) noexcept = delete;  // move constructor
+		xlib_global_app_manager& operator=(xlib_global_app_manager&&) = delete; // move assigment
+
+		Display* m_display = nullptr;
+		unsigned int m_event_mask = StructureNotifyMask | FocusChangeMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
+	};
+
+	static xlib_global_app_manager* globalAppManager = nullptr;
+
+	/*
+	*/
+	class xlib_window : public window
+	{
+		friend class xlib_rendering_context;
+
+	public:
+		xlib_window() {}
+
+		~xlib_window() {
+			if (hWindow)
+				destroy();
+		}
+
+		xlib_window(const xlib_window& copy) = delete; // copy constructor
+		xlib_window& operator=(const xlib_window& copy) = delete; // copy assignment
+		xlib_window(xlib_window&& move) noexcept = delete;  // move constructor
+		xlib_window& operator=(xlib_window&&) = delete; // move assigment
+
+		bool create(int xPos, int yPos, int widthParam, int heightParam, const std::string& nameParam) {
+			x = xPos;
+			y = yPos;
+			width = widthParam;
+			height = heightParam;
+			name = nameParam;
+
+			XSetWindowAttributes attributes;
+			attributes.event_mask = globalAppManager->m_event_mask;
+
+			hWindow = XCreateWindow(
+				globalAppManager->m_display,
+				DefaultRootWindow(globalAppManager->m_display), // or RootWindowOfScreen(screen)
+				x,
+				y,
+				width,
+				height,
+				0,
+				CopyFromParent, // depth
+				InputOutput,
+				CopyFromParent, // visual,
+				CWEventMask,
+				&attributes);
+
+			XStoreName(globalAppManager->m_display, hWindow, name.c_str());
+
+			Atom wm_delete = XInternAtom(globalAppManager->m_display, "WM_DELETE_WINDOW", False);
+			XSetWMProtocols(globalAppManager->m_display, hWindow, &wm_delete, 1);
+
+			if (globalUserEventsCallback && globalAppManager->isCallbackCallsEnabled())
+				globalUserEventsCallback->onWindowReady(this);
+
+			return true;
+		}
+
+		bool createGLX() {
+			GLint majorVersion = 0;
+			GLint minorVersion = 0;
+			int screenNumber = DefaultScreen(globalAppManager->m_display);
+
+			glXQueryVersion(globalAppManager->m_display, &majorVersion, &minorVersion);
+			globalUserEventsCallback->debugMessage("> GLX version: " + std::to_string(majorVersion) + std::to_string(minorVersion));
+			globalUserEventsCallback->debugMessage("> GLX client version: " + std::string(glXGetClientString(globalAppManager->m_display, GLX_VERSION)));
+			globalUserEventsCallback->debugMessage("> GLX client vendor: " + std::string(glXGetClientString(globalAppManager->m_display, GLX_VENDOR)));
+			//globalUserEventsCallback->debugMessage("> GLX client extensions: " + std::string(glXGetClientString(globalAppManager->m_display, GLX_EXTENSIONS)));
+			globalUserEventsCallback->debugMessage("> GLX server version: " + std::string(glXQueryServerString(globalAppManager->m_display, screenNumber, GLX_VERSION)));
+			globalUserEventsCallback->debugMessage("> GLX server vendor: " + std::string(glXQueryServerString(globalAppManager->m_display, screenNumber, GLX_VENDOR)));
+			//globalUserEventsCallback->debugMessage("> GLX server extensions: " + std::string(glXQueryServerString(globalAppManager->m_display, screenNumber, GLX_EXTENSIONS)));
+
+			GLint glxAttributes[] = {
+				GLX_X_RENDERABLE, True,
+				GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+				GLX_RENDER_TYPE, GLX_RGBA_BIT,
+				GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+				GLX_RED_SIZE, 8,
+				GLX_GREEN_SIZE, 8,
+				GLX_BLUE_SIZE, 8,
+				GLX_ALPHA_SIZE, 8,
+				GLX_DEPTH_SIZE, 24,
+				GLX_STENCIL_SIZE, 8,
+				GLX_DOUBLEBUFFER, True,
+				None
+			};
+
+			int framebufferCounter = 0;
+			GLXFBConfig* frameBufferConfigList = glXChooseFBConfig(globalAppManager->m_display, screenNumber, glxAttributes, &framebufferCounter);
+
+			if (frameBufferConfigList == nullptr)
+			{
+				globalUserEventsCallback->debugMessage("Failed to retrieve a list of GLX framebuffer configurations");
+				return false;
+			}
+
+			//globalUserEventsCallback->debugMessage("> framebuffer counter: " + std::to_string(framebufferCounter));
+
+			int bestFramebufferConfigIndex = -1;
+			int bestSample = -1;
+
+			for (int i = 0; i < framebufferCounter; ++i)
+			{
+				int sampleBuffers, samples;
+				glXGetFBConfigAttrib(globalAppManager->m_display, frameBufferConfigList[i], GLX_SAMPLE_BUFFERS, &sampleBuffers);
+				glXGetFBConfigAttrib(globalAppManager->m_display, frameBufferConfigList[i], GLX_SAMPLES, &samples);
+
+				//globalUserEventsCallback->debugMessage("> GLX framebuffer [" + std::to_string(i) + "] sample buffers : " + std::to_string(sampleBuffers));
+				//globalUserEventsCallback->debugMessage("> GLX framebuffer [" + std::to_string(i) + "] samples: " + std::to_string(samples));
+
+				if (bestFramebufferConfigIndex < 0 || (sampleBuffers && samples > bestSample)) {
+					bestFramebufferConfigIndex = i;
+					bestSample = samples;
+				}
+			}
+
+			framebufferConfig = frameBufferConfigList[bestFramebufferConfigIndex];
+
+			//globalUserEventsCallback->debugMessage("> best GLX framebuffer config: " + std::to_string(bestFramebufferConfigIndex));
+
+			visualInfo = glXGetVisualFromFBConfig(globalAppManager->m_display, framebufferConfig);
+			XFree(frameBufferConfigList);
+
+			if (visualInfo == nullptr) {
+				std::cout << "Failed to get GLX visual from framebuffer config.\n";
+				return false;
+			}
+
+			XSetWindowAttributes attributes;
+			//attributes.border_pixel = BlackPixel(globalAppManager->m_display, screenNumber);
+			//attributes.background_pixel = WhitePixel(display, screenId);
+			attributes.override_redirect = True;
+			cmap = XCreateColormap(globalAppManager->m_display, DefaultRootWindow(globalAppManager->m_display), visualInfo->visual, AllocNone);
+			attributes.colormap = cmap;
+			attributes.event_mask = globalAppManager->m_event_mask;
+
+			hWindow = XCreateWindow(
+				globalAppManager->m_display,
+				DefaultRootWindow(globalAppManager->m_display), // or RootWindowOfScreen(screen)
+				x,
+				y,
+				width,
+				height,
+				0,
+				visualInfo->depth, // depth
+				InputOutput,
+				visualInfo->visual, // visual,
+				CWColormap | CWEventMask, // CWBorderPixel, CWBackPixel
+				&attributes);
+
+			Atom windowMessageDelete = XInternAtom(globalAppManager->m_display, "WM_DELETE_WINDOW", False);
+			XSetWMProtocols(globalAppManager->m_display, hWindow, &windowMessageDelete, 1);
+
+			//if (globalUserEventsCallback && globalAppManager->isCallbackCallsEnabled())
+			//	globalUserEventsCallback->onWindowReady(this);
+
+			return true;
+		}
+
+		int destroy() {
+			if (visualInfo != nullptr)
+			{
+				XFreeColormap(globalAppManager->m_display, cmap);
+
+				XFree(visualInfo);
+				visualInfo = nullptr;
+			}
+
+			XDestroyWindow(globalAppManager->m_display, hWindow);
+
+			hWindow = 0;
+			return 1;
+		}
+
+		int show() {
+			XMapWindow(globalAppManager->m_display, hWindow);
+			return 1;
+		}
+
+		int hide() {
+			XUnmapWindow(globalAppManager->m_display, hWindow);
+			return 1;
+		}
+
+		int swapBuffers()  const {
+			if(hWindow)
+				glXSwapBuffers(globalAppManager->m_display, hWindow);
+			return 1;
+		}
+
+		void setWindowText(std::string text)
+		{
+			XStoreName(globalAppManager->m_display, hWindow, text.c_str());
+		}
+
+		void flushEvents() const
+		{
+			XSync(globalAppManager->m_display, true);
+		}
+
+	private:
+		Window hWindow = 0;
+		XVisualInfo* visualInfo = nullptr;
+		Colormap cmap;
+		GLXFBConfig framebufferConfig;
+	};
+
+	window* windowInstance()
+	{
+		return new xlib_window;
+	}
+
+
+	/*
+		kengine::xlib_rendering_context - class members definition
+	*/
+	class xlib_rendering_context : public rendering_context
+	{
+	public:
+		explicit xlib_rendering_context(window* windowParam) {
+			assert(!(windowParam == nullptr));
+			xlib_win = dynamic_cast<xlib_window*>(windowParam);
+		}
+
+		~xlib_rendering_context() {
+			if (hRC != nullptr)
+				destroy();
+		}
+
+		xlib_rendering_context(const xlib_rendering_context& copy) = delete; // copy constructor
+		xlib_rendering_context& operator=(const xlib_rendering_context& copy) = delete; // copy assignment
+		xlib_rendering_context(xlib_rendering_context&& move) noexcept = delete;  // move constructor
+		xlib_rendering_context& operator=(xlib_rendering_context&&) = delete; // move assigment
+
+		int create() {
+#ifndef GLX_ARB_create_context 
+			globalUserEventsCallback->debugMessage("The GLX_ARB_create_context extension is not defined");
+			return 0;
+#endif
+
+#ifndef GLX_ARB_create_context_profile
+			globalUserEventsCallback->debugMessage("The GLX_ARB_create_context_profile extension is not defined");
+			return 0;
+#endif
+
+			globalAppManager->setCallbackCalls(false);
+
+			// destroy the window to create a GLX window
+			if (!xlib_win->destroy())
+				return 0;
+
+			// flush the queue events
+			xlib_win->flushEvents(); 
+
+			// create a new GLX window
+			if (!xlib_win->createGLX())
+				return 0;
+
+			if (!kengine::getAllGLProcedureAddress())
+				return 0;
+
+			//hRC = glXCreateContext(globalAppManager->m_display, win->visualInfo, nullptr, GL_TRUE); // legacy
+
+			int attribList[] = {
+			   GLX_CONTEXT_MAJOR_VERSION_ARB, KENGINE_OPENGL_MAJOR_VERSION,
+			   GLX_CONTEXT_MINOR_VERSION_ARB, KENGINE_OPENGL_MINOR_VERSION,
+			   //GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			   GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+			   None
+			};
+
+			hRC = glXCreateContextAttribsARB(globalAppManager->m_display, xlib_win->framebufferConfig, 0, true, attribList);
+			XSync(globalAppManager->m_display, False);
+
+			makeCurrent(true);
+			globalAppManager->setCallbackCalls(true);
+
+			return 1;
+		}
+
+		int destroy() {
+			makeCurrent(false);
+			glXDestroyContext(globalAppManager->m_display, hRC);
+			return 1;
+		}
+
+		int makeCurrent(bool enable) {
+			if (enable)
+			{
+				glXMakeCurrent(globalAppManager->m_display, xlib_win->hWindow, hRC);
+			}
+			else
+			{
+				glXMakeCurrent(globalAppManager->m_display, None, NULL);
+			}
+
+			return 1;
+		}
+
+		int swapBuffers()
+		{
+			return 1;
+		}
+
+	private:
+		xlib_window* xlib_win = nullptr; // avoid dynamic casts in the methods
+		GLXContext hRC;
+	};
+
+	rendering_context* renderingContextInstance(window* win)
+	{
+		return new xlib_rendering_context(win);
+	}
+}
 
 int64_t kengine::getHighResolutionTimerCounter()
 {
@@ -51,6 +416,7 @@ int64_t kengine::getHighResolutionTimerCounter()
 	return (t.tv_sec * LINUX_TIME_RESOLUTION) + t.tv_nsec;
 }
 
+
 int64_t kengine::getHighResolutionTimerFrequency()
 {
 	timespec t;
@@ -58,186 +424,132 @@ int64_t kengine::getHighResolutionTimerFrequency()
 	return t.tv_nsec * LINUX_TIME_RESOLUTION;
 }
 
-/*
-	Creating a debug console
-*/
+
 int kengine::createDebugConsole()
 {
 	return 1;
 }
 
-/*
-	Closing the debug console
-*/
+
 int kengine::closeDebugConsole()
 {
 	return 1;
 }
 
-/*
-	OS initialization
-	This function must be called only one time
-*/
+
 int kengine::osInitialize()
 {
-	g_display = XOpenDisplay(nullptr);
+	if (globalAppManager != nullptr)
+		delete globalAppManager;
 
-	if(g_display == nullptr)
-	{
-		assert(!(globalUserEventsCallback == nullptr));
-		globalUserEventsCallback->debugMessage("It was not possible to connect to X server");
-		return 0;
-	}
+	globalAppManager = new xlib_global_app_manager;
 
 	return 1;
 }
 
-/*
-	OS finish
-*/
+
 int kengine::osFinish()
 {
-	XCloseDisplay(g_display);
-	g_display = nullptr;
+	delete globalAppManager;
 	return 1;
 }
 
-/*
-	Get the primary display size in pixels
-*/
+
 void kengine::getDisplaySize(int* width, int* height)
 {
-	assert(!(g_display == nullptr));
-	int screenNumber = DefaultScreen(g_display);
-	*width = DisplayWidth(g_display, screenNumber);
-	*height = DisplayHeight(g_display, screenNumber);
+	assert(!(globalAppManager == nullptr));
+	int screenNumber = DefaultScreen(globalAppManager->m_display);
+	*width = DisplayWidth(globalAppManager->m_display, screenNumber);
+	*height = DisplayHeight(globalAppManager->m_display, screenNumber);
 }
 
-/*
-	Get the center position (x axis) of the primary display
-*/
+
 int kengine::getDisplayCenterPosX(int width)
 {
-	assert(!(g_display == nullptr));
-	int screenNumber = DefaultScreen(g_display);
-	return (DisplayWidth(g_display, screenNumber) - width) / 2;
+	assert(!(globalAppManager == nullptr));
+	int screenNumber = DefaultScreen(globalAppManager->m_display);
+	return (DisplayWidth(globalAppManager->m_display, screenNumber) - width) / 2;
 }
 
-/*
-	Get the center position in y axis of the primary display
-*/
+
 int kengine::getDisplayCenterPosY(int height)
 {
-	assert(!(g_display == nullptr));
-	int screenNumber = DefaultScreen(g_display);
-	return (DisplayHeight(g_display, screenNumber) - height) / 2;
+	assert(!(globalAppManager == nullptr));
+	int screenNumber = DefaultScreen(globalAppManager->m_display);
+	return (DisplayHeight(globalAppManager->m_display, screenNumber) - height) / 2;
 }
 
-/*
-	Get the number of monitors
-*/
+
 int kengine::getNumberOfMonitors()
 {
-	assert(!(g_display == nullptr));
-	return ScreenCount(g_display);
+	assert(!(globalAppManager == nullptr));
+	return ScreenCount(globalAppManager->m_display);
 }
 
-/*
-	Set global callback events
-*/
+
+void kengine::quitApplication(int returnCode)
+{
+	assert(!(globalUserEventsCallback == nullptr));
+	globalUserEventsCallback->onFinishEvent();
+
+}
+
+
 void kengine::setGlobalUserEventsCallback(events_callback* evt)
 {
 	assert(globalUserEventsCallback == nullptr); // trying to override a globalUserEventsCallback
 	globalUserEventsCallback = evt;
 }
 
-/*
-	Message events handling (message pump)
-*/
+
 void kengine::handleSystemMessages()
 {
 	// (!) PLEASE DON'T INCLUDE I/O's STUFF HERE!
 	XEvent xEvent;
 
 	// This event message is like WM_CLOSE in Win32
-	if(XCheckTypedEvent(g_display, ClientMessage, &xEvent))
+	if(XCheckTypedEvent(globalAppManager->m_display, ClientMessage, &xEvent))
 	{
-		globalUserEventsCallback->beforeFinishEvent();
+		globalUserEventsCallback->closeButtonEvent();
 	}
 
-	if(XCheckMaskEvent(g_display, g_event_mask, &xEvent))
+	if(XCheckMaskEvent(globalAppManager->m_display, globalAppManager->m_event_mask, &xEvent))
 		xWindowProcedure(xEvent);
 }
 
-/*
-	kengine::os_window class member definition
-*/
 
-bool kengine::os_window::create(int x, int y, int width, int height, std::string name, WINDOW_STYLE style, unsigned long additional)
+void* kengine::getGLFunctionAddress(std::string name)
 {
-	//GLint att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
-	//XVisualInfo* vi = glXChooseVisual(g_display, 0, att);
-	//auto cmap = XCreateColormap(g_display, root, vi->visual, AllocNone);
+	/*
+		References:
+			- https://www.khronos.org/opengl/wiki/Load_OpenGL_Functions
+	*/
 
-	XSetWindowAttributes attributes;
-	//attributes.colormap = cmap;
-	attributes.event_mask = g_event_mask;
-	
-	hWindow = XCreateWindow(
-		g_display,
-		DefaultRootWindow(g_display),
-		x,
-		y,
-		width,
-		height,
-		0,
-		CopyFromParent, // vi->depth,
-		InputOutput,
-		CopyFromParent, // vi->visual,
-		CWEventMask, // CWColormap | CWEventMask,
-		&attributes);
-
-	XStoreName(g_display, hWindow, name.c_str());
-
-	Atom wm_delete = XInternAtom(g_display, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(g_display, hWindow, &wm_delete, 1);
-
-	// auto myGLContext = glXCreateContext(g_display, vi, nullptr, 1);
-	// glXMakeCurrent(g_display, hWindow, myGLContext);
-
-	return true;
+	//return glXGetProcAddressARB(name.c_str());
+	return nullptr;
 }
 
-int kengine::os_window::destroy()
+
+int kengine::getAllGLProcedureAddress()
 {
-	XDestroyWindow(g_display, hWindow);
-	hWindow = 0;
+	glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddressARB((const GLubyte*)"glXCreateContextAttribsARB");
+
+	if (glXCreateContextAttribsARB == nullptr)
+	{
+		return 0;
+	}
+
 	return 1;
 }
 
-int kengine::os_window::show(int showType) const
-{
-	XMapWindow(g_display, hWindow);
-	return 1;
-}
 
-void kengine::os_window::setWindowText(std::string text)
-{
-	XStoreName(g_display, hWindow, text.c_str());
-}
-
-int kengine::os_window::swapBuffers() const
-{
-	//glXSwapBuffers(g_display, hWindow);
-	return 1;
-}
-
-/*
-*/
 int xWindowProcedure(const XEvent& event)
 {
 	assert(!(globalUserEventsCallback == nullptr));
 
+	if (!kengine::globalAppManager->isCallbackCallsEnabled())
+		return 1;
+	
 	switch(event.type)
 	{
 	/*
@@ -248,8 +560,8 @@ int xWindowProcedure(const XEvent& event)
 		globalUserEventsCallback->onResizeWindowEvent(event.xconfigure.width, event.xconfigure.height);
 		break;
 
-	case DestroyNotify: // WM_QUIT
-		globalUserEventsCallback->afterFinishEvent();
+	case DestroyNotify: // WM_DESTROY
+		globalUserEventsCallback->onWindowDestroy();
 		return 0;
 
 	case FocusIn: // WM_ACTIVATE
@@ -295,4 +607,5 @@ int xWindowProcedure(const XEvent& event)
 	return 1;
 }
 
+#endif
 #endif

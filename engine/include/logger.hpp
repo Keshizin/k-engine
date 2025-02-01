@@ -1,5 +1,5 @@
 /*
-	K-Engine Timer
+	K-Engine Logger
 	This file is part of the K-Engine.
 
 	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
@@ -23,33 +23,23 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_TIMER_HPP
-#define K_ENGINE_TIMER_HPP
+#ifndef K_ENGINE_LOGGER_HPP
+#define K_ENGINE_LOGGER_HPP
 
-namespace kengine
-{
-	/*
-		kengine::timer class
-	*/
-	class timer
-	{
-	public:
-		timer();
-		explicit timer(long long stopTimeInMs);
+/*
+	[ ... under construction ... ]
+*/
 
-		void start();
-		int done();
-		int doneAndRestart();
-
-		void setTimerInMs(long long stopTimeInMs);
-		void stop();
-
-	private:
-		long long stopTime;
-		long long startTimer;
-		long long stopWatch;
-		long long frequency;
-	};
-}
+#ifdef K_ENGINE_DEBUG
+#if defined(__ANDROID__)
+#define MODULE_NAME "K-ENGINE"
+#define K_LOG_OUTPUT_RAW(message) __android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message)
+#else
+#include <iostream>
+#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
+#endif
+#else
+#define K_LOG_OUTPUT_RAW(message)
+#endif
 
 #endif

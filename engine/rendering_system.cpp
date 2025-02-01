@@ -2,7 +2,7 @@
 	K-Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include <os_api_wrapper.hpp>
 
 #include <cassert>
+#include <sstream>
 
 /*
 	kengine::rendering_system class - member class definition
@@ -42,7 +43,7 @@ kengine::rendering_system::~rendering_system()
 	delete context;
 }
 
-int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType)
+int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType, const compatibility_profile& profile)
 {
 	type = renderingType;
 
@@ -50,7 +51,7 @@ int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType)
 		delete context;
 
 	context = kengine::renderingContextInstance(win);
-	context->create();
+	context->create(profile);
 	
 //#if defined(__ANDROID__)
 //	context->create();
@@ -74,4 +75,52 @@ int kengine::rendering_system::swapBuffers()
 
 	context->swapBuffers();
 	return 1;
+}
+
+void kengine::rendering_system::clearBuffers()
+{
+	if (context == nullptr)
+		return;
+
+	context->clearBuffers();
+}
+
+std::string kengine::rendering_system::info(bool extension)
+{
+	std::string info;
+
+	if (context) {
+		std::stringstream renderingInfo;
+
+		const GLubyte* vendor = glGetString(GL_VENDOR);
+		renderingInfo << "> GL vendor: " << vendor << "\n";
+
+		const GLubyte* renderer = glGetString(GL_RENDERER);
+		renderingInfo << "> GL renderer: " << renderer << "\n";
+
+		const GLubyte* version = glGetString(GL_VERSION);
+		renderingInfo << "> GL version: " << version << "\n";
+
+		const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+		renderingInfo << "> GLSL version: " << glslVersion << "\n";
+
+		GLint maxVertexAttribs;
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+
+		renderingInfo << "\n> Max GL vertex attributes: " << maxVertexAttribs << "\n";
+
+		if (extension) {
+			GLint numExtensions;
+			glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+			renderingInfo << "\n> GL_NUM_EXTENSIONS: " << numExtensions << "\n";
+
+			for (GLint i = 0; i < numExtensions; i++) {
+				renderingInfo << "> " << glGetStringi(GL_EXTENSIONS, static_cast<GLuint>(i)) << "\n";
+			}
+		}
+
+		info = renderingInfo.str();
+	}
+
+	return info;
 }

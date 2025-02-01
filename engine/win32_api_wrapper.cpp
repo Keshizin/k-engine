@@ -2,7 +2,7 @@
 	Win32 API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -35,14 +35,12 @@
 #include <tchar.h>
 #include <windowsx.h>
 
-
 /*
 	Global Objects
 */
 
 static kengine::events_callback* globalUserEventsCallback = nullptr;
 static kengine::global_app_manager globalAppManager;
-
 
 /*
 	WIN32 API Global Objects
@@ -53,7 +51,6 @@ static kengine::global_app_manager globalAppManager;
 
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-
 /*
 	OpenGL Procedures Extension for Win32 (WGL)
 */
@@ -61,7 +58,6 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
 PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = 0;
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
-
 
 /*
 	Registers a Win32 window class
@@ -74,40 +70,30 @@ int registerWindowClass(std::string windowClassName);
 */
 int unregisterWindowClass(std::string windowClassName);
 
-
 /*
 	C++ program entry point
 */
-
 int main();
-
 
 /*
 	Win32 program entry point
 */
-
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	return main();
 }
 
-
 /*
-   ****************************************************************************
-	 K-Engine public interface for OS API functions
-   ****************************************************************************
+	K-Engine public interface for OS API functions
 */
-
 namespace kengine
 {
-	/*
-	*/
 	class win32_window : public window
 	{
 		friend class win32_rendering_context;
 
 	public:
-		win32_window() : hWindow{ NULL }, hDC{ NULL } {}
+		win32_window() {}
 		
 		~win32_window() {
 			if (hWindow)
@@ -182,8 +168,7 @@ namespace kengine
 				GetModuleHandle(nullptr),
 				nullptr);
 
-			if (hWindow == nullptr)
-			{
+			if (hWindow == nullptr) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to create the window: " + std::to_string(error) + "\n");
 				return false;
@@ -191,8 +176,7 @@ namespace kengine
 
 			hDC = GetDC(hWindow);
 
-			if (hDC == nullptr)
-			{
+			if (hDC == nullptr) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to get the device context: " + std::to_string(error) + "\n");
 				return 0;
@@ -211,10 +195,8 @@ namespace kengine
 		int destroy() {
 			int isSuccessful = 1;
 
-			if (hDC != nullptr)
-			{
-				if (!ReleaseDC(hWindow, hDC))
-				{
+			if (hDC != nullptr) {
+				if (!ReleaseDC(hWindow, hDC)) {
 					DWORD error = GetLastError();
 					globalUserEventsCallback->debugMessage("It was not possible to release the device context: " + std::to_string(error) + "\n");
 				}
@@ -222,10 +204,8 @@ namespace kengine
 				hDC = nullptr;
 			}
 
-			if (hWindow != nullptr)
-			{
-				if (!DestroyWindow(hWindow))
-				{
+			if (hWindow != nullptr) {
+				if (!DestroyWindow(hWindow)) {
 					DWORD error = GetLastError();
 					globalUserEventsCallback->debugMessage("It was not possible to destroy a window application: " + std::to_string(error) + "\n");
 					isSuccessful = 0;
@@ -268,9 +248,7 @@ namespace kengine
 	class win32_rendering_context : public rendering_context
 	{
 	public:
-		explicit win32_rendering_context(window* windowParam)
-			: win32_win{ nullptr }, hRC{ nullptr }
-		{
+		explicit win32_rendering_context(window* windowParam) {
 			assert(!(windowParam == nullptr));
 			win32_win = dynamic_cast<win32_window*>(windowParam);
 		}
@@ -284,15 +262,14 @@ namespace kengine
 		win32_rendering_context(win32_rendering_context&& move) noexcept = delete;  // move constructor
 		win32_rendering_context& operator=(win32_rendering_context&&) = delete; // move assigment
 
-		int create() {
+		int create(const compatibility_profile& profile) {
 			/*
 				We need to create a dummy opengl context first to get the WGL extensions to create a better OpenGL context.
 
 				https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
 			*/
 
-			PIXELFORMATDESCRIPTOR pfd =
-			{
+			PIXELFORMATDESCRIPTOR pfd = {
 				sizeof(PIXELFORMATDESCRIPTOR),
 				1,
 				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
@@ -323,15 +300,13 @@ namespace kengine
 
 			int pixelFormat = ChoosePixelFormat(win32_win->hDC, &pfd);
 
-			if (pixelFormat == 0)
-			{
+			if (pixelFormat == 0) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to choose an pixel format: " + std::to_string(error) + "\n");
 				return 0;
 			}
 
-			if (!SetPixelFormat(win32_win->hDC, pixelFormat, &pfd))
-			{
+			if (!SetPixelFormat(win32_win->hDC, pixelFormat, &pfd)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to set the format pixel: " + std::to_string(error) + "\n");
 				return 0;
@@ -339,8 +314,7 @@ namespace kengine
 
 			hRC = wglCreateContext(win32_win->hDC);
 
-			if (hRC == nullptr)
-			{
+			if (hRC == nullptr) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to create the rendering context: " + std::to_string(error) + "\n");
 				return 0;
@@ -356,26 +330,24 @@ namespace kengine
 			destroy();
 			// destroying the window
 			win32_win->destroy();
-			//flush the Window event messages
+			// flush the Window event messages
 			kengine::handleSystemMessages();
 			// creating a new window for the new opengl context (extended context)
 			win32_win->create();
 			// creating a new rendering context with WGL extension
-			createEXT();
+			createEXT(profile);
 			makeCurrent(true);
 			globalAppManager.setCallbackCalls(true);
 			return 1;
 		}
 
 		int destroy() {
-			if (!wglMakeCurrent(win32_win->hDC, nullptr))
-			{
+			if (!wglMakeCurrent(win32_win->hDC, nullptr)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to make the current rendering context nullptr: " + std::to_string(error) + "\n");
 			}
 
-			if (!wglDeleteContext(hRC))
-			{
+			if (!wglDeleteContext(hRC)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to delete the rendering context: " + std::to_string(error) + "\n");
 				return 0;
@@ -388,8 +360,7 @@ namespace kengine
 		int makeCurrent(bool enable) {
 			HGLRC context = (enable ? hRC : nullptr);
 
-			if (!wglMakeCurrent(win32_win->hDC, context))
-			{
+			if (!wglMakeCurrent(win32_win->hDC, context)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to make current the rendering context: " + std::to_string(error) + "\n");
 				return 0;
@@ -398,7 +369,10 @@ namespace kengine
 			return 1;
 		}
 
-		int createEXT() {
+		int createEXT(const compatibility_profile& profile) {
+			/*
+				check https://registry.khronos.org/OpenGL/extensions/ARB/WGL_ARB_create_context.txt for more details
+			*/
 
 #ifndef WGL_ARB_extensions_string
 			globalUserEventsCallback->debugMessage("The WGL_ARB_extensions_string extension is not defined");
@@ -415,15 +389,20 @@ namespace kengine
 			return 0;
 #endif
 
-#ifndef WGL_ARB_create_context_profile
-			globalUserEventsCallback->debugMessage("The WGL_ARB_create_context_profile extension is not defined");
-			return 0;
-#endif
+//#ifndef WGL_ARB_create_context_profile
+//			globalUserEventsCallback->debugMessage("The WGL_ARB_create_context_profile extension is not defined");
+//			return 0;
+//#endif
 
 #ifndef WGL_EXT_swap_control
 			globalUserEventsCallback->debugMessage("The WGL_EXT_swap_control extension is not defined");
 			return 0;
 #endif
+
+//#ifndef GL_ARB_compatibility
+//			globalUserEventsCallback->debugMessage("The GL_ARB_compatibility extension is not defined");
+//			return 0;
+//#endif
 
 			/*
 				https://registry.khronos.org/OpenGL/extensions/ARB/WGL_ARB_pixel_format.txt
@@ -443,23 +422,20 @@ namespace kengine
 			int piFormats;
 			UINT nNumFormats;
 
-			if (wglChoosePixelFormatARB(win32_win->hDC, piAttribIList, nullptr, 1, &piFormats, &nNumFormats) == FALSE)
-			{
+			if (wglChoosePixelFormatARB(win32_win->hDC, piAttribIList, nullptr, 1, &piFormats, &nNumFormats) == FALSE) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to choose an extensible pixel format: " + std::to_string(error) + "\n");
 				return 0;
 			}
 
 			PIXELFORMATDESCRIPTOR pfd;
-			if (!DescribePixelFormat(win32_win->hDC, piFormats, sizeof(PIXELFORMATDESCRIPTOR), &pfd))
-			{
+			if (!DescribePixelFormat(win32_win->hDC, piFormats, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to obtains information about the ext pixel format: " + std::to_string(error) + "\n");
 				return 0;
 			}
 
-			if (!SetPixelFormat(win32_win->hDC, piFormats, &pfd))
-			{
+			if (!SetPixelFormat(win32_win->hDC, piFormats, &pfd)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to set the ext format pixel: " + std::to_string(error) + "\n");
 				return 0;
@@ -472,8 +448,8 @@ namespace kengine
 				WGL_CONTEXT_MAJOR_VERSION_ARB, KENGINE_OPENGL_MAJOR_VERSION,
 				WGL_CONTEXT_MINOR_VERSION_ARB, KENGINE_OPENGL_MINOR_VERSION,
 				//WGL_CONTEXT_LAYER_PLANE_ARB,
-				//WGL_CONTEXT_FLAGS_ARB, // WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB or WGL_CONTEXT_DEBUG_BIT_ARB
-				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, // WGL_CONTEXT_CORE_PROFILE_BIT_ARB or WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 
+				WGL_CONTEXT_FLAGS_ARB, profile.contextFlag, // WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, WGL_CONTEXT_DEBUG_BIT_ARB
+				WGL_CONTEXT_PROFILE_MASK_ARB, profile.profileMask, // WGL_CONTEXT_CORE_PROFILE_BIT_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 
 				0
 			};
 
@@ -481,8 +457,7 @@ namespace kengine
 
 			hRC = wglCreateContextAttribsARB(win32_win->hDC, hRC, attribList);
 
-			if (hRC == nullptr)
-			{
+			if (hRC == nullptr) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to create the ext rendering context: " + std::to_string(error) + "\n");
 				return 0;
@@ -491,22 +466,23 @@ namespace kengine
 			return 1;
 		}
 
-		int swapBuffers()
-		{
+		int swapBuffers() {
 			return 1;
 		}
 
+		void clearBuffers() {
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+
 	private:
-		win32_window* win32_win; // avoid dynamic casts in the methods
+		win32_window* win32_win = nullptr; // avoid dynamic casts in the methods
 		HGLRC hRC = nullptr;
 	};
 	
-	rendering_context* renderingContextInstance(window* win)
-	{
+	rendering_context* renderingContextInstance(window* win) {
 		return new win32_rendering_context(win);
 	}
 }
-
 
 int64_t kengine::getHighResolutionTimerCounter()
 {
@@ -515,14 +491,12 @@ int64_t kengine::getHighResolutionTimerCounter()
 	return static_cast<int64_t>(time.QuadPart);
 }
 
-
 int64_t kengine::getHighResolutionTimerFrequency()
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	return static_cast<int64_t>(frequency.QuadPart);
 }
-
 
 int kengine::createDebugConsole()
 {
@@ -549,53 +523,37 @@ int kengine::createDebugConsole()
 	return 1;
 }
 
-
 int kengine::closeDebugConsole()
 {
 	return FreeConsole();
 }
 
-
 int kengine::osInitialize()
 {
 	return registerWindowClass(K_ENGINE_WINDOW_CLASS);
 }
-/*
-	OS finish
-*/
+
 int kengine::osFinish()
 {
 	return unregisterWindowClass(K_ENGINE_WINDOW_CLASS);
 }
 
-/*
-	Get the primary display size in pixels
-*/
 void kengine::getDisplaySize(int* width, int* height)
 {
 	*width = GetSystemMetrics(SM_CXSCREEN);
 	*height = GetSystemMetrics(SM_CYSCREEN);
 }
 
-/*
-	Get the center position (x axis) of the primary display
-*/
 int kengine::getDisplayCenterPosX(int displayWidth)
 {
 	return (GetSystemMetrics(SM_CXSCREEN) - displayWidth) / 2;
 }
 
-/*
-	Get the center position in y axis of the primary display
-*/
 int kengine::getDisplayCenterPosY(int displayHeight)
 {
 	return (GetSystemMetrics(SM_CYSCREEN) - displayHeight) / 2;
 }
 
-/*
-	Get the number of monitors
-*/
 int kengine::getNumberOfMonitors()
 {
 	return 0;
@@ -614,35 +572,24 @@ int kengine::getNumberOfMonitors()
 //	return GetDpiForWindow(hWindow);
 //}
 
-/*
-	Send QUIT message to indicate to the system that a thread has made a request to terminate (quit).
-*/
 void kengine::quitApplication(int returnCode)
 {
 	PostQuitMessage(returnCode);
 }
 
-/*
-	Set global callback events
-*/
 void kengine::setGlobalUserEventsCallback(events_callback* evt)
 {
 	assert(globalUserEventsCallback == nullptr); // trying to override a globalUserEventsCallback
 	globalUserEventsCallback = evt;
 }
 
-/*
-	Message events handling (message pump)
-*/
 void kengine::handleSystemMessages()
 {
 	// (!) PLEASE DON'T INCLUDE I/O's STUFF HERE!
 	MSG msg;
 
-	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-	{
-		if (msg.message == WM_QUIT)
-		{
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		if (msg.message == WM_QUIT) {
 			globalUserEventsCallback->onFinishEvent();
 		}
 
@@ -651,9 +598,6 @@ void kengine::handleSystemMessages()
 	}
 }
 
-/*
-	Getting an OpenGL function address
-*/
 void* kengine::getGLFunctionAddress(std::string name)
 {
 	/*
@@ -664,8 +608,7 @@ void* kengine::getGLFunctionAddress(std::string name)
 	void* functionAddress = (void*)wglGetProcAddress(name.c_str());
 
 	// some implementations can return these codes: 1, 2, 3 and -1
-	if (functionAddress == nullptr || (functionAddress == (void*)0x01) || (functionAddress == (void*)0x02) || (functionAddress == (void*)0x03) || (functionAddress == (void*)-1))
-	{
+	if (functionAddress == nullptr || (functionAddress == (void*)0x01) || (functionAddress == (void*)0x02) || (functionAddress == (void*)0x03) || (functionAddress == (void*)-1)) {
 		//HMODULE module = LoadLibraryA("opengl32.dll");
 		//p = (void*)GetProcAddress(module, name);
 		return nullptr;
@@ -674,9 +617,6 @@ void* kengine::getGLFunctionAddress(std::string name)
 	return functionAddress;
 }
 
-/*
-	Getting all OpenGL functions
-*/
 int kengine::getAllGLProcedureAddress()
 {
 #pragma warning(disable: 4191)
@@ -689,8 +629,11 @@ int kengine::getAllGLProcedureAddress()
 
 	if (wglChoosePixelFormatARB == nullptr ||
 		wglCreateContextAttribsARB == nullptr ||
-		wglSwapIntervalEXT == nullptr)
-	{
+		wglSwapIntervalEXT == nullptr) {
+		return 0;
+	}
+
+	if (!getAllGLProcedures()) {
 		return 0;
 	}
 
@@ -769,8 +712,7 @@ int registerWindowClass(std::string windowClassName)
 	windowClass.lpszMenuName = 0;
 	windowClass.lpszClassName = WINDOWCLASSNAME(windowClassName.c_str()); // mandatory
 
-	if (RegisterClassEx(&windowClass) == 0)
-	{
+	if (RegisterClassEx(&windowClass) == 0) {
 		assert(!(globalUserEventsCallback == nullptr));
 		DWORD error = GetLastError();
 		globalUserEventsCallback->debugMessage("It was not possible to register a " + windowClassName + " class window: " + std::to_string(error));
@@ -787,8 +729,7 @@ int unregisterWindowClass(std::string windowClassName)
 {
 	int ret = UnregisterClass(WINDOWCLASSNAME(windowClassName.c_str()), GetModuleHandle(nullptr));
 
-	if (!ret)
-	{
+	if (!ret) {
 		assert(!(globalUserEventsCallback == nullptr));
 		DWORD error = GetLastError();
 		globalUserEventsCallback->debugMessage("It was not possible to unregister a " + windowClassName + " class window: " + std::to_string(error));
@@ -800,8 +741,7 @@ int unregisterWindowClass(std::string windowClassName)
 /*
 	Win32 window procedure
 */
-LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	assert(!(globalUserEventsCallback == nullptr));
 
 	if(!globalAppManager.isCallbackCallsEnabled())

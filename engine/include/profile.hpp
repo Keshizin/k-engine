@@ -2,7 +2,7 @@
 	K-Engine profiling
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal

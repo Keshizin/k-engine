@@ -2,7 +2,7 @@
 	Operating System API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@
 
 // k-engine headers
 #include <events_callback.hpp>
+#include <gl_wrapper.hpp>
 // std headers
 #include <cstdint>
 #include <string>
@@ -35,36 +36,12 @@
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <GL/gl.h>
-#include <GL/wglext.h>
 #elif defined(__ANDROID__)
 #include <android/log.h>
 #include <android_native_app_glue.h>
-#include <EGL/egl.h>
 #elif defined(__linux__)
 #include <X11/Xlib.h>
-#include <GL/glx.h>
-#include <GL/glxext.h>
 #endif
-
-
-/*
-	This macro provide std output for debug only
-	Note: este bloco de codigo deve ser movido para o header de log
-*/
-
-#ifdef K_ENGINE_DEBUG
-#if defined(__ANDROID__)
-#define MODULE_NAME "K-ENGINE"
-#define K_LOG_OUTPUT_RAW(message) __android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message)
-#else
-#include <iostream>
-#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
-#endif
-#else
-#define K_LOG_OUTPUT_RAW(message)
-#endif
-
 
 /*
 	K-Engine public interface for OS API functions
@@ -77,7 +54,13 @@ namespace kengine
 	class window
 	{
 	public:
-		virtual ~window() {} // call the derivated class destructor
+		window() {}
+		virtual ~window() {}
+
+		window(const window& copy) = delete; // copy constructor
+		window& operator=(const window& copy) = delete; // copy assignment
+		window(window&& move) noexcept = delete;  // move constructor
+		window& operator=(window&&) = delete; // move assigment
 
 		virtual bool create(int x, int y, int width, int height, const std::string& name) = 0;
 		virtual int destroy() = 0;
@@ -93,8 +76,13 @@ namespace kengine
 		int height = 480; // window height in pixels size
 	};
 
+	/*
+		Retorna uma instância baseada na plataforma (Win32, LibX ou Android)
+	*/
 	window* windowInstance();
 
+	/*
+	*/
 	class rendering_context_info
 	{
 	public:
@@ -103,25 +91,18 @@ namespace kengine
 	};
 
 	/*
-		Supported rendering API:
-			- OpenGL (WGL)
-			- OpenGL (GLX)
-			- OpenGL (EGL)
-
-		Ideas:
-			- obrigatoriamente é necessário ter uma janela de aplicação associada a este contexto
-			- não deve ser possível criar um contexto sem uma janela de aplicação associada
-			- não permitir copy and move semantics sem tratamentos devidos
+		kengine::rendering_context is an abstract class for graphis API context e.g. OpenGL.
 	*/
 	class rendering_context
 	{
 	public:
-		virtual ~rendering_context() {} // call the derivated class destructor
+		virtual ~rendering_context() {}
 
-		virtual int create() = 0;
+		virtual int create(const compatibility_profile& profile) = 0;
 		virtual int destroy() = 0;
 		virtual int makeCurrent(bool enable) = 0;
 		virtual int swapBuffers() = 0;
+		virtual void clearBuffers() = 0;
 
 		void setRenderingContextInfo(int major, int minor) { info.major = major; info.minor = minor; }
 
@@ -129,10 +110,16 @@ namespace kengine
 		rendering_context_info info;
 	};
 
+	/*
+		Retorna uma instância baseada na plataforma (Win32, LibX ou Android)
+	*/
 	rendering_context* renderingContextInstance(window* windowParam);
+
 
 	/*
 		Global App Manager Class
+			- permite controlar as chamadas de funções de callback
+			- permite gerenciar váriaveis globais específicos de plataformas com LibX e Android
 	*/
 	class global_app_manager
 	{
@@ -227,12 +214,7 @@ namespace kengine
 	void handleSystemMessages();
 
 	/*
-		Getting an OpenGL function address
-	*/
-	void* getGLFunctionAddress(std::string name);
-
-	/*
-		Getting all OpenGL functions
+		Getting OpenGL functions and OS extension functions
 	*/
 	int getAllGLProcedureAddress();
 }

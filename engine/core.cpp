@@ -2,7 +2,7 @@
 	K-Engine Core
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,11 @@
 #include <cassert>
 
 kengine::core::core()
-	:
-	mainLoopState{ K_RUNTIME_STATE::STOPPED },
-	userEventsCallback{ nullptr }
 {
 	osInitialize();
 }
 
 kengine::core::core(events_callback* eventsCallback)
-	:
-	mainLoopState{ K_RUNTIME_STATE::STOPPED },
-	userEventsCallback { nullptr }
 {
 	setEventsCallback(eventsCallback);
 	osInitialize();
@@ -59,13 +53,13 @@ void kengine::core::startMainLoop()
 	//int64_t frequency = getHighResolutionTimerFrequency();
 
 	userEventsCallback->beforeMainLoopEvent();
+	int64_t startTime;
 	int64_t endTime = getHighResolutionTimerCounter();
 
 	// please don't put code between endTime initialization and startTime initialization !!!
 
-	while (mainLoopState != K_RUNTIME_STATE::STOPPED)
-	{
-		int64_t startTime = getHighResolutionTimerCounter();
+	while (mainLoopState != K_RUNTIME_STATE::STOPPED) {
+		startTime = getHighResolutionTimerCounter();
 
 		/*
 			message pump
@@ -95,12 +89,12 @@ void kengine::core::stopMainLoop()
 	mainLoopState = K_RUNTIME_STATE::STOPPED;
 }
 
-void kengine::core::pauseGameLoop()
+void kengine::core::pauseMainLoop()
 {
 	mainLoopState = K_RUNTIME_STATE::PAUSED;
 }
 
-void kengine::core::resumeGameLoop()
+void kengine::core::resumeMainLoop()
 {
 	mainLoopState = K_RUNTIME_STATE::RUNNING;
 }
@@ -112,11 +106,16 @@ void kengine::core::setEventsCallback(events_callback* eventsCallback)
 	kengine::setGlobalUserEventsCallback(eventsCallback);
 }
 
-std::string kengine::infoType()
+std::string kengine::getDataTypeInfo()
 {
-	return std::string("> k-engine data types:") +
-		"\n\t- int: " + std::to_string(sizeof(int)) +
-		"\n\t- long int: " + std::to_string(sizeof(long int)) +
-		"\n\t- int64_t: " + std::to_string(sizeof(int64_t)) +
+	return std::string("> Platform data types:") +
+		"\n - int: " + std::to_string(sizeof(int)) +
+		"\n - long int: " + std::to_string(sizeof(long int)) +
+		"\n - int64_t: " + std::to_string(sizeof(int64_t)) +
 		"\n";
+}
+
+std::string kengine::getVersion()
+{
+	return "kengine version " + std::to_string(K_ENGINE_VERSION_MAJOR) + "." + std::to_string(K_ENGINE_VERSION_MINOR) + "." + std::to_string(K_ENGINE_VERSION_PATCH);
 }

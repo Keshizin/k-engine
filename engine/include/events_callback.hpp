@@ -2,7 +2,7 @@
 	K-Engine events callback
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -52,12 +52,7 @@ namespace kengine
 			Callback event called once per main loop iteration
 			@param - *frameTime* is a high resolution (<1us) time value
 		*/
-		virtual void update(int64_t frameTime) = 0;
-
-		/*
-			Callback event called when the user clicks the window's close button
-		*/
-		virtual void closeButtonEvent() = 0;
+		virtual void update(const int64_t frameTime) = 0;
 
 		/*
 			Callback event called when the apllication is being terminated
@@ -65,47 +60,7 @@ namespace kengine
 		virtual void onFinishEvent() = 0;
 
 		/*
-			Callback event called when the window is activated
-		*/
-		virtual void onResumeEvent() = 0;
-
-		/*
-			Callback event called when the window is deactivated (e.g. minimized window)
-		*/
-		virtual void onPauseEvent() = 0;
-
-		/*
-			Callback event called when the window is being resized
-		*/
-		virtual void onResizeWindowEvent(int width, int height) = 0;
-
-		/*
-			Callback event called when the window is being moved
-		*/
-		virtual void onMoveWindowEvent(int x, int y) = 0;
-
-		/*
-			Callback event called on mouse move event
-		*/
-		virtual void onMouseMotionEvent(int x, int y) = 0;
-
-		/*
-			Callback event called on mouse button event
-		*/
-		virtual void onMouseButtonEvent(int button, MOUSE_ACTION state, int x, int y) = 0;
-
-		/*
-			Callback event called on keyboard key event
-		*/
-		virtual void onKeyboardEvent(unsigned long long key, int state) = 0;
-
-		/*
-			Callback event called on special keyboard keys event like shift, ctrl, etc
-		*/
-		virtual void onKeyboardSpecialEvent(unsigned long long key, int state) = 0;
-
-		/*
-			Callback event called when the window is ready for use (e.g. ANativeWindow (Android plaform) is created implicitly)
+			Callback event called when the window is ready for use
 		*/
 		virtual void onWindowReady(window* window) = 0;
 
@@ -113,6 +68,51 @@ namespace kengine
 			Callback event called when the window is being destroyed
 		*/
 		virtual void onWindowDestroy() = 0;
+
+		/*
+			Callback event called when the window is deactivated (e.g. minimized window)
+		*/
+		virtual void onPauseEvent() = 0;
+
+		/*
+			Callback event called when the window is activated
+		*/
+		virtual void onResumeEvent() = 0;
+
+		/*
+			Callback event called when the user clicks the window's close button
+		*/
+		virtual void closeButtonEvent() = 0;
+
+		/*
+			Callback event called when the window is being resized
+		*/
+		virtual void onResizeWindowEvent(const int width, const int height) = 0;
+
+		/*
+			Callback event called when the window is being moved
+		*/
+		virtual void onMoveWindowEvent(const int x, const int y) = 0;
+
+		/*
+			Callback event called on mouse move event
+		*/
+		virtual void onMouseMotionEvent(const int x, const int y) = 0;
+
+		/*
+			Callback event called on mouse button event
+		*/
+		virtual void onMouseButtonEvent(const int button, const MOUSE_ACTION& state, const int x, const int y) = 0;
+
+		/*
+			Callback event called on keyboard key event
+		*/
+		virtual void onKeyboardEvent(const unsigned long long key, const int state) = 0;
+
+		/*
+			Callback event called on special keyboard keys event like shift, ctrl, etc
+		*/
+		virtual void onKeyboardSpecialEvent(const unsigned long long key, const int state) = 0;
 
 		/*
 			Callback event for debug message

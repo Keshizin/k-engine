@@ -28,6 +28,7 @@
 // k-engine headers
 #include <os_api_wrapper.hpp>
 #include <k_version.hpp>
+#include <logger.hpp>
 // std headers
 #include <cassert>
 // android/linux headers
@@ -100,7 +101,7 @@ namespace kengine
 
         ~android_rendering_context() { destroy(); }
 
-        int create()
+        int create(const compatibility_profile& profile)
         {
             eglDisplayID = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
@@ -162,13 +163,16 @@ namespace kengine
             K_LOG_OUTPUT_RAW(width.c_str());
             K_LOG_OUTPUT_RAW(height.c_str());
 
+            bool isDebug = profile.contextFlag & CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB ? EGL_TRUE : EGL_FALSE;
+            bool isForwardCompatible = profile.contextFlag & CONTEXT_FLAG::CONTEXT_FORWARD_COMPATIBLE_BIT_ARB ? EGL_TRUE : EGL_FALSE;
+
             // creating context
             const EGLint context_attribs[] = {
                     EGL_CONTEXT_MAJOR_VERSION, 3,
                     EGL_CONTEXT_MINOR_VERSION, 2,
-                    //EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT, // or EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT
-                    //EGL_CONTEXT_OPENGL_DEBUG, EGL_FALSE,
-                    //EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, EGL_FALSE,
+                    EGL_CONTEXT_OPENGL_PROFILE_MASK, profile.profileMask, // EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT, // or EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT
+                    EGL_CONTEXT_OPENGL_DEBUG, isDebug,
+                    EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, isForwardCompatible,
                     //EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_FALSE,
                     //EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY,
                     EGL_NONE
@@ -217,6 +221,10 @@ namespace kengine
 
         int swapBuffers() {
             return eglSwapBuffers(eglDisplayID, eglSurface);
+        }
+
+        void clearBuffers() {
+            glClear(GL_COLOR_BUFFER_BIT);
         }
 
     private:

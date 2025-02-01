@@ -5,7 +5,7 @@ Pre-requisites:
 - MSVC 2019 or greater for MS Windows
 - GCC compiler for Linux
 - CMake
-- Lua (binaries included with this project)
+- Lua (binaries are included with this project)
 
 ## Building System
 
@@ -20,7 +20,7 @@ Estes scripts, além de executar o comando **cmake** e **make** para cada plataf
 
 > **Nota**: o script executa um programa _Lua_ (```build/auto-increment.lua```) para atualizar o arquivo de versão ```k_version.hpp```. O projeto também disponibiliza o interpretador **Lua** para ambientes de desenvolvimento Microsoft Windows e Linux.
 
-## Processo de Building com Versionamento Automático
+## Processo de Building com versionamento automático
 
 Este projeto utiliza sistema de versão baseado em [**Semantic Version**](https://semver.org/).
 
@@ -64,6 +64,8 @@ Ideias iniciais de pipeline de building para incrementar a versão automaticamen
 
 Este processo de building gera uma nova versão no arquivo ```engine/include/k_version.hpp```.
 
+Referências de estudo:
+
 - https://semver.org/
 - https://stackoverflow.com/questions/5007707/versioning-with-an-automatic-build-system
 - https://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
@@ -89,6 +91,8 @@ Arquivos necessários para utilizar k-engine em seus projetos:
 - arquivos headers (.hpp) em ```core/inc/```
 
 ## Compiler Warnings from MSVC
+
+Dependendo do compilador, é possível que diversos warnings sejam gerados durante a compilação. Este tópico contém informações a respeito destes warnings.
 
 Apesar de não ser necessário incluir nomes de parâmetros em declarações de funções. É melhor colocá-los para questão de legibilidade. Imagina que o usuario vai consultar o arquivo header e ele consegue identificar o significado de cada parametro pelo seu nome.
 
@@ -117,3 +121,5 @@ https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-w
 https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4820?view=msvc-160
 
 Nota: É necessário uma forma de realizar essa desabilitação no CMAKE. Atualmente está sendo editada diretamente na flag CMAKE_CXX_FLAGS como por exemplo usar target_compile_options ou pragmas dentro do código.
+
+## Como compilar no Android (Android NDK) - EM CONSTRUÇÃO

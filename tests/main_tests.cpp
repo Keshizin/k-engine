@@ -1,6 +1,6 @@
 /*
-	K-Engine Timer
-	This file is part of the K-Engine.
+	K-Engine Test Unit
+	This file provide an test environment for K-Engine.
 
 	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
@@ -23,33 +23,27 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_TIMER_HPP
-#define K_ENGINE_TIMER_HPP
+#include <mesh.hpp>
 
-namespace kengine
+int main()
 {
-	/*
-		kengine::timer class
-	*/
-	class timer
+	int result = 0;
+
+	float vertex_positions[] =
 	{
-	public:
-		timer();
-		explicit timer(long long stopTimeInMs);
-
-		void start();
-		int done();
-		int doneAndRestart();
-
-		void setTimerInMs(long long stopTimeInMs);
-		void stop();
-
-	private:
-		long long stopTime;
-		long long startTimer;
-		long long stopWatch;
-		long long frequency;
+		-1.0, -1.0, 0.0f,
+		 1.0, -1.0, 0.0f,
+		-1.0,  1.0, 0.0f,
+		-1.0,  1.0, 0.0f,
+		 1.0, -1.0, 0.0f,
+		 1.0,  1.0, 0.0f,
 	};
-}
 
-#endif
+	kengine::vattrib<float> va = {
+		vertex_positions,
+		18,
+		3
+	};
+	
+	return result;
+}

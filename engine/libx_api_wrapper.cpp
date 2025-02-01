@@ -328,7 +328,7 @@ namespace kengine
 		xlib_rendering_context(xlib_rendering_context&& move) noexcept = delete;  // move constructor
 		xlib_rendering_context& operator=(xlib_rendering_context&&) = delete; // move assigment
 
-		int create() {
+		int create(const compatibility_profile& profile) {
 #ifndef GLX_ARB_create_context 
 			globalUserEventsCallback->debugMessage("The GLX_ARB_create_context extension is not defined");
 			return 0;
@@ -360,8 +360,8 @@ namespace kengine
 			int attribList[] = {
 			   GLX_CONTEXT_MAJOR_VERSION_ARB, KENGINE_OPENGL_MAJOR_VERSION,
 			   GLX_CONTEXT_MINOR_VERSION_ARB, KENGINE_OPENGL_MINOR_VERSION,
-			   //GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-			   GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+			   GLX_CONTEXT_FLAGS_ARB, profile.contextFlag,
+			   GLX_CONTEXT_PROFILE_MASK_ARB, profile.profileMask,
 			   None
 			};
 
@@ -396,6 +396,10 @@ namespace kengine
 		int swapBuffers()
 		{
 			return 1;
+		}
+
+		void clearBuffers() {
+			glClear(GL_COLOR_BUFFER_BIT);
 		}
 
 	private:
@@ -524,9 +528,9 @@ void* kengine::getGLFunctionAddress(std::string name)
 		References:
 			- https://www.khronos.org/opengl/wiki/Load_OpenGL_Functions
 	*/
-
-	//return glXGetProcAddressARB(name.c_str());
-	return nullptr;
+	
+	auto functionAddress = glXGetProcAddressARB((const GLubyte*)name.c_str());
+	return (void*)functionAddress;
 }
 
 
@@ -536,6 +540,10 @@ int kengine::getAllGLProcedureAddress()
 
 	if (glXCreateContextAttribsARB == nullptr)
 	{
+		return 0;
+	}
+
+	if (!getAllGLProcedures()) {
 		return 0;
 	}
 

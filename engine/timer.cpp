@@ -2,7 +2,7 @@
 	K-Engine Timer Class
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,8 @@ kengine::timer::timer()
 	:
 	stopTime{ 0 },
 	startTimer{ 0 },
-	stopWatch{ 0 }
+	stopWatch{ 0 },
+	frequency{ kengine::getHighResolutionTimerFrequency() }
 {
 }
 
@@ -38,7 +39,8 @@ kengine::timer::timer(long long stopTimeInMs)
 	:
 	stopTime{ stopTimeInMs * (kengine::getHighResolutionTimerFrequency() / 1000) },
 	startTimer{ 0 },
-	stopWatch{ 0 }
+	stopWatch{ 0 },
+	frequency{ kengine::getHighResolutionTimerFrequency() }
 {
 }
 
@@ -79,5 +81,5 @@ int kengine::timer::doneAndRestart()
 
 void kengine::timer::setTimerInMs(long long stopTimeInMs)
 {
-	stopTime = stopTimeInMs * (getHighResolutionTimerFrequency() / 1000); // convert from milliseconds to perfomance counter (high resolution < 1us)
+	stopTime = stopTimeInMs * (frequency / 1000); // convert from milliseconds to perfomance counter (high resolution < 1us)
 }

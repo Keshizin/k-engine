@@ -6,7 +6,6 @@
 #	https://developer.android.com/ndk/guides/cmake
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_VERBOSE_MAKEFILE on)
-#set (CMAKE_CXX_STANDARD 11)
 
 #
 #  project name
@@ -20,6 +19,7 @@ enable_language(CXX)
 #
 set(APPNAME game)
 set(LIBNAME kengine)
+set(KENGINE_TEST_NAME kengine_test)
 
 #
 # output binary directory
@@ -51,3 +51,12 @@ set(CMAKE_CXX_FLAGS "-Wall ${WARNING_FLAGS}")
 #
 add_subdirectory(engine)
 add_subdirectory(demo)
+
+#
+# test directories
+#
+
+#if(KENGINE_TEST_UNIT)
+enable_testing()
+add_subdirectory(tests)
+#ndif()

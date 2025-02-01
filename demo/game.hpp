@@ -2,7 +2,7 @@
 	K-Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 #include <core.hpp>
 #include <profile.hpp>
 #include <rendering_system.hpp>
+#include <logger.hpp>
 
 namespace demo
 {
@@ -56,17 +57,27 @@ namespace demo
 			Callback event called once per main loop iteration
 			@param - *frameTime* is a high resolution (<1us) time value
 		*/
-		void update(int64_t frameTime);
+		void update(const int64_t frameTime);
 
 		/*
-			Callback event called before the finish event starts
-		*/
-		void closeButtonEvent();
-
-		/*
-			Callback event called after the finish event ends
+			Callback event called when the apllication is being terminated
 		*/
 		void onFinishEvent();
+
+		/*
+			Callback event called when the window is ready for use
+		*/
+		void onWindowReady(kengine::window* window);
+
+		/*
+			Callback event called when the window is being destroyed
+		*/
+		void onWindowDestroy();
+
+		/*
+			Callback event called when the window is deactivated (e.g. minimized window)
+		*/
+		void onPauseEvent();
 
 		/*
 			Callback event called when the window is activated
@@ -74,49 +85,39 @@ namespace demo
 		void onResumeEvent();
 
 		/*
-			Callback event called when the window is deactivated
+			Callback event called when the user clicks the window's close button
 		*/
-		void onPauseEvent();
+		void closeButtonEvent();
 
 		/*
 			Callback event called when the window is being resized
 		*/
-		void onResizeWindowEvent(int width, int height);
+		void onResizeWindowEvent(const int width, const int height);
 
 		/*
 			Callback event called when the window is being moved
 		*/
-		void onMoveWindowEvent(int x, int y);
+		void onMoveWindowEvent(const int x, const int y);
 
 		/*
 			Callback event called on mouse move event
 		*/
-		void onMouseMotionEvent(int x, int y);
+		void onMouseMotionEvent(const int x, const int y);
 
 		/*
 			Callback event called on mouse button event
 		*/
-		void onMouseButtonEvent(int button, kengine::MOUSE_ACTION state, int x, int y);
+		void onMouseButtonEvent(const int button, const kengine::MOUSE_ACTION& state, const int x, const int y);
 
 		/*
 			Callback event called on keyboard key event
 		*/
-		void onKeyboardEvent(unsigned long long key, int state);
+		void onKeyboardEvent(const unsigned long long key, const int state);
 
 		/*
 			Callback event called on special keyboard keys event like shift, ctrl, etc
 		*/
-		void onKeyboardSpecialEvent(unsigned long long key, int state);
-
-		/*
-			Callback event called when the window is ready for use (e.g. ANativeWindow in Android plaform)
-		*/
-		void onWindowReady(kengine::window* window);
-		
-		/*
-			Callback event called when the window was destroyed
-		*/
-		void onWindowDestroy();
+		void onKeyboardSpecialEvent(const unsigned long long key, const int state);
 
 		/*
 			Callback event for debug message
@@ -128,6 +129,9 @@ namespace demo
 		kengine::window* m_window = nullptr;
 		kengine::profile m_profile;
 		kengine::rendering_system m_renderingSystem;
+		kengine::GLSLprogram m_shader;
+
+		kengine::mesh_node node;
 	};
 }
 

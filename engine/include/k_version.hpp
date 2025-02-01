@@ -2,7 +2,7 @@
 	K-Engine Version
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,7 @@
 /*
 	This project uses Semantic Versioning (https://semver.org/) and automatic increment version
 
-		- MAJOR.MINOR.PATCH
-		- commit hash
-		- build-type.build-increment.build date
-		- platform
-
-			M.N.P-hash-[release or debug or undefined]-[platform]
+		major.minor.patch - commit_hash - build-type.build_increment.build_date - platform
 
 	Notes:
 		- The build types are [Release] or [Debug]
@@ -42,16 +37,14 @@
 #define K_ENGINE_VERSION_MINOR 0 // version for backward compatible changes
 #define K_ENGINE_VERSION_PATCH 0 // version for backward compatible bug fixes
 
-// (!) the lines below are automatically updated by external building tool
+// the lines below must be automatically updated by external building tool
 #define K_ENGINE_GIT_HASHCODE 0
-#define K_ENGINE_BUILD_TYPE 1
+#define K_ENGINE_BUILD_TYPE 2
 #define K_ENGINE_VERSION_BUILD_INCREMENT 0
 #define K_ENGINE_BUILD_DATE 0
 #define K_ENGINE_BUILD_PLATFORM 2
 
-/*
-	OpenGL version
-*/
+// OpenGL version
 #define KENGINE_OPENGL_MAJOR_VERSION 4
 #define KENGINE_OPENGL_MINOR_VERSION 5
 
@@ -100,9 +93,9 @@ namespace kengine
 
 	inline std::string version() {
 		return
-			std::to_string(K_ENGINE_VERSION_MAJOR) + "." + std::to_string(K_ENGINE_VERSION_MINOR) + "." + std::to_string(K_ENGINE_VERSION_PATCH) + "-" +
-			std::to_string(K_ENGINE_GIT_HASHCODE) + "-" +
-			getBuildType(K_ENGINE_BUILD_TYPE) + "." + std::to_string(K_ENGINE_VERSION_BUILD_INCREMENT) + "." + std::to_string(K_ENGINE_BUILD_DATE) + "-" +
+			std::to_string(K_ENGINE_VERSION_MAJOR) + "." + std::to_string(K_ENGINE_VERSION_MINOR) + "." + std::to_string(K_ENGINE_VERSION_PATCH) + "." +
+			std::to_string(K_ENGINE_GIT_HASHCODE) + "." +
+			getBuildType(K_ENGINE_BUILD_TYPE) + "." + std::to_string(K_ENGINE_VERSION_BUILD_INCREMENT) + "." + std::to_string(K_ENGINE_BUILD_DATE) + "." +
 			getBuildPlatform(K_ENGINE_BUILD_PLATFORM);
 	}
 }

@@ -2,7 +2,7 @@
 	K-Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -30,21 +30,6 @@ namespace kengine
 	class rendering_context;
 	class window;
 
-	/*
-		kengine::rendering_system class
-
-		Support to:
-			- OpenGL
-			- Vulkan (not implemented yet)
-			- DirectX (not implemented yet)
-
-		Ideas:
-			- inicialização do contexto
-				- escolher entre tipos de renderizador (OpenGL, Vulkan, DirectX, etc)
-				- inicialização apropriada do contexto de acordo com o renderizador e a janela de aplicação
-			- possibilidade de gerenciar múltiplos contextos? (future)
-	*/
-
 	enum class RENDERING_TYPE
 	{
 		OPENGL,
@@ -52,6 +37,13 @@ namespace kengine
 		VULKAN
 	};
 
+	/*
+		kengine::rendering_system class
+
+			- Escolher entre tipos de renderizador (OpenGL, Vulkan, DirectX, etc)
+			- Criação do contexto de acordo o renderizador e a janela de aplicação (por exemplo, OpenGL context)
+			- Possibilidade de gerenciar múltiplos contextos? (future)
+	*/
 	class rendering_system
 	{
 	public:
@@ -63,10 +55,13 @@ namespace kengine
 		rendering_system& operator=(const rendering_system& copy) = delete; // copy assignment
 		rendering_system& operator=(rendering_system&&) = delete; // move assigment
 
-		int init(window* win, RENDERING_TYPE type);
+		int init(window* win, RENDERING_TYPE type, const compatibility_profile& profile);
 		void finish();
 		int swapBuffers();
-		
+		void clearBuffers();
+
+		std::string info(bool extension);
+
 	private:
 		RENDERING_TYPE type;
 		rendering_context* context = nullptr;

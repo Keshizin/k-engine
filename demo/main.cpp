@@ -2,7 +2,7 @@
 	K-Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2024 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -27,30 +27,19 @@
 
 int main()
 {
-	K_LOG_OUTPUT_RAW("> Welcome to K-Engine Game Engine! v" + kengine::version() + "\n");
-
-	/*
-		Platform info
-	*/
-	K_LOG_OUTPUT_RAW(kengine::infoType());
+	K_LOG_OUTPUT_RAW("> Welcome to K-Engine Game Engine! " + kengine::version() + "\n");
+	K_LOG_OUTPUT_RAW(kengine::getDataTypeInfo());
 
 	kengine::core engine;
 	demo::game scene(&engine);
 
 	/*
-		On Android platforms, the window is created (and destroyed) implicitly by Android Surface Object
+		On Android platforms, the window is created and destroyed implicitly by Android Surface Object
 	*/
-
 #ifndef __ANDROID__
-	scene.createWindow(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! v" + kengine::version());
+	scene.createWindow(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! " + kengine::version());
 	scene.showWindow();
 #endif
-
-	/*
-		Nota: É recomendável que o sistema de renderização seja criado no evento "onWindowReady".
-		Nas plataformas Android, a janela é criada implicitamente pelo Android Surface. Portanto,
-		este evento foi criado especificamente para notificafar o usuário quando a janela estiver disponível.
-	*/
 
 	scene.start();
 

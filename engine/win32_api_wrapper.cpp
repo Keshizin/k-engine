@@ -233,6 +233,10 @@ namespace kengine
 			SetWindowTextA(hWindow, text.c_str());
 		}
 
+		void* getHandle() {
+			return hWindow;
+		}
+
 	private:
 		HWND hWindow = NULL;
 		HDC hDC = NULL;
@@ -640,7 +644,6 @@ int kengine::getAllGLProcedureAddress()
 	return 1;
 }
 
-
 namespace kengine
 {
 	/*
@@ -746,6 +749,8 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	if(!globalAppManager.isCallbackCallsEnabled())
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
+	globalUserEventsCallback->customWindowProcedure(&hWnd, &uMsg, &wParam, &lParam);
 
 	switch (uMsg)
 	{

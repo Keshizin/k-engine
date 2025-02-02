@@ -284,6 +284,10 @@ namespace kengine
 			return 1;
 		}
 
+		void* getHandle() {
+			return nullptr;
+		}
+
 		void setWindowText(std::string text)
 		{
 			XStoreName(globalAppManager->m_display, hWindow, text.c_str());

@@ -33,25 +33,20 @@
 	kengine::rendering_system class - member class definition
 */
 
-kengine::rendering_system::rendering_system()
-	: type{ RENDERING_TYPE::OPENGL }
+kengine::rendering_system::rendering_system(window* win)
 {
+	m_context = kengine::renderingContextInstance(win);
 }
 
 kengine::rendering_system::~rendering_system()
 {
-	delete context;
+	delete m_context;
 }
 
-int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType, const compatibility_profile& profile)
+int kengine::rendering_system::init(RENDERING_TYPE renderingType, const compatibility_profile& profile)
 {
-	type = renderingType;
-
-	if (context != nullptr)
-		delete context;
-
-	context = kengine::renderingContextInstance(win);
-	context->create(profile);
+	m_type = renderingType;
+	m_context->create(profile);
 	
 //#if defined(__ANDROID__)
 //	context->create();
@@ -64,63 +59,56 @@ int kengine::rendering_system::init(window* win, RENDERING_TYPE renderingType, c
 void kengine::rendering_system::finish()
 {
 	//context->makeCurrent(false);
-	delete context;
-	context = nullptr;
+	delete m_context;
+	m_context = nullptr;
 }
 
-int kengine::rendering_system::swapBuffers()
+void kengine::rendering_system::swapBuffers()
 {
-	if (context == nullptr)
-		return 0;
-
-	context->swapBuffers();
-	return 1;
+	assert(!(m_context == nullptr)); // remove branching code in the release version
+	m_context->swapBuffers();
 }
 
 void kengine::rendering_system::clearBuffers()
 {
-	if (context == nullptr)
-		return;
-
-	context->clearBuffers();
+	assert(!(m_context == nullptr)); // remove branching code in the release version
+	m_context->clearBuffers();
 }
 
 std::string kengine::rendering_system::info(bool extension)
 {
+	assert(!(m_context == nullptr)); // remove branching code in the release version
+	
 	std::string info;
+	std::stringstream renderingInfo;
 
-	if (context) {
-		std::stringstream renderingInfo;
+	const GLubyte* vendor = glGetString(GL_VENDOR);
+	renderingInfo << "> GL vendor: " << vendor << "\n";
 
-		const GLubyte* vendor = glGetString(GL_VENDOR);
-		renderingInfo << "> GL vendor: " << vendor << "\n";
+	const GLubyte* renderer = glGetString(GL_RENDERER);
+	renderingInfo << "> GL renderer: " << renderer << "\n";
 
-		const GLubyte* renderer = glGetString(GL_RENDERER);
-		renderingInfo << "> GL renderer: " << renderer << "\n";
+	const GLubyte* version = glGetString(GL_VERSION);
+	renderingInfo << "> GL version: " << version << "\n";
 
-		const GLubyte* version = glGetString(GL_VERSION);
-		renderingInfo << "> GL version: " << version << "\n";
+	const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+	renderingInfo << "> GLSL version: " << glslVersion << "\n";
 
-		const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-		renderingInfo << "> GLSL version: " << glslVersion << "\n";
+	GLint maxVertexAttribs;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
 
-		GLint maxVertexAttribs;
-		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+	renderingInfo << "\n> Max GL vertex attributes: " << maxVertexAttribs << "\n";
 
-		renderingInfo << "\n> Max GL vertex attributes: " << maxVertexAttribs << "\n";
+	if (extension) {
+		GLint numExtensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+		renderingInfo << "\n> GL_NUM_EXTENSIONS: " << numExtensions << "\n";
 
-		if (extension) {
-			GLint numExtensions;
-			glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-			renderingInfo << "\n> GL_NUM_EXTENSIONS: " << numExtensions << "\n";
-
-			for (GLint i = 0; i < numExtensions; i++) {
-				renderingInfo << "> " << glGetStringi(GL_EXTENSIONS, static_cast<GLuint>(i)) << "\n";
-			}
+		for (GLint i = 0; i < numExtensions; i++) {
+			renderingInfo << "> " << glGetStringi(GL_EXTENSIONS, static_cast<GLuint>(i)) << "\n";
 		}
-
-		info = renderingInfo.str();
 	}
 
+	info = renderingInfo.str();
 	return info;
 }

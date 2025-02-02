@@ -67,6 +67,9 @@ void kengine::core::startMainLoop()
 
 		handleSystemMessages();
 
+		if (mainLoopState == K_RUNTIME_STATE::STOPPED)
+			break;
+
 		/*
 			user's update
 		*/

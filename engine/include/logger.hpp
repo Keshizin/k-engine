@@ -32,8 +32,11 @@
 
 #ifdef K_ENGINE_DEBUG
 #if defined(__ANDROID__)
-#define MODULE_NAME "K-ENGINE"
-#define K_LOG_OUTPUT_RAW(message) __android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message)
+#include <sstream>
+#define K_LOG_OUTPUT_RAW(message) { std::stringstream msg; msg << message; K_LOG_OUTPUT(msg.str().c_str()); }
+inline void K_LOG_OUTPUT(const char* message) {
+	__android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message);
+}
 #else
 #include <iostream>
 #define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;

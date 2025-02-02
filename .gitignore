@@ -2,3 +2,7 @@
 .vs
 out/
 *.json
+
+# Ignoring bin
+bin/
+!bin/.keep

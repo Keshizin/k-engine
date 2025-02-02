@@ -900,8 +900,7 @@ void kengine::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 
 	case GL_DEBUG_SEVERITY_NOTIFICATION:
 		messageString += "\n\t- severity: GL_DEBUG_SEVERITY_NOTIFICATION";
-		break;
-		//return;
+		return;
 	}
 
 	messageString += "\n\t- id: " + std::to_string(id);

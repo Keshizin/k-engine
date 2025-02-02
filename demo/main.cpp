@@ -25,6 +25,9 @@
 
 #include <game.hpp>
 
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
+
 int main()
 {
 	K_LOG_OUTPUT_RAW("> Welcome to K-Engine Game Engine! " + kengine::version() + "\n");
@@ -37,7 +40,7 @@ int main()
 		On Android platforms, the window is created and destroyed implicitly by Android Surface Object
 	*/
 #ifndef __ANDROID__
-	scene.createWindow(kengine::getDisplayCenterPosX(640), kengine::getDisplayCenterPosY(480), 640, 480, "K-Engine! " + kengine::version());
+	scene.createWindow(kengine::getDisplayCenterPosX(WINDOW_WIDTH), kengine::getDisplayCenterPosY(WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT, "K-Engine! " + kengine::version());
 	scene.showWindow();
 #endif
 

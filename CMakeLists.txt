@@ -53,6 +53,11 @@ add_subdirectory(engine)
 add_subdirectory(demo)
 
 #
+# third libraries
+#
+add_subdirectory(third/imgui-1.91.8)
+
+#
 # test directories
 #
 

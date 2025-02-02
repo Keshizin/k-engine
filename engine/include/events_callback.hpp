@@ -118,6 +118,12 @@ namespace kengine
 			Callback event for debug message
 		*/
 		virtual void debugMessage(const std::string& msg) = 0;
+
+		/*
+			Custom message pump handler
+			This callback is specific for Win32 window procedure
+		*/
+		virtual void customWindowProcedure(void* param1, void* param2, void* param3, void* param4) = 0;
 	};
 }
 

@@ -68,6 +68,8 @@ namespace kengine
 		virtual int hide() = 0;
 		virtual int swapBuffers() const = 0;
 
+		virtual void* getHandle() = 0;
+
 	protected:
 		std::string name; // window bar title
 		int x = 0; // position in X axis (in pixels units)

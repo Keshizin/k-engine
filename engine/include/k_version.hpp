@@ -39,7 +39,7 @@
 
 // the lines below must be automatically updated by external building tool
 #define K_ENGINE_GIT_HASHCODE 0
-#define K_ENGINE_BUILD_TYPE 2
+#define K_ENGINE_BUILD_TYPE 1
 #define K_ENGINE_VERSION_BUILD_INCREMENT 0
 #define K_ENGINE_BUILD_DATE 0
 #define K_ENGINE_BUILD_PLATFORM 2

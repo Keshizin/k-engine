@@ -107,7 +107,7 @@ namespace kengine
 
             if (eglDisplayID == EGL_NO_DISPLAY)
             {
-                K_LOG_OUTPUT_RAW("Failed to get EGL Display");
+                globalUserEventsCallback->debugMessage("Failed to get EGL Display");
                 return 0;
             }
 
@@ -118,9 +118,9 @@ namespace kengine
             setRenderingContextInfo(major, minor);
 
             std::string eglMajorMSG = "EGL major: " + std::to_string(major);
-            K_LOG_OUTPUT_RAW(eglMajorMSG.c_str());
+            globalUserEventsCallback->debugMessage(eglMajorMSG.c_str());
             std::string eglMinorMSG = "EGL minor: " + std::to_string(minor);
-            K_LOG_OUTPUT_RAW(eglMinorMSG.c_str());
+            globalUserEventsCallback->debugMessage(eglMinorMSG.c_str());
 
             const EGLint attribs[] = {
                     EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
@@ -142,7 +142,7 @@ namespace kengine
             if (config == NULL)
             {
                 destroy();
-                K_LOG_OUTPUT_RAW("Failed to choose EGL config");
+                globalUserEventsCallback->debugMessage("Failed to choose EGL config");
                 return 0;
             }
 
@@ -151,7 +151,7 @@ namespace kengine
             if (eglSurface == EGL_NO_SURFACE)
             {
                 destroy();
-                K_LOG_OUTPUT_RAW("Failed to create window surface");
+                globalUserEventsCallback->debugMessage("Failed to create window surface");
                 return 0;
             }
 
@@ -160,8 +160,8 @@ namespace kengine
 
             std::string width = "EGL WIDTH: " + std::to_string(win->width);
             std::string height = "EGL HEIGHT: " + std::to_string(win->height);
-            K_LOG_OUTPUT_RAW(width.c_str());
-            K_LOG_OUTPUT_RAW(height.c_str());
+            globalUserEventsCallback->debugMessage(width.c_str());
+            globalUserEventsCallback->debugMessage(height.c_str());
 
             bool isDebug = profile.contextFlag & CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB ? EGL_TRUE : EGL_FALSE;
             bool isForwardCompatible = profile.contextFlag & CONTEXT_FLAG::CONTEXT_FORWARD_COMPATIBLE_BIT_ARB ? EGL_TRUE : EGL_FALSE;
@@ -183,7 +183,7 @@ namespace kengine
             if (eglContext == EGL_NO_CONTEXT)
             {
                 destroy();
-                K_LOG_OUTPUT_RAW("Failed to create EGL context");
+                globalUserEventsCallback->debugMessage("Failed to create EGL context");
                 return 0;
             }
 
@@ -382,7 +382,7 @@ void kengine::handleSystemMessages()
 
     if (result == ALOOPER_POLL_ERROR) {
         std::string error = "ALooper_pollOnce returned an error" + std::to_string(result);
-        K_LOG_OUTPUT_RAW(error.c_str());
+        globalUserEventsCallback->debugMessage(error.c_str());
         return;
     }
 
@@ -424,10 +424,10 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
 
     // command from main thread (java): a new ANativeWindow is ready for use.
     case APP_CMD_INIT_WINDOW:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD INIT WINDOW");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD INIT WINDOW");
 
         if (app->window != nullptr) {
-            K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD INIT WINDOW - app->window != nullptr");
+            globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD INIT WINDOW - app->window != nullptr");
 
             /*
                 Segundo os exemplos oficiais do uso da NDK da Google,
@@ -436,7 +436,7 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
             */
             if (kengine::globalAppManager.m_android_window.m_hWindow != app->window)
             {
-                K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD INIT WINDOW - g_app.m_android_window != app->window");
+                globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD INIT WINDOW - g_app.m_android_window != app->window");
                 kengine::globalAppManager.m_android_window.m_hWindow = app->window;
             }
 
@@ -447,22 +447,22 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
 
     // command from main thread (java): the existing ANativeWindow needs to be terminated.
     case APP_CMD_TERM_WINDOW:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD TERM WINDOW");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD TERM WINDOW");
         globalUserEventsCallback->onWindowDestroy();
         break;
 
     // Command from main thread (java): the current ANativeWindow has been resized.
     case APP_CMD_WINDOW_RESIZED:
     {
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD WINDOW RESIZED");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD WINDOW RESIZED");
 
         std::string widthString = "ANDROID HANDLE CMD - width: " +
         std::to_string(ANativeWindow_getWidth(app->window));
-        K_LOG_OUTPUT_RAW(widthString.c_str());
+        globalUserEventsCallback->debugMessage(widthString.c_str());
 
         std::string heightString = "ANDROID HANDLE CMD - height: " +
         std::to_string(ANativeWindow_getHeight(app->window));
-        K_LOG_OUTPUT_RAW(heightString.c_str());
+        globalUserEventsCallback->debugMessage(heightString.c_str());
 
         globalUserEventsCallback->onResizeWindowEvent(ANativeWindow_getWidth(app->window),
         ANativeWindow_getHeight(app->window));
@@ -472,17 +472,17 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
 
     // command from main thread (java): the system needs that the current ANativeWindow be redrawn.
     case APP_CMD_WINDOW_REDRAW_NEEDED:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD WINDOW REDRAW NEEDED");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD WINDOW REDRAW NEEDED");
         break;
 
     // command from main thread (java): the content area of the window has changed
     case APP_CMD_CONTENT_RECT_CHANGED:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD CONTENT RECT CHANGED");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD CONTENT RECT CHANGED");
         break;
 
     // command from main thread (java): the app's activity window has gained input focus.
     case APP_CMD_GAINED_FOCUS:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD GAINED FOCUS");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD GAINED FOCUS");
         //        eng->ResumeSensors();
         // Start animation
         //        eng->has_focus_ = true;
@@ -490,7 +490,7 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
 
     // command from main thread: the app's activity window has lost input focus.
     case APP_CMD_LOST_FOCUS:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD LOST FOCUS");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD LOST FOCUS");
         //        eng->SuspendSensors();
         // Also stop animating.
         //        eng->has_focus_ = false;
@@ -499,45 +499,45 @@ void androidHandleCmd(struct android_app* app, int32_t cmd)
 
     // command from main thread (java): the current device configuration has changed.
     case APP_CMD_CONFIG_CHANGED:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD CONFIG CHANGED");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD CONFIG CHANGED");
         break;
 
     // command from main thread (java): the system is running low on memory.
     case APP_CMD_LOW_MEMORY:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD LOW MEMORY");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD LOW MEMORY");
         // Free up GL resources
         break;
 
     // command from main thread (java): the app's activity has been started.
     case APP_CMD_START:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD START");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD START");
         break;
 
     // command from main thread (java): the app's activity has been resumed.
     case APP_CMD_RESUME:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD START");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD START");
         globalUserEventsCallback->onResumeEvent();
         break;
 
     // command from main thread (java): the existing ANativeWindow needs to be terminated.
     case APP_CMD_SAVE_STATE:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD SAVE STATE");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD SAVE STATE");
         break;
 
     // command from main thread (java): the app's activity has been paused.
     case APP_CMD_PAUSE:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD PAUSE");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD PAUSE");
         globalUserEventsCallback->onPauseEvent();
         break;
 
     // command from main thread (java): the app's activity has been stopped.
     case APP_CMD_STOP:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD STOP");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD STOP");
         break;
 
     // command from main thread (java): the app's activity is being destroyed, and waiting for the app thread to clean up and exit before proceeding.
     case APP_CMD_DESTROY:
-        K_LOG_OUTPUT_RAW("ANDROID HANDLE CMD - APP CMD DESTROY");
+        globalUserEventsCallback->debugMessage("ANDROID HANDLE CMD - APP CMD DESTROY");
         globalUserEventsCallback->onFinishEvent();
         break;
 

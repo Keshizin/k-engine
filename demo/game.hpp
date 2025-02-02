@@ -31,6 +31,13 @@
 #include <rendering_system.hpp>
 #include <logger.hpp>
 
+// third-party library
+// #include <glm/glm.hpp>
+
+//#include <imgui-1.91.8/imgui.h>
+//#include <imgui-1.91.8/backends/imgui_impl_win32.h>
+//#include <imgui-1.91.8/backends/imgui_impl_opengl3.h>
+
 namespace demo
 {
 	class game : public kengine::events_callback
@@ -124,13 +131,17 @@ namespace demo
 		*/
 		void debugMessage(const std::string& msg);
 
+		/*
+			Custom message pump handler
+		*/
+		void customWindowProcedure(void* param1, void* param2, void* param3, void* param4);
+
 	private:
 		kengine::core* m_engine = nullptr;
 		kengine::window* m_window = nullptr;
+		kengine::rendering_system* m_renderingSystem = nullptr;
 		kengine::profile m_profile;
-		kengine::rendering_system m_renderingSystem;
 		kengine::GLSLprogram m_shader;
-
 		kengine::mesh_node node;
 	};
 }

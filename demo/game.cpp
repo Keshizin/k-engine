@@ -24,7 +24,6 @@
 */
 
 #include <game.hpp>
-#include <k_math.hpp>
 
 #include <iostream>
 #include <cassert>
@@ -40,6 +39,7 @@ demo::game::game(kengine::core* engine)
 }
 
 demo::game::~game() {
+	delete m_renderingSystem;
 	delete m_window;
 }
 
@@ -58,14 +58,22 @@ void demo::game::showWindow() {
 
 void demo::game::beforeMainLoopEvent()
 {
-	kengine::mesh q = kengine::quad(2.0f);
+	kengine::mesh q = kengine::quad(1.0f);
 	node.load(q);
 }
 
 void demo::game::update(const int64_t frameTime)
 {
-	m_renderingSystem.clearBuffers();	
+	m_renderingSystem->clearBuffers();	
 	node.drawArrays();
+
+	//ImGui_ImplOpenGL3_NewFrame();
+	//ImGui_ImplWin32_NewFrame();
+	//ImGui::NewFrame();
+	//ImGui::ShowDemoWindow();
+
+	//ImGui::Render();
+	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 // (!) Unificar a chamada abaixo de SwapBuffer para facilitar o usuário
 #ifdef __ANDROID__
@@ -98,13 +106,15 @@ void demo::game::onWindowReady(kengine::window* window)
 			- escolher o tipo de render(e.g. OpenGL, Vulkan, DirectX, etc)
 			- passar o handle de os_window para criar o contexto de renderização. É possível passar múltiplos handles de janela?
 	*/
-	if (!m_renderingSystem.init(window, kengine::RENDERING_TYPE::OPENGL, profile))
+	m_renderingSystem = new kengine::rendering_system(window);
+
+	if (!m_renderingSystem->init(kengine::RENDERING_TYPE::OPENGL, profile))
 	{
 		K_LOG_OUTPUT_RAW("(!) Failed to init the rendering system!");
 		assert("(!) SHOWSTOPPER ERROR (!)");
 	}
 
-	K_LOG_OUTPUT_RAW(m_renderingSystem.info(false));
+	K_LOG_OUTPUT_RAW(m_renderingSystem->info(false));
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
@@ -124,42 +134,20 @@ void demo::game::onWindowReady(kengine::window* window)
 	m_shader.print();
 	m_shader.useProgram();
 
-	GLuint blockIndex = glGetUniformBlockIndex(m_shader.getProgramID(), "BlobSettings");
+	glClearColor(0.0f, 0.0f, 0.f, 1.0f);
 
-	GLint blockSize;
-	glGetActiveUniformBlockiv(m_shader.getProgramID(), blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-	
-	GLubyte* blockBuffer = new GLubyte[static_cast<size_t>(blockSize)];
-	
-	const GLchar* names[] = { "InnerColor", "OuterColor", "RadiusInner", "RadiusOuter" };
-	GLuint indices[4];
+	/*
+		IMGUI
+	*/
 
-	glGetUniformIndices(m_shader.getProgramID(), 4, names, indices);
-	
-	GLint offset[4];
-	glGetActiveUniformsiv(m_shader.getProgramID(), 4, indices, GL_UNIFORM_OFFSET, offset);
+	//IMGUI_CHECKVERSION();
 
-	// Store data within the buffer at the appropriate offsets
-	GLfloat outerColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	GLfloat innerColor[] = { 1.0f, 1.0f, 0.75f, 1.0f };
-	GLfloat innerRadius = 0.3f;
-	GLfloat outerRadius = 0.45f;
-	
-	memcpy(blockBuffer + offset[0], innerColor, 4 * sizeof(GLfloat));
-	memcpy(blockBuffer + offset[1], outerColor, 4 * sizeof(GLfloat));
-	memcpy(blockBuffer + offset[2], &innerRadius, sizeof(GLfloat));
-	memcpy(blockBuffer + offset[3], &outerRadius, sizeof(GLfloat));
-
-	GLuint uboHandle;
-	glGenBuffers(1, &uboHandle);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboHandle);
-	glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_DYNAMIC_DRAW);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboHandle);
-
-	delete[] blockBuffer;
-
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	//ImGui::CreateContext();
+	//ImGuiIO& io = ImGui::GetIO();
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	//
+	//ImGui_ImplWin32_Init(m_window->getHandle());
+	//ImGui_ImplOpenGL3_Init();
 }
 
 void demo::game::onWindowDestroy()
@@ -178,7 +166,12 @@ void demo::game::onResumeEvent()
 void demo::game::closeButtonEvent()
 {
 	assert(!(m_engine == nullptr));
-	m_renderingSystem.finish();
+
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplWin32_Shutdown();
+	//ImGui::DestroyContext();
+
+	m_renderingSystem->finish();
 	m_window->destroy();
 	//m_engine->stopMainLoop(); no android a janela é fechada 
 }
@@ -211,4 +204,11 @@ void demo::game::debugMessage(const std::string& msg)
 {
 	std::string message = "> debug message: " + msg;
 	K_LOG_OUTPUT_RAW(message);
+}
+
+//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(void* hWnd, void* msg, void* wParam, void* lParam);
+
+void demo::game::customWindowProcedure(void* param1, void* param2, void* param3, void* param4)
+{
+	//ImGui_ImplWin32_WndProcHandler(param1, param2, param3, param4);
 }

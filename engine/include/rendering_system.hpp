@@ -47,7 +47,7 @@ namespace kengine
 	class rendering_system
 	{
 	public:
-		rendering_system();
+		explicit rendering_system(window* win);
 		~rendering_system();
 
 		rendering_system(const rendering_system& copy) = delete; // copy constructor
@@ -55,15 +55,15 @@ namespace kengine
 		rendering_system& operator=(const rendering_system& copy) = delete; // copy assignment
 		rendering_system& operator=(rendering_system&&) = delete; // move assigment
 
-		int init(window* win, RENDERING_TYPE type, const compatibility_profile& profile);
+		int init(RENDERING_TYPE type, const compatibility_profile& profile);
 		void finish();
-		int swapBuffers();
+		void swapBuffers();
 		void clearBuffers();
 
 		std::string info(bool extension);
 
 	private:
-		RENDERING_TYPE type;
-		rendering_context* context = nullptr;
+		RENDERING_TYPE m_type = RENDERING_TYPE::OPENGL;
+		rendering_context* m_context = nullptr;
 	};
 }

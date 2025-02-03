@@ -34,7 +34,7 @@
 namespace kengine {
 	/*
 		Class to store an vertex attribute
-		Note: "vertex attribute" is a term used in OpenGL to represent an array of vertex data (i.e. positions, colors, uv, etc).
+		Note: "vertex attribute" is a term used in OpenGL to represent an array of vertex data (i.e. array of positions, array of colors, etc).
 	*/
 	template <typename TYPE>
 	class vattrib
@@ -95,7 +95,7 @@ namespace kengine {
 		// copy assignment = operator
 		vattrib& operator=(const vattrib& va)
 		{
-			delete attributeArray;
+			delete[] attributeArray;
 
 			if (va.arraySize) {
 				arraySize = va.arraySize;
@@ -128,6 +128,7 @@ namespace kengine {
 		// move assignment = operator
 		vattrib& operator=(vattrib&& move)
 		{
+			delete[] attributeArray;
 			arraySize = std::move(move.arraySize);
 			count = std::move(move.count);
 			attributeArray = std::move(move.attributeArray);

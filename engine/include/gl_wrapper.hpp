@@ -212,13 +212,13 @@ namespace kengine {
 		void saveBinary(const std::string& name);
 		void loadBinary(const std::string& name);
 
-		void setUniform(std::string name, kengine::matrix& m);
+		void setUniform(std::string name, bool transpose, GLfloat* value);
 
 		/*
 			(!) for perfomance: it doesn't use std::unordered_map and is inline
 		*/
-		void setUniformL(GLint location, kengine::matrix& m) {
-			glUniformMatrix4fv(location, 1, GL_FALSE, m.value());
+		void setUniformL(GLint location, bool transpose, GLfloat* value) {
+			glUniformMatrix4fv(location, 1, transpose, value);
 		}
 
 		GLint getLocation(std::string name) {
@@ -298,7 +298,6 @@ namespace kengine {
 		Note: Use breakpoint on OpenGL callback function "openGLDebugMessageCallback" with callstack actived for debbuging.
 	*/
 	void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param);
-
 }
 
 #endif

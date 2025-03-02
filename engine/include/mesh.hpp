@@ -241,6 +241,7 @@ namespace kengine {
 		//vattrib<unsigned int> m_indices;
 	};
 
+	mesh point(float x, float y, float z);
 	mesh triangle(float size);
 	mesh quad(float size);
 	mesh cube(float size);

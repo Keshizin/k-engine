@@ -1,6 +1,6 @@
 /*
-	K-Engine Logger
-	This file is part of the K-Engine.
+	K-Engine Unit Test for Mathematics
+	This file provide an test environment for K-Engine.
 
 	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
@@ -23,30 +23,40 @@
 	SOFTWARE.
 */
 
-#ifndef K_ENGINE_LOGGER_HPP
-#define K_ENGINE_LOGGER_HPP
+#include <k_math.hpp>
 
 /*
-	[ ... under construction ... ]
-
-	Design ideas:
-	- Ter um log proprio de K-Engine (este não deve atrapalhar o log do usuario)
-	- Alguns tipos de erros devem ser retornados para o usuario mas não como uma mensagem string e sim com o identificador. É o usuário que deve decidir como exibir esta informação.
+	- test all vec4 instancing
+	- test all matrix instancing
+	- test vec4 multiplication (vec4 * vec4, vec4 * matrix, matrix * vec4)
+	- test matrix multiplication (matrix * matrix)
+	- testar os metodos como transposta, inverse, etc de matrix
+	- testar translate,scale e rotate
+	- testar todos os metodos de vec4 (normalize, dot, cross, etc)
 */
 
-#ifdef K_ENGINE_DEBUG
-#if defined(__ANDROID__)
-#include <sstream>
-#define K_LOG_OUTPUT_RAW(message) { std::stringstream msg; msg << message; K_LOG_OUTPUT(msg.str().c_str()); }
-inline void K_LOG_OUTPUT(const char* message) {
-	__android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message);
-}
-#else
-#include <iostream>
-#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
-#endif
-#else
-#define K_LOG_OUTPUT_RAW(message)
-#endif
+void vec4_instancing_test();
+int linear_transformation_test();
 
-#endif
+/*
+	main
+*/
+int main()
+{
+	int result = 0;
+	return result;
+}
+
+void vec4_instancing_test()
+{
+	kengine::vec4<float> v = { 1.5f, 1.5f, 1.5f };
+	kengine::vec4<float> v1;
+	kengine::vec4<float> v2(3.5f, 3.5f, 3.5f);
+	kengine::vec4<float> v4 = v2;
+}
+
+int linear_transformation_test()
+{
+	// test translate
+	return 0;
+}

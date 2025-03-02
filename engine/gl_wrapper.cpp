@@ -424,7 +424,7 @@ void kengine::GLSLprogram::loadBinary(const std::string& name)
 	}
 }
 
-void kengine::GLSLprogram::setUniform(std::string name, kengine::matrix& m)
+void kengine::GLSLprogram::setUniform(std::string name, bool transpose, GLfloat* value)
 {
 	/*
 		It is inefficient to query the location of a uniform variable in each frame [Wolf, 2018]
@@ -438,7 +438,7 @@ void kengine::GLSLprogram::setUniform(std::string name, kengine::matrix& m)
 		return;
 	}
 
-	glUniformMatrix4fv(location, 1, GL_FALSE, m.value());
+	glUniformMatrix4fv(location, 1, transpose, value);
 }
 
 void kengine::GLSLprogram::print() const
@@ -586,7 +586,7 @@ void kengine::mesh_node::load(kengine::mesh& m, size_t size)
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
 	size_t offset = 0;
-	m_count = static_cast<GLsizei>(m.m_vattributesMap[0].arraySize);
+	m_count = static_cast<GLsizei>(m.m_vattributesMap[0].getSize());
 
 	for (auto it : m.m_vattributesMap) {
 		auto location = it.first;

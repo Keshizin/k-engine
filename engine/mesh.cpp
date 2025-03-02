@@ -129,10 +129,27 @@ std::string kengine::mesh::dump() const
 			msg += "      vattributes[" + location + "].attributeArray[" + std::to_string(j) + "]: " + std::to_string(it.second.attributeArray[j]);
 		}
 
-		msg + "\n";
+		msg += "\n";
 	}
 	
 	return msg;
+}
+
+kengine::mesh kengine::point(float x, float y, float z)
+{
+	float vertex_positions[] = {
+		x, y, z
+	};
+
+	kengine::vattrib<float> v = {
+		vertex_positions,
+		3,
+		1
+	};
+
+	kengine::mesh m;
+	m.setVertexAttribute(v, 0);
+	return m;
 }
 
 kengine::mesh kengine::triangle(float size)
@@ -249,63 +266,148 @@ kengine::mesh kengine::quad(float size)
 kengine::mesh kengine::cube(float size)
 {
 	float half = size / 2.0f;
+	size_t quads = 6;
+
+	//float vertex_positions[] =
+	//{
+	//	-half,  half, -half,
+	//	-half, -half, -half,
+	//	 half, -half, -half,
+	//	 half,  half, -half,
+	//	-half,  half,  half,
+	//	-half, -half,  half,
+	//	 half, -half,  half,
+	//	 half,  half,  half,
+	//};
+
+	//kengine::vattrib<float> v = {
+	//	vertex_positions,
+	//	24,
+	//	3
+	//};
 
 	float vertex_positions[] =
 	{
-		-half,  half, -half,
-		-half, -half, -half,
+		-half,  half, half,
+		-half, -half, half,
+		 half, -half, half,
+		 half, -half, half,
+		 half,  half, half,
+		-half,  half, half,
+
+		 half,  half,  half,
+		 half, -half,  half,
+		 half, -half, -half,
 		 half, -half, -half,
 		 half,  half, -half,
-		-half,  half,  half,
-		-half, -half,  half,
-		 half, -half,  half,
 		 half,  half,  half,
+
+		 half,  half, -half,
+		 half, -half, -half,
+		-half, -half, -half,
+		-half, -half, -half,
+		-half,  half, -half,
+		 half,  half, -half,
+
+		-half,  half, -half,
+		-half, -half, -half,
+		-half, -half,  half,
+		-half, -half,  half,
+		-half,  half,  half,
+		-half,  half, -half,
+
+		-half, half, -half,
+		-half, half,  half,
+		 half, half,  half,
+		 half, half,  half,
+		 half, half, -half,
+		-half, half, -half,
+
+		-half, -half,  half,
+		-half, -half, -half,
+		 half, -half, -half,
+		 half, -half, -half,
+		 half, -half,  half,
+		-half, -half,  half,
 	};
 
 	kengine::vattrib<float> v = {
 		vertex_positions,
-		24,
+		3 * 6 * quads,
 		3
 	};
 
 	float vertex_colors[] =
 	{
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f,
-		1.0f, 0.5f, 0.5f, 1.0f
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+
+		1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f,
+
+		0.2f, 0.6f, 0.5f, 1.0f,
+		0.2f, 0.6f, 0.5f, 1.0f,
+		0.2f, 0.6f, 0.5f, 1.0f,
+		0.2f, 0.6f, 0.5f, 1.0f,
+		0.2f, 0.6f, 0.5f, 1.0f,
+		0.2f, 0.6f, 0.5f, 1.0f,
+
+		0.7f, 0.0f, 0.2f, 1.0f,
+		0.7f, 0.1f, 0.7f, 1.0f,
+		0.7f, 0.6f, 0.8f, 1.0f,
+		0.7f, 0.3f, 0.3f, 1.0f,
+		0.7f, 0.6f, 0.2f, 1.0f,
+		0.7f, 0.2f, 0.1f, 1.0f,
 	};
 
 	kengine::vattrib<float> c = {
 		vertex_colors,
-		32,
+		4 * 6 * quads,
 		4
 	};
 
-	unsigned int vertex_indices[] = {
-		0, 1, 2,
-		0, 2, 3,
-		4, 0, 3,
-		4, 3, 7,
-		5, 4, 7,
-		5, 7, 6,
-		1, 5, 6,
-		1, 6, 2,
-		4, 5, 1,
-		4, 1, 0,
-		3, 2, 6,
-		3, 6, 7
-	};
+	//unsigned int vertex_indices[] = {
+	//	0, 1, 2,
+	//	0, 2, 3,
+	//	4, 0, 3,
+	//	4, 3, 7,
+	//	5, 4, 7,
+	//	5, 7, 6,
+	//	1, 5, 6,
+	//	1, 6, 2,
+	//	4, 5, 1,
+	//	4, 1, 0,
+	//	3, 2, 6,
+	//	3, 6, 7
+	//};
 
-	kengine::vattrib<unsigned int> i = {
-		vertex_indices,
-		36,
-		1
-	};
+	//kengine::vattrib<unsigned int> i = {
+	//	vertex_indices,
+	//	36,
+	//	1
+	//};
 
 	kengine::mesh q;
 	q.setVertexAttribute(v, 0);

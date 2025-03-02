@@ -19,7 +19,6 @@ enable_language(CXX)
 #
 set(APPNAME game)
 set(LIBNAME kengine)
-set(KENGINE_TEST_NAME kengine_test_unit)
 
 #
 # output binary directory

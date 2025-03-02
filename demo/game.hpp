@@ -34,10 +34,6 @@
 // third-party library
 // #include <glm/glm.hpp>
 
-//#include <imgui-1.91.8/imgui.h>
-//#include <imgui-1.91.8/backends/imgui_impl_win32.h>
-//#include <imgui-1.91.8/backends/imgui_impl_opengl3.h>
-
 namespace demo
 {
 	class game : public kengine::events_callback
@@ -143,6 +139,7 @@ namespace demo
 		kengine::profile m_profile;
 		kengine::GLSLprogram m_shader;
 		kengine::mesh_node node;
+		kengine::projection_info<float> m_projectionInfo;
 	};
 }
 

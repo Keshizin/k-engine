@@ -33,7 +33,7 @@ demo::game::game(kengine::core* engine)
 	:
 	m_engine{ engine },
 	m_window{ kengine::windowInstance() },
-	m_profile{}
+	m_projectionInfo{}
 {
 	m_engine->setEventsCallback(this);
 }
@@ -58,22 +58,41 @@ void demo::game::showWindow() {
 
 void demo::game::beforeMainLoopEvent()
 {
-	kengine::mesh q = kengine::quad(1.0f);
-	node.load(q);
+	auto c = kengine::cube(1.0f);
+	node.load(c, 1);
 }
 
 void demo::game::update(const int64_t frameTime)
 {
+	static float angleY = 0.0f;
+
+	angleY += 1.0f;
+
+	if (angleY > 360.0f)
+		angleY = 0.0f;
+
+	kengine::matrix<float> modelMatrix = kengine::scale(angleY / 100.0f, angleY / 100.0f, angleY / 100.0f);
+	modelMatrix = kengine::rotate(angleY, 0.0f, 1.0f, 0.0f) * modelMatrix;
+
+	kengine::matrix<float> eyeMatrix = kengine::lookAt(
+		kengine::vec4<float>(0.0f, 3.0f, 10.0f),
+		kengine::vec4<float>(0.0f, 0.0f, 0.0f),
+		kengine::vec4<float>(0.0f, 0.1f, 0.0f));
+	
+	kengine::matrix<float> projectionMatrix = kengine::frustum(m_projectionInfo.left, m_projectionInfo.right, m_projectionInfo.bottom, m_projectionInfo.top, m_projectionInfo.zNear, m_projectionInfo.zFar);
+
+	m_shader.setUniform("model", false, modelMatrix.value());
+	m_shader.setUniform("eye", false, eyeMatrix.value());
+	m_shader.setUniform("projection", false, projectionMatrix.value());
+
+	// ----------------------------------------------------------------------------
+	//	rendering here
+	// ----------------------------------------------------------------------------
+
 	m_renderingSystem->clearBuffers();	
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	node.drawArrays();
-
-	//ImGui_ImplOpenGL3_NewFrame();
-	//ImGui_ImplWin32_NewFrame();
-	//ImGui::NewFrame();
-	//ImGui::ShowDemoWindow();
-
-	//ImGui::Render();
-	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 // (!) Unificar a chamada abaixo de SwapBuffer para facilitar o usuário
 #ifdef __ANDROID__
@@ -120,6 +139,8 @@ void demo::game::onWindowReady(kengine::window* window)
 	glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
+	glCullFace(GL_BACK);
+
 	kengine::ShaderInfo shaders[] = {
 		{GL_VERTEX_SHADER, KENGINE_SHADER_PATH_STR + "/shaders/vs_example.vert"},
 		{GL_FRAGMENT_SHADER, KENGINE_SHADER_PATH_STR + "/shaders/fs_example.frag"},
@@ -134,20 +155,21 @@ void demo::game::onWindowReady(kengine::window* window)
 	m_shader.print();
 	m_shader.useProgram();
 
-	glClearColor(0.0f, 0.0f, 0.f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	/*
-		IMGUI
-	*/
+	// setting the projection
+	m_projectionInfo.left = -2.0f;
+	m_projectionInfo.right = 2.0f;
+	m_projectionInfo.bottom = -2.0f;
+	m_projectionInfo.top = 2.0f;
+	m_projectionInfo.zNear = 2.0f;
+	m_projectionInfo.zFar = 100.0f;
 
-	//IMGUI_CHECKVERSION();
-
-	//ImGui::CreateContext();
-	//ImGuiIO& io = ImGui::GetIO();
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	//
-	//ImGui_ImplWin32_Init(m_window->getHandle());
-	//ImGui_ImplOpenGL3_Init();
+	//glPointSize(5.0f);
+	//glLineWidth(1.0f);
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_FRONT);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 }
 
 void demo::game::onWindowDestroy()
@@ -166,10 +188,6 @@ void demo::game::onResumeEvent()
 void demo::game::closeButtonEvent()
 {
 	assert(!(m_engine == nullptr));
-
-	//ImGui_ImplOpenGL3_Shutdown();
-	//ImGui_ImplWin32_Shutdown();
-	//ImGui::DestroyContext();
 
 	m_renderingSystem->finish();
 	m_window->destroy();
@@ -206,9 +224,6 @@ void demo::game::debugMessage(const std::string& msg)
 	K_LOG_OUTPUT_RAW(message);
 }
 
-//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(void* hWnd, void* msg, void* wParam, void* lParam);
-
 void demo::game::customWindowProcedure(void* param1, void* param2, void* param3, void* param4)
 {
-	//ImGui_ImplWin32_WndProcHandler(param1, param2, param3, param4);
 }

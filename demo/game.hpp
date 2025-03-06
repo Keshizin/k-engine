@@ -1,6 +1,6 @@
 /*
 	K-Engine Demonstration
-	This file provide a template for a game created with K-Engine.
+	This file provide a Graphical User Interface for a game created with K-Engine.
 
 	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 

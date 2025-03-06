@@ -39,8 +39,24 @@ PFNGLNAMEDBUFFERDATAPROC glNamedBufferData = 0;
 PFNGLBUFFERDATAPROC glBufferData = 0;
 PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData = 0;
 PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
+PFNGLCLEARNAMEDBUFFERDATAPROC glClearNamedBufferData = 0;
+PFNGLCLEARBUFFERDATAPROC glClearBufferData = 0;
+PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData = 0;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
+PFNGLGETNAMEDBUFFERSUBDATAPROC glGetNamedBufferSubData = 0;
+PFNGLGETBUFFERSUBDATAPROC glGetBufferSubData = 0;
+PFNGLMAPNAMEDBUFFERPROC glMapNamedBuffer = 0;
+PFNGLMAPBUFFERPROC glMapBuffer = 0;
+PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer = 0;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
+PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange = 0;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
+PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC glFlushMappedNamedBufferRange = 0;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
 PFNGLBINDBUFFERPROC glBindBuffer = 0;
 PFNGLISBUFFERPROC glIsBuffer = 0;
+PFNGLINVALIDATEBUFFERDATAPROC glInvalidateBufferData = 0;
+PFNGLINVALIDATEBUFFERSUBDATAPROC glInvalidateBufferSubData = 0;
 PFNGLDELETEBUFFERSPROC glDeleteBuffers = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
 PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays = 0;
@@ -48,6 +64,8 @@ PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
 PFNGLISVERTEXARRAYPROC glIsVertexArray = 0;
 PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
 PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer = 0;
+PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer = 0;
+PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer = 0;
 PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = 0;
 PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray = 0;
 PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib = 0;
@@ -104,6 +122,7 @@ PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback = 0;
 PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl = 0;
 PFNGLPUSHDEBUGGROUPPROC glPushDebugGroup = 0;
 PFNGLPOPDEBUGGROUPPROC glPopDebugGroup = 0;
+PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex = 0;
 
 bool kengine::getAllGLProcedures()
 {
@@ -116,8 +135,24 @@ bool kengine::getAllGLProcedures()
 	glBufferData = (PFNGLBUFFERDATAPROC)getGLFunctionAddress("glBufferData");
 	glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glNamedBufferSubData");
 	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLFunctionAddress("glBufferSubData");
+	glClearNamedBufferData = (PFNGLCLEARNAMEDBUFFERDATAPROC)getGLFunctionAddress("glClearNamedBufferData");
+	glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)getGLFunctionAddress("glClearBufferData");
+	glCopyNamedBufferSubData = (PFNGLCOPYNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyNamedBufferSubData");
+	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyBufferSubData");
+	glGetNamedBufferSubData = (PFNGLGETNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glGetNamedBufferSubData");
+	glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)getGLFunctionAddress("glGetBufferSubData");
+	glMapNamedBuffer = (PFNGLMAPNAMEDBUFFERPROC)getGLFunctionAddress("glMapNamedBuffer");
+	glMapBuffer = (PFNGLMAPBUFFERPROC)getGLFunctionAddress("glMapBuffer");
+	glUnmapNamedBuffer = (PFNGLUNMAPNAMEDBUFFERPROC)getGLFunctionAddress("glUnmapNamedBuffer");
+	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)getGLFunctionAddress("glUnmapBuffer");
+	glMapNamedBufferRange = (PFNGLMAPNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glMapNamedBufferRange");
+	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)getGLFunctionAddress("glMapBufferRange");
+	glFlushMappedNamedBufferRange = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedNamedBufferRange");
+	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedBufferRange");
 	glBindBuffer = (PFNGLBINDBUFFERPROC)getGLFunctionAddress("glBindBuffer");
 	glIsBuffer = (PFNGLISBUFFERPROC)getGLFunctionAddress("glIsBuffer");
+	glInvalidateBufferData = (PFNGLINVALIDATEBUFFERDATAPROC)getGLFunctionAddress("glInvalidateBufferData");
+	glInvalidateBufferSubData = (PFNGLINVALIDATEBUFFERSUBDATAPROC)getGLFunctionAddress("glInvalidateBufferSubData");
 	glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)getGLFunctionAddress("glDeleteBuffers");
 	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)getGLFunctionAddress("glGenVertexArrays");
 	glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)getGLFunctionAddress("glCreateVertexArrays");
@@ -125,6 +160,8 @@ bool kengine::getAllGLProcedures()
 	glIsVertexArray = (PFNGLISVERTEXARRAYPROC)getGLFunctionAddress("glIsVertexArray");
 	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)getGLFunctionAddress("glDeleteVertexArrays");
 	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)getGLFunctionAddress("glVertexAttribPointer");
+	glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)getGLFunctionAddress("glVertexAttribIPointer");
+	glVertexAttribLPointer = (PFNGLVERTEXATTRIBLPOINTERPROC)getGLFunctionAddress("glVertexAttribLPointer");
 	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glEnableVertexAttribArray");
 	glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glDisableVertexAttribArray");
 	glEnableVertexArrayAttrib = (PFNGLENABLEVERTEXARRAYATTRIBPROC)getGLFunctionAddress("glEnableVertexArrayAttrib");
@@ -181,6 +218,7 @@ bool kengine::getAllGLProcedures()
 	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)getGLFunctionAddress("glDebugMessageControl");
 	glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)getGLFunctionAddress("glPushDebugGroup");
 	glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)getGLFunctionAddress("glPopDebugGroup");
+	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)getGLFunctionAddress("glPrimitiveRestartIndex");
 
 	if (glClearBufferfv == nullptr ||
 		glCreateBuffers == nullptr ||
@@ -191,8 +229,24 @@ bool kengine::getAllGLProcedures()
 		glBufferData == nullptr ||
 		glNamedBufferSubData == nullptr ||
 		glBufferSubData == nullptr ||
+		glClearNamedBufferData == nullptr ||
+		glClearBufferData == nullptr ||
+		glCopyNamedBufferSubData == nullptr ||
+		glCopyBufferSubData == nullptr ||
+		glGetNamedBufferSubData == nullptr ||
+		glGetBufferSubData == nullptr ||
+		glMapNamedBuffer == nullptr ||
+		glMapBuffer == nullptr ||
+		glUnmapNamedBuffer == nullptr ||
+		glUnmapBuffer == nullptr ||
+		glMapNamedBufferRange == nullptr ||
+		glMapBufferRange == nullptr ||
+		glFlushMappedNamedBufferRange == nullptr ||
+		glFlushMappedBufferRange == nullptr ||
 		glBindBuffer == nullptr ||
 		glIsBuffer == nullptr ||
+		glInvalidateBufferData == nullptr ||
+		glInvalidateBufferSubData == nullptr ||
 		glDeleteBuffers == nullptr ||
 		glGenVertexArrays == nullptr ||
 		glCreateVertexArrays == nullptr ||
@@ -200,6 +254,8 @@ bool kengine::getAllGLProcedures()
 		glIsVertexArray == nullptr ||
 		glDeleteVertexArrays == nullptr ||
 		glVertexAttribPointer == nullptr ||
+		glVertexAttribIPointer == nullptr ||
+		glVertexAttribLPointer == nullptr ||
 		glEnableVertexAttribArray == nullptr ||
 		glDisableVertexAttribArray == nullptr ||
 		glEnableVertexArrayAttrib == nullptr ||
@@ -255,7 +311,8 @@ bool kengine::getAllGLProcedures()
 		glDebugMessageCallback == nullptr ||
 		glDebugMessageControl == nullptr ||
 		glPushDebugGroup == nullptr ||
-		glPopDebugGroup == nullptr)
+		glPopDebugGroup == nullptr ||
+		glPrimitiveRestartIndex == nullptr)
 	{
 		return false;
 	}
@@ -579,7 +636,6 @@ void kengine::mesh_node::load(kengine::mesh& m, size_t size)
 	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
 	//}
 
-	
 	/*
 		Mapping the vertex data stored in m_vbo[0] to the vertex attributes declared in vertex shader
 	*/

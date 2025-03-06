@@ -24,6 +24,7 @@
 */
 
 #include <game.hpp>
+#include <gui.hpp>
 
 #include <iostream>
 #include <cassert>
@@ -60,6 +61,8 @@ void demo::game::beforeMainLoopEvent()
 {
 	auto c = kengine::cube(1.0f);
 	node.load(c, 1);
+
+	KGUI::init(m_window->getHandle());
 }
 
 void demo::game::update(const int64_t frameTime)
@@ -93,6 +96,8 @@ void demo::game::update(const int64_t frameTime)
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	node.drawArrays();
+
+	KGUI::draw();
 
 // (!) Unificar a chamada abaixo de SwapBuffer para facilitar o usuário
 #ifdef __ANDROID__
@@ -158,10 +163,10 @@ void demo::game::onWindowReady(kengine::window* window)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// setting the projection
-	m_projectionInfo.left = -2.0f;
-	m_projectionInfo.right = 2.0f;
-	m_projectionInfo.bottom = -2.0f;
-	m_projectionInfo.top = 2.0f;
+	m_projectionInfo.left = -5.0f;
+	m_projectionInfo.right = 5.0f;
+	m_projectionInfo.bottom = -5.0f;
+	m_projectionInfo.top = 5.0f;
 	m_projectionInfo.zNear = 2.0f;
 	m_projectionInfo.zFar = 100.0f;
 
@@ -188,6 +193,8 @@ void demo::game::onResumeEvent()
 void demo::game::closeButtonEvent()
 {
 	assert(!(m_engine == nullptr));
+
+	KGUI::destroy();
 
 	m_renderingSystem->finish();
 	m_window->destroy();
@@ -226,4 +233,5 @@ void demo::game::debugMessage(const std::string& msg)
 
 void demo::game::customWindowProcedure(void* param1, void* param2, void* param3, void* param4)
 {
+	KGUI::customWndProcHandler(param1, param2, param3, param4);
 }

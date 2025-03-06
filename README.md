@@ -41,7 +41,9 @@ K-Engine is licensed under the MIT License.
 - Stroustrup, B. The C++ Programming Language, 4th ed. Reading, MA: Addison-Wesley, 2013.
 - Kessenich, J. Graham, S. Shreiner, D. OpenGL Programming Guide: the official guide to learning OpenGL, versions 4.5. 9th ed. Boston: Pearson Education, 2017.
 - Wolff, D. OpenGL 4 Shading Language Cookbook. 3rd ed. Birmingham: Packt Publishing, 2018.
-- Gregory, J. Game Engine Architecture. 3rd ed. Boca Raton: Taylor & Francis, CRC Press, 2018.
+- GREGORY, J. Game Engine Architecture. 3rd ed. Boca Raton: Taylor & Francis, CRC Press, 2018.
 - Cohen, M. Manssour, I. OpenGL Uma Abordagem Prática e Objetiva. Novatec, 2006.
-- Perucia, A. et al. Desenvolvimento de Jogos Eletrônicos: teoria e prática, 2nd edition. Novatec, 2005.
+- PERUCIA, A. et al. Desenvolvimento de Jogos Eletrônicos: teoria e prática, 2ª edição. São Paulo: Novatec Editora, 2007.
 - Morrison, Michael. Game Programming in 24 hours. Sams Publishing, 2003.
+- GORDON, V. S. CLEVENGER, J. Computer Graphics Programming in OpenGL with C++, 3rd ed. Mercury Learning and Information, 2024.
+- Scratch a pixel. https://www.scratchapixel.com/

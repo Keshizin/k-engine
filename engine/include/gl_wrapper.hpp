@@ -62,8 +62,24 @@ extern PFNGLNAMEDBUFFERDATAPROC glNamedBufferData; // OpenGL 4.5
 extern PFNGLBUFFERDATAPROC glBufferData; // OpenGL 2.0
 extern PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData; // OpenGL 4.5
 extern PFNGLBUFFERSUBDATAPROC glBufferSubData; // OpenGL 2.0
+extern PFNGLCLEARNAMEDBUFFERDATAPROC glClearNamedBufferData; // OpenGL 4.5
+extern PFNGLCLEARBUFFERDATAPROC glClearBufferData; // OpenGL 4.3
+extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData; // OpenGL 4.5
+extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData; // OpenGL 3.1
+extern PFNGLGETNAMEDBUFFERSUBDATAPROC glGetNamedBufferSubData; // OpenGL 4.5
+extern PFNGLGETBUFFERSUBDATAPROC glGetBufferSubData; // OpenGL 2.0
+extern PFNGLMAPNAMEDBUFFERPROC glMapNamedBuffer; // OpenGL 4.5
+extern PFNGLMAPBUFFERPROC glMapBuffer; // OpenGL 2.0
+extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer; // OpenGL 4.5
+extern PFNGLUNMAPBUFFERPROC glUnmapBuffer; // OpenGL 2.0
+extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange; // OpenGL 4.5
+extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange; // OpenGL 3.0
+extern PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC glFlushMappedNamedBufferRange; // OpenGL 4.5
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange; // OpenGL 3.0
 extern PFNGLBINDBUFFERPROC glBindBuffer; // OpenGL 2.0
-extern PFNGLISBUFFERPROC glIsBuffer; // OpenGL 2.0
+extern PFNGLISBUFFERPROC glIsBuffer; // OpenGL 2.0=
+extern PFNGLINVALIDATEBUFFERDATAPROC glInvalidateBufferData; // OpenGL 4.3
+extern PFNGLINVALIDATEBUFFERSUBDATAPROC glInvalidateBufferSubData; // OpenGL 4.3
 extern PFNGLDELETEBUFFERSPROC glDeleteBuffers; // OpenGL 2.0
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays; // OpenGL 3.0
 extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays; // OpenGL 4.5
@@ -71,6 +87,8 @@ extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray; // OpenGL 3.0
 extern PFNGLISVERTEXARRAYPROC glIsVertexArray; // OpenGL 3.0
 extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays; // OpenGL 3.0
 extern PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer; // OpenGL 2.0
+extern PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer; // OpenGL 3.0
+extern PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer; // OpenGL 4.1
 extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray; // OpenGL 2.0
 extern PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray; // OpenGL 2.0
 extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib; // OpenGL 4.5
@@ -127,6 +145,7 @@ extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback; // OpenGL 4.3
 extern PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl; // OpenGL 4.3
 extern PFNGLPUSHDEBUGGROUPPROC glPushDebugGroup; // OpenGL 4.3
 extern PFNGLPOPDEBUGGROUPPROC glPopDebugGroup; // OpenGL 4.3
+extern PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex; // OpenGL 3.1
 
 namespace kengine {
 	enum CONTEXT_FLAG {

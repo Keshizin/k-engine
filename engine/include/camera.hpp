@@ -26,10 +26,58 @@
 #ifndef K_ENGINE_CAMERA_HPP
 #define K_ENGINE_CAMERA_HPP
 
-//#include <ke_math.hpp>
+#include <k_math.hpp>
 
 namespace kengine
 {
+	/*
+		Enums for projection type
+	*/
+	enum class PROJECTION_TYPE
+	{
+		_2D,
+		_3D_ORTHO,
+		_3D_FRUSTUM,
+		_3D_PERSPECTIVE
+	};
+
+	/*
+		kengine::camera class
+	*/
+	class camera
+	{
+	public:
+		camera();
+		~camera() {}
+
+		//camera(const camera& copy) = delete; // copy constructor
+		//camera(camera&& move) noexcept = delete; // move constructor
+		//camera& operator=(const camera& copy) = delete; // copy assignment
+		//camera& operator=(camera&&) = delete; // move assigment
+
+		kengine::matrix<float> lookAt() { return kengine::lookAt(eye, center, up); }
+		kengine::matrix<float> lookAt(const vec4<float>& eyeParam, const vec4<float>& centerParam, const vec4<float>& upParam);
+		kengine::matrix<float> getProjection(PROJECTION_TYPE type, bool aspectCorrection) const;
+
+		vec4<float> eye;
+		vec4<float> center;
+		vec4<float> up;
+		projection_info<float> m_projectionInfo;
+
+		//		void setNavigation(int button, int x, int y);
+		//		void updateNavigation(int x, int y);
+		//		void clearNavigation();
+
+	//		void setWindow(int width, int height);
+	//		projection_info getProjectionInfo() const;
+			//glm::mat4 getProjectionMatrix() const;
+
+	//		kengine::vec3<float> eye; // camera position
+	//		kengine::vec3<float> center; // camera looking at position
+	//		navigation* nav;
+	//		//kengine::matrix viewMatrix; // camera matrix for linear transformation
+	};
+
 	/*
 	*
 	*  kengine::navigation class
@@ -66,56 +114,6 @@ namespace kengine
 	//		//float sensor_camera;
 	//		//float sensor_translate;
 	//	};
-
-		/*
-			Enum for render context
-		*/
-	//enum class RENDER_CONTEXT
-	//{
-	//	RENDER_CONTEXT_2D,
-	//	RENDER_CONTEXT_3D_ORTHO,
-	//	RENDER_CONTEXT_3D_FRUSTUM
-	//};
-
-	/*
-		kengine::camera class
-	*/
-	class camera
-	{
-	public:
-	private:
-	//		camera();
-	//		~camera();
-	//
-	//		camera(const camera& copy) = delete; // copy constructor
-	//		camera(camera&& move) noexcept = delete; // move constructor
-	//		camera& operator=(const camera& copy) = delete; // copy assignment
-	//		camera& operator=(camera&&) = delete; // move assigment
-	//
-	//		//		void lookAt();
-	//		//		void lookAt(kengine::vec3<float> eyeParam, kengine::vec3<float> centerParam, kengine::vec3<float> upParam);
-	//		//		void setNavigation(int button, int x, int y);
-	//		//		void updateNavigation(int x, int y);
-	//		//		void clearNavigation();
-	//
-	//		//		const kengine::matrix& get() const;
-	//
-	//		void setWindow(int width, int height);
-	//		void setProjectionInfo(const projection_info& projInfo);
-	//
-	//		kengine::matrix getProjectionMatrix(RENDER_CONTEXT renderContext) const;
-	//		projection_info getProjectionInfo() const;
-	//
-	//		//glm::mat4 getProjectionMatrix() const;
-	//
-	////		kengine::vec3<float> eye; // camera position
-	////		kengine::vec3<float> center; // camera looking at position
-	////		navigation* nav;
-	//
-		/*private:*/
-	//		projection_info projectionInfo;
-	//		//kengine::matrix viewMatrix; // camera matrix for linear transformation
-	};
 }
 
 #endif

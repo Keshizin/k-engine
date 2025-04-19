@@ -77,6 +77,8 @@ PFNGLVERTEXATTRIBFORMATPROC glVertexAtttribFormat = 0;
 PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding = 0;
 PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation = 0;
 PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance = 0;
+PFNGLUNIFORM1IPROC glUniform1i = 0;
+PFNGLUNIFORM3FPROC glUniform3f = 0;
 PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv = 0;
 PFNGLGETSTRINGIPROC glGetStringi = 0;
 PFNGLCREATESHADERPROC glCreateShader = 0;
@@ -123,6 +125,26 @@ PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl = 0;
 PFNGLPUSHDEBUGGROUPPROC glPushDebugGroup = 0;
 PFNGLPOPDEBUGGROUPPROC glPopDebugGroup = 0;
 PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex = 0;
+PFNGLCREATETEXTURESPROC glCreateTextures = 0;
+PFNGLTEXSTORAGE1DPROC glTexStorage1D = 0;
+PFNGLTEXTURESTORAGE1DPROC glTextureStorage1D = 0;
+PFNGLTEXSTORAGE2DPROC glTexStorage2D = 0;
+PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D = 0;
+PFNGLTEXSTORAGE3DPROC glTexStorage3D = 0;
+PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D = 0;
+PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D = 0;
+PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D = 0;
+//PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D = 0;
+PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D = 0;
+PFNGLBINDTEXTUREUNITPROC glBindTextureUnit = 0;
+PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor = 0;
+PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced = 0;
+PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced = 0;
+PFNGLTEXBUFFERPROC glTexBuffer = 0;
+
+#if defined(_WIN32)
+PFNGLCLIENTACTIVETEXTUREPROC glActiveTexture = 0;
+#endif
 
 bool kengine::getAllGLProcedures()
 {
@@ -173,6 +195,8 @@ bool kengine::getAllGLProcedures()
 	glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC)getGLFunctionAddress("glVertexAttribBinding");
 	glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)getGLFunctionAddress("glBindAttribLocation");
 	glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)getGLFunctionAddress("glDrawArraysInstancedBaseInstance");
+	glUniform1i = (PFNGLUNIFORM1IPROC)getGLFunctionAddress("glUniform1i");
+	glUniform3f = (PFNGLUNIFORM3FPROC)getGLFunctionAddress("glUniform3f");
 	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)getGLFunctionAddress("glUniformMatrix4fv");
 	glGetStringi = (PFNGLGETSTRINGIPROC)getGLFunctionAddress("glGetStringi");
 	glCreateShader = (PFNGLCREATESHADERPROC)getGLFunctionAddress("glCreateShader");
@@ -219,6 +243,26 @@ bool kengine::getAllGLProcedures()
 	glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)getGLFunctionAddress("glPushDebugGroup");
 	glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)getGLFunctionAddress("glPopDebugGroup");
 	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)getGLFunctionAddress("glPrimitiveRestartIndex");
+	glCreateTextures = (PFNGLCREATETEXTURESPROC)getGLFunctionAddress("glCreateTextures");
+	glTexStorage1D = (PFNGLTEXSTORAGE1DPROC)getGLFunctionAddress("glTexStorage1D");
+	glTextureStorage1D = (PFNGLTEXTURESTORAGE1DPROC)getGLFunctionAddress("glTextureStorage1D");
+	glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)getGLFunctionAddress("glTexStorage2D");
+	glTextureStorage2D = (PFNGLTEXTURESTORAGE2DPROC)getGLFunctionAddress("glTextureStorage2D");
+	glTexStorage3D = (PFNGLTEXSTORAGE3DPROC)getGLFunctionAddress("glTexStorage3D");
+	glTextureStorage3D = (PFNGLTEXTURESTORAGE3DPROC)getGLFunctionAddress("glTextureStorage3D");
+	glTextureSubImage1D = (PFNGLTEXTURESUBIMAGE1DPROC)getGLFunctionAddress("glTextureSubImage1D");
+	glTextureSubImage2D = (PFNGLTEXTURESUBIMAGE2DPROC)getGLFunctionAddress("glTextureSubImage2D");
+	//glTexSubImage3D = (PFNGLTEXSUBIMAGE3DPROC)getGLFunctionAddress("glTexSubImage3D");
+	glTextureSubImage3D = (PFNGLTEXTURESUBIMAGE3DPROC)getGLFunctionAddress("glTextureSubImage3D");
+	glBindTextureUnit = (PFNGLBINDTEXTUREUNITPROC)getGLFunctionAddress("glBindTextureUnit");	
+	glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLFunctionAddress("glVertexAttribDivisor");
+	glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)getGLFunctionAddress("glDrawArraysInstanced");
+	glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)getGLFunctionAddress("glDrawElementsInstanced");
+	glTexBuffer = (PFNGLTEXBUFFERPROC)getGLFunctionAddress("glTexBuffer");
+
+#if defined(_WIN32)
+	glActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC)getGLFunctionAddress("glActiveTexture");
+#endif
 
 	if (glClearBufferfv == nullptr ||
 		glCreateBuffers == nullptr ||
@@ -267,6 +311,8 @@ bool kengine::getAllGLProcedures()
 		glVertexAttribBinding == nullptr ||
 		glBindAttribLocation == nullptr ||
 		glDrawArraysInstancedBaseInstance == nullptr ||
+		glUniform1i == nullptr ||
+		glUniform3f == nullptr ||
 		glUniformMatrix4fv == nullptr ||
 		glGetStringi == nullptr ||
 		glCreateShader == nullptr ||
@@ -312,7 +358,24 @@ bool kengine::getAllGLProcedures()
 		glDebugMessageControl == nullptr ||
 		glPushDebugGroup == nullptr ||
 		glPopDebugGroup == nullptr ||
-		glPrimitiveRestartIndex == nullptr)
+		glPrimitiveRestartIndex == nullptr ||
+		glCreateTextures == nullptr ||
+		glTexStorage1D == nullptr ||
+		glTextureStorage1D == nullptr ||
+		glTexStorage2D == nullptr ||
+		glTextureStorage2D == nullptr ||
+		glTexStorage3D == nullptr ||
+		glTextureStorage3D == nullptr ||
+		glTextureSubImage1D == nullptr ||
+		glTextureSubImage2D == nullptr ||
+		//glTexSubImage3D == nullptr ||
+		glTextureSubImage3D == nullptr ||
+		glBindTextureUnit == nullptr ||
+		//glActiveTexture == nullptr ||
+		glVertexAttribDivisor == nullptr ||
+		glDrawArraysInstanced == nullptr ||
+		glDrawElementsInstanced == nullptr ||
+		glTexBuffer == nullptr)
 	{
 		return false;
 	}
@@ -483,19 +546,40 @@ void kengine::GLSLprogram::loadBinary(const std::string& name)
 
 void kengine::GLSLprogram::setUniform(std::string name, bool transpose, GLfloat* value)
 {
-	/*
-		It is inefficient to query the location of a uniform variable in each frame [Wolf, 2018]
-	*/
+	// It is inefficient to query the location of a uniform variable in each frame
 	// GLint location = glGetUniformLocation(programID, name.c_str());
-
 	GLint location = uniformMap[name];
 
 	if (location == -1) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (kengine::matrix): " << name);
+		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat*): " << name);
 		return;
 	}
 
 	glUniformMatrix4fv(location, 1, transpose, value);
+}
+
+void kengine::GLSLprogram::setUniform(std::string name, GLint value)
+{
+	GLint location = uniformMap[name];
+
+	if (location == -1) {
+		K_LOG_OUTPUT_RAW("Failed to set uniform (GLboolean): " << name);
+		return;
+	}
+
+	glUniform1i(location, value);
+}
+
+void kengine::GLSLprogram::setUniform(std::string name, GLfloat x, GLfloat y, GLfloat z)
+{
+	GLint location = uniformMap[name];
+
+	if (location == -1) {
+		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat x, GLfloat y, GLfloat z): " << name);
+		return;
+	}
+
+	glUniform3f(location, x, y, z);
 }
 
 void kengine::GLSLprogram::print() const
@@ -561,13 +645,13 @@ void kengine::GLSLprogram::print() const
 }
 
 /*
-	kengine::mesh_node class - member class definition
+	kengine::render_node class - member class definition
 */
 
-void kengine::mesh_node::load(kengine::mesh& m, size_t size)
+void kengine::render_node::load(kengine::mesh& m, GLsizei instances)
 {
-	clear(); // if this mesh_node was already loaded, it must be cleaned before
-	//max_size = size;
+	clear(); // if this render_node was already loaded, it must be cleaned before
+	m_maxInstances = instances;
 
 	glGenBuffers(MAX_VBO, m_vbo);
 
@@ -575,44 +659,40 @@ void kengine::mesh_node::load(kengine::mesh& m, size_t size)
 	const float* const data = m.getInterleavedData();
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
-	glBufferStorage(GL_ARRAY_BUFFER, totalSizeInBytes, data, 0);
+	glBufferData(GL_ARRAY_BUFFER, totalSizeInBytes, data, GL_STATIC_DRAW);
 
-	//if (m.m_indices.attributeArray != nullptr) {
-	//	glNamedBufferStorage(vbo[2], static_cast<GLsizeiptr>(m.m_indices.getSizeInBytes()), m.m_indices.attributeArray, GL_DYNAMIC_STORAGE_BIT);
-	//	countElement = static_cast<GLsizei>(m.m_indices.arraySize);
-	//}
+	if (m.m_indices.attributeArray != nullptr) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[1]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(m.m_indices.getSizeInBytes()), m.m_indices.attributeArray, GL_STATIC_DRAW);
+		m_elements = static_cast<GLsizei>(m.m_indices.arraySize);
+	}
 
-	//if (hasModelMatrix)
-	//{
-	//	GLsizeiptr modelMatrix_size = static_cast<GLsizeiptr>(max_size * 16LL * sizeof(GLfloat));
-	//	glNamedBufferStorage(vbo[1], modelMatrix_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+	GLfloat* modelMatrices = new float[static_cast<size_t>(m_maxInstances) * 16LL];
 
-	//	GLfloat* modelviewData = new float[max_size * 16LL];
+	for (size_t i = 0; i < static_cast<size_t>(m_maxInstances); i++) {
+		modelMatrices[ 0 + (i * 16)] = 1.0f;
+		modelMatrices[ 1 + (i * 16)] = 0.0f;
+		modelMatrices[ 2 + (i * 16)] = 0.0f;
+		modelMatrices[ 3 + (i * 16)] = 0.0f;
+		modelMatrices[ 4 + (i * 16)] = 0.0f;
+		modelMatrices[ 5 + (i * 16)] = 1.0f;
+		modelMatrices[ 6 + (i * 16)] = 0.0f;
+		modelMatrices[ 7 + (i * 16)] = 0.0f;
+		modelMatrices[ 8 + (i * 16)] = 0.0f;
+		modelMatrices[ 9 + (i * 16)] = 0.0f;
+		modelMatrices[10 + (i * 16)] = 1.0f;
+		modelMatrices[11 + (i * 16)] = 0.0f;
+		modelMatrices[12 + (i * 16)] = 0.0f;
+		modelMatrices[13 + (i * 16)] = 0.0f;
+		modelMatrices[14 + (i * 16)] = 0.0f;
+		modelMatrices[15 + (i * 16)] = 1.0f;
+	}
 
-	//	for (size_t i = 0; i < max_size; i++)
-	//	{
-	//		modelviewData[0 + (i * 16)] = 1.0f;
-	//		modelviewData[1 + (i * 16)] = 0.0f;
-	//		modelviewData[2 + (i * 16)] = 0.0f;
-	//		modelviewData[3 + (i * 16)] = 0.0f;
-	//		modelviewData[4 + (i * 16)] = 0.0f;
-	//		modelviewData[5 + (i * 16)] = 1.0f;
-	//		modelviewData[6 + (i * 16)] = 0.0f;
-	//		modelviewData[7 + (i * 16)] = 0.0f;
-	//		modelviewData[8 + (i * 16)] = 0.0f;
-	//		modelviewData[9 + (i * 16)] = 0.0f;
-	//		modelviewData[10 + (i * 16)] = 1.0f;
-	//		modelviewData[11 + (i * 16)] = 0.0f;
-	//		modelviewData[12 + (i * 16)] = 0.0f;
-	//		modelviewData[13 + (i * 16)] = 0.0f;
-	//		modelviewData[14 + (i * 16)] = 0.0f;
-	//		modelviewData[15 + (i * 16)] = 1.0f;
-	//	}
-
-	//	glNamedBufferSubData(vbo[1], 0, modelMatrix_size, modelviewData);
-	//	delete[] modelviewData;
-	//}
-
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
+	GLsizeiptr modelMatrixSize = static_cast<GLsizeiptr>(m_maxInstances * 16LL * sizeof(GLfloat));
+	glBufferData(GL_ARRAY_BUFFER, modelMatrixSize, modelMatrices, GL_DYNAMIC_DRAW);
+	delete[] modelMatrices;
+	
 	/*
 		Creating vertex array object (VAO)
 	*/
@@ -620,24 +700,14 @@ void kengine::mesh_node::load(kengine::mesh& m, size_t size)
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
-	/*
-		shader plumbing
-
-		Note:
-			Note that the "type" parameter for glVertexAttribPointer will be converted to floating-point by OpenGL in order to load it into floating-point vertex attributes.
-			The way this conversion is performed is controlled by the normalize parameter.
-			When normalize is GL_FALSE, integer data is simply typecast into floating-point format before being passed to the vertex shader.
-			When normalize is GL_TRUE, the data is normalized before being passed to the vertex shader.
-			To do this, OpenGL divides each element by a fixed constant that depends on the incoming data type.
-	*/
-
-	//if (m.m_indices.attributeArray != nullptr)
-	//{
-	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
-	//}
+	if (m.m_indices.attributeArray != nullptr)
+	{
+		// setting the state of the buffer object for ELEMENTS in VAO
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[1]);
+	}
 
 	/*
-		Mapping the vertex data stored in m_vbo[0] to the vertex attributes declared in vertex shader
+		Shader plumbing
 	*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
@@ -658,47 +728,146 @@ void kengine::mesh_node::load(kengine::mesh& m, size_t size)
 			(const GLvoid*)offset);
 
 		offset += it.second.count * sizeof(float);
-		
 	}
 
-	//for (GLuint location = 0; location < m.m_bitset.size(); location++)
-	//{
-	//	if (m.m_bitset[location])
-	//	{
-	//		glEnableVertexAttribArray(location);
-	//		glVertexAttribPointer(location, static_cast<GLint>(m.m_vattributes[location].count), GL_FLOAT, GL_FALSE, static_cast<GLsizei>(m.m_interleavedStride * sizeof(float)), (const GLvoid*)m.m_interleavedOffsets[location]);
-	//		countArray = static_cast<GLsizei>(m.m_vattributes[location].getSize());
-	//	}
-	//}
+	// map the vertex attribute for model matrix at: 12, 13, 14 and 15 locations
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
 
-	//if (hasModelMatrix)
-	//{
-	//	// map index for model matrix
-	//	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-
-	//	for (unsigned int i = 0; i < 4; i++)
-	//	{
-	//		glVertexAttribPointer(3UL + i, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)((sizeof(GLfloat) * 4 * i)));
-	//		glEnableVertexAttribArray(3UL + i);
-	//		glVertexAttribDivisor(3UL + i, 1);
-	//	}
-	//}
+	for (unsigned int row = 0; row < 4; row++) {
+		glVertexAttribPointer(12UL + row, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)((sizeof(GLfloat) * 4 * row)));
+		glEnableVertexAttribArray(12UL + row);
+		glVertexAttribDivisor(12UL + row, 1);
+	}
 }
 
-void kengine::mesh_node::clear()
+void kengine::render_node::updateModelMatrix(const kengine::matrix<float>& matrix)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
+	float* data = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+	for (size_t i = 0; i < 16; i++) {
+		data[i] = matrix[i];
+	}
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+void kengine::render_node::updateModelMatrices(const kengine::matrix<float>* matrices, size_t start, size_t count)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
+	float* data = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+	for (size_t m = start; m < count; m++) {
+		for (size_t i = 0; i < 16; i++) {
+			size_t index = i + (m * 16);
+			data[index] = matrices[m][i];
+		}
+	}
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+void kengine::render_node::clear()
 {
 	glDeleteBuffers(MAX_VBO, m_vbo);
 	glDeleteVertexArrays(1, &m_vao);
 	m_count = 0;
-
-	//max_size = 0;
-	//countElement = 0;
+	m_elements = 0;
+	m_maxInstances = 1;
 }
 
-void kengine::mesh_node::drawArrays() const
+void kengine::render_node::drawArrays() const
 {
 	glBindVertexArray(m_vao);
 	glDrawArrays(m_mode, 0, m_count);
+}
+
+void kengine::render_node::drawElements() const
+{
+	glBindVertexArray(m_vao);
+	glDrawElements(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0);
+}
+
+void kengine::render_node::draw() const
+{
+	glBindVertexArray(m_vao);
+
+	if(m_elements)
+		glDrawElements(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0);
+	else
+		glDrawArrays(m_mode, 0, m_count);
+}
+
+void kengine::render_node::drawInstanced(GLsizei size) const
+{
+	glBindVertexArray(m_vao);
+
+	if (m_elements)
+		glDrawElementsInstanced(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0, size);
+	else
+		glDrawArraysInstanced(m_mode, 0, m_count, size);
+}
+
+
+/*
+	kengine::texture class - member definition
+*/
+
+kengine::texture::~texture()
+{
+	clear();
+}
+
+void kengine::texture::create(TEXTURE_TYPE target, GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+{
+	clear();
+
+	switch (target)
+	{
+	case TEXTURE_TYPE::_2D:
+		m_target = GL_TEXTURE_2D;
+		break;
+	}
+
+	glGenTextures(1, &m_name);
+	glBindTexture(m_target, m_name);
+
+	glTexImage2D(m_target, levels, internalFormat, width, height, 0, format, type, data); // OpenGL 2.0+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void kengine::texture::update(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+{
+	if (m_target == GL_TEXTURE_2D)
+		glTexSubImage2D(m_target, level, xoffset, yoffset, width, height, format, type, data);
+}
+
+void kengine::texture::bindTextureUnit(GLuint textureUnit)
+{
+	//glBindTextureUnit(textureUnit, m_name); // OpenGL 4.5+
+	glActiveTexture(GL_TEXTURE0 + textureUnit); // OpenGL 2.0+
+	glBindTexture(m_target, m_name);
+}
+
+void kengine::texture::bind()
+{
+	glBindTexture(m_target, m_name);
+}
+
+void kengine::texture::unbind()
+{
+	glBindTexture(m_target, 0);
+}
+
+void kengine::texture::clear()
+{
+	glDeleteTextures(1, &m_name);
+	m_name = 0;
+	m_target = 0;
 }
 
 /*

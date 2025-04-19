@@ -31,6 +31,7 @@
 // std headers
 #include <cassert>
 #include <iostream>
+#include <filesystem>
 // microsoft windows headers
 #include <tchar.h>
 #include <windowsx.h>
@@ -52,6 +53,7 @@ static kengine::global_app_manager globalAppManager;
 LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 /*
+	OpenGL Procedures Extension for Win32 (WGL)
 	OpenGL Procedures Extension for Win32 (WGL)
 */
 
@@ -105,46 +107,43 @@ namespace kengine
 		win32_window(win32_window&& move) noexcept = delete;  // move constructor
 		win32_window& operator=(win32_window&&) = delete; // move assigment
 
-		bool create(int xPos, int yPos, int widthParam, int heightParam, const std::string& nameParam) {
+		bool create(int xPos, int yPos, int widthParam, int heightParam, const std::string& nameParam, const window_style& style) {
 			x = xPos;
 			y = yPos;
 			width = widthParam;
 			height = heightParam;
 			name = nameParam;
 
-			//style = styleParam;
+			m_style = style;
 			//additionalStyle = static_cast<WINDOW_ADDITIONAL_STYLE>(additional);
 
 			//DWORD dwExStyle = additional;
 			DWORD dwExStyle = WS_EX_APPWINDOW;
 			DWORD dwStyle = 0;
 
-			//switch (style)
-			//{
-			//case WINDOW_STYLE::SPLASH:
-			//	dwStyle = WS_POPUPWINDOW;
-			//	break;
+			switch (m_style)
+			{
+			case window_style::SPLASH:
+				dwStyle = WS_POPUPWINDOW;
+				break;
 
-			//case WINDOW_STYLE::MINIMAL:
-			//	dwStyle = WS_OVERLAPPED | WS_SYSMENU;
-			//	break;
+			case window_style::MINIMAL:
+				dwStyle = WS_OVERLAPPED | WS_SYSMENU;
+				break;
 
-			//case WINDOW_STYLE::MINIMAL_NO_SYS:
-			//	dwStyle = WS_OVERLAPPED;
-			//	break;
+			case window_style::MINIMAL_NO_SYS:
+				dwStyle = WS_OVERLAPPED;
+				break;
 
-			//case WINDOW_STYLE::WINDOWED_FULLSCREEN:
-			//	dwStyle = WS_POPUPWINDOW | WS_MAXIMIZE;
-			//	break;
+			case window_style::WINDOWED_FULLSCREEN:
+				dwStyle = WS_POPUPWINDOW | WS_MAXIMIZE;
+				break;
 
-			//case WINDOW_STYLE::DEFAULT:
-			dwStyle = WS_OVERLAPPEDWINDOW;
-			//	break;
-
-			//default:
-			//	dwStyle = WS_OVERLAPPEDWINDOW;
-			//	break;
-			//}
+			case window_style::DEFAULT:
+			default:
+				dwStyle = WS_OVERLAPPEDWINDOW;
+				break;
+			}
 
 			RECT windowSize = { 0 };
 			windowSize.left = (LONG)0;
@@ -189,7 +188,7 @@ namespace kengine
 		}
 
 		bool create() {
-			return create(x, y, width, height, name);
+			return create(x, y, width, height, name, m_style);
 		}
 
 		int destroy() {
@@ -475,7 +474,7 @@ namespace kengine
 		}
 
 		void clearBuffers() {
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 
 	private:
@@ -583,7 +582,10 @@ void kengine::quitApplication(int returnCode)
 
 void kengine::setGlobalUserEventsCallback(events_callback* evt)
 {
-	assert(globalUserEventsCallback == nullptr); // trying to override a globalUserEventsCallback
+	//assert(globalUserEventsCallback == nullptr); // trying to override a globalUserEventsCallback
+	if(globalUserEventsCallback != nullptr)
+		globalUserEventsCallback->debugMessage("Overriding the globalUserEventsCallback\n");
+
 	globalUserEventsCallback = evt;
 }
 
@@ -644,23 +646,28 @@ int kengine::getAllGLProcedureAddress()
 	return 1;
 }
 
+/*
+	This method specify the swap interval (synchronization of the front and back frame buffers with vertical blanks)
+	@param value 1 enable vsync and value 0 disable vsync
+*/
+int kengine::setVSync(int vsync)
+{
+	return wglSwapIntervalEXT(vsync);
+}
+
+/*
+	Get the path of executable directoty
+*/
+std::string kengine::getExePath()
+{
+	char path[1000] = { 0 };
+	GetModuleFileNameA(nullptr, path, 1000);
+	std::filesystem::path p(path);
+	return p.parent_path().string();
+}
+
 namespace kengine
 {
-	/*
-		window styles
-			- splash (no caption, no resize, no move)
-			- default (caption, sys menu, minimize box, maximize box, resize, can move)
-			- minimal (caption, sys menu, no resize, can move)
-			- minimal no sys menu (caption, no resize, can move)
-	*/
-//	enum class WINDOW_STYLE
-//	{
-//		SPLASH,
-//		MINIMAL,
-//		MINIMAL_NO_SYS,
-//		WINDOWED_FULLSCREEN,
-//		DEFAULT
-//	};
 
 //	enum WINDOW_ADDITIONAL_STYLE
 //	{
@@ -681,17 +688,6 @@ namespace kengine
 //#endif
 //	};
 }
-
-
-/*
-	This method specify the swap interval (synchronization of the front and back frame buffers with vertical blanks)
-	@param value 1 enable vsync and value 0 disable vsync
-*/
-//int kengine::rendering_context::setVSync(int vsync)
-//{
-//	return wglSwapIntervalEXT(vsync);
-//}
-
 
 /*
 	Registering Win32 window class

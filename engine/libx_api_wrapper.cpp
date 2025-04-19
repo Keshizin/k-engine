@@ -32,8 +32,10 @@
 // std headers
 #include <cassert>
 #include <iostream>
+#include <filesystem>
 // linux headers
 #include <time.h>
+#include <unistd.h>
 
 
 /*
@@ -117,12 +119,13 @@ namespace kengine
 		xlib_window(xlib_window&& move) noexcept = delete;  // move constructor
 		xlib_window& operator=(xlib_window&&) = delete; // move assigment
 
-		bool create(int xPos, int yPos, int widthParam, int heightParam, const std::string& nameParam) {
+		bool create(int xPos, int yPos, int widthParam, int heightParam, const std::string& nameParam, const window_style& style) {
 			x = xPos;
 			y = yPos;
 			width = widthParam;
 			height = heightParam;
 			name = nameParam;
+			m_style = style;
 
 			XSetWindowAttributes attributes;
 			attributes.event_mask = globalAppManager->m_event_mask;
@@ -553,6 +556,22 @@ int kengine::getAllGLProcedureAddress()
 
 	return 1;
 }
+
+/*
+	Get the path of executable directoty
+*/
+std::string kengine::getExePath()
+{
+	char path[1000] = { 0 };
+	ssize_t count = readlink("/proc/self/exe", path, 1000);
+	if (count != -1) {
+		std::filesystem::path p(path);
+		return p.parent_path().string();
+	}
+
+	return "";
+}
+
 
 
 int xWindowProcedure(const XEvent& event)

@@ -31,8 +31,6 @@
 */
 
 kengine::mesh::mesh()
-	//:
-	//m_indices{}
 {
 	m_vattributesMap.reserve(MAX_VERTEX_ATTRIBUTES); // avoid dynamically resizing
 }
@@ -45,9 +43,9 @@ kengine::mesh::mesh(mesh&& m) noexcept
 	m_size{ m.m_size },
 	m_sizeInBytes{ m.m_sizeInBytes },
 	m_interleavedStride{ m.m_interleavedStride },
-	m_vattributesMap{ std::move(m.m_vattributesMap) },
-	m_interleavedData{ std::move(m.m_interleavedData) }
-	//m_indices{ std::move(m.m_indices) }
+	m_indices{ std::move(m.m_indices) },
+	m_interleavedData{ std::move(m.m_interleavedData) },
+	m_vattributesMap{ std::move(m.m_vattributesMap) }
 {
 }
 
@@ -135,31 +133,42 @@ std::string kengine::mesh::dump() const
 	return msg;
 }
 
-kengine::mesh kengine::point(float x, float y, float z)
+kengine::mesh kengine::point(float x, float y, float z, float r, float g, float b, float a)
 {
-	float vertex_positions[] = {
+	float vertexPositions[] = {
 		x, y, z
 	};
 
 	kengine::vattrib<float> v = {
-		vertex_positions,
+		vertexPositions,
 		3,
-		1
+		3
+	};
+
+	float vertexColors[] = {
+		r, g, b, a
+	};
+
+	kengine::vattrib<float> c = {
+		vertexColors,
+		4,
+		4,
 	};
 
 	kengine::mesh m;
 	m.setVertexAttribute(v, 0);
+	m.setVertexAttribute(c, 1);
 	return m;
 }
 
-kengine::mesh kengine::triangle(float size)
+kengine::mesh kengine::triangle(float size, float r, float g, float b, float a)
 {
 	float half = size / 2.0f;
 
 	float vertex_positions[] = {
+		-half,  half,  0.0f,
 		-half, -half,  0.0f,
-		 half, -half,  0.0f,
-		-half,  half,  0.0f
+	 	 half, -half,  0.0f
 	};
 
 	kengine::vattrib<float> v = {
@@ -169,9 +178,9 @@ kengine::mesh kengine::triangle(float size)
 	};
 
 	float vertex_colors[] = {
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a
 	};
 
 	kengine::vattrib<float> c = {
@@ -181,9 +190,9 @@ kengine::mesh kengine::triangle(float size)
 	};
 
 	float texture_coordinates[] = {
+		0.0f, 1.0f,
 		0.0f, 0.0f,
 		1.0f, 0.0f,
-		0.0f, 1.0f
 	};
 
 	kengine::vattrib<float> t = {
@@ -192,229 +201,196 @@ kengine::mesh kengine::triangle(float size)
 		2
 	};
 
+	float vertex_normals[] = {
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+	};
+
+	kengine::vattrib<float> n = {
+		vertex_normals,
+		9,
+		3
+	};
+
 	kengine::mesh tris;
 	tris.setVertexAttribute(v, 0);
 	tris.setVertexAttribute(c, 1);
 	tris.setVertexAttribute(t, 2);
-	tris.dump();
+	tris.setVertexAttribute(n, 3);
 	return tris;
 }
 
-
-kengine::mesh kengine::quad(float size)
+kengine::mesh kengine::quad(float size, float r, float g, float b, float a)
 {
 	float half = size / 2.0f;
 
 	float vertex_positions[] =
 	{
+		-half,  half, 0.0f,
 		-half, -half, 0.0f,
 		 half, -half, 0.0f,
-		-half,  half, 0.0f,
-
-		-half,  half, 0.0f,
-		 half, -half, 0.0f,
-		 half,  half, 0.0f,
+		 half,  half, 0.0f
 	};
 
 	kengine::vattrib<float> v = {
 		vertex_positions,
-		18,
+		12,
 		3
 	};
 
 	float vertex_colors[] =
 	{
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
-		0.5f, 0.5f, 0.5f, 1.0f,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
 	};
 
 	kengine::vattrib<float> c = {
 		vertex_colors,
-		24,
+		16,
 		4
 	};
 
-	
 	float vertex_uv[] =
 	{
+		0.0f, 1.0f,
 		0.0f, 0.0f,
 		1.0f, 0.0f,
-		0.0f, 1.0f,
-		0.0f, 1.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f
+		1.0f, 1.0f,
 	};
 
 	kengine::vattrib<float> t = {
 		vertex_uv,
-		12,
+		8,
 		2
+	};
+
+	float vertex_normals[] = {
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+	};
+
+	kengine::vattrib<float> n = {
+		vertex_normals,
+		12,
+		3
+	};
+
+	unsigned int vertex_indices[] = {
+			0, 1, 2,
+			0, 2, 3,
+	};
+
+	kengine::vattrib<unsigned int> i = {
+		vertex_indices,
+		6,
+		1
 	};
 
 	kengine::mesh q;
 	q.setVertexAttribute(v, 0);
 	q.setVertexAttribute(c, 1);
 	q.setVertexAttribute(t, 2);
-	q.dump();
+	q.setVertexAttribute(n, 3);
+	q.setIndices(i);
 	return q;
 }
 
-kengine::mesh kengine::cube(float size)
+kengine::mesh kengine::cube(float size, float r, float g, float b, float a)
 {
 	float half = size / 2.0f;
-	size_t quads = 6;
-
-	//float vertex_positions[] =
-	//{
-	//	-half,  half, -half,
-	//	-half, -half, -half,
-	//	 half, -half, -half,
-	//	 half,  half, -half,
-	//	-half,  half,  half,
-	//	-half, -half,  half,
-	//	 half, -half,  half,
-	//	 half,  half,  half,
-	//};
-
-	//kengine::vattrib<float> v = {
-	//	vertex_positions,
-	//	24,
-	//	3
-	//};
-
+	
 	float vertex_positions[] =
 	{
-		-half,  half, half,
-		-half, -half, half,
-		 half, -half, half,
-		 half, -half, half,
-		 half,  half, half,
-		-half,  half, half,
-
-		 half,  half,  half,
-		 half, -half,  half,
-		 half, -half, -half,
-		 half, -half, -half,
-		 half,  half, -half,
-		 half,  half,  half,
-
-		 half,  half, -half,
-		 half, -half, -half,
-		-half, -half, -half,
-		-half, -half, -half,
-		-half,  half, -half,
-		 half,  half, -half,
-
 		-half,  half, -half,
 		-half, -half, -half,
-		-half, -half,  half,
-		-half, -half,  half,
+		 half, -half, -half,
+		 half,  half, -half,
 		-half,  half,  half,
-		-half,  half, -half,
-
-		-half, half, -half,
-		-half, half,  half,
-		 half, half,  half,
-		 half, half,  half,
-		 half, half, -half,
-		-half, half, -half,
-
 		-half, -half,  half,
-		-half, -half, -half,
-		 half, -half, -half,
-		 half, -half, -half,
 		 half, -half,  half,
-		-half, -half,  half,
+		 half,  half,  half
 	};
 
 	kengine::vattrib<float> v = {
 		vertex_positions,
-		3 * 6 * quads,
+		24,
 		3
 	};
 
 	float vertex_colors[] =
 	{
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-
-		0.2f, 0.6f, 0.5f, 1.0f,
-		0.2f, 0.6f, 0.5f, 1.0f,
-		0.2f, 0.6f, 0.5f, 1.0f,
-		0.2f, 0.6f, 0.5f, 1.0f,
-		0.2f, 0.6f, 0.5f, 1.0f,
-		0.2f, 0.6f, 0.5f, 1.0f,
-
-		0.7f, 0.0f, 0.2f, 1.0f,
-		0.7f, 0.1f, 0.7f, 1.0f,
-		0.7f, 0.6f, 0.8f, 1.0f,
-		0.7f, 0.3f, 0.3f, 1.0f,
-		0.7f, 0.6f, 0.2f, 1.0f,
-		0.7f, 0.2f, 0.1f, 1.0f,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a,
+		r, g, b, a
 	};
 
 	kengine::vattrib<float> c = {
 		vertex_colors,
-		4 * 6 * quads,
+		32,
 		4
 	};
 
-	//unsigned int vertex_indices[] = {
-	//	0, 1, 2,
-	//	0, 2, 3,
-	//	4, 0, 3,
-	//	4, 3, 7,
-	//	5, 4, 7,
-	//	5, 7, 6,
-	//	1, 5, 6,
-	//	1, 6, 2,
-	//	4, 5, 1,
-	//	4, 1, 0,
-	//	3, 2, 6,
-	//	3, 6, 7
-	//};
+	float vertex_uv[] =
+	{
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+	};
 
-	//kengine::vattrib<unsigned int> i = {
-	//	vertex_indices,
-	//	36,
-	//	1
-	//};
+	kengine::vattrib<float> t = {
+		vertex_uv,
+		16,
+		2
+	};
+
+	unsigned int vertex_indices[] = {
+		0, 1, 2,
+		0, 2, 3,
+		3, 2, 6,
+		3, 6, 7,
+		7, 6, 5,
+		7, 5, 4,
+		4, 5, 1,
+		4, 1, 0,
+		1, 5, 6,
+		1, 6, 5,
+		4, 0, 3,
+		4, 3, 7
+	};
+
+	kengine::vattrib<unsigned int> i = {
+		vertex_indices,
+		36,
+		1
+	};
 
 	kengine::mesh q;
 	q.setVertexAttribute(v, 0);
 	q.setVertexAttribute(c, 1);
-	//q.setIndices(i);
-
+	q.setVertexAttribute(t, 2);
+	q.setIndices(i);
 	return q;
+}
+
+kengine::mesh kengine::sphere()
+{
+	kengine::mesh s;
+	return s;
 }
 
 kengine::mesh kengine::grid()
@@ -445,7 +421,7 @@ kengine::mesh kengine::grid()
 		0.5f, 0.5f, 0.7f, 1.0f
 	};
 
-	kengine::vattrib<float> col = {
+	kengine::vattrib<float> c = {
 		vertex_colors,
 		24,
 		4
@@ -453,7 +429,6 @@ kengine::mesh kengine::grid()
 
 	kengine::mesh g;
 	g.setVertexAttribute(v, 0);
-	g.setVertexAttribute(col, 1);
-
+	g.setVertexAttribute(c, 1);
 	return g;
 }

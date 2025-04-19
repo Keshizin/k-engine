@@ -184,7 +184,7 @@ namespace kengine {
 	*/
 	class mesh
 	{
-		friend class mesh_node; // for perfomance reason
+		friend class render_node; // for perfomance reason
 		static const int MAX_VERTEX_ATTRIBUTES = 16; // this value can be obtained by GL_MAX_VERTEX_ATTRIBS
 
 	public:
@@ -224,10 +224,10 @@ namespace kengine {
 
 		std::string dump() const;
 		
-		//void setIndices(vattrib<unsigned int>& indices)
-		//{
-		//	this->indices = indices;
-		//}
+		void setIndices(vattrib<unsigned int>& indices)
+		{
+			this->m_indices = indices;
+		}
 
 		//void setMaxVertexAttributes(int value);
 
@@ -235,16 +235,16 @@ namespace kengine {
 		size_t m_size = 0; // total of array elements
 		size_t m_sizeInBytes = 0;
 		size_t m_interleavedStride = 0;
-		std::unordered_map<size_t, vattrib<float>> m_vattributesMap = {}; // [location, vattribute array]
+		vattrib<unsigned int> m_indices;
 		std::vector<float> m_interleavedData = {};
-
-		//vattrib<unsigned int> m_indices;
+		std::unordered_map<size_t, vattrib<float>> m_vattributesMap = {}; // [location, vattribute array]
 	};
 
-	mesh point(float x, float y, float z);
-	mesh triangle(float size);
-	mesh quad(float size);
-	mesh cube(float size);
+	mesh point(float x, float y, float z, float r, float g, float b, float a);
+	mesh triangle(float size, float r, float g, float b, float a);
+	mesh quad(float size, float r, float g, float b, float a);
+	mesh cube(float size, float r, float g, float b, float a);
+	mesh sphere();
 	mesh grid();
 }
 

@@ -29,10 +29,14 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <initializer_list>
 #include <cstddef>
 #include <string>
-
+#include <vector>
 
 // (!) constant used to convert angle to radian (PI / 180º)
 #define K_PI_TO_RADIAN 0.0174532925f
@@ -117,7 +121,7 @@ namespace kengine
 			(w)   [d][h][l][p]   (d.x + h.y + l.z + p.w)
 		*/
 
-		vec4<TYPE> r;
+		vec4<T> r;
 		r.x = (m[ 0] * x) + (m[ 1] * y) + (m[ 2] * z) + (m[ 3] * w);
 		r.y = (m[ 4] * x) + (m[ 5] * y) + (m[ 6] * z) + (m[ 7] * w);
 		r.z = (m[ 8] * x) + (m[ 9] * y) + (m[10] * z) + (m[11] * w);
@@ -161,7 +165,7 @@ namespace kengine
 			[d][h][l][p]   (w)   (m.x + n.y + o.z + p.w)
 		*/
 
-		vec4<TYPE> r;
+		vec4<T> r;
 		r.x = (m[0] * v.x) + (m[4] * v.y) + (m[ 8] * v.z) + (m[12] * v.w);
 		r.y = (m[1] * v.x) + (m[5] * v.y) + (m[ 9] * v.z) + (m[13] * v.w);
 		r.z = (m[2] * v.x) + (m[6] * v.y) + (m[10] * v.z) + (m[14] * v.w);
@@ -199,7 +203,7 @@ namespace kengine
 	template <typename T>
 	T dotProduct(const vec4<T>& v1, const vec4<T>& v2)
 	{
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
 	// ***************************************************************************
@@ -207,7 +211,7 @@ namespace kengine
 	/*
 		This class stores A 4x4 matrix in column-major order.
 	*/
-	template <typename T>
+	template <typename TYPE>
 	class matrix {
 		template <class T> friend matrix<T> transpose(const matrix<T>& m);
 		template <class T> friend matrix<T> translate(T x, T y, T z);
@@ -215,40 +219,40 @@ namespace kengine
 		template <class T> friend matrix<T> rotate(T angle, T x, T y, T z);
 		template <class T> friend matrix<T> rotate(T x, T y, T z);
 		template <class T> friend matrix<T> frustum(const T left, const T right, const T bottom, const T top, const T near, const T far);
-		template <class T> friend matrix<T> lookAt(kengine::vec4<T> eye, kengine::vec4<T> center, kengine::vec4<T> up);
+		template <class T> friend matrix<T> lookAt(vec4<T>& eye, vec4<T>& center, vec4<T>& up);
 		template <class T> friend matrix<T> perspective(T fovy, T aspectRatio, T near, T far);
 		template <class T> friend matrix<T> ortho(const T left, const T right, const T bottom, const T top, const T near, const T far);
 
 	public:
-		static size_t size() { return 16 * sizeof(T); }
+		static size_t size() { return 16 * sizeof(TYPE); }
 
 		matrix(); // zero values
 		~matrix();
 
-		explicit matrix(T identity);
-		explicit matrix(std::initializer_list<T> data);
+		explicit matrix(TYPE identity);
+		explicit matrix(std::initializer_list<TYPE> data);
 
 		matrix(const matrix& copy); // copy constructor
 		matrix(matrix&& move) noexcept; // move constructor
 		matrix& operator=(const matrix& right); // copy assignment
 		matrix& operator=(matrix&&) noexcept; // move assigment
 		
-		T& operator[](size_t i) { return m[i]; } // (!) validar indice invalido
-		T operator[](size_t i) const { return m[i]; } // (!) validar indice invalido
-		matrix operator*(const matrix<T>& right);
-		bool operator==(const matrix<T>& right);
+		TYPE& operator[](size_t i) { return m[i]; } // (!) validar indice invalido
+		TYPE operator[](size_t i) const { return m[i]; } // (!) validar indice invalido
+		matrix operator*(const matrix<TYPE>& right);
+		bool operator==(const matrix<TYPE>& right);
 		
 		/*
 			this function will override the values
 		*/
 		matrix& transpose();
 
-		T* value() { return m; } // (!) dangerous
+		TYPE* value() { return m; } // (!) dangerous
 		
 		std::string dump() const; // this method is used only for the K-Engine purpose
 
 	private:
-		T* m = nullptr;
+		TYPE* m = nullptr;
 	};
 
 	template <class T>
@@ -385,6 +389,50 @@ namespace kengine
 
 	// ****************************************************************************
 
+	class circle_points
+	{
+	public:
+		circle_points() {}
+		~circle_points() {}
+
+		circle_points(const circle_points& copy) = delete; // copy constructor
+		circle_points(circle_points&& move) noexcept = delete; // move constructor
+		circle_points& operator=(const circle_points& copy) = delete; // copy assignment
+		circle_points& operator=(circle_points&&) = delete; // move assigment
+
+		void generate(size_t count) {
+
+			float radAngle = 0.0;
+			float increment = static_cast<float>(M_PI) * 2.0f / static_cast<float>(count);
+
+			for (size_t i = 0; i < count; i++) {
+				vec4<float> point;
+				point.x = std::cos(radAngle);
+				point.y = std::sin(radAngle);
+				point.z = 0.0f;
+
+				radAngle += increment;
+
+				m_points.push_back(point);
+			}
+		}
+
+		vec4<float> getPoint(size_t index) {
+			vec4<float> p;
+			
+			if (index < m_points.size()) {
+				p = m_points[index];
+			}
+
+			return p;
+		}
+
+	private:
+		std::vector<vec4<float>> m_points;
+	};
+
+	// ****************************************************************************
+
 	template <class T>
 	matrix<T> transpose(const matrix<T>& m)
 	{
@@ -398,6 +446,8 @@ namespace kengine
 
 		return t;
 	}
+
+	// ***************************************************************************
 
 	/*
 		kengine::projection_info class
@@ -417,11 +467,11 @@ namespace kengine
 		T zNear = 2; // 2.0f;
 		T zFar = 100;
 		T fovy = 60; // field of view in Y axis for perspective use 39.6
+		T width = 640.0f;
+		T height = 480.0f;
 	};
 
-	/*
-		global function for mathematics
-	*/
+	// ***************************************************************************
 
 	template <class T>
 	matrix<T> translate(T x, T y, T z)
@@ -442,6 +492,8 @@ namespace kengine
 		return t;
 	}
 
+	// ***************************************************************************
+
 	template <class T>
 	matrix<T> scale(T x, T y, T z)
 	{
@@ -460,6 +512,8 @@ namespace kengine
 		s[10] = z;
 		return s;
 	}
+
+	// ***************************************************************************
 
 	template <class T>
 	matrix<T> rotate(T angle, T x, T y, T z)
@@ -496,6 +550,8 @@ namespace kengine
 
 		return r;
 	}
+
+	// ***************************************************************************
 
 	// (!) this function set the matrix in coloumn-major order
 	template <class T>
@@ -567,6 +623,8 @@ namespace kengine
 		return  r;
 	}
 
+	// ***************************************************************************
+
 	template <typename T>
 	matrix<T> frustum(const T left, const T right, const T bottom, const T top, const T near, const T far)
 	{
@@ -593,12 +651,15 @@ namespace kengine
 		return p;
 	}
 
+	// ***************************************************************************
+
 	template <class T>
-	matrix<T> lookAt(vec4<T> eye, vec4<T> center, vec4<T> up)
+	matrix<T> lookAt(vec4<T>& eye, vec4<T>& center, vec4<T>& up)
 	{
 		/*
-			(!) look-at matrix in column-major matrix
-				- using right-hand matrix
+			(!) The look-at matrix is:
+				- column-major order
+				- right-hand matrix
 		*/
 		vec4<T> forward = normalize(center - eye);
 		vec4<T> right = normalize(crossProduct(forward, up));
@@ -617,8 +678,14 @@ namespace kengine
 		l[6] = -forward.y;
 		l[10] = -forward.z;
 
-		return translate(-eye.x, -eye.y, -eye.z) * l;
+		l[12] = -dotProduct(right, eye);
+		l[13] = -dotProduct(up_, eye);
+		l[14] = dotProduct(forward, eye);
+
+		return l;
 	}
+
+	// ***************************************************************************
 
 	template <typename T>
 	matrix<T> perspective(T fovy, T aspectRatio, T near, T far)
@@ -650,6 +717,8 @@ namespace kengine
 		return p;
 	}
 
+	// ***************************************************************************
+
 	/*
 		min returns the minimum of the two parameters. It returns y if y is less than x, otherwise it returns x.
 	*/
@@ -657,6 +726,8 @@ namespace kengine
 	TYPE min(TYPE x, TYPE y) {
 		return (y < x ? y : x);
 	}
+
+	// ***************************************************************************
 
 	/*
 		max returns the maximum of the two parameters. It returns y if y is greater than x, otherwise it returns x.
@@ -666,6 +737,8 @@ namespace kengine
 		return (y > x ? y : x);
 	}
 
+	// ***************************************************************************
+
 	/*
 		clamp returns the value of x constrained to the range minVal to maxVal.
 	*/
@@ -673,6 +746,8 @@ namespace kengine
 	TYPE clamp(TYPE x, TYPE minValue, TYPE maxValue) {
 		return min<TYPE>(max<TYPE>(x, minValue), maxValue);
 	}
+
+	// ***************************************************************************
 
 	/*
 		smoothstep performs smooth Hermite interpolation between 0 and 1 when edge0 < x < edge1
@@ -682,6 +757,8 @@ namespace kengine
 		TYPE t = clamp<TYPE>((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 		return t * t * (3.0 - 2.0 * t);
 	}
+
+	// ***************************************************************************
 
 	/*
 		mix performs a linear interpolation between x and y using a to weight between them.

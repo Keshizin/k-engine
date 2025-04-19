@@ -23,7 +23,9 @@
 	SOFTWARE.
 */
 
+// k-engine headers
 #include <core.hpp>
+// std c++ headers
 #include <iostream>
 #include <cassert>
 
@@ -53,6 +55,8 @@ void kengine::core::startMainLoop()
 	//int64_t frequency = getHighResolutionTimerFrequency();
 
 	userEventsCallback->beforeMainLoopEvent();
+	m_profile.init();
+
 	int64_t startTime;
 	int64_t endTime = getHighResolutionTimerCounter();
 
@@ -60,6 +64,8 @@ void kengine::core::startMainLoop()
 
 	while (mainLoopState != K_RUNTIME_STATE::STOPPED) {
 		startTime = getHighResolutionTimerCounter();
+
+		m_profile.update(frameTime);
 
 		/*
 			message pump

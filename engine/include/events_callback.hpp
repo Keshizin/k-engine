@@ -44,6 +44,11 @@ namespace kengine
 		virtual ~events_callback() {}
 
 		/*
+			Callback event called when the window is ready for use
+		*/
+		virtual void onWindowReady(window* window) = 0;
+
+		/*
 			Callback event called before the main loop event starts
 		*/
 		virtual void beforeMainLoopEvent() = 0;
@@ -52,17 +57,12 @@ namespace kengine
 			Callback event called once per main loop iteration
 			@param - *frameTime* is a high resolution (<1us) time value
 		*/
-		virtual void update(const int64_t frameTime) = 0;
+		virtual void update(int64_t frameTime) = 0;
 
 		/*
 			Callback event called when the apllication is being terminated
 		*/
 		virtual void onFinishEvent() = 0;
-
-		/*
-			Callback event called when the window is ready for use
-		*/
-		virtual void onWindowReady(window* window) = 0;
 
 		/*
 			Callback event called when the window is being destroyed

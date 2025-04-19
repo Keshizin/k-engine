@@ -49,6 +49,35 @@
 namespace kengine
 {
 	/*
+		Enum for keys
+	*/
+	enum KEY : unsigned long long
+	{
+#if defined(_WIN32)
+		ENTER = VK_RETURN,
+		ESCAPE = VK_ESCAPE
+#elif(__ANDROID__)
+		ENTER,
+		ESCAPE
+#elif(__linux__)
+		ENTER,
+		ESCAPE
+#endif
+	};
+
+	/*
+		OS Window style
+	*/
+	enum class window_style
+	{
+		SPLASH, // no caption, no resize, no move
+		MINIMAL, // caption, sys menu, no resize, can move
+		MINIMAL_NO_SYS, // caption, no resize, can move
+		WINDOWED_FULLSCREEN,
+		DEFAULT // caption, sys menu, minimize box, maximize box, resize, can move
+	};
+
+	/*
 		This class is an abstract class for the application window
 	*/
 	class window
@@ -62,7 +91,7 @@ namespace kengine
 		window(window&& move) noexcept = delete;  // move constructor
 		window& operator=(window&&) = delete; // move assigment
 
-		virtual bool create(int x, int y, int width, int height, const std::string& name) = 0;
+		virtual bool create(int x, int y, int width, int height, const std::string& name, const window_style& style) = 0;
 		virtual int destroy() = 0;
 		virtual int show() = 0;
 		virtual int hide() = 0;
@@ -70,12 +99,17 @@ namespace kengine
 
 		virtual void* getHandle() = 0;
 
+		void setWindowSize(int w, int h) { width = w; height = h; }
+		int getWidth() const { return width; }
+		int getHeight() const { return height; }
+
 	protected:
 		std::string name; // window bar title
 		int x = 0; // position in X axis (in pixels units)
 		int y = 0; // position in Y axis (in pixels units)
 		int width = 640; // window width in pixels size
 		int height = 480; // window height in pixels size
+		window_style m_style = window_style::DEFAULT;
 	};
 
 	/*
@@ -88,8 +122,8 @@ namespace kengine
 	class rendering_context_info
 	{
 	public:
-		int major;
-		int minor;
+		int major = 0;
+		int minor = 0;
 	};
 
 	/*
@@ -219,6 +253,17 @@ namespace kengine
 		Getting OpenGL functions and OS extension functions
 	*/
 	int getAllGLProcedureAddress();
+
+	/*
+		This method specify the swap interval (synchronization of the front and back frame buffers with vertical blanks)
+		@param value 1 enable vsync and value 0 disable vsync
+	*/
+	int setVSync(int vsync);
+
+	/*
+		Get the path of executable directoty
+	*/
+	std::string getExePath();
 }
 
 #endif

@@ -34,15 +34,7 @@
 kengine::profile::profile()
 	:
 	timer{ 1000 }, // one second timer
-	framesPerSecond{},
-	meanFrameTime{ 0.0 },
-	maxFrameTime{ 0 },
-	minFrameTime{ 0 },
-	maxFramesPerSecond{ 0 },
-	minFramesPerSecond{ 0 },
-	frameCounter{ 0 },
-	totalFrameTime{ 0 },
-	isProfilingEnd{ false }
+	framesPerSecond{}
 {
 }
 
@@ -70,7 +62,6 @@ void kengine::profile::update(int64_t frameTime)
 	if (isProfilingEnd)
 		return;
 
-	//std::cout << "frametime: " << frameTime << std::endl;
 	frameCounter++;
 	totalFrameTime += frameTime;
 
@@ -95,8 +86,6 @@ void kengine::profile::update(int64_t frameTime)
 
 		meanFrameTime = static_cast<double>(totalFrameTime) / frameCounter;
 		totalFrameTime = 0;
-
-		std::cout << "> FPS: " << frameCounter << std::endl;
 		frameCounter = 0;
 	}
 }

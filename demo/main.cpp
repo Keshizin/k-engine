@@ -23,28 +23,55 @@
 	SOFTWARE.
 */
 
+#include <splash.hpp>
 #include <game.hpp>
-
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
 
 int main()
 {
 	K_LOG_OUTPUT_RAW("> Welcome to K-Engine Game Engine! " + kengine::version() + "\n");
 	K_LOG_OUTPUT_RAW(kengine::getDataTypeInfo());
 
+	/*
+		Note: maybe it is better to change the kengine::core instantiation to singleton instantiation
+	*/
 	kengine::core engine;
-	demo::game scene(&engine);
 
 	/*
-		On Android platforms, the window is created and destroyed implicitly by Android Surface Object
+		Setting up the splash scene
+		- On Android platform, it doesn't need a C++ scene splash screen
+	*/
+
+	demo::splash splashScene(&engine);
+
+	/*
+		Note: On Android platforms, the window is created and destroyed implicitly by Android Surface Object
 	*/
 #ifndef __ANDROID__
-	scene.createWindow(kengine::getDisplayCenterPosX(WINDOW_WIDTH), kengine::getDisplayCenterPosY(WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT, "K-Engine! " + kengine::version());
-	scene.showWindow();
+	splashScene.createWindow();
+	splashScene.showWindow();
 #endif
 
-	scene.start();
+	splashScene.start();
+
+	/*
+		At this point, the splash screen scene (and its window) was destroyed...
+	*/
+
+	/*
+		Setting up the game scene
+	*/
+
+	demo::game gameScene(&engine);
+
+	/*
+		Note: On Android platforms, the window is created and destroyed implicitly by Android Surface Object
+	*/
+#ifndef __ANDROID__
+	gameScene.createWindow();
+	gameScene.showWindow();
+#endif
+
+	gameScene.start();
 
 	K_LOG_OUTPUT_RAW("> End of K-Engine Game Engine!\n");
 	return 0;

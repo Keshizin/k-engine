@@ -23,19 +23,22 @@
 	SOFTWARE.
 */
 
+#ifndef K_ENGINE_RENDERING_SYSTEM_HPP
+#define K_ENGINE_RENDERING_SYSTEM_HPP
+
 #include <gl_wrapper.hpp>
 
 namespace kengine
 {
-	class rendering_context;
-	class window;
-
 	enum class RENDERING_TYPE
 	{
 		OPENGL,
 		OPENGL_ES,
 		VULKAN
 	};
+
+	class rendering_context;
+	class window;
 
 	/*
 		kengine::rendering_system class
@@ -67,3 +70,5 @@ namespace kengine
 		rendering_context* m_context = nullptr;
 	};
 }
+
+#endif

@@ -96,8 +96,19 @@ std::string kengine::rendering_system::info(bool extension)
 
 	GLint maxVertexAttribs;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+	renderingInfo << "\n> Max GL vertex attributes: " << maxVertexAttribs;
 
-	renderingInfo << "\n> Max GL vertex attributes: " << maxVertexAttribs << "\n";
+	GLint maxVertexTextureImageUnits;
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
+	renderingInfo << "\n> Max vertex texture image units: " << maxVertexTextureImageUnits;
+
+	GLint maxCombinedTextureImageUnits;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureImageUnits);
+	renderingInfo << "\n> Max combined texture image units: " << maxCombinedTextureImageUnits;
+
+	GLint maxTextureSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	renderingInfo << "\n> Max texture size: " << maxTextureSize << "\n";
 
 	if (extension) {
 		GLint numExtensions;

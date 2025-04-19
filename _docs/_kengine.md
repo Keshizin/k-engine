@@ -6,16 +6,26 @@ Aqui você encontrará todas as ideias de design e uma lista com todas as refer�
 
 > *K-Engine* tem um valor sentimental imenso para mim! Existem milhares de motores de jogos incríveis por aí que podem ser considerados melhores em diversos aspectos, porém, este projeto esteve presente em todas as fases da minha vida desde que iniciei meus estudos na área da Computação. Posso dizer com toda certeza que devo todo o meu conhecimento em Computação e Desenvolvimento de Jogos à **K-Engine**! <3
 
-# K-Engine Architecture Design
+- [Building](building.md)  
+- [K-Engine architecture](arch.md)  
 
-Meu interesse inicial pelo desenvolvimento de jogos surgiu ao ler o livro **"OpenGL: Uma Abordagem Prática e Objetiva"**, de _Marcelo Cohen_ e _Isabel Harb_, ambos professores de Computação Gráfica na PUC-RS (Pontifícia Universidade Católica do Rio Grande do Sul). A obra utilizava a biblioteca [**GLUT (OpenGL Utility Toolkit)**](https://www.opengl.org/resources/libraries/glut/glut_downloads.php) para ilustrar diversos conceitos de Computação Gráfica de forma didática. Um dos momentos mais marcantes da leitura foi desenvolver uma sala de aula virtual em 3D, com iluminação baseada no modelo Phong e navegação em primeira pessoa.
+# Notas de desenvolvimento
 
-A partir deste livro, passei a explorar outras bibliotecas e frameworks para substituir GLUT, como, por exemplo [**GLFW**](https://www.glfw.org/). Percebi que todos eles utilizavam o conceito de **funções de callback**, onde a biblioteca ou framework controla o loop principal da aplicação, enquanto o programador define funções de callback personalizadas, que são chamadas implicitamente durante a sua execução. A principal desvantagem é a limitação no controle da execução do programa, especialmente quando a biblioteca utilizada é mais restrita em funcionalidades.
+Meu interesse inicial pelo desenvolvimento de jogos surgiu ao ler o livro **"OpenGL: Uma Abordagem Prática e Objetiva"**, de _Marcelo Cohen_ e _Isabel Harb_, ambos professores de Computação Gráfica na PUC-RS (Pontifícia Universidade Católica do Rio Grande do Sul). A obra utiliza a biblioteca [**GLUT (OpenGL Utility Toolkit)**](https://www.opengl.org/resources/libraries/glut/glut_downloads.php) para ilustrar diversos conceitos de Computação Gráfica de forma prática e simples. No final, o livro incetiva o leitor a desenvolver um projeto de aplicação OpenGL completa de uma sala virtual 3D interativo que aborda todos os conceitos explicados no livro.
 
-Querendo entender melhor o funcionamento interno destas bibliotecas, encontrei dois livros sobre programação de jogos utilizando a API [**Win32**](https://learn.microsoft.com/pt-br/windows/win32/desktop-programming) e **DirectX**: o livro **"Desenvolvimento de Jogos Eletrônicos: Teoria e Prática"**, de _Alexandre Souza Perucia et al._, e o livro **"Game Programming in 25 Hours"**, de _Michael Morrison_. Ambos os livros me deram a primeira introdução de uma arquitetura de motor de jogos.
+A partir deste livro, passei a explorar outras bibliotecas e frameworks para substituir **GLUT**, como, por exemplo [**GLFW**](https://www.glfw.org/) e [**SDL2**](https://www.libsdl.org/). Neste momento, aprendi que todos eles utilizavam o conceito de **funções de callback**, onde a biblioteca ou framework controlava o loop principal da aplicação, enquanto o programador definia funções de callback personalizadas, que eram chamadas implicitamente durante a execução da aplicação.
 
-A partir deste ponto, tomei a decisão que queria construir o meu próprio motor de jogo multiplataforma utilizando apenas a API Win32 para Microsoft Windows e LibX para Linux. Como a proposta inicial era garantir compatibilidade entre diferentes sistemas operacionais, optei por utilizar OpenGL em vez de DirectX.
+Para entender melhor o funcionamento interno destas bibliotecas, encontrei dois livros sobre programação de jogos utilizando a API [**Win32**](https://learn.microsoft.com/pt-br/windows/win32/desktop-programming) e **DirectX**: o livro **"Desenvolvimento de Jogos Eletrônicos: Teoria e Prática"**, de _Alexandre Souza Perucia et al._, e o livro **"Game Programming in 25 Hours"**, de _Michael Morrison_. Ambos os livros me deram a primeira introdução de uma arquitetura de motor de jogos.
 
+A partir deste ponto, tomei a decisão de construir o meu próprio motor de jogo multiplataforma utilizando apenas a API Win32 para Microsoft Windows e LibX para Linux. Como a proposta inicial era garantir compatibilidade entre diferentes sistemas operacionais, optei por utilizar OpenGL em vez de DirectX.
+
+
+??
+## OpenGL
+
+A partir da versão 4.4 e 4.5 foram introduzidos novos conceitos para melhorar o desempenho: immutable objects e direct state access. Entretanto, para manter compatiblidade com a versão Android, todas as funções OpenGL foram baseadas a partir da versão 3.0+. Portanto, a implementação padrão do rendering system não utiliza immutable objects e direct state acess.
+
+??
 [arquitetura inicial de K-Engine: core, callback_events, os_api_wrapper]
 
 Com o objetivo definido, eu precisva me aprofundar mais sobre OpenGL. Dois livros foram essenciais: **"OpenGL Programming Guide 8th edition"** e **"OpenGL 4 Shading Language Cookbook 3rd edition"**. O segundo livro abriu mais portas ao introduzir o mundo da programação de shaders e animação. Além disso, comecei a ler o livro **"Game Engine Architecture, 3rd edition"** de _Jason Gregory_ para me aprofundar mais sobre arquitetura de motor de jogos. Jason Gregory é lead programmer na **Naughty Dog** e também professor universtário na univerdade de California.
@@ -25,7 +35,6 @@ Com o objetivo definido, eu precisva me aprofundar mais sobre OpenGL. Dois livro
 [Framework vs biblioteca]
 [Eventos de callbacks (events_callback.hpp)]
 
-- [K-Engine Core](core.md)
 - [Mesh](mesh.md)
 - [Rendering System](rendering_system.md)
 
@@ -60,3 +69,9 @@ kengine::mesh
 Escolha de std::unordered_map vs std::vector vs std::bitset
 
 Inserir location 0 e 4 por exemplo
+
+- Linux
+  - https://man7.org/linux/man-pages/man3/clock_gettime.3.html
+  - https://www.guyrutenberg.com/2007/09/22/profiling-code-using-clock_gettime/
+
+C++17 para utilizar std::filesystem

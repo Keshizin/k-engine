@@ -42,17 +42,20 @@ namespace kengine
 		void update(int64_t frameTime);
 		void save() const;
 
+		int getFramesPerSecond() const { return !framesPerSecond.empty() ? framesPerSecond.back() : 0; };
+
 	private:
 		kengine::timer timer;
 		std::vector<int> framesPerSecond;
-		double meanFrameTime;
-		int64_t maxFrameTime;
-		int64_t minFrameTime;
-		int maxFramesPerSecond;
-		int minFramesPerSecond;
-		int frameCounter;
-		int64_t totalFrameTime;
-		bool isProfilingEnd;
+
+		double meanFrameTime = 0.0;
+		int64_t maxFrameTime = 0;
+		int64_t minFrameTime = 0;
+		int64_t totalFrameTime = 0;
+		int maxFramesPerSecond = 0;
+		int minFramesPerSecond = 0;
+		int frameCounter = 0;
+		bool isProfilingEnd = false;;
 	};
 }
 

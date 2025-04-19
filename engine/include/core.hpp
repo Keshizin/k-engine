@@ -29,6 +29,7 @@
 #include <k_version.hpp>
 #include <os_api_wrapper.hpp>
 #include <events_callback.hpp>
+#include <profile.hpp>
 
 namespace kengine
 {
@@ -65,9 +66,12 @@ namespace kengine
 		void setEventsCallback(events_callback* eventsCallback);
 		// void setFrameRate(unsigned int framesPerSecond);
 
+		profile* getProfile() { return &m_profile; };
+
 	private:
 		K_RUNTIME_STATE mainLoopState = K_RUNTIME_STATE::STOPPED;
 		events_callback* userEventsCallback = nullptr;
+		profile m_profile;
 	};
 
 	/*

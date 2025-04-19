@@ -26,10 +26,18 @@
 #ifndef K_ENGINE_CONSTANTS_HPP
 #define K_ENGINE_CONSTANTS_HPP
 
-#define KENGINE_SHADER_PATH_STR std::string(K_ENGINE_SHADER_PATH)
-
 namespace kengine
 {
+	/*
+		K-Engine colors
+	*/
+	constexpr int BACKGROUND_COLOR_GRAY_ENGINE = 0x3B3B3BFF;
+	constexpr int BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU = 0x2C001EFF;
+	constexpr int BACKGROUND_COLOR_GRAY_LOGO = 0x323232FF;
+	constexpr int BACKGROUND_COLOR_YELLOW_LOGO = 0xF7C217FF;
+	constexpr int BACKGROUND_COLOR_ORANGE_LOGO = 0xEE5509FF;
+	constexpr int BACKGROUND_COLOR_BROWN_LOGO = 0x774425FF;
+
 	/*
 		Enum for mouse input in the OS events handling (message pumps)
 	*/

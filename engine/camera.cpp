@@ -24,8 +24,94 @@
 */
 
 #include <camera.hpp>
-//#include <keaux.h>
-//#include <keconstants.h>
+
+/*
+	kengine::camera class - member class definition
+*/
+
+kengine::camera::camera()
+	:
+	eye{ 0.0f, 0.0f, 0.0f },
+	center{ 0.0f, 0.0f, 0.0f },
+	up{ 0.0f, 1.0f, 0.0f }
+//		viewMatrix{ 1 },
+//		nav{ new kengine::navigation }
+{
+}
+
+//kengine::camera::~camera()
+//{
+	//	delete nav;
+//}
+
+kengine::matrix<float> kengine::camera::lookAt(const vec4<float>& eyeParam, const vec4<float>& centerParam, const vec4<float>& upParam)
+{
+	eye = eyeParam;
+	center = centerParam;
+	up = upParam;
+	return kengine::lookAt(eye, center, up);
+}
+
+kengine::matrix<float> kengine::camera::getProjection(PROJECTION_TYPE type, bool aspectCorrection) const
+{
+	kengine::matrix<float> projection(1.0f);
+	projection_info<float> info = m_projectionInfo;
+	float aspectRatio = 1.0f;
+
+	if (aspectCorrection) {
+
+		if (info.width <= info.height)
+		{
+			aspectRatio = info.height / info.width;
+			info.bottom *= aspectRatio;
+			info.top *= aspectRatio;
+		}
+		else
+		{
+			aspectRatio = info.width / info.height;
+			info.left *= aspectRatio;
+			info.right *= aspectRatio;
+		}
+	}
+
+	if (type == PROJECTION_TYPE::_2D)
+	{
+		projection = kengine::ortho(
+			info.left,
+			info.right,
+			info.bottom,
+			info.top,
+			0.1f,
+			100.0f);
+	}
+	else if (type == kengine::PROJECTION_TYPE::_3D_ORTHO)
+	{
+		projection = kengine::ortho(
+			info.left,
+			info.right,
+			info.bottom,
+			info.top,
+			m_projectionInfo.zNear,
+			m_projectionInfo.zFar
+		);
+	}
+	else if (type == PROJECTION_TYPE::_3D_PERSPECTIVE)
+	{
+		projection = kengine::perspective(m_projectionInfo.fovy, aspectRatio, m_projectionInfo.zNear, m_projectionInfo.zFar);
+	}
+	else if(type == PROJECTION_TYPE::_3D_FRUSTUM)
+	{
+		projection = kengine::frustum(
+			info.left,
+			info.right,
+			info.bottom,
+			info.top,
+			m_projectionInfo.zNear,
+			m_projectionInfo.zFar);
+	}
+
+	return projection;
+}
 
 /*
 *
@@ -46,13 +132,11 @@
 //	//	sensor_translate{ 3.0f }
 //{
 //}
-//
-//
+
 //kengine::navigation::~navigation()
 //{
 //}
-//
-//
+
 //void kengine::navigation::set(int activeButton, int x, int y)
 //{
 //	mouse_x_init = x;
@@ -64,8 +148,7 @@
 //	//	camera_pos_init = from;
 //	//	camera_rotate_init = rotate;
 //}
-//
-//
+
 //kengine::matrix kengine::navigation::update(int x, int y)
 //{
 //	kengine::matrix r(1);
@@ -86,8 +169,7 @@
 //
 //	return r;
 //}
-//
-//
+
 //void kengine::navigation::clear()
 //{
 //	mouse_x_init = 0;
@@ -97,40 +179,6 @@
 //	//camera_rotate_init = { 0.0f, 0.0f, 0.0f };
 //}
 
-/*
-*
-*  kengine::camera class - member class definition
-*
-*/
-//kengine::camera::camera()
-//	: projectionInfo{}
-	//	eye{ 0.0f, 0.0f, 0.0f },
-	//	center{ 0.0f, 0.0f, 0.0f },
-	//	viewMatrix{ 1 },
-	//	nav{ new kengine::navigation }
-//{
-//}
-
-//kengine::camera::~camera()
-//{
-	//	delete nav;
-//}
-
-//void kengine::camera::lookAt()
-//{
-//	viewMatrix = kengine::lookAt(eye, center, { 0.0f, 1.0f, 0.0f });
-//}
-//
-//
-//void kengine::camera::lookAt(kengine::vec3<float> eyeParam, kengine::vec3<float> centerParam, kengine::vec3<float> upParam)
-//{
-//	eye = eyeParam;
-//	center = centerParam;
-//	
-//	viewMatrix = kengine::lookAt(eye, center, upParam);
-//}
-//
-//
 //void kengine::camera::setNavigation(int button, int x, int y)
 //{
 //	if (nav == nullptr)
@@ -139,13 +187,11 @@
 //	nav->set(button, x, y);
 //}
 
-
 //void kengine::camera::updateNavigation(int x, int y)
 //{
 //	kengine::matrix r = nav->update(x, y);
 //	viewMatrix = viewMatrix * r;
 //}
-
 
 //void kengine::camera::clearNavigation()
 //{
@@ -155,87 +201,17 @@
 //	nav->clear();
 //}
 
-
-
 //const kengine::matrix& kengine::camera::get() const
 //{
 //	return viewMatrix;
 //}
-
 
 //void kengine::camera::setWindow(int width, int height)
 //{
 //	projectionInfo.window_width = width;
 //	projectionInfo.window_height = height;
 //}
-//
-//
-//void kengine::camera::setProjectionInfo(const projection_info& projInfo)
-//{
-//	projectionInfo = projInfo;
-//}
-//
-//
-//kengine::matrix kengine::camera::getProjectionMatrix(RENDER_CONTEXT renderContext) const
-//{
-//	kengine::matrix projection(1.0f);
-//
-//	float aspectRatio;
-//	kengine::rect window = projectionInfo.plane_size;
-//
-//	if (projectionInfo.window_width <= projectionInfo.window_height)
-//	{
-//		aspectRatio = static_cast<float>(projectionInfo.window_height) / static_cast<float>(projectionInfo.window_width);
-//		window.bottom *= aspectRatio;
-//		window.top *= aspectRatio;
-//	}
-//	else
-//	{
-//		aspectRatio = static_cast<float>(projectionInfo.window_width) / static_cast<float>(projectionInfo.window_height);
-//		window.left *= aspectRatio;
-//		window.right *= aspectRatio;
-//	}
-//
-//	if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_2D)
-//	{
-//		projection = kengine::ortho(
-//			window.left,
-//			window.right,
-//			window.bottom,
-//			window.top,
-//			-1.0f,
-//			1.0f);
-//	}
-//	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_ORTHO)
-//	{
-//		projection = kengine::ortho(
-//			window.left,
-//			window.right,
-//			window.bottom,
-//			window.top,
-//			projectionInfo.near_plane,
-//			projectionInfo.far_plane
-//		);
-//	}
-//	else if (renderContext == kengine::RENDER_CONTEXT::RENDER_CONTEXT_3D_FRUSTUM)
-//	{
-//		projection = kengine::perspective(projectionInfo.fovy, aspectRatio, projectionInfo.near_plane, projectionInfo.far_plane);
-//
-//		//projection = kengine::frustum(
-//		//	window.left,
-//		//	window.right,
-//		//	window.bottom,
-//		//	window.top,
-//		//	viewingWindow._near,
-//		//	viewingWindow._far);
-//
-//		//projection = glm::perspective(projectionInfo.fovy, aspectRatio, projectionInfo.near_plane, projectionInfo.far_plane);
-//	}
-//
-//	return projection;
-//}
-//
-//
+
 //kengine::projection_info kengine::camera::getProjectionInfo() const
 //{
 //	return projectionInfo;

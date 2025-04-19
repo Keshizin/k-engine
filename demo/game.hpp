@@ -1,6 +1,6 @@
 /*
 	K-Engine Demonstration
-	This file provide a Graphical User Interface for a game created with K-Engine.
+	This file provide a template for game created with K-Engine.
 
 	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
 
@@ -26,13 +26,17 @@
 #ifndef K_ENGINE_DEMO_HPP
 #define K_ENGINE_DEMO_HPP
 
+// game headers
+#include <gui.hpp>
+// k-engine headers
 #include <core.hpp>
-#include <profile.hpp>
 #include <rendering_system.hpp>
 #include <logger.hpp>
 
 // third-party library
 // #include <glm/glm.hpp>
+
+#define TOTAL_ENTITY 100
 
 namespace demo
 {
@@ -48,8 +52,13 @@ namespace demo
 		game& operator=(game&&) = delete; // move assigment
 
 		void start();
-		void createWindow(int x, int y, int width, int height, const std::string& name);
+		void createWindow();
 		void showWindow();
+
+		/*
+			Callback event called when the window is ready for use
+		*/
+		void onWindowReady(kengine::window* window);
 
 		/*
 			Callback event called before the main loop event starts
@@ -60,17 +69,12 @@ namespace demo
 			Callback event called once per main loop iteration
 			@param - *frameTime* is a high resolution (<1us) time value
 		*/
-		void update(const int64_t frameTime);
+		void update(int64_t frameTime);
 
 		/*
 			Callback event called when the apllication is being terminated
 		*/
 		void onFinishEvent();
-
-		/*
-			Callback event called when the window is ready for use
-		*/
-		void onWindowReady(kengine::window* window);
 
 		/*
 			Callback event called when the window is being destroyed
@@ -135,11 +139,16 @@ namespace demo
 	private:
 		kengine::core* m_engine = nullptr;
 		kengine::window* m_window = nullptr;
+
 		kengine::rendering_system* m_renderingSystem = nullptr;
-		kengine::profile m_profile;
 		kengine::GLSLprogram m_shader;
-		kengine::mesh_node node;
-		kengine::projection_info<float> m_projectionInfo;
+		kengine::render_node node;
+		kengine::texture tex;
+		kengine::matrix<float> modelMatrices[TOTAL_ENTITY];
+		
+		kengine::camera m_cam;
+
+		kgui::GraphicalUserInterface m_engineGUI;
 	};
 }
 

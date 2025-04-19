@@ -100,6 +100,8 @@ extern PFNGLVERTEXATTRIBFORMATPROC glVertexAtttribFormat; // OpenGL 4.3
 extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding; // OpenGL 4.3
 extern PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation; // OpenGL 2.0
 extern PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance; // OpenGL 4.2
+extern PFNGLUNIFORM1IPROC glUniform1i; // OpenGL 2.0
+extern PFNGLUNIFORM3FPROC glUniform3f; // OpenGL 2.0
 extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv; // OpenGL 2.0
 extern PFNGLGETSTRINGIPROC glGetStringi; // OpenGL 3.0
 extern PFNGLCREATESHADERPROC glCreateShader; // OpenGL 2.0
@@ -146,6 +148,26 @@ extern PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl; // OpenGL 4.3
 extern PFNGLPUSHDEBUGGROUPPROC glPushDebugGroup; // OpenGL 4.3
 extern PFNGLPOPDEBUGGROUPPROC glPopDebugGroup; // OpenGL 4.3
 extern PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex; // OpenGL 3.1
+extern PFNGLCREATETEXTURESPROC glCreateTextures; // OpenGL 4.5
+extern PFNGLTEXSTORAGE1DPROC glTexStorage1D; // OpenGL 4.2
+extern PFNGLTEXTURESTORAGE1DPROC glTextureStorage1D; // OpenGL 4.5
+extern PFNGLTEXSTORAGE2DPROC glTexStorage2D; // OpenGL 4.2
+extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D; // OpenGL 4.5
+extern PFNGLTEXSTORAGE3DPROC glTexStorage3D; // OpenGL 4.2
+extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;; // OpenGL 4.5
+extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D; // OpenGL 4.5
+extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D; // OpenGL 4.5
+//extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D; // OpenGL 2.0+
+extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D; // OpenGL 4.5+
+extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit; // OpenGL 4.5
+extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor; // OpenGL 3.3+
+extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced; // OpenGL 3.1+
+extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced; // OpenGL 3.1+
+extern PFNGLTEXBUFFERPROC glTexBuffer; // OpenGL 3.1+
+
+#if defined(_WIN32)
+extern PFNGLCLIENTACTIVETEXTUREPROC glActiveTexture; // OpenGL 2.0+
+#endif
 
 namespace kengine {
 	enum CONTEXT_FLAG {
@@ -196,8 +218,6 @@ namespace kengine {
 	/*
 		This struct is used to pass a list of GLSL shaders that can be compiled.
 
-		Values for GLuint type:
-
 			- GL_VERTEX_SHADER
 			- GL_GEOMETRY_SHADER
 			- GL_TESS_EVALUATION_SHADER
@@ -232,12 +252,19 @@ namespace kengine {
 		void loadBinary(const std::string& name);
 
 		void setUniform(std::string name, bool transpose, GLfloat* value);
+		void setUniform(std::string name, GLint value);
+		void setUniform(std::string name, GLfloat x, GLfloat y, GLfloat z);
 
 		/*
 			(!) for perfomance: it doesn't use std::unordered_map and is inline
 		*/
+
 		void setUniformL(GLint location, bool transpose, GLfloat* value) {
 			glUniformMatrix4fv(location, 1, transpose, value);
+		}
+
+		void setUniformL(GLint location, GLfloat x, GLfloat y, GLfloat z) {
+			glUniform3f(location, x, y, z);
 		}
 
 		GLint getLocation(std::string name) {
@@ -248,7 +275,6 @@ namespace kengine {
 
 		void print() const;
 
-		//void setUniform(std::string name, int value);
 		//void setUniform(std::string name, const kengine::phong_light& l);
 		//void setUniform(std::string name, const kengine::phong_material& m);
 		//void setUniform(std::string name, const kengine::lighting_model& lm);
@@ -266,36 +292,70 @@ namespace kengine {
 
 	/*
 		This class encapsulate the vertex buffer object and vertex array object
+			- The model matrix is stored as vertex attribute to allows instancing rendering
 	*/
-	class mesh_node {
-		static constexpr int MAX_VBO = 1;
+	class render_node {
+		static constexpr int MAX_VBO = 3; // vertex data, vertex indices, model matrix
 
 	public:
-		mesh_node() {}
-		~mesh_node() { clear(); }
+		render_node() {}
+		~render_node() { clear(); }
 
-		mesh_node(const mesh_node& copy) = delete; // copy constructor
-		mesh_node(mesh_node&& move) noexcept = delete; // move constructor
-		mesh_node& operator=(const mesh_node& copy) = delete; // copy assignment
-		mesh_node& operator=(mesh_node&&) = delete; // move assigment
+		render_node(const render_node& copy) = delete; // copy constructor
+		render_node(render_node&& move) noexcept = delete; // move constructor
+		render_node& operator=(const render_node& copy) = delete; // copy assignment
+		render_node& operator=(render_node&&) = delete; // move assigment
 
 		/*
-			Create new buffer objects for the mesh m. This method will destroy all previous loaded objects.
+			Creates new buffer objects for the mesh m. This method will destroy all previous loaded objects.
 		*/
-		void load(mesh& m, size_t size = 1); // no DSA commands
+		void load(mesh& m, GLsizei instances = 1); // no DSA commands
+		void updateModelMatrix(const kengine::matrix<float>& matrix);
+		void updateModelMatrices(const kengine::matrix<float>* matrices, size_t start, size_t count);
 		void clear();
+
 		void drawArrays() const;
+		void drawElements() const;
+		void draw() const;
+		void drawInstanced(GLsizei size) const;
 		void setMode(GLenum mode) { m_mode = mode; }
 
 	private:
-		GLuint m_vbo[MAX_VBO] = { 0 };
 		GLuint m_vao = 0;
+		GLuint m_vbo[MAX_VBO] = { 0 };
 		GLsizei m_count = 0;
+		GLsizei m_elements = 0;
 		GLenum m_mode = GL_TRIANGLES;
+		GLsizei m_maxInstances = 1;
+	};
 
-		//GLsizei countElement = 0;
-		//size_t max_size = 1;
-		//int hasModelMatrix = 1;
+	enum class TEXTURE_TYPE {
+		_2D,
+	};
+
+	/*
+		Texture class
+	*/
+	class texture {
+	public:
+		texture() {};
+		~texture();
+
+		texture(const texture& copy) = delete; // copy constructor
+		texture(texture&& move) noexcept = delete; // move constructor
+		texture& operator=(const texture& copy) = delete; // copy assignment
+		texture& operator=(texture&&) = delete; // move assigment
+
+		void create(TEXTURE_TYPE target, GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data);
+		void update(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data);
+		void bindTextureUnit(GLuint textureUnit);
+		void bind();
+		void unbind();
+		void clear();
+	
+	private:
+		GLuint m_name = 0;
+		GLenum m_target = 0;
 	};
 
 	/*

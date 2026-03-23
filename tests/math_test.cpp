@@ -35,9 +35,6 @@
 	- testar todos os metodos de vec4 (normalize, dot, cross, etc)
 */
 
-void vec4_instancing_test();
-int linear_transformation_test();
-
 /*
 	main
 */
@@ -45,18 +42,4 @@ int main()
 {
 	int result = 0;
 	return result;
-}
-
-void vec4_instancing_test()
-{
-	kengine::vec4<float> v = { 1.5f, 1.5f, 1.5f };
-	kengine::vec4<float> v1;
-	kengine::vec4<float> v2(3.5f, 3.5f, 3.5f);
-	kengine::vec4<float> v4 = v2;
-}
-
-int linear_transformation_test()
-{
-	// test translate
-	return 0;
 }

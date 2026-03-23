@@ -2,7 +2,7 @@
 	K-Engine Demonstration
 	This file provide a splash screen example created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@
 #include <core.hpp>
 #include <rendering_system.hpp>
 #include <camera.hpp>
+
+#include <memory>
 
 namespace demo
 {
@@ -74,16 +76,6 @@ namespace demo
 		void onWindowDestroy();
 
 		/*
-			Callback event called when the window is deactivated (e.g. minimized window)
-		*/
-		void onPauseEvent();
-
-		/*
-			Callback event called when the window is activated
-		*/
-		void onResumeEvent();
-
-		/*
 			Callback event called when the user clicks the window's close button
 		*/
 		void closeButtonEvent();
@@ -94,54 +86,31 @@ namespace demo
 		void onResizeWindowEvent(const int width, const int height);
 
 		/*
-			Callback event called when the window is being moved
-		*/
-		void onMoveWindowEvent(const int x, const int y);
-
-		/*
-			Callback event called on mouse move event
-		*/
-		void onMouseMotionEvent(const int x, const int y);
-
-		/*
-			Callback event called on mouse button event
-		*/
-		void onMouseButtonEvent(const int button, const kengine::MOUSE_ACTION& state, const int x, const int y);
-
-		/*
 			Callback event called on keyboard key event
 		*/
 		void onKeyboardEvent(const unsigned long long key, const int state);
-
-		/*
-			Callback event called on special keyboard keys event like shift, ctrl, etc
-		*/
-		void onKeyboardSpecialEvent(const unsigned long long key, const int state);
 
 		/*
 			Callback event for debug message
 		*/
 		void debugMessage(const std::string& msg);
 
-		/*
-			Custom message pump handler
-		*/
-		void customWindowProcedure(void* param1, void* param2, void* param3, void* param4);
+		HIDE_ENGINE_EVENT_CALLBACK()
+		HIDE_MOUSE_EVENT_CALLBACK()
+		HIDE_SPECIAL_KEYBOARD_EVENT_CALLBACK()
+		HIDE_CUSTOM_WINPROC_EVENT_CALLBACK()
 
 	private:
 		kengine::core* m_engine = nullptr;
-		kengine::window* m_window = nullptr;
+		std::unique_ptr<kengine::window> m_window;
+		std::unique_ptr<kengine::rendering_system> m_renderingSystem;
+		std::unique_ptr<kengine::primitive_render> m_primitive;
 
-		kengine::rendering_system* m_renderingSystem = nullptr;
 		kengine::GLSLprogram m_shader;
-		kengine::render_node logo;
-		kengine::texture logoTexture;
-
+		kengine::gpu_buffer m_gpuBuffer;
+		kengine::texture m_texture;
 		kengine::camera m_cam;
-
-		kengine::timer m_timer;
-		float animationTimer = 0.0f;
-		kengine::circle_points m_circlePoints;
+		kengine::timer m_sceneTimer;
 	};
 }
 

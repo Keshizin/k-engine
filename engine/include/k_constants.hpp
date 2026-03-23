@@ -2,7 +2,7 @@
 	K-Engine constants header
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,12 @@
 
 #ifndef K_ENGINE_CONSTANTS_HPP
 #define K_ENGINE_CONSTANTS_HPP
+
+/*
+	(!) Este header deve incluir apenas constantes simbólicas e enums de propósito geral.
+
+		- enum MOUSE pode ser movido para os_api_wrapper.hpp igual enum KEY
+*/
 
 namespace kengine
 {

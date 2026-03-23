@@ -2,7 +2,7 @@
 	K-Engine Demonstration
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 
 #include <splash.hpp>
 #include <game.hpp>
+#include <logger.hpp>
 
 int main()
 {
@@ -32,7 +33,7 @@ int main()
 	K_LOG_OUTPUT_RAW(kengine::getDataTypeInfo());
 
 	/*
-		Note: maybe it is better to change the kengine::core instantiation to singleton instantiation
+		Note: maybe it is better to change the kengine::core instantiation to singleton instantiation.
 	*/
 	kengine::core engine;
 
@@ -40,22 +41,25 @@ int main()
 		Setting up the splash scene
 		- On Android platform, it doesn't need a C++ scene splash screen
 	*/
-
-	demo::splash splashScene(&engine);
+	std::unique_ptr<demo::splash> splashScene = std::make_unique<demo::splash>(&engine);
 
 	/*
 		Note: On Android platforms, the window is created and destroyed implicitly by Android Surface Object
 	*/
 #ifndef __ANDROID__
-	splashScene.createWindow();
-	splashScene.showWindow();
+	splashScene->createWindow();
+	splashScene->showWindow();
 #endif
 
-	splashScene.start();
+	/*
+		K-Engine will get the game execution control after the start() call
+	*/
+	splashScene->start();
 
 	/*
-		At this point, the splash screen scene (and its window) was destroyed...
+		If the execution has reached this point, the splash screen's window was destroyed...
 	*/
+	splashScene.reset();
 
 	/*
 		Setting up the game scene
@@ -63,9 +67,6 @@ int main()
 
 	demo::game gameScene(&engine);
 
-	/*
-		Note: On Android platforms, the window is created and destroyed implicitly by Android Surface Object
-	*/
 #ifndef __ANDROID__
 	gameScene.createWindow();
 	gameScene.showWindow();

@@ -2,7 +2,7 @@
 	Win32 API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,6 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 /*
 	OpenGL Procedures Extension for Win32 (WGL)
-	OpenGL Procedures Extension for Win32 (WGL)
 */
 
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
@@ -65,7 +64,6 @@ PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
 	Registers a Win32 window class
 */
 int registerWindowClass(std::string windowClassName);
-
 
 /*
 	Unregistering a Win32 window class
@@ -85,11 +83,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	return main();
 }
 
-/*
-	K-Engine public interface for OS API functions
-*/
 namespace kengine
 {
+	/*
+	*/
 	class win32_window : public window
 	{
 		friend class win32_rendering_context;
@@ -113,8 +110,8 @@ namespace kengine
 			width = widthParam;
 			height = heightParam;
 			name = nameParam;
-
 			m_style = style;
+
 			//additionalStyle = static_cast<WINDOW_ADDITIONAL_STYLE>(additional);
 
 			//DWORD dwExStyle = additional;
@@ -241,9 +238,9 @@ namespace kengine
 		HDC hDC = NULL;
 	};
 
-	window* windowInstance()
+	std::unique_ptr<kengine::window> windowInstance()
 	{
-		return new win32_window;
+		return std::make_unique<win32_window>();
 	}
 
 	/*
@@ -323,10 +320,16 @@ namespace kengine
 				return 0;
 			}
 
-			makeCurrent(true);
+			makeCurrent();
 
-			if (!kengine::getAllGLProcedureAddress())
+			if (!kengine::getAllGLProcedureAddress()) {
+				destroy();
 				return 0;
+			}
+
+			/*
+				Recreating the context with extended context
+			*/
 
 			globalAppManager.setCallbackCalls(false);
 			// destroying a dummy opengl context
@@ -336,10 +339,15 @@ namespace kengine
 			// flush the Window event messages
 			kengine::handleSystemMessages();
 			// creating a new window for the new opengl context (extended context)
-			win32_win->create();
+			
+			if (!win32_win->create())
+				return 0;
+
 			// creating a new rendering context with WGL extension
-			createEXT(profile);
-			makeCurrent(true);
+			if (!createEXT(profile))
+				return 0;
+
+			makeCurrent();
 			globalAppManager.setCallbackCalls(true);
 			return 1;
 		}
@@ -360,16 +368,18 @@ namespace kengine
 			return 1;
 		}
 
-		int makeCurrent(bool enable) {
-			HGLRC context = (enable ? hRC : nullptr);
-
-			if (!wglMakeCurrent(win32_win->hDC, context)) {
+		void makeCurrent() {
+			if (!wglMakeCurrent(win32_win->hDC, hRC)) {
 				DWORD error = GetLastError();
 				globalUserEventsCallback->debugMessage("It was not possible to make current the rendering context: " + std::to_string(error) + "\n");
-				return 0;
 			}
+		}
 
-			return 1;
+		void unmakeCurrent() {
+			if (!wglMakeCurrent(win32_win->hDC, nullptr)) {
+				DWORD error = GetLastError();
+				globalUserEventsCallback->debugMessage("It was not possible to unmake current the rendering context: " + std::to_string(error) + "\n");
+			}
 		}
 
 		int createEXT(const compatibility_profile& profile) {
@@ -470,23 +480,23 @@ namespace kengine
 		}
 
 		int swapBuffers() {
-			return 1;
-		}
-
-		void clearBuffers() {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			win32_win->swapBuffers();
+			return true;
 		}
 
 	private:
 		win32_window* win32_win = nullptr; // avoid dynamic casts in the methods
 		HGLRC hRC = nullptr;
 	};
-	
-	rendering_context* renderingContextInstance(window* win) {
-		return new win32_rendering_context(win);
+
+	std::unique_ptr<kengine::rendering_context> renderingContextInstance(window* win) {
+		return std::make_unique<win32_rendering_context>(win);
 	}
 }
 
+/*
+	Retrieves the current value of the perfomance counter, which is a high resolution (<1us) time stamp that can be used for time-interval measurements.
+*/
 int64_t kengine::getHighResolutionTimerCounter()
 {
 	LARGE_INTEGER time;
@@ -494,6 +504,9 @@ int64_t kengine::getHighResolutionTimerCounter()
 	return static_cast<int64_t>(time.QuadPart);
 }
 
+/*
+	Retrieves the frequency of the perfomance counter. The frequency of the perfomance counter is fixed at system boot and is consistent across all processors. Therefore, the frequency need only be queried upon application initialization, and the result can be cached.
+*/
 int64_t kengine::getHighResolutionTimerFrequency()
 {
 	LARGE_INTEGER frequency;
@@ -501,6 +514,9 @@ int64_t kengine::getHighResolutionTimerFrequency()
 	return static_cast<int64_t>(frequency.QuadPart);
 }
 
+/*
+	Creating a debug console
+*/
 int kengine::createDebugConsole()
 {
 	if (!AllocConsole())
@@ -526,37 +542,60 @@ int kengine::createDebugConsole()
 	return 1;
 }
 
+/*
+	Closing the debug console
+*/
 int kengine::closeDebugConsole()
 {
 	return FreeConsole();
 }
 
+/*
+	OSInitialize is used to initialize global objects from OS API (e.g. Win32, XLib and Android NDK)
+	This function must be called only one time in the application life
+*/
 int kengine::osInitialize()
 {
 	return registerWindowClass(K_ENGINE_WINDOW_CLASS);
 }
 
+/*
+	OSFinish is used to finish and release the global objects from OS API (e.g. Win32, XLib and Android NDK)
+	This function must be called only one time in the application life
+*/
 int kengine::osFinish()
 {
 	return unregisterWindowClass(K_ENGINE_WINDOW_CLASS);
 }
 
+/*
+	Get the primary display size in pixels
+*/
 void kengine::getDisplaySize(int* width, int* height)
 {
 	*width = GetSystemMetrics(SM_CXSCREEN);
 	*height = GetSystemMetrics(SM_CYSCREEN);
 }
 
+/*
+	Get the center position in x axis of the primary display
+*/
 int kengine::getDisplayCenterPosX(int displayWidth)
 {
 	return (GetSystemMetrics(SM_CXSCREEN) - displayWidth) / 2;
 }
 
+/*
+	Get the center position in y axis of the primary display
+*/
 int kengine::getDisplayCenterPosY(int displayHeight)
 {
 	return (GetSystemMetrics(SM_CYSCREEN) - displayHeight) / 2;
 }
 
+/*
+	Get the number of monitors
+*/
 int kengine::getNumberOfMonitors()
 {
 	return 0;
@@ -575,11 +614,17 @@ int kengine::getNumberOfMonitors()
 //	return GetDpiForWindow(hWindow);
 //}
 
+/*
+	Send QUIT message to indicate to the system that a thread has made a request to terminate (quit).
+*/
 void kengine::quitApplication(int returnCode)
 {
 	PostQuitMessage(returnCode);
 }
 
+/*
+	Set global user events callback
+*/
 void kengine::setGlobalUserEventsCallback(events_callback* evt)
 {
 	//assert(globalUserEventsCallback == nullptr); // trying to override a globalUserEventsCallback
@@ -589,6 +634,9 @@ void kengine::setGlobalUserEventsCallback(events_callback* evt)
 	globalUserEventsCallback = evt;
 }
 
+/*
+	Message events handling (message pump)
+*/
 void kengine::handleSystemMessages()
 {
 	// (!) PLEASE DON'T INCLUDE I/O's STUFF HERE!
@@ -604,7 +652,10 @@ void kengine::handleSystemMessages()
 	}
 }
 
-void* kengine::getGLFunctionAddress(std::string name)
+/*
+	Get an OpenGL function address (it must be defined by OS API Wrapper)
+*/
+void* kengine::getGLFunctionAddress(const std::string& name)
 {
 	/*
 		References:
@@ -617,12 +668,16 @@ void* kengine::getGLFunctionAddress(std::string name)
 	if (functionAddress == nullptr || (functionAddress == (void*)0x01) || (functionAddress == (void*)0x02) || (functionAddress == (void*)0x03) || (functionAddress == (void*)-1)) {
 		//HMODULE module = LoadLibraryA("opengl32.dll");
 		//p = (void*)GetProcAddress(module, name);
+		globalUserEventsCallback->debugMessage("Failed to get OpenGL procedure address: " + name);
 		return nullptr;
 	}
 
 	return functionAddress;
 }
 
+/*
+	Getting OpenGL functions and OS extension functions
+*/
 int kengine::getAllGLProcedureAddress()
 {
 #pragma warning(disable: 4191)
@@ -639,11 +694,7 @@ int kengine::getAllGLProcedureAddress()
 		return 0;
 	}
 
-	if (!getAllGLProcedures()) {
-		return 0;
-	}
-
-	return 1;
+	return getGLProcedures();
 }
 
 /*
@@ -668,7 +719,6 @@ std::string kengine::getExePath()
 
 namespace kengine
 {
-
 //	enum WINDOW_ADDITIONAL_STYLE
 //	{
 //#if defined(_WIN32)
@@ -747,7 +797,7 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 	globalUserEventsCallback->customWindowProcedure(&hWnd, &uMsg, &wParam, &lParam);
-
+	
 	switch (uMsg)
 	{
 	case WM_DESTROY: // 0x0002

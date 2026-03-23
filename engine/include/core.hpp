@@ -2,7 +2,7 @@
 	K-Engine Core
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@
 
 #include <k_version.hpp>
 #include <os_api_wrapper.hpp>
-#include <events_callback.hpp>
 #include <profile.hpp>
 
 namespace kengine
@@ -44,7 +43,7 @@ namespace kengine
 	};
 
 	/*
-		kengine::core class orchestrates all core engine components
+		This class orchestrates all core engine components
 	*/
 	class core
 	{

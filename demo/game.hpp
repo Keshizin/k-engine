@@ -1,8 +1,8 @@
 /*
 	K-Engine Demonstration
-	This file provide a template for game created with K-Engine.
+	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -31,15 +31,24 @@
 // k-engine headers
 #include <core.hpp>
 #include <rendering_system.hpp>
-#include <logger.hpp>
 
-// third-party library
-// #include <glm/glm.hpp>
+#include <memory>
 
-#define TOTAL_ENTITY 100
+#define TOTAL_TRIANGLES 150
+#define TOTAL_ENTITY 3
 
 namespace demo
 {
+	/*
+	*/
+	class Entity {
+	public:
+	private:
+		kengine::vec3<float> position;
+	};
+
+	/*
+	*/
 	class game : public kengine::events_callback
 	{
 	public:
@@ -82,6 +91,11 @@ namespace demo
 		void onWindowDestroy();
 
 		/*
+			Callback event called when the user clicks the window's close button
+		*/
+		void closeButtonEvent();
+
+		/*
 			Callback event called when the window is deactivated (e.g. minimized window)
 		*/
 		void onPauseEvent();
@@ -90,11 +104,6 @@ namespace demo
 			Callback event called when the window is activated
 		*/
 		void onResumeEvent();
-
-		/*
-			Callback event called when the user clicks the window's close button
-		*/
-		void closeButtonEvent();
 
 		/*
 			Callback event called when the window is being resized
@@ -134,21 +143,24 @@ namespace demo
 		/*
 			Custom message pump handler
 		*/
-		void customWindowProcedure(void* param1, void* param2, void* param3, void* param4);
+		int customWindowProcedure(void* param1, void* param2, void* param3, void* param4);
 
 	private:
 		kengine::core* m_engine = nullptr;
-		kengine::window* m_window = nullptr;
-
-		kengine::rendering_system* m_renderingSystem = nullptr;
-		kengine::GLSLprogram m_shader;
-		kengine::render_node node;
-		kengine::texture tex;
-		kengine::matrix<float> modelMatrices[TOTAL_ENTITY];
-		
+		std::unique_ptr<kengine::window> m_window;
+		std::unique_ptr<kengine::rendering_system> m_renderingSystem;
+		std::unique_ptr<kengine::primitive_render> m_primitive;
+		std::unique_ptr<kengine::primitive_render> m_cube;
+		std::unique_ptr<kengine::primitive_render> m_grid;
+		std::unique_ptr<float[]> m_modelTransforms;
+	
+		kengine::GLSLprogram m_particleShader;
+		kengine::GLSLprogram m_orbitShader;
+		kengine::gpu_buffer m_gpuBuffer;	
 		kengine::camera m_cam;
+		kengine::gui m_gui;
 
-		kgui::GraphicalUserInterface m_engineGUI;
+		bool isKey_1 = false; // just for test
 	};
 }
 

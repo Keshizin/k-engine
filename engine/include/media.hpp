@@ -2,7 +2,7 @@
 	K-Engine Media Library
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,76 +26,12 @@
 #ifndef K_ENGINE_MEDIA_HPP
 #define K_ENGINE_MEDIA_HPP
 
-#include <string>
-#include <fstream>
+#include <camera.hpp>
 
 namespace kengine
 {
-	/*
-		kengine::raw_img class
-	*/
-	class k_img
-	{
-	public:
-		k_img() {}
-		~k_img() { delete[] pixels; }
-
-		k_img(const k_img& copy) = delete; // copy constructor
-		k_img(k_img&& move) noexcept = delete; // move constructor
-		k_img& operator=(const k_img& copy) = delete; // copy assignment
-		k_img& operator=(k_img&&) = delete; // move assigment
-
-		bool loadfile(const std::string& filename)
-		{
-			std::ifstream filestream(filename, std::ios::in | std::ios::binary);
-
-			if (!filestream)
-			{
-				return false;
-			}
-
-			filestream.seekg(0, std::ios::end);
-			std::streamoff fileSize = filestream.tellg();
-			filestream.seekg(0, std::ios::beg);
-
-			char sign[4] = {};
-			filestream.read(sign, sizeof(sign));
-			filestream.read(reinterpret_cast<char*>(&width), sizeof(int));
-			filestream.read(reinterpret_cast<char*>(&height), sizeof(int));
-
-			size_t dataSize = fileSize - (2 * sizeof(int)) - 4;
-			pixels = new unsigned char[dataSize];
-			filestream.read(reinterpret_cast<char*>(pixels), static_cast<std::streamsize>(dataSize));
-
-			return true;
-		}
-
-		bool writeFile(std::string filename, int widthParam, int heightParam, void* data, long long data_size) {
-			std::ofstream file_stream(filename, std::ios::binary);
-
-			if (!file_stream)
-			{
-				return false;
-			}
-
-			char sign[] = { 'K', 'I', 'M', 'G' };
-			file_stream.write(reinterpret_cast<const char*>(&sign), sizeof(sign));
-			file_stream.write(reinterpret_cast<const char*>(&width), sizeof(int));
-			file_stream.write(reinterpret_cast<const char*>(&height), sizeof(int));
-			file_stream.write(reinterpret_cast<const char*>(data), data_size);
-
-			return true;
-		}
-
-		int getWidth() const { return width; }
-		int getHeight() const { return height; }
-		unsigned char* getPixels() { return pixels; }
-
-	private:
-		int width = 0;
-		int height = 0;
-		unsigned char* pixels = nullptr;
-	};
+	bool loadCameraConfig(camera* cam);
+	bool saveCameraConfig(const camera* cam);
 }
 
 #endif

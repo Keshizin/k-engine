@@ -6,9 +6,9 @@ The main motivation for this project is to study game engine architectures and i
 
 Platforms supported:
 
-- Microsoft Windows  
-- Linux  
-- Android  
+- Microsoft Windows (Win32 API)  
+- Linux (XLib)  
+- Android (Android NDK)  
 
 Graphics API supported:
 
@@ -30,7 +30,7 @@ How to build for GCC:
   $ linux-build.sh [Release or Debug]
 ```
 
-For more details, check [Building](_docs/building.md)   
+For more details, check [Building](_docs/building.md).
 
 ## License
 
@@ -38,12 +38,23 @@ K-Engine is licensed under the MIT License.
 
 ## References
 
-- Stroustrup, B. The C++ Programming Language, 4th ed. Reading, MA: Addison-Wesley, 2013.
-- Kessenich, J. Graham, S. Shreiner, D. OpenGL Programming Guide: the official guide to learning OpenGL, versions 4.5. 9th ed. Boston: Pearson Education, 2017.
-- Wolff, D. OpenGL 4 Shading Language Cookbook. 3rd ed. Birmingham: Packt Publishing, 2018.
+OpenGL:
+- WOLFF, D. OpenGL 4 Shading Language Cookbook. 3rd ed. Birmingham: Packt Publishing, 2018.  
+- GORDON, V. S. CLEVENGER, J. Computer Graphics Programming in OpenGL with C++, 3rd ed. Mercury Learning and Information, 2024.  
+- KESSENICH, J. et al. OpenGL Programming Guide: the official guide to learning OpenGL, versions 4.5. 9th ed. Boston: Pearson Education, 2017.  
+- COHEN, M. MANSSOUR, I. OpenGL Uma Abordagem Prática e Objetiva. Novatec, 2006.
+
+Game Development:
 - GREGORY, J. Game Engine Architecture. 3rd ed. Boca Raton: Taylor & Francis, CRC Press, 2018.
-- Cohen, M. Manssour, I. OpenGL Uma Abordagem Prática e Objetiva. Novatec, 2006.
+- PENAZZO, D. 2D Game Development: From Zero To Hero. Avaible in [https://therealpenaz91.itch.io/2dgd-f0th](https://therealpenaz91.itch.io/2dgd-f0th).
 - PERUCIA, A. et al. Desenvolvimento de Jogos Eletrônicos: teoria e prática, 2a edição. São Paulo: Novatec Editora, 2007.
-- Morrison, Michael. Game Programming in 24 hours. Sams Publishing, 2003.
-- GORDON, V. S. CLEVENGER, J. Computer Graphics Programming in OpenGL with C++, 3rd ed. Mercury Learning and Information, 2024.
-- Scratch a pixel. https://www.scratchapixel.com/
+- MORRISON, M. Game Programming in 24 hours. Sams Publishing, 2003.  
+
+Physics Engine:
+- MILLINGTON, I. Game Physics Engine Development, 2nd ed. Morgan Kaufmann Publishers, 2010.
+
+Computer Graphics:
+- Scratch a pixel. Available in [https://www.scratchapixel.com/](https://www.scratchapixel.com/)  
+
+C++:
+- STROUSTRUP, B. The C++ programming language, 4th ed. Reading, MA: Addison-Wesley, 2013.

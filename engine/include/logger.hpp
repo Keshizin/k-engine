@@ -2,7 +2,7 @@
 	K-Engine Logger
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -30,23 +30,25 @@
 	[ ... under construction ... ]
 
 	Design ideas:
+	- Utilizar a mesma função para imprimir o log (Android por exemplo não utiliza std::cout)
 	- Ter um log proprio de K-Engine (este não deve atrapalhar o log do usuario)
 	- Alguns tipos de erros devem ser retornados para o usuario mas não como uma mensagem string e sim com o identificador. É o usuário que deve decidir como exibir esta informação.
 */
 
 #ifdef K_ENGINE_DEBUG
-#if defined(__ANDROID__)
-#include <sstream>
-#define K_LOG_OUTPUT_RAW(message) { std::stringstream msg; msg << message; K_LOG_OUTPUT(msg.str().c_str()); }
-inline void K_LOG_OUTPUT(const char* message) {
-	__android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message);
-}
+	#if defined(__ANDROID__)
+		#include <sstream>
+		#define K_LOG_OUTPUT_RAW(message) { std::stringstream msg; msg << message; K_LOG_OUTPUT(msg.str().c_str()); }
+		inline void K_LOG_OUTPUT(const char* message)
+		{
+			__android_log_print(ANDROID_LOG_INFO, MODULE_NAME, "%s", message);
+		}
+	#else
+		#include <iostream>
+		#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
+	#endif
 #else
-#include <iostream>
-#define K_LOG_OUTPUT_RAW(message) std::cout << message << std::endl;
-#endif
-#else
-#define K_LOG_OUTPUT_RAW(message)
+	#define K_LOG_OUTPUT_RAW(message)
 #endif
 
 #endif

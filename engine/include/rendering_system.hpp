@@ -2,7 +2,7 @@
 	K-Engine Rendering System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -61,13 +61,10 @@ namespace kengine
 		int init(RENDERING_TYPE type, const compatibility_profile& profile);
 		void finish();
 		void swapBuffers();
-		void clearBuffers();
-
-		std::string info(bool extension);
 
 	private:
 		RENDERING_TYPE m_type = RENDERING_TYPE::OPENGL;
-		rendering_context* m_context = nullptr;
+		std::unique_ptr<rendering_context> m_context;
 	};
 }
 

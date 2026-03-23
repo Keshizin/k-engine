@@ -2,7 +2,7 @@
 	K-Engine events callback
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,11 @@
 
 #include <cstdint>
 #include <string>
+
+/*
+	TODO:
+		- use MACRO to skip the override methodss (e.g. chromium)
+*/
 
 namespace kengine
 {
@@ -123,8 +128,23 @@ namespace kengine
 			Custom message pump handler
 			This callback is specific for Win32 window procedure
 		*/
-		virtual void customWindowProcedure(void* param1, void* param2, void* param3, void* param4) = 0;
+		virtual int customWindowProcedure(void* param1, void* param2, void* param3, void* param4) = 0;
 	};
 }
+
+/*
+	MACRO to hide unused callback events
+*/
+
+#define HIDE_ENGINE_EVENT_CALLBACK() void onPauseEvent() {} \
+	void onResumeEvent() {}
+
+#define HIDE_MOUSE_EVENT_CALLBACK() void onMoveWindowEvent(const int x, const int y) {} \
+	void onMouseMotionEvent(const int x, const int y) {} \
+	void onMouseButtonEvent(const int button, const kengine::MOUSE_ACTION& state, const int x, const int y) {}
+
+#define HIDE_SPECIAL_KEYBOARD_EVENT_CALLBACK() void onKeyboardSpecialEvent(const unsigned long long key, const int state) {}
+
+#define HIDE_CUSTOM_WINPROC_EVENT_CALLBACK() int customWindowProcedure(void* param1, void* param2, void* param3, void* param4) { return 0; }
 
 #endif

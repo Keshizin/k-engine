@@ -1,8 +1,8 @@
 /*
-	K-Engine Timer Class
+	K-Engine Timer
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ kengine::timer::timer()
 {
 }
 
-kengine::timer::timer(long long stopTimeInMs)
+kengine::timer::timer(int64_t stopTimeInMs)
 	:
 	stopTime{ stopTimeInMs * (kengine::getHighResolutionTimerFrequency() / 1000) },
 	startTimer{ 0 },
@@ -50,14 +50,10 @@ void kengine::timer::start()
 	startTimer = getHighResolutionTimerCounter();
 }
 
-int kengine::timer::done()
+bool kengine::timer::done()
 {
-	long long internalTimer = getHighResolutionTimerCounter();
-
-	if ((internalTimer - startTimer) >= stopTime)
-		return 1;
-	else
-		return 0;
+	int64_t internalTimer = getHighResolutionTimerCounter();
+	return (internalTimer - startTimer) >= stopTime;
 }
 
 void kengine::timer::stop()
@@ -67,10 +63,9 @@ void kengine::timer::stop()
 
 int kengine::timer::doneAndRestart()
 {
-	long long internalTimer = getHighResolutionTimerCounter();
+	int64_t internalTimer = getHighResolutionTimerCounter();
 
-	if (internalTimer - startTimer >= stopWatch)
-	{
+	if (internalTimer - startTimer >= stopWatch) {
 		// (!) dont put code before the next instruction!
 		stopWatch += stopTime;
 		return 1;
@@ -79,7 +74,7 @@ int kengine::timer::doneAndRestart()
 		return 0;
 }
 
-void kengine::timer::setTimerInMs(long long stopTimeInMs)
+void kengine::timer::setTimerInMs(int64_t stopTimeInMs)
 {
 	stopTime = stopTimeInMs * (frequency / 1000); // convert from milliseconds to perfomance counter (high resolution < 1us)
 }

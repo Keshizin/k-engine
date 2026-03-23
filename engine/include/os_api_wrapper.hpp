@@ -2,7 +2,7 @@
 	Operating System API Wrapper
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -50,12 +50,16 @@ namespace kengine
 {
 	/*
 		Enum for keys
+		(!) TODO: criar um header especifico para isso para não aumentar o tamanho deste header
 	*/
 	enum KEY : unsigned long long
 	{
 #if defined(_WIN32)
 		ENTER = VK_RETURN,
-		ESCAPE = VK_ESCAPE
+		ESCAPE = VK_ESCAPE,
+		TAB = VK_TAB,
+		OEM_3 = VK_OEM_3
+
 #elif(__ANDROID__)
 		ENTER,
 		ESCAPE
@@ -78,7 +82,7 @@ namespace kengine
 	};
 
 	/*
-		This class is an abstract class for the application window
+		This class is an abstract class for the application window.
 	*/
 	class window
 	{
@@ -96,7 +100,6 @@ namespace kengine
 		virtual int show() = 0;
 		virtual int hide() = 0;
 		virtual int swapBuffers() const = 0;
-
 		virtual void* getHandle() = 0;
 
 		void setWindowSize(int w, int h) { width = w; height = h; }
@@ -113,9 +116,9 @@ namespace kengine
 	};
 
 	/*
-		Retorna uma instância baseada na plataforma (Win32, LibX ou Android)
+		Returns an instance based on the platform (Win32, LibX ou Android) window
 	*/
-	window* windowInstance();
+	std::unique_ptr<kengine::window> windowInstance();
 
 	/*
 	*/
@@ -132,30 +135,37 @@ namespace kengine
 	class rendering_context
 	{
 	public:
+		rendering_context() {}
 		virtual ~rendering_context() {}
+
+		rendering_context(const rendering_context& copy) = delete; // copy constructor
+		rendering_context& operator=(const rendering_context& copy) = delete; // copy assignment
+		rendering_context(rendering_context&& move) noexcept = delete;  // move constructor
+		rendering_context& operator=(rendering_context&&) = delete; // move assigment
 
 		virtual int create(const compatibility_profile& profile) = 0;
 		virtual int destroy() = 0;
-		virtual int makeCurrent(bool enable) = 0;
+		virtual void makeCurrent() = 0;
+		virtual void unmakeCurrent() = 0;
 		virtual int swapBuffers() = 0;
-		virtual void clearBuffers() = 0;
-
+	
 		void setRenderingContextInfo(int major, int minor) { info.major = major; info.minor = minor; }
 
 	private:
 		rendering_context_info info;
 	};
 
+
 	/*
-		Retorna uma instância baseada na plataforma (Win32, LibX ou Android)
+		Returns an instance based on the plaform (Win32, LibX ou Android)
 	*/
-	rendering_context* renderingContextInstance(window* windowParam);
+	std::unique_ptr<rendering_context> renderingContextInstance(window* windowParam);
 
 
 	/*
 		Global App Manager Class
-			- permite controlar as chamadas de funções de callback
-			- permite gerenciar váriaveis globais específicos de plataformas com LibX e Android
+			- allows to controle the callback events calls
+			- allows to manage the global variables of the platfom (LibX and Android)
 	*/
 	class global_app_manager
 	{
@@ -204,8 +214,6 @@ namespace kengine
 	/*
 		OSFinish is used to finish and release the global objects from OS API (e.g. Win32, XLib and Android NDK)
 		This function must be called only one time in the application life
-
-		Nota: Esta função deve ser obrigatoriamente usada como RAII
 	*/
 	int osFinish();
 

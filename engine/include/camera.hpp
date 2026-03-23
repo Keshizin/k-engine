@@ -2,7 +2,7 @@
 	K-Engine Camera
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@
 namespace kengine
 {
 	/*
-		Enums for projection type
 	*/
 	enum class PROJECTION_TYPE
 	{
@@ -42,78 +41,65 @@ namespace kengine
 	};
 
 	/*
-		kengine::camera class
 	*/
 	class camera
 	{
 	public:
-		camera();
+		camera() {}
 		~camera() {}
 
-		//camera(const camera& copy) = delete; // copy constructor
-		//camera(camera&& move) noexcept = delete; // move constructor
-		//camera& operator=(const camera& copy) = delete; // copy assignment
-		//camera& operator=(camera&&) = delete; // move assigment
+		camera(const camera& copy) = delete; // copy constructor
+		camera(camera&& move) noexcept = delete; // move constructor
+		camera& operator=(const camera& copy) = delete; // copy assignment
+		camera& operator=(camera&&) = delete; // move assigment
 
-		kengine::matrix<float> lookAt() { return kengine::lookAt(eye, center, up); }
-		kengine::matrix<float> lookAt(const vec4<float>& eyeParam, const vec4<float>& centerParam, const vec4<float>& upParam);
-		kengine::matrix<float> getProjection(PROJECTION_TYPE type, bool aspectCorrection) const;
+		matrix<float> getProjection(bool aspectCorrection) const;
+		matrix<float> lookAt() { return kengine::lookAt(m_eye, m_center, m_up); }
+	
+		void setProjectionType(const PROJECTION_TYPE& type) { m_projectionType = type; }
+		PROJECTION_TYPE getProjectionType() const { return m_projectionType; }
 
-		vec4<float> eye;
-		vec4<float> center;
-		vec4<float> up;
+		void setProjectionInfo(const projection_info<float>& projInfo) { m_projectionInfo = projInfo; }
+		projection_info<float> getProjectionInfo() const { return m_projectionInfo; }
+		projection_info<float>* getProjectionInfo() { return &m_projectionInfo; }
+
+		void setEye(float v[4]) {
+			m_eye.x = v[0];
+			m_eye.y = v[1];
+			m_eye.z = v[2];
+		}
+
+		void setCenter(float v[4]) {
+			m_center.x = v[0];
+			m_center.y = v[1];
+			m_center.z = v[2];
+		}
+
+		void setUp(float v[4]) {
+			m_up.x = v[0];
+			m_up.y = v[1];
+			m_up.z = v[2];
+		}
+
+		vec3<float> getEye() const { return m_eye; }
+		vec3<float> getCenter() const { return m_center; }
+		vec3<float> getUp() const { return m_up; }
+
+		void setCamera(const vec3<float>& eye, const vec3<float>& center, const vec3<float>& up)
+		{
+			m_eye = eye;
+			m_center = center;
+			m_up = up;
+		}
+
+	private:
+		PROJECTION_TYPE m_projectionType = PROJECTION_TYPE::_3D_FRUSTUM;
 		projection_info<float> m_projectionInfo;
-
-		//		void setNavigation(int button, int x, int y);
-		//		void updateNavigation(int x, int y);
-		//		void clearNavigation();
-
-	//		void setWindow(int width, int height);
-	//		projection_info getProjectionInfo() const;
-			//glm::mat4 getProjectionMatrix() const;
-
-	//		kengine::vec3<float> eye; // camera position
-	//		kengine::vec3<float> center; // camera looking at position
-	//		navigation* nav;
-	//		//kengine::matrix viewMatrix; // camera matrix for linear transformation
+		vec3<float> m_eye;
+		vec3<float> m_center;
+		vec3<float> m_up;
+		
 	};
-
-	/*
-	*
-	*  kengine::navigation class
-	*
-	*  (!) not finished yet
-	*/
-	//	class navigation
-	//	{
-	//		friend class camera;
-	//
-	//	public:
-	//		navigation();
-	//		~navigation();
-	//
-	//		navigation(const navigation& copy) = delete; // copy constructor
-	//		navigation(navigation&& move) noexcept = delete; // move constructor
-	//		navigation& operator=(const navigation& copy) = delete; // copy assignment
-	//
-	//		void set(int activeButton, int x, int y);
-	//		kengine::matrix update(int x, int y);
-	//		void clear();
-	//		
-	//	//private:
-	//		kengine::vec3<float> rotation;
-	//		kengine::vec3<float> rotation_init;
-	//
-	//		int mouse_x_init;
-	//		int mouse_y_init;
-	//		int mouse_active_button;
-	//
-	//		float sensor_rotate;
-	//
-	//		//kengine::vec3<float> camera_pos_init;
-	//		//float sensor_camera;
-	//		//float sensor_translate;
-	//	};
 }
 
 #endif

@@ -1,8 +1,8 @@
 /*
-	K-Engine Graphical User Interface
+	K-Engine Graphical User Interface (experimental)
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -28,15 +28,13 @@
 
 #include <profile.hpp>
 #include <camera.hpp>
-#include <k_math.hpp>
 
 #include <vector>
 
-namespace kgui {
-	void customWndProcHandler(void* param1, void* param2, void* param3, void* param4);
+namespace kengine {
+	int customWndProcHandler(void* param1, void* param2, void* param3, void* param4);
 
 	/*
-		kgui::widget class
 	*/
 	class widget {
 	public:
@@ -45,126 +43,105 @@ namespace kgui {
 	};
 
 	/*
-		kgui::profile_widget class
 	*/
 	class profile_widget : public widget {
 	public:
 		~profile_widget() {}
 
-		profile_widget() {}
-
 		void draw();
-		void setProfile(kengine::profile* p) { p_profile = p; }
+		void drawMenu();
+		void setProfile(kengine::profile* p) { m_profile = p; }
 
 	private:
-		kengine::profile* p_profile = nullptr;
+		int m_comboFlags = 0;
+		kengine::profile* m_profile = nullptr;
 	};
 
 	/*
-		kgui::projection_widget class
+	*/
+	class camera_widget : public widget {
+	public:
+		~camera_widget() {}
+
+		void draw();
+
+		void setCamera(kengine::camera* cam) { m_camera = cam; }
+		void setUpdate(bool update) { m_update = update; }
+		bool mustBeUpdate() const { return m_update; }
+
+	private:
+		bool m_update = false;
+		kengine::camera* m_camera = nullptr;
+	};
+
+	/*
+	*/
+	class vectors_widget : public widget {
+	public:
+		~vectors_widget() {}
+
+		void drawMenu();
+		void draw();
+
+	private:
+		bool m_isSelected = false;
+	};
+
+	/*
 	*/
 	class projection_widget : public widget {
 	public:
 		~projection_widget() {}
 
-		void draw() {}
+		void drawMenu();
+		void draw();
 
-		bool mustBeUpdate() { return m_update; }
-		void setUpdate(bool b) { m_update = b; }
-
-		bool mustCameraBeUpdate() { return m_cameraUpdate; }
-		void setCameraUpdate(bool b) { m_cameraUpdate = b; }
-
-		bool m_update = false;
-		bool m_cameraUpdate = false;
-		kengine::PROJECTION_TYPE m_type = kengine::PROJECTION_TYPE::_3D_FRUSTUM;
-		kengine::camera* m_cam = nullptr;
+	private:
+		bool m_isSelected = false;
 	};
 
 	/*
 	*/
-	class lighting_widget : public widget {
+	class gui {
 	public:
-		~lighting_widget() {}
+		gui() {}
+		~gui() {}
 
-		void draw() {
-			//ImGui::SeparatorText("Lighting:");
-
-			//static int e = 0;
-			//ImGui::RadioButton("On", &e, 1); ImGui::SameLine();
-			//ImGui::RadioButton("Off", &e, 0);
-
-			//if (e != enableLighting) {
-			//	enableLighting = e;
-			//	update = true;
-			//}
-
-			//ImGui::SeparatorText("Light position:");
-
-			//static float lx = 0.0f;
-
-			//ImGui::InputFloat("x", &lightPosition.x, 0.0f, 1.0f, "%.6f");
-
-			//if (lx != lightPosition.x) {
-			//	lx = lightPosition.x;
-			//	update = true;
-			//}
-
-			//static float ly = 0.0f;
-
-			//ImGui::InputFloat("y", &lightPosition.y, 0.0f, 1.0f, "%.6f");
-
-			//if (ly != lightPosition.y) {
-			//	ly = lightPosition.y;
-			//	update = true;
-			//}
-
-			//static float lz = 0.0f;
-
-			//ImGui::InputFloat("z", &lightPosition.z, 0.0f, 1.0f, "%.6f");
-
-			//if (lz != lightPosition.z) {
-			//	lz = lightPosition.z;
-			//	update = true;
-			//}
-		}
-
-		bool mustBeUpdate() { return update; }
-		void setUpdate(bool b) { update = b; }
-
-		bool update = false;
-		int enableLighting = 1;
-		kengine::vec4<float> lightPosition;
-	};
-
-	class GraphicalUserInterface {
-	public:
-		GraphicalUserInterface() {}
-		~GraphicalUserInterface() {}
-
-		GraphicalUserInterface(const GraphicalUserInterface& copy) = delete; // copy constructor
-		GraphicalUserInterface& operator=(const GraphicalUserInterface& copy) = delete; // copy assignment
-		GraphicalUserInterface(GraphicalUserInterface&& move) noexcept = delete;  // move constructor
-		GraphicalUserInterface& operator=(GraphicalUserInterface&&) = delete; // move assigment
+		gui(const gui& copy) = delete; // copy constructor
+		gui& operator=(const gui& copy) = delete; // copy assignment
+		gui(gui&& move) noexcept = delete;  // move constructor
+		gui& operator=(gui&&) = delete; // move assigment
 
 		void init(void* windowHandle);
 		void destroy();
+		void draw();
 
 		void setEnable(bool b) { m_enable = b; }
-		void setProfile(kengine::profile* p) { m_profileWidget.setProfile(p); }
-		void draw();
-		void drawView();
+		bool getEnable() const { return m_enable; }
 
-		void setCamera(kengine::camera* c) { m_projectionWidget.m_cam = c; }
-		projection_widget* getProjectionWidget() { return &m_projectionWidget; }
-	
-		lighting_widget* getLightingWidget() { return &m_lightingWidget; }
+		void setWindowSize(int width, int height) { m_width = width; m_height = height; }
+
+		void setProfile(kengine::profile* p) { m_profileWidget.setProfile(p); }
+
+		void setCameraWidget(kengine::camera* cam) { m_cameraWidget.setCamera(cam); }
+		camera_widget* getCameraWidget() { return &m_cameraWidget; }
+
+		// ** test **
+		void setDemoExample(bool b) { m_demoExample = b; }
+		bool getDemoExample() const { return m_demoExample; }
 
 	private:
+		int m_width = 1280;
+		int m_height = 720;
 		bool m_enable = true;
+
 		profile_widget m_profileWidget;
+		camera_widget m_cameraWidget;
+		vectors_widget m_vectorsWidget;
 		projection_widget m_projectionWidget;
-		lighting_widget m_lightingWidget;
+
+		// ** test **
+		bool m_demoExample = false;
 	};
 }
 

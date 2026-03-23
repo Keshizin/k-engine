@@ -5,7 +5,6 @@
 file (GLOB SOURCE "*.cpp")
 
 add_executable(${APPNAME} ${SOURCE})
-
 set_target_properties(${APPNAME} PROPERTIES WIN32_EXECUTABLE $<CONFIG:Release>)
 
 if(UNIX)

@@ -2,7 +2,7 @@
 	K-Engine Timer
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,29 +26,31 @@
 #ifndef K_ENGINE_TIMER_HPP
 #define K_ENGINE_TIMER_HPP
 
+#include <cstdint>
+
 namespace kengine
 {
 	/*
-		kengine::timer class
+		This timer uses OS high resolution timer
 	*/
 	class timer
 	{
 	public:
 		timer();
-		explicit timer(long long stopTimeInMs);
+		explicit timer(int64_t stopTimeInMs);
 
 		void start();
-		int done();
+		bool done();
 		int doneAndRestart();
 
-		void setTimerInMs(long long stopTimeInMs);
+		void setTimerInMs(int64_t stopTimeInMs);
 		void stop();
 
 	private:
-		long long stopTime;
-		long long startTimer;
-		long long stopWatch;
-		long long frequency;
+		int64_t stopTime;
+		int64_t startTimer;
+		int64_t stopWatch;
+		int64_t frequency;
 	};
 }
 

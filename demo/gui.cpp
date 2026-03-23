@@ -1,8 +1,8 @@
 /*
-	K-Engine Graphical User Interface
+	K-Engine Graphical User Interface (experimental)
 	This file provide a template for a game created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,54 +25,224 @@
 
 #include <gui.hpp>
 #include <os_api_wrapper.hpp>
+#include <k_version.hpp>
 
-#include <imgui-1.91.8/imgui.h>
-#include <imgui-1.91.8/backends/imgui_impl_win32.h>
-#include <imgui-1.91.8/backends/imgui_impl_opengl3.h>
+#include <imgui-1.92.5/imgui.h>
+#include <imgui-1.92.5/backends/imgui_impl_win32.h>
+#include <imgui-1.92.5/backends/imgui_impl_opengl3.h>
 
+#if defined(_WIN32)
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(void* hWnd, void* msg, void* wParam, void* lParam);
+#endif
 
-void kgui::customWndProcHandler(void* param1, void* param2, void* param3, void* param4)
+int kengine::customWndProcHandler(void* param1, void* param2, void* param3, void* param4)
 {
+#if defined(_WIN32)
 	ImGui_ImplWin32_WndProcHandler(param1, param2, param3, param4);
+#endif
+
+	return 1;
 }
 
 /*
-	kgui::profile_widget member class definition
+	kengine::profile_widget member class definition
 */
 
-void kgui::profile_widget::draw()
+void kengine::profile_widget::draw()
 {
-	if (!p_profile)
+	if (!m_profile)
 		return;
 
-	auto fps = p_profile->getFramesPerSecond();
+	auto fps = m_profile->getFramesPerSecond();
 	ImGui::Text("FPS: %d", fps);
 }
 
+void kengine::profile_widget::drawMenu()
+{
+	ImGui::CheckboxFlags("Profile", &m_comboFlags, ImGuiComboFlags_None);
+}
 
 /*
-	kgui::GraphicalUserInterface member class definition
+	kengine::camera_widget member class definition
 */
 
-void kgui::GraphicalUserInterface::init(void* windowHandle)
+void kengine::camera_widget::draw()
+{
+	if (!m_camera)
+		return;
+
+	ImGui::SeparatorText("Projection Type:");
+
+	static int type = static_cast<int>(m_camera->getProjectionType());
+	
+	if (ImGui::RadioButton("Frustum", &type, static_cast<int>(kengine::PROJECTION_TYPE::_3D_FRUSTUM))) {
+		m_update = true;
+		m_camera->setProjectionType(static_cast<kengine::PROJECTION_TYPE>(type));
+	}
+
+	ImGui::SameLine();
+		
+	if (ImGui::RadioButton("Perspective", &type, static_cast<int>(kengine::PROJECTION_TYPE::_3D_PERSPECTIVE))) {
+		m_update = true;
+		m_camera->setProjectionType(static_cast<kengine::PROJECTION_TYPE>(type));
+	}
+		
+	ImGui::SameLine();
+	
+	if (ImGui::RadioButton("Ortho", &type, static_cast<int>(kengine::PROJECTION_TYPE::_3D_ORTHO))) {
+		m_update = true;
+		m_camera->setProjectionType(static_cast<kengine::PROJECTION_TYPE>(type));
+	}
+
+	ImGui::SeparatorText("Projection Parameters:");
+
+	if (ImGui::InputFloat("left", &m_camera->getProjectionInfo()->left, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (ImGui::InputFloat("right", &m_camera->getProjectionInfo()->right, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (ImGui::InputFloat("bottom", &m_camera->getProjectionInfo()->bottom, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (ImGui::InputFloat("top", &m_camera->getProjectionInfo()->top, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (ImGui::InputFloat("near", &m_camera->getProjectionInfo()->zNear, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (ImGui::InputFloat("far", &m_camera->getProjectionInfo()->zFar, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+		m_update = true;
+	}
+
+	if (m_camera->getProjectionType() == kengine::PROJECTION_TYPE::_3D_PERSPECTIVE) {
+
+		if (ImGui::InputFloat("fovy", &m_camera->getProjectionInfo()->fovy, 0.001f, 0.1f, "%.6f", ImGuiInputTextFlags_None)) {
+			m_update = true;
+		}
+	}
+
+	ImGui::SeparatorText("Camera parameters:");
+
+	float vEye[4] = { 0 };
+	m_camera->getEye().copy(vEye);
+
+	if (ImGui::InputFloat3("eye", vEye, "%.6f", ImGuiInputTextFlags_None) && ImGui::IsItemDeactivatedAfterEdit()) {
+		m_update = true;
+		m_camera->setEye(vEye);
+	}
+
+	float vCenter[4] = { 0 };
+	m_camera->getCenter().copy(vCenter);
+
+	if (ImGui::InputFloat3("center", vCenter, "%.6f", ImGuiInputTextFlags_None) && ImGui::IsItemDeactivatedAfterEdit()) {
+		m_update = true;
+		m_camera->setCenter(vCenter);
+	}
+
+	float vUp[4] = { 0 };
+	m_camera->getUp().copy(vUp);
+
+	if (ImGui::InputFloat3("up", vUp, "%.6f", ImGuiInputTextFlags_None) && ImGui::IsItemDeactivatedAfterEdit()) {
+		m_update = true;
+		m_camera->setUp(vUp);
+	}
+}
+
+
+/*
+	kengine::projection_widget member class definition
+*/
+void kengine::vectors_widget::drawMenu()
+{
+	ImGui::MenuItem("Vectors", nullptr, &m_isSelected, true);
+}
+
+void kengine::vectors_widget::draw()
+{
+	if (m_isSelected) {
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+
+		//window_flags |= ImGuiWindowFlags_NoResize;
+		//window_flags |= ImGuiWindowFlags_NoMove;
+		//window_flags |= ImGuiWindowFlags_NoScrollbar;
+		//window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
+		//window_flags |= ImGuiWindowFlags_NoCollapse;
+		//window_flags |= ImGuiWindowFlags_NoBackground;
+		//window_flags |= ImGuiWindowFlags_MenuBar;
+
+		if (!ImGui::Begin("Vectors Tool", &m_isSelected)) {
+			ImGui::End();
+			return;
+		}
+
+		ImGui::End();
+	}
+}
+
+
+/*
+	kengine::projection_widget member class definition
+*/
+
+void kengine::projection_widget::drawMenu()
+{
+	ImGui::MenuItem("Projection", nullptr, &m_isSelected, true);
+}
+
+void kengine::projection_widget::draw()
+{
+	if (m_isSelected) {
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+
+		//window_flags |= ImGuiWindowFlags_NoResize;
+		//window_flags |= ImGuiWindowFlags_NoMove;
+		//window_flags |= ImGuiWindowFlags_NoScrollbar;
+		//window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
+		//window_flags |= ImGuiWindowFlags_NoCollapse;
+		//window_flags |= ImGuiWindowFlags_NoBackground;
+		//window_flags |= ImGuiWindowFlags_MenuBar;
+
+		if (!ImGui::Begin("Projection Tool", &m_isSelected)) {
+			ImGui::End();
+			return;
+		}
+
+		ImGui::End();
+	}
+}
+
+
+/*
+*/
+void kengine::gui::init(void* windowHandle)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // enable keyboard controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // enable gamepad controls
+
 	ImGui_ImplWin32_InitForOpenGL(windowHandle);
 	ImGui_ImplOpenGL3_Init();
 }
 
-void kgui::GraphicalUserInterface::destroy()
+void kengine::gui::destroy()
 {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void kgui::GraphicalUserInterface::draw()
+void kengine::gui::draw()
 {
 	if (!m_enable)
 		return;
@@ -81,230 +251,61 @@ void kgui::GraphicalUserInterface::draw()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// ImGui::ShowDemoWindow();
+	// ************************************************************************
 
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(ImVec2(1280, 720));
-	ImGui::SetNextWindowBgAlpha(0.35f);
+	if (m_demoExample) {
+		ImGui::ShowDemoWindow();
+	} else {
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(m_width, m_height));
+		ImGui::SetNextWindowBgAlpha(0.35f);
 
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-	window_flags |= ImGuiWindowFlags_NoTitleBar;
-	window_flags |= ImGuiWindowFlags_NoResize;
-	window_flags |= ImGuiWindowFlags_NoMove;
-	window_flags |= ImGuiWindowFlags_NoScrollbar;
-	window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
-	window_flags |= ImGuiWindowFlags_NoCollapse;
-	window_flags |= ImGuiWindowFlags_NoBackground;
-	window_flags |= ImGuiWindowFlags_MenuBar;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+		window_flags |= ImGuiWindowFlags_NoTitleBar;
+		window_flags |= ImGuiWindowFlags_NoResize;
+		window_flags |= ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoScrollbar;
+		window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
+		window_flags |= ImGuiWindowFlags_NoCollapse;
+		window_flags |= ImGuiWindowFlags_NoBackground;
+		window_flags |= ImGuiWindowFlags_MenuBar;
 
-	ImGui::Begin("K-Engine!", nullptr, window_flags);
+		ImGui::Begin("K-Engine!", nullptr, window_flags);
 
-	if (ImGui::BeginMenuBar()) {
-		if (ImGui::BeginMenu("Info")) {
-			ImGui::EndMenu();
+		if (ImGui::BeginMenuBar()) {
+
+			if (ImGui::BeginMenu("Info")) {
+				ImGui::Text("K-Engine version: %s", kengine::version().c_str());
+				m_profileWidget.drawMenu();
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Camera")) {
+				m_cameraWidget.draw();
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Tools")) {
+				m_vectorsWidget.drawMenu();
+				m_projectionWidget.drawMenu();
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
 		}
 
-		if (ImGui::BeginMenu("View")) {
-			drawView();
-			ImGui::EndMenu();
-		}
+		/*
+			rendering in main viewport
+		*/ 
+		m_profileWidget.draw();
+		m_vectorsWidget.draw();
+		m_projectionWidget.draw();
 
-		if (ImGui::BeginMenu("Lighting")) {
-			//m_lightingWidget.draw();
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Tools")) {
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMenuBar();
+		ImGui::End();
 	}
 
-	m_profileWidget.draw();
-
-	ImGui::End();
-
-	// ========================================================================
+	// ************************************************************************
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void kgui::GraphicalUserInterface::drawView()
-{
-	m_projectionWidget.m_update = false;
-
-	ImGui::SeparatorText("Projection Type:");
-	static int e = 0;
-	ImGui::RadioButton("Frustum", &e, 0); ImGui::SameLine();
-	ImGui::RadioButton("Perspective", &e, 1); ImGui::SameLine();
-	ImGui::RadioButton("Ortho", &e, 2);
-
-	switch (e)
-	{
-	case 0: // frustum
-		if (m_projectionWidget.m_type != kengine::PROJECTION_TYPE::_3D_FRUSTUM) {
-			m_projectionWidget.m_type = kengine::PROJECTION_TYPE::_3D_FRUSTUM;
-			m_projectionWidget.m_update = true;
-		}
-
-		break;
-
-	case 1: // perspective
-		if (m_projectionWidget.m_type != kengine::PROJECTION_TYPE::_3D_PERSPECTIVE) {
-			m_projectionWidget.m_type = kengine::PROJECTION_TYPE::_3D_PERSPECTIVE;
-			m_projectionWidget.m_update = true;
-		}
-
-		break;
-
-	case 2: // ortho
-		if (m_projectionWidget.m_type != kengine::PROJECTION_TYPE::_3D_ORTHO) {
-			m_projectionWidget.m_type = kengine::PROJECTION_TYPE::_3D_ORTHO;
-			m_projectionWidget.m_update = true;
-		}
-
-		break;
-	}
-
-	ImGui::SeparatorText("Projection Parameters:");
-
-	static float left = 0.0f;
-	ImGui::InputFloat("Left", &m_projectionWidget.m_cam->m_projectionInfo.left, 0.0f, 1.0f, "%.6f");
-
-	if (left != m_projectionWidget.m_cam->m_projectionInfo.left) {
-		left = m_projectionWidget.m_cam->m_projectionInfo.left;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float right = 0.0f;
-	ImGui::InputFloat("Right", &m_projectionWidget.m_cam->m_projectionInfo.right, 0.0f, 1.0f, "%.6f");
-
-	if (right != m_projectionWidget.m_cam->m_projectionInfo.right) {
-		right = m_projectionWidget.m_cam->m_projectionInfo.right;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float bottom = 0.0f;
-	ImGui::InputFloat("Bottom", &m_projectionWidget.m_cam->m_projectionInfo.bottom, 0.0f, 1.0f, "%.6f");
-
-	if (bottom != m_projectionWidget.m_cam->m_projectionInfo.bottom) {
-		bottom = m_projectionWidget.m_cam->m_projectionInfo.bottom;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float top = 0.0f;
-	ImGui::InputFloat("Top", &m_projectionWidget.m_cam->m_projectionInfo.top, 0.0f, 1.0f, "%.6f");
-
-	if (top != m_projectionWidget.m_cam->m_projectionInfo.top) {
-		top = m_projectionWidget.m_cam->m_projectionInfo.top;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float zNear = 0.0f;
-	ImGui::InputFloat("Near", &m_projectionWidget.m_cam->m_projectionInfo.zNear, 0.0f, 1.0f, "%.6f");
-
-	if (zNear != m_projectionWidget.m_cam->m_projectionInfo.zNear) {
-		zNear = m_projectionWidget.m_cam->m_projectionInfo.zNear;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float zFar = 0.0f;
-	ImGui::InputFloat("Far", &m_projectionWidget.m_cam->m_projectionInfo.zFar, 0.0f, 1.0f, "%.6f");
-
-	if (zFar != m_projectionWidget.m_cam->m_projectionInfo.zFar) {
-		zFar = m_projectionWidget.m_cam->m_projectionInfo.zFar;
-		m_projectionWidget.m_update = true;
-	}
-
-	static float fovy = 0.0f;
-	ImGui::InputFloat("Field of view", &m_projectionWidget.m_cam->m_projectionInfo.fovy, 0.0f, 1.0f, "%.6f");
-
-	if (fovy != m_projectionWidget.m_cam->m_projectionInfo.fovy) {
-		fovy = m_projectionWidget.m_cam->m_projectionInfo.fovy;
-		m_projectionWidget.m_update = true;
-	}
-
-	ImGui::SeparatorText("Camera Parameters:");
-
-	static float eyeX = 0.0f;
-	ImGui::InputFloat("Eye X", &m_projectionWidget.m_cam->eye.x, 0.0f, 1.0f, "%.6f");
-
-	if (eyeX != m_projectionWidget.m_cam->eye.x) {
-		eyeX = m_projectionWidget.m_cam->eye.x;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float eyeY = 0.0f;
-
-	ImGui::InputFloat("Eye Y", &m_projectionWidget.m_cam->eye.y, 0.0f, 1.0f, "%.6f");
-
-	if (eyeY != m_projectionWidget.m_cam->eye.y) {
-		eyeY = m_projectionWidget.m_cam->eye.y;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float eyeZ = 0.0f;
-
-	ImGui::InputFloat("Eye Z", &m_projectionWidget.m_cam->eye.z, 0.0f, 1.0f, "%.6f");
-
-	if (eyeZ != m_projectionWidget.m_cam->eye.z) {
-		eyeZ = m_projectionWidget.m_cam->eye.z;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float centerX = 0.0f;
-
-	ImGui::InputFloat("center X", &m_projectionWidget.m_cam->center.x, 0.0f, 1.0f, "%.6f");
-
-	if (centerX != m_projectionWidget.m_cam->center.x) {
-		centerX = m_projectionWidget.m_cam->center.x;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float centerY = 0.0f;
-
-	ImGui::InputFloat("center Y", &m_projectionWidget.m_cam->center.y, 0.0f, 1.0f, "%.6f");
-
-	if (centerY != m_projectionWidget.m_cam->center.y) {
-		centerY = m_projectionWidget.m_cam->center.y;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float centerZ = 0.0f;
-
-	ImGui::InputFloat("center Z", &m_projectionWidget.m_cam->center.z, 0.0f, 1.0f, "%.6f");
-
-	if (centerZ != m_projectionWidget.m_cam->center.z) {
-		centerZ = m_projectionWidget.m_cam->center.z;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float upX = 0.0f;
-
-	ImGui::InputFloat("up X", &m_projectionWidget.m_cam->up.x, 0.0f, 1.0f, "%.6f");
-
-	if (upX != m_projectionWidget.m_cam->up.x) {
-		upX = m_projectionWidget.m_cam->up.x;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float upY = 0.0f;
-
-	ImGui::InputFloat("up Y", &m_projectionWidget.m_cam->up.y, 0.0f, 1.0f, "%.6f");
-
-	if (upY != m_projectionWidget.m_cam->up.y) {
-		upY = m_projectionWidget.m_cam->up.y;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
-
-	static float upZ = 0.0f;
-
-	ImGui::InputFloat("up Z", &m_projectionWidget.m_cam->up.z, 0.0f, 1.0f, "%.6f");
-
-	if (upZ != m_projectionWidget.m_cam->up.z) {
-		upZ = m_projectionWidget.m_cam->up.z;
-		m_projectionWidget.m_cameraUpdate = true;
-	}
 }

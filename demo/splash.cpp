@@ -2,7 +2,7 @@
 	K-Engine Demonstration
 	This file provide a splash screen example created with K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -25,21 +25,22 @@
 
 #include <splash.hpp>
 #include <logger.hpp>
-#include <media.hpp>
 
 #include <cassert>
 
+#pragma warning(push, 0)
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+#pragma warning(pop)
+
 demo::splash::splash(kengine::core* engine)
-	:
-	m_engine{ engine },
-	m_window{ kengine::windowInstance() }
+	: m_engine{ engine }, m_window{ kengine::windowInstance() }
 {
+	assert(!(m_engine == nullptr) && "splash constructor failed - m_engine is nullptr");
 	m_engine->setEventsCallback(this);
 }
 
 demo::splash::~splash() {
-	delete m_renderingSystem;
-	delete m_window;
 }
 
 void demo::splash::start()
@@ -48,6 +49,7 @@ void demo::splash::start()
 }
 
 void demo::splash::createWindow() {
+	// se a janela foi criada anteriormente, deve ser destruida antes de chamar ela novamente
 	m_window->create(
 		kengine::getDisplayCenterPosX(640),
 		kengine::getDisplayCenterPosY(480),
@@ -67,29 +69,25 @@ void demo::splash::onWindowReady(kengine::window* window)
 		É recomendável que o sistema de renderização seja criado no evento "onWindowReady".
 
 		Nas plataformas Android, a janela é criada implicitamente pelo Android Surface. Portanto,
-		este evento foi criado especificamente para notificafar o usuário quando a janela estiver disponível.
+		este evento foi criado especificamente para notificar o usuário quando a janela estiver disponível.
 	*/
 
 	kengine::compatibility_profile profile;
-	profile.contextFlag = kengine::CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB;
+	//profile.contextFlag = kengine::CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB;
 	profile.profileMask = kengine::CONTEXT_FLAG::CONTEXT_CORE_PROFILE_BIT_ABR;
 
 	if (m_renderingSystem != nullptr)
-		delete m_renderingSystem;
+		m_renderingSystem.reset();
 
-	m_renderingSystem = new kengine::rendering_system(window);
+	m_renderingSystem = std::make_unique<kengine::rendering_system>(window);
 
-	if (!m_renderingSystem->init(kengine::RENDERING_TYPE::OPENGL, profile))
-	{
-		K_LOG_OUTPUT_RAW("(!) Failed to init the rendering system!");
-		assert("(!) SHOWSTOPPER ERROR (!)");
+	if (!m_renderingSystem->init(kengine::RENDERING_TYPE::OPENGL, profile)) {
+		assert(false && "splash::onWindowReady can't init rendering system!");
 	}
 
-	kengine::setVSync(1);
-
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	//glEnable(GL_DEBUG_OUTPUT);
+	//glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
+	//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
 	kengine::ShaderInfo shaders[] = {
 		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/splash.vert"},
@@ -104,97 +102,121 @@ void demo::splash::onWindowReady(kengine::window* window)
 	m_shader.useProgram();
 
 	/*
-		Projection and Camera
+		projection and camera settings
 	*/
-
-	m_cam.eye.x = 0.0f;
-	m_cam.eye.y = 0.0f;
-	m_cam.eye.z = 1.0f;
-	m_cam.center.x = 0.0f;
-	m_cam.center.y = 0.0f;
-	m_cam.center.z = 0.0f;
-	m_cam.up.x = 0.0f;
-	m_cam.up.y = 1.0f;
-	m_cam.up.z = 0.0f;
-
-	m_shader.setUniform("view", false, m_cam.lookAt().value());
+	m_cam.setProjectionType(kengine::PROJECTION_TYPE::_2D);
 
 	float w = static_cast<float>(m_window->getWidth());
 	float h = static_cast<float>(m_window->getHeight());
 
-	m_cam.m_projectionInfo.left = -w / 2.0f;
-	m_cam.m_projectionInfo.right = w / 2.0f;
-	m_cam.m_projectionInfo.bottom = -h / 2.0f;
-	m_cam.m_projectionInfo.top = h / 2.0f;
-	m_cam.m_projectionInfo.zNear = 0.1f;
-	m_cam.m_projectionInfo.zFar = 100.0f;
-	m_cam.m_projectionInfo.width = w;
-	m_cam.m_projectionInfo.height = h;
+	kengine::projection_info<float> projectionInfo;
+	projectionInfo.left = -w / 2.0f;
+	projectionInfo.right = w / 2.0f;
+	projectionInfo.bottom = -h / 2.0f;
+	projectionInfo.top = h / 2.0f;
+	projectionInfo.zNear = 0.1f;
+	projectionInfo.zFar = 100.0f;
+	projectionInfo.width = w;
+	projectionInfo.height = h;
+	projectionInfo.fovy = 60.0f;
+	m_cam.setProjectionInfo(projectionInfo);
 
-	m_shader.setUniform("projection", false, m_cam.getProjection(kengine::PROJECTION_TYPE::_2D, false).value());
+	kengine::vec3<float> eye{ 0.0f, 0.0f, 1.0f };
+	kengine::vec3<float> center{ 0.0f, 0.0f, 0.0f };
+	kengine::vec3<float> up{ 0.0f, 1.0f, 0.0f };
+	m_cam.setCamera(eye, center, up);
+
+	m_shader.setUniform("projectionTransform", false, m_cam.getProjection(false).data());
+	m_shader.setUniform("viewTransform", false, m_cam.lookAt().data());
 
 	glViewport(0, 0, m_window->getWidth(), m_window->getHeight());
-
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	kengine::setVSync(1);
 
-	float red = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0xFF000000) >> 24) / 256.0f;
-	float green = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x00FF0000) >> 16) / 256.0f;
-	float blue = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x0000FF00) >> 8) / 256.0f;
-	float alpha = (kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x000000FF) / 256.0f;
-
+	float red = ((kengine::BACKGROUND_COLOR_YELLOW_LOGO & 0xFF000000) >> 24) / 256.0f;
+	float green = ((kengine::BACKGROUND_COLOR_YELLOW_LOGO & 0x00FF0000) >> 16) / 256.0f;
+	float blue = ((kengine::BACKGROUND_COLOR_YELLOW_LOGO & 0x0000FF00) >> 8) / 256.0f;
+	float alpha = (kengine::BACKGROUND_COLOR_YELLOW_LOGO & 0x000000FF) / 256.0f;
 	glClearColor(red, green, blue, alpha);
 }
 
 void demo::splash::beforeMainLoopEvent()
 {
-	auto c = kengine::quad(270.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-	logo.load(c, 1);
+	std::unordered_map<std::string, GLuint> shaderLocations = {
+		{"POSITION", 0 },
+		{"TEXTURE", 1 },
+	};
 
-	kengine::k_img img;
-	img.loadfile(std::string(K_PROJECT_PATH) + "/assets/shisabranco1080_fullhd.png");
-	logoTexture.create(kengine::TEXTURE_TYPE::_2D, 0, GL_RGBA8, img.getWidth(), img.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, img.getPixels());
-	logoTexture.bindTextureUnit(0);
+	m_primitive = kengine::quad(324.0f, 324.0f, shaderLocations);
 
-	m_timer.setTimerInMs(5000);
-	m_timer.start();
+	int width, height, channels;
+	stbi_set_flip_vertically_on_load(true);
+	//std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisabranco1080_fullhd.png";
+	std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisacolorido1080_fullhd.png";
+	//std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisapreto1080_fullhd.png";
+	unsigned char* imageData = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 
-	m_circlePoints.generate(16);
+	if (imageData) {
+		GLint internalFormat = 0;
+		GLenum format = 0;
+
+		switch (channels) {
+		case 1:
+			internalFormat = GL_R8;
+			format = GL_RED;
+			break;
+
+		case 3:
+			internalFormat = GL_RGB8;
+			format = GL_RGB;
+			break;
+
+		case 4:
+			internalFormat = GL_RGBA8;
+			format = GL_RGBA;
+			break;
+		}
+
+		m_texture.create(kengine::TEXTURE_TYPE::_2D, 0, internalFormat, width, height, format, GL_UNSIGNED_BYTE, imageData);
+		m_texture.bindTextureUnit(0);
+	} else {
+		std::cout << stbi_failure_reason() << std::endl;
+	}
+
+	stbi_image_free(imageData);
+
+	m_sceneTimer.setTimerInMs(5000); // 5 seconds
+	m_sceneTimer.start();
 }
 
 void demo::splash::update(int64_t frameTime)
 {
-	if (m_timer.done()) {
+	if (m_sceneTimer.done()) {
 		m_renderingSystem->finish();
 		m_window->destroy();
 		return;
 	}
+
+	static float currentTime = 0.0f;
+	currentTime += static_cast<float>(frameTime) / static_cast<float>(kengine::getHighResolutionTimerFrequency());
+
+	float circlePoints = static_cast<float>(M_PI) * 2.0f / 16.0f;
+	circlePoints = 1.0f;
 	
-	animationTimer += static_cast<float>(frameTime) / static_cast<float>(kengine::getHighResolutionTimerFrequency());
+	float speed = 10.0f;
+	float x = std::cos(circlePoints * currentTime * speed) * 1.5f;
+	float y = std::sin(circlePoints * currentTime * speed) * 1.5f;
+	kengine::matrix<float> t = kengine::translate<float>(x, y, 0.0f);
+	m_shader.setUniform("modelTransform", false, t.data());
 
-	static size_t pointIndex = 0;
-
-	if (animationTimer >= 0.02f) {
-		animationTimer = 0.0f;
-
-		kengine::vec4<float> p = m_circlePoints.getPoint(pointIndex++);
-		logo.updateModelMatrix(kengine::translate(p.x * 7.5f, p.y * 7.5f, 0.0f));
-
-		if (pointIndex > 15)
-			pointIndex = 0;
-	}
-
-	m_renderingSystem->clearBuffers();
-	logo.drawElements();
-
-	// (!) Unificar a chamada abaixo de SwapBuffer para facilitar o usuário
-#ifdef __ANDROID__
-	m_renderingSystem.swapBuffers();
-#else
-	m_window->swapBuffers();
-#endif
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_primitive->draw();
+	m_renderingSystem->swapBuffers();
 }
 
 void demo::splash::onFinishEvent()
@@ -205,14 +227,6 @@ void demo::splash::onFinishEvent()
 void demo::splash::onWindowDestroy()
 {
 	kengine::quitApplication(0);
-}
-
-void demo::splash::onPauseEvent()
-{
-}
-
-void demo::splash::onResumeEvent()
-{
 }
 
 void demo::splash::closeButtonEvent()
@@ -226,58 +240,31 @@ void demo::splash::closeButtonEvent()
 void demo::splash::onResizeWindowEvent(const int width, const int height)
 {
 	m_window->setWindowSize(width, height);
+	m_cam.getProjectionInfo()->width = static_cast<float>(width);
+	m_cam.getProjectionInfo()->height = static_cast<float>(height);
 
-	float w = static_cast<float>(m_window->getWidth());
-	float h = static_cast<float>(m_window->getHeight());
-
-	m_cam.m_projectionInfo.left = -w / 2.0f;
-	m_cam.m_projectionInfo.right = w / 2.0f;
-	m_cam.m_projectionInfo.bottom = -h / 2.0f;
-	m_cam.m_projectionInfo.top = h / 2.0f;
-	m_cam.m_projectionInfo.zNear = 0.1f;
-	m_cam.m_projectionInfo.zFar = 100.0f;
-	m_cam.m_projectionInfo.width = w;
-	m_cam.m_projectionInfo.height = h;
-
-	if (m_renderingSystem == nullptr)
+	// na primeira vez que a janela criada, rendering system ainda não foi inicializada
+	if (!m_renderingSystem)
 		return;
 
 	m_shader.useProgram();
-	m_shader.setUniform("projection", false, m_cam.getProjection(kengine::PROJECTION_TYPE::_2D, false).value());
+	m_shader.setUniform("projectionTransform", false, m_cam.getProjection(false).data());
 	glViewport(0, 0, width, height);
-}
-
-void demo::splash::onMoveWindowEvent(const int x, const int y)
-{
-}
-
-void demo::splash::onMouseMotionEvent(const int x, const int y)
-{
-}
-
-void demo::splash::onMouseButtonEvent(const int button, const kengine::MOUSE_ACTION& state, const int x, const int y)
-{
 }
 
 void demo::splash::onKeyboardEvent(const unsigned long long key, const int state)
 {
 	if (key == kengine::KEY::ENTER && state)
 	{
-		m_renderingSystem->finish();
+		if(m_renderingSystem)
+			m_renderingSystem->finish();
+
 		m_window->destroy();
 	}
-}
-
-void demo::splash::onKeyboardSpecialEvent(const unsigned long long key, const int state)
-{
 }
 
 void demo::splash::debugMessage(const std::string& msg)
 {
 	std::string message = "> debug message: " + msg;
 	K_LOG_OUTPUT_RAW(message);
-}
-
-void demo::splash::customWindowProcedure(void* param1, void* param2, void* param3, void* param4)
-{
 }

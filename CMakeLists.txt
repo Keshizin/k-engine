@@ -56,7 +56,7 @@ add_subdirectory(demo)
 #
 # third libraries
 #
-add_subdirectory(third/imgui-1.91.8)
+add_subdirectory(third/imgui-1.92.5)
 
 #
 # test directories

@@ -1,9 +1,5 @@
 #version 420 core
 
-/*
-	PASS-THROUGH SHADER
-*/
-
 layout (location=0) in vec3 vPosition;
 layout (location=1) in vec4 vColor;
 layout (location=2) in vec2 vTexCoord;
@@ -17,7 +13,8 @@ uniform mat4 projection;
 uniform mat4 view;
 
 void main() {
-	gl_Position = projection * view * vModelMatrix * vec4(vPosition, 1.0);
+	//gl_Position = projection * view * vModelMatrix * vec4(vPosition, 1.0);
+	gl_Position = vec4(vPosition, 1.0);
 	texCoord = vTexCoord;
 	color = vColor;
 }

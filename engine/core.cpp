@@ -2,7 +2,7 @@
 	K-Engine Core
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -96,6 +96,7 @@ void kengine::core::startMainLoop()
 void kengine::core::stopMainLoop()
 {
 	mainLoopState = K_RUNTIME_STATE::STOPPED;
+	kengine::setGlobalUserEventsCallback(nullptr);
 }
 
 void kengine::core::pauseMainLoop()
@@ -120,7 +121,6 @@ std::string kengine::getDataTypeInfo()
 	return std::string("> Platform data types:") +
 		"\n - int: " + std::to_string(sizeof(int)) +
 		"\n - long int: " + std::to_string(sizeof(long int)) +
-		"\n - int64_t: " + std::to_string(sizeof(int64_t)) +
 		"\n";
 }
 

@@ -1,8 +1,8 @@
 /*
-	K-Engine Version
+	K-Engine Version System
 	This file is part of the K-Engine.
 
-	Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+	Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 /*
 	This project uses Semantic Versioning (https://semver.org/) and automatic increment version
 
-		major.minor.patch - commit_hash - build-type.build_increment.build_date - platform
+		version: major.minor.patch - commit_hash - build-type.build_increment.build_date - platform
 
 	Notes:
 		- The build types are [Release] or [Debug]
@@ -42,11 +42,11 @@
 #define K_ENGINE_BUILD_TYPE 1
 #define K_ENGINE_VERSION_BUILD_INCREMENT 0
 #define K_ENGINE_BUILD_DATE 0
-#define K_ENGINE_BUILD_PLATFORM 2
+#define K_ENGINE_BUILD_PLATFORM 1
 
 // OpenGL version
 #define KENGINE_OPENGL_MAJOR_VERSION 4
-#define KENGINE_OPENGL_MINOR_VERSION 5
+#define KENGINE_OPENGL_MINOR_VERSION 6
 
 #include <string>
 

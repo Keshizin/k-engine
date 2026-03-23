@@ -2,7 +2,7 @@
    K-Engine OpenGL Wrapper
    This file is part of the K-Engine.
 
-   Copyright (C) 2020-2025 Fabio Takeshi Ishikawa
+   Copyright (C) 2020-2026 Fabio Takeshi Ishikawa
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -29,58 +29,13 @@
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include <sstream>
+#include <cassert>
 
-PFNGLCLEARBUFFERFVPROC glClearBufferfv = 0;
-PFNGLCREATEBUFFERSPROC glCreateBuffers = 0;
-PFNGLGENBUFFERSPROC glGenBuffers = 0;
-PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage = 0;
-PFNGLBUFFERSTORAGEPROC glBufferStorage = 0;
-PFNGLNAMEDBUFFERDATAPROC glNamedBufferData = 0;
-PFNGLBUFFERDATAPROC glBufferData = 0;
-PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData = 0;
-PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
-PFNGLCLEARNAMEDBUFFERDATAPROC glClearNamedBufferData = 0;
-PFNGLCLEARBUFFERDATAPROC glClearBufferData = 0;
-PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData = 0;
-PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
-PFNGLGETNAMEDBUFFERSUBDATAPROC glGetNamedBufferSubData = 0;
-PFNGLGETBUFFERSUBDATAPROC glGetBufferSubData = 0;
-PFNGLMAPNAMEDBUFFERPROC glMapNamedBuffer = 0;
-PFNGLMAPBUFFERPROC glMapBuffer = 0;
-PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer = 0;
-PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
-PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange = 0;
-PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
-PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC glFlushMappedNamedBufferRange = 0;
-PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
-PFNGLBINDBUFFERPROC glBindBuffer = 0;
-PFNGLISBUFFERPROC glIsBuffer = 0;
-PFNGLINVALIDATEBUFFERDATAPROC glInvalidateBufferData = 0;
-PFNGLINVALIDATEBUFFERSUBDATAPROC glInvalidateBufferSubData = 0;
-PFNGLDELETEBUFFERSPROC glDeleteBuffers = 0;
-PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
-PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays = 0;
-PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
-PFNGLISVERTEXARRAYPROC glIsVertexArray = 0;
-PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
-PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer = 0;
-PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer = 0;
-PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer = 0;
-PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = 0;
-PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray = 0;
-PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib = 0;
-PFNGLDISABLEVERTEXARRAYATTRIBPROC glDisableVertexArrayAttrib = 0;
-PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat = 0;
-PFNGLVERTEXARRAYVERTEXBUFFERSPROC glVertexArrayVertexBuffers = 0;
-PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer = 0;
-PFNGLVERTEXATTRIBFORMATPROC glVertexAtttribFormat = 0;
-PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding = 0;
-PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation = 0;
-PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance = 0;
-PFNGLUNIFORM1IPROC glUniform1i = 0;
-PFNGLUNIFORM3FPROC glUniform3f = 0;
-PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv = 0;
-PFNGLGETSTRINGIPROC glGetStringi = 0;
+/*
+	OpenGL extension: GLSL shaders
+*/
+
 PFNGLCREATESHADERPROC glCreateShader = 0;
 PFNGLDELETESHADERPROC glDeleteShader = 0;
 PFNGLSHADERSOURCEPROC glShaderSource = 0;
@@ -94,38 +49,137 @@ PFNGLDETACHSHADERPROC glDetachShader = 0;
 PFNGLLINKPROGRAMPROC glLinkProgram = 0;
 PFNGLGETPROGRAMIVPROC glGetProgramiv = 0;
 PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog = 0;
-PFNGLUSEPROGRAMPROC glUseProgram = 0;
-PFNGLGETPROGRAMBINARYPROC glGetProgramBinary = 0;
-PFNGLPROGRAMBINARYPROC glProgramBinary = 0;
-PFNGLSHADERBINARYPROC glShaderBinary = 0;
-PFNGLSPECIALIZESHADERPROC glSpecializeShader = 0;
-PFNGLGETPROGRAMINTERFACEIVPROC glGetProgramInterfaceiv = 0;
-PFNGLGETPROGRAMRESOURCEIVPROC glGetProgramResourceiv = 0;
-PFNGLGETPROGRAMRESOURCENAMEPROC glGetProgramResourceName = 0;
 PFNGLGETACTIVEATTRIBPROC glGetActiveAttrib = 0;
 PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation = 0;
+PFNGLUSEPROGRAMPROC glUseProgram = 0;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = 0;
 PFNGLGETACTIVEUNIFORMPROC glGetActiveUniform = 0;
+PFNGLUNIFORM1FPROC glUniform1f = 0;
+PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv = 0;
+PFNGLBINDBUFFERBASEPROC glBindBufferBase = 0;
+PFNGLPROGRAMPARAMETERIPROC glProgramParameteri = 0;
 PFNGLGETACTIVEUNIFORMNAMEPROC glGetActiveUniformName = 0;
 PFNGLGETUNIFORMBLOCKINDEXPROC glGetUniformBlockIndex = 0;
 PFNGLGETACTIVEUNIFORMBLOCKIVPROC glGetActiveUniformBlockiv = 0;
 PFNGLGETUNIFORMINDICESPROC glGetUniformIndices = 0;
 PFNGLGETACTIVEUNIFORMSIVPROC glGetActiveUniformsiv = 0;
-PFNGLBINDBUFFERBASEPROC glBindBufferBase = 0;
+PFNGLGETPROGRAMBINARYPROC glGetProgramBinary = 0;
+PFNGLPROGRAMBINARYPROC glProgramBinary = 0;
+PFNGLSHADERBINARYPROC glShaderBinary = 0;
 PFNGLCREATESHADERPROGRAMVPROC glCreateShaderProgramv = 0;
-PFNGLCREATEPROGRAMPIPELINESPROC glCreateProgramPipelines = 0;
-PFNGLDELETEPROGRAMPIPELINESPROC glDeleteProgramPipelines = 0;
 PFNGLUSEPROGRAMSTAGESPROC glUseProgramStages = 0;
 PFNGLBINDPROGRAMPIPELINEPROC glBindProgramPipeline = 0;
 PFNGLPROGRAMUNIFORM3FPROC glProgramUniform3f = 0;
 PFNGLACTIVESHADERPROGRAMPROC glActiveShaderProgram = 0;
-PFNGLPROGRAMPARAMETERIPROC glProgramParameteri = 0;
+PFNGLGETPROGRAMINTERFACEIVPROC glGetProgramInterfaceiv = 0;
+PFNGLGETPROGRAMRESOURCEIVPROC glGetProgramResourceiv = 0;
+PFNGLGETPROGRAMRESOURCENAMEPROC glGetProgramResourceName = 0;
+PFNGLCREATEPROGRAMPIPELINESPROC glCreateProgramPipelines = 0;
+PFNGLDELETEPROGRAMPIPELINESPROC glDeleteProgramPipelines = 0;
+PFNGLSPECIALIZESHADERPROC glSpecializeShader = 0;
+
+/*
+	OpenGL extension: buffers objects
+*/
+
+PFNGLGENBUFFERSPROC glGenBuffers = 0;
+PFNGLISBUFFERPROC glIsBuffer = 0;
+PFNGLDELETEBUFFERSPROC glDeleteBuffers = 0;
+PFNGLBINDBUFFERPROC glBindBuffer = 0;
+PFNGLBUFFERDATAPROC glBufferData = 0;
+PFNGLBUFFERSUBDATAPROC glBufferSubData = 0;
+PFNGLGETBUFFERSUBDATAPROC glGetBufferSubData = 0;
+PFNGLMAPBUFFERPROC glMapBuffer = 0;
+PFNGLUNMAPBUFFERPROC glUnmapBuffer = 0;
+PFNGLMAPBUFFERRANGEPROC glMapBufferRange = 0;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC glFlushMappedBufferRange = 0;
+PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData = 0;
+PFNGLCLEARBUFFERDATAPROC glClearBufferData = 0;
+PFNGLCLEARBUFFERSUBDATAPROC glClearBufferSubData = 0;
+PFNGLINVALIDATEBUFFERDATAPROC glInvalidateBufferData = 0;
+PFNGLINVALIDATEBUFFERSUBDATAPROC glInvalidateBufferSubData = 0;
+PFNGLBUFFERSTORAGEPROC glBufferStorage = 0;
+PFNGLCREATEBUFFERSPROC glCreateBuffers = 0;
+PFNGLNAMEDBUFFERDATAPROC glNamedBufferData = 0;
+PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage = 0;
+PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData = 0;
+PFNGLCLEARNAMEDBUFFERDATAPROC glClearNamedBufferData = 0;
+PFNGLCLEARNAMEDBUFFERSUBDATAPROC glClearNamedBufferSubData = 0;
+PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData = 0;
+PFNGLGETNAMEDBUFFERSUBDATAPROC glGetNamedBufferSubData = 0;
+PFNGLMAPNAMEDBUFFERPROC glMapNamedBuffer = 0;
+PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer = 0;
+PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange = 0;
+PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC glFlushMappedNamedBufferRange = 0;
+
+/*
+	OpenGL extension: Vertex Array Objects
+*/
+
+PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = 0;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray = 0;
+PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer = 0;
+PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation = 0;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
+PFNGLBINDFRAGDATALOCATIONPROC glBindFragDataLocation;
+PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer = 0;
+PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor = 0;
+PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer = 0;
+PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer = 0;
+PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat = 0;
+PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding = 0;
+PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays = 0;
+
+/*
+	OpenGL extensions: OpenGL drawing comands
+*/
+PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced = 0;
+PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced = 0;
+
+/*
+	OpenGL extension: texture objects
+*/
+PFNGLGENERATEMIPMAPPROC glGenerateMipmap = 0;
+PFNGLCREATETEXTURESPROC glCreateTextures = 0;
+
+/*
+	OpenGL extension: OpenGL debug messages
+*/
 PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback = 0;
 PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl = 0;
 PFNGLPUSHDEBUGGROUPPROC glPushDebugGroup = 0;
 PFNGLPOPDEBUGGROUPPROC glPopDebugGroup = 0;
+
+/*
+	OpenGL extension: transform feedback objects
+*/
+PFNGLGENTRANSFORMFEEDBACKSPROC glGenTransformFeedbacks = 0;
+PFNGLBINDTRANSFORMFEEDBACKPROC glBindTransformFeedback = 0;
+PFNGLISTRANSFORMFEEDBACKPROC glIsTransformFeedback = 0;
+PFNGLDELETETRANSFORMFEEDBACKSPROC glDeleteTransformFeedbacks = 0;
+PFNGLCREATETRANSFORMFEEDBACKSPROC glCreateTransformFeedbacks = 0;
+PFNGLTRANSFORMFEEDBACKBUFFERBASEPROC glTransformFeedbackBufferBase = 0;
+PFNGLTRANSFORMFEEDBACKBUFFERRANGEPROC glTransformFeedbackBufferRange = 0;
+
+/*
+*/
+PFNGLDEPTHRANGEFPROC glDepthRangef = 0;
+PFNGLBINDBUFFERSRANGEPROC glBindBuffersRange = 0;
+
+//
+PFNGLCLEARBUFFERFVPROC glClearBufferfv = 0;
+PFNGLISVERTEXARRAYPROC glIsVertexArray = 0;
+PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib = 0;
+PFNGLDISABLEVERTEXARRAYATTRIBPROC glDisableVertexArrayAttrib = 0;
+PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat = 0;
+PFNGLVERTEXARRAYVERTEXBUFFERSPROC glVertexArrayVertexBuffers = 0;
+PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance = 0;
+PFNGLUNIFORM1IPROC glUniform1i = 0;
+PFNGLUNIFORM3FPROC glUniform3f = 0;
+PFNGLGETSTRINGIPROC glGetStringi = 0;
 PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex = 0;
-PFNGLCREATETEXTURESPROC glCreateTextures = 0;
 PFNGLTEXSTORAGE1DPROC glTexStorage1D = 0;
 PFNGLTEXTURESTORAGE1DPROC glTextureStorage1D = 0;
 PFNGLTEXSTORAGE2DPROC glTexStorage2D = 0;
@@ -137,113 +191,354 @@ PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D = 0;
 //PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D = 0;
 PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D = 0;
 PFNGLBINDTEXTUREUNITPROC glBindTextureUnit = 0;
-PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor = 0;
-PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced = 0;
-PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced = 0;
 PFNGLTEXBUFFERPROC glTexBuffer = 0;
+PFNGLUNIFORMBLOCKBINDINGPROC glUniformBlockBinding = 0;
 
 #if defined(_WIN32)
-PFNGLCLIENTACTIVETEXTUREPROC glActiveTexture = 0;
+	PFNGLCLIENTACTIVETEXTUREPROC glActiveTexture = 0;
 #endif
 
-bool kengine::getAllGLProcedures()
+bool kengine::getGLProcedures()
 {
-	glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)getGLFunctionAddress("glClearBufferfv");
-	glCreateBuffers = (PFNGLCREATEBUFFERSPROC)getGLFunctionAddress("glCreateBuffers");
-	glGenBuffers = (PFNGLGENBUFFERSPROC)getGLFunctionAddress("glGenBuffers");
-	glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)getGLFunctionAddress("glNamedBufferStorage");
-	glBufferStorage = (PFNGLBUFFERSTORAGEPROC)getGLFunctionAddress("glBufferStorage");
-	glNamedBufferData = (PFNGLNAMEDBUFFERDATAPROC)getGLFunctionAddress("glNamedBufferData");
-	glBufferData = (PFNGLBUFFERDATAPROC)getGLFunctionAddress("glBufferData");
-	glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glNamedBufferSubData");
-	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLFunctionAddress("glBufferSubData");
-	glClearNamedBufferData = (PFNGLCLEARNAMEDBUFFERDATAPROC)getGLFunctionAddress("glClearNamedBufferData");
-	glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)getGLFunctionAddress("glClearBufferData");
-	glCopyNamedBufferSubData = (PFNGLCOPYNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyNamedBufferSubData");
-	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyBufferSubData");
-	glGetNamedBufferSubData = (PFNGLGETNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glGetNamedBufferSubData");
-	glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)getGLFunctionAddress("glGetBufferSubData");
-	glMapNamedBuffer = (PFNGLMAPNAMEDBUFFERPROC)getGLFunctionAddress("glMapNamedBuffer");
-	glMapBuffer = (PFNGLMAPBUFFERPROC)getGLFunctionAddress("glMapBuffer");
-	glUnmapNamedBuffer = (PFNGLUNMAPNAMEDBUFFERPROC)getGLFunctionAddress("glUnmapNamedBuffer");
-	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)getGLFunctionAddress("glUnmapBuffer");
-	glMapNamedBufferRange = (PFNGLMAPNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glMapNamedBufferRange");
-	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)getGLFunctionAddress("glMapBufferRange");
-	glFlushMappedNamedBufferRange = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedNamedBufferRange");
-	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedBufferRange");
-	glBindBuffer = (PFNGLBINDBUFFERPROC)getGLFunctionAddress("glBindBuffer");
-	glIsBuffer = (PFNGLISBUFFERPROC)getGLFunctionAddress("glIsBuffer");
-	glInvalidateBufferData = (PFNGLINVALIDATEBUFFERDATAPROC)getGLFunctionAddress("glInvalidateBufferData");
-	glInvalidateBufferSubData = (PFNGLINVALIDATEBUFFERSUBDATAPROC)getGLFunctionAddress("glInvalidateBufferSubData");
-	glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)getGLFunctionAddress("glDeleteBuffers");
-	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)getGLFunctionAddress("glGenVertexArrays");
-	glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)getGLFunctionAddress("glCreateVertexArrays");
-	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)getGLFunctionAddress("glBindVertexArray");
-	glIsVertexArray = (PFNGLISVERTEXARRAYPROC)getGLFunctionAddress("glIsVertexArray");
-	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)getGLFunctionAddress("glDeleteVertexArrays");
-	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)getGLFunctionAddress("glVertexAttribPointer");
-	glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)getGLFunctionAddress("glVertexAttribIPointer");
-	glVertexAttribLPointer = (PFNGLVERTEXATTRIBLPOINTERPROC)getGLFunctionAddress("glVertexAttribLPointer");
-	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glEnableVertexAttribArray");
-	glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glDisableVertexAttribArray");
-	glEnableVertexArrayAttrib = (PFNGLENABLEVERTEXARRAYATTRIBPROC)getGLFunctionAddress("glEnableVertexArrayAttrib");
-	glDisableVertexArrayAttrib = (PFNGLDISABLEVERTEXARRAYATTRIBPROC)getGLFunctionAddress("glDisableVertexArrayAttrib");
-	glVertexArrayAttribFormat = (PFNGLVERTEXARRAYATTRIBFORMATPROC)getGLFunctionAddress("glVertexArrayAttribFormat");
-	glVertexArrayVertexBuffers = (PFNGLVERTEXARRAYVERTEXBUFFERSPROC)getGLFunctionAddress("glVertexArrayVertexBuffers");
-	glBindVertexBuffer = (PFNGLBINDVERTEXBUFFERPROC)getGLFunctionAddress("glBindVertexBuffer");
-	glVertexAtttribFormat = (PFNGLVERTEXATTRIBFORMATPROC)getGLFunctionAddress("glVertexAtttribFormat");
-	glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC)getGLFunctionAddress("glVertexAttribBinding");
-	glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)getGLFunctionAddress("glBindAttribLocation");
-	glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)getGLFunctionAddress("glDrawArraysInstancedBaseInstance");
-	glUniform1i = (PFNGLUNIFORM1IPROC)getGLFunctionAddress("glUniform1i");
-	glUniform3f = (PFNGLUNIFORM3FPROC)getGLFunctionAddress("glUniform3f");
-	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)getGLFunctionAddress("glUniformMatrix4fv");
-	glGetStringi = (PFNGLGETSTRINGIPROC)getGLFunctionAddress("glGetStringi");
 	glCreateShader = (PFNGLCREATESHADERPROC)getGLFunctionAddress("glCreateShader");
+	if (glCreateShader == nullptr) return false;
+
 	glDeleteShader = (PFNGLDELETESHADERPROC)getGLFunctionAddress("glDeleteShader");
+	if (glDeleteShader == nullptr) return false;
+
 	glShaderSource = (PFNGLSHADERSOURCEPROC)getGLFunctionAddress("glShaderSource");
+	if (glShaderSource == nullptr) return false;
+
 	glCompileShader = (PFNGLCOMPILESHADERPROC)getGLFunctionAddress("glCompileShader");
+	if (glCompileShader == nullptr) return false;
+
 	glGetShaderiv = (PFNGLGETSHADERIVPROC)getGLFunctionAddress("glGetShaderiv");
+	if (glGetShaderiv == nullptr) return false;
+
 	glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)getGLFunctionAddress("glGetShaderInfoLog");
+	if (glGetShaderInfoLog == nullptr) return false;
+
 	glCreateProgram = (PFNGLCREATEPROGRAMPROC)getGLFunctionAddress("glCreateProgram");
+	if (glCreateProgram == nullptr) return false;
+
 	glDeleteProgram = (PFNGLDELETEPROGRAMPROC)getGLFunctionAddress("glDeleteProgram");
+	if (glDeleteProgram == nullptr) return false;
+
 	glAttachShader = (PFNGLATTACHSHADERPROC)getGLFunctionAddress("glAttachShader");
+	if (glAttachShader == nullptr) return false;
+
 	glDetachShader = (PFNGLDETACHSHADERPROC)getGLFunctionAddress("glDetachShader");
+	if (glDetachShader == nullptr) return false;
+
 	glLinkProgram = (PFNGLLINKPROGRAMPROC)getGLFunctionAddress("glLinkProgram");
+	if (glLinkProgram == nullptr) return false;
+
 	glGetProgramiv = (PFNGLGETPROGRAMIVPROC)getGLFunctionAddress("glGetProgramiv");
+	if (glGetProgramiv == nullptr) return false;
+
 	glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)getGLFunctionAddress("glGetProgramInfoLog");
-	glUseProgram = (PFNGLUSEPROGRAMPROC)getGLFunctionAddress("glUseProgram");
-	glGetProgramBinary = (PFNGLGETPROGRAMBINARYPROC)getGLFunctionAddress("glGetProgramBinary");
-	glProgramBinary = (PFNGLPROGRAMBINARYPROC)getGLFunctionAddress("glProgramBinary");
-	glShaderBinary = (PFNGLSHADERBINARYPROC)getGLFunctionAddress("glShaderBinary");
-	glSpecializeShader = (PFNGLSPECIALIZESHADERPROC)getGLFunctionAddress("glSpecializeShader");
-	glGetProgramInterfaceiv = (PFNGLGETPROGRAMINTERFACEIVPROC)getGLFunctionAddress("glGetProgramInterfaceiv");
-	glGetProgramResourceiv = (PFNGLGETPROGRAMRESOURCEIVPROC)getGLFunctionAddress("glGetProgramResourceiv");
-	glGetProgramResourceName = (PFNGLGETPROGRAMRESOURCENAMEPROC)getGLFunctionAddress("glGetProgramResourceName");
+	if (glGetProgramInfoLog == nullptr) return false;
+
 	glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)getGLFunctionAddress("glGetActiveAttrib");
+	if (glGetActiveAttrib == nullptr) return false;
+
 	glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)getGLFunctionAddress("glGetAttribLocation");
+	if (glGetAttribLocation == nullptr) return false;
+
+	glUseProgram = (PFNGLUSEPROGRAMPROC)getGLFunctionAddress("glUseProgram");
+	if (glUseProgram == nullptr) return false;
+
 	glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)getGLFunctionAddress("glGetUniformLocation");
+	if (glGetUniformLocation == nullptr) return false;
+
 	glGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC)getGLFunctionAddress("glGetActiveUniform");
-	glGetActiveUniformName = (PFNGLGETACTIVEUNIFORMNAMEPROC)getGLFunctionAddress("glGetActiveUniformName");
-	glGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)getGLFunctionAddress("glGetUniformBlockIndex");
-	glGetActiveUniformBlockiv = (PFNGLGETACTIVEUNIFORMBLOCKIVPROC)getGLFunctionAddress("glGetActiveUniformBlockiv");
-	glGetUniformIndices = (PFNGLGETUNIFORMINDICESPROC)getGLFunctionAddress("glGetUniformIndices");
-	glGetActiveUniformsiv = (PFNGLGETACTIVEUNIFORMSIVPROC)getGLFunctionAddress("glGetActiveUniformsiv");
+	if (glGetActiveUniform == nullptr) return false;
+
+	glUniform1f = (PFNGLUNIFORM1FPROC)getGLFunctionAddress("glUniform1f");
+	if (glUniform1f == nullptr) return false;
+
+	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)getGLFunctionAddress("glUniformMatrix4fv");
+	if (glUniformMatrix4fv == nullptr) return false;
+
 	glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)getGLFunctionAddress("glBindBufferBase");
-	glCreateShaderProgramv = (PFNGLCREATESHADERPROGRAMVPROC)getGLFunctionAddress("glCreateShaderProgramv");
-	glCreateProgramPipelines = (PFNGLCREATEPROGRAMPIPELINESPROC)getGLFunctionAddress("glCreateProgramPipelines");
-	glDeleteProgramPipelines = (PFNGLDELETEPROGRAMPIPELINESPROC)getGLFunctionAddress("glDeleteProgramPipelines");
-	glUseProgramStages = (PFNGLUSEPROGRAMSTAGESPROC)getGLFunctionAddress("glUseProgramStages");
-	glBindProgramPipeline = (PFNGLBINDPROGRAMPIPELINEPROC)getGLFunctionAddress("glBindProgramPipeline");
-	glProgramUniform3f = (PFNGLPROGRAMUNIFORM3FPROC)getGLFunctionAddress("glProgramUniform3f");
-	glActiveShaderProgram = (PFNGLACTIVESHADERPROGRAMPROC)getGLFunctionAddress("glActiveShaderProgram");
+	if (glBindBufferBase == nullptr) return false;
+
 	glProgramParameteri = (PFNGLPROGRAMPARAMETERIPROC)getGLFunctionAddress("glProgramParameteri");
-	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)getGLFunctionAddress("glDebugMessageCallback");
-	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)getGLFunctionAddress("glDebugMessageControl");
-	glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)getGLFunctionAddress("glPushDebugGroup");
-	glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)getGLFunctionAddress("glPopDebugGroup");
-	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)getGLFunctionAddress("glPrimitiveRestartIndex");
+	if (glProgramParameteri == nullptr) return false;
+
+	glGetActiveUniformName = (PFNGLGETACTIVEUNIFORMNAMEPROC)getGLFunctionAddress("glGetActiveUniformName");
+	if (glGetActiveUniformName == nullptr) return false;
+
+	glGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)getGLFunctionAddress("glGetUniformBlockIndex");
+	if (glGetUniformBlockIndex == nullptr) return false;
+
+	glGetActiveUniformBlockiv = (PFNGLGETACTIVEUNIFORMBLOCKIVPROC)getGLFunctionAddress("glGetActiveUniformBlockiv");
+	if (glGetActiveUniformBlockiv == nullptr) return false;
+
+	glGetUniformIndices = (PFNGLGETUNIFORMINDICESPROC)getGLFunctionAddress("glGetUniformIndices");
+	if (glGetUniformIndices == nullptr) return false;
+
+	glGetActiveUniformsiv = (PFNGLGETACTIVEUNIFORMSIVPROC)getGLFunctionAddress("glGetActiveUniformsiv");
+	if (glGetActiveUniformsiv == nullptr) return false;
+	
+	glGetProgramBinary = (PFNGLGETPROGRAMBINARYPROC)getGLFunctionAddress("glGetProgramBinary");
+	if (glGetProgramBinary == nullptr) return false;
+
+	glProgramBinary = (PFNGLPROGRAMBINARYPROC)getGLFunctionAddress("glProgramBinary");
+	if (glProgramBinary == nullptr) return false;
+
+	glShaderBinary = (PFNGLSHADERBINARYPROC)getGLFunctionAddress("glShaderBinary");
+	if (glShaderBinary == nullptr) return false;
+
+	glCreateShaderProgramv = (PFNGLCREATESHADERPROGRAMVPROC)getGLFunctionAddress("glCreateShaderProgramv");
+	if (glCreateShaderProgramv == nullptr) return false;
+
+	glUseProgramStages = (PFNGLUSEPROGRAMSTAGESPROC)getGLFunctionAddress("glUseProgramStages");
+	if (glUseProgramStages == nullptr) return false;
+
+	glBindProgramPipeline = (PFNGLBINDPROGRAMPIPELINEPROC)getGLFunctionAddress("glBindProgramPipeline");
+	if (glBindProgramPipeline == nullptr) return false;
+
+	glProgramUniform3f = (PFNGLPROGRAMUNIFORM3FPROC)getGLFunctionAddress("glProgramUniform3f");
+	if (glProgramUniform3f == nullptr) return false;
+
+	glActiveShaderProgram = (PFNGLACTIVESHADERPROGRAMPROC)getGLFunctionAddress("glActiveShaderProgram");
+	if (glActiveShaderProgram == nullptr) return false;
+
+	glGetProgramInterfaceiv = (PFNGLGETPROGRAMINTERFACEIVPROC)getGLFunctionAddress("glGetProgramInterfaceiv");
+	if (glGetProgramInterfaceiv == nullptr) return false;
+
+	glGetProgramResourceiv = (PFNGLGETPROGRAMRESOURCEIVPROC)getGLFunctionAddress("glGetProgramResourceiv");
+	if (glGetProgramResourceiv == nullptr) return false;
+
+	glGetProgramResourceName = (PFNGLGETPROGRAMRESOURCENAMEPROC)getGLFunctionAddress("glGetProgramResourceName");
+	if (glGetProgramResourceName == nullptr) return false;
+
+	glCreateProgramPipelines = (PFNGLCREATEPROGRAMPIPELINESPROC)getGLFunctionAddress("glCreateProgramPipelines");
+	if (glCreateProgramPipelines == nullptr) return false;
+
+	glDeleteProgramPipelines = (PFNGLDELETEPROGRAMPIPELINESPROC)getGLFunctionAddress("glDeleteProgramPipelines");
+	if (glDeleteProgramPipelines == nullptr) return false;
+
+	glSpecializeShader = (PFNGLSPECIALIZESHADERPROC)getGLFunctionAddress("glSpecializeShader");
+	if (glSpecializeShader == nullptr) return false;
+
+	glGenBuffers = (PFNGLGENBUFFERSPROC)getGLFunctionAddress("glGenBuffers");
+	if (glGenBuffers == nullptr) return false;
+
+	glIsBuffer = (PFNGLISBUFFERPROC)getGLFunctionAddress("glIsBuffer");
+	if (glIsBuffer == nullptr) return false;
+
+	glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)getGLFunctionAddress("glDeleteBuffers");
+	if (glDeleteBuffers == nullptr) return false;
+
+	glBindBuffer = (PFNGLBINDBUFFERPROC)getGLFunctionAddress("glBindBuffer");
+	if (glBindBuffer == nullptr) return false;
+
+	glBufferData = (PFNGLBUFFERDATAPROC)getGLFunctionAddress("glBufferData");
+	if (glBufferData == nullptr) return false;
+
+	glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLFunctionAddress("glBufferSubData");
+	if (glBufferSubData == nullptr) return false;
+
+	glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)getGLFunctionAddress("glGetBufferSubData");
+	if (glGetBufferSubData == nullptr) return false;
+
+	glMapBuffer = (PFNGLMAPBUFFERPROC)getGLFunctionAddress("glMapBuffer");
+	if (glMapBuffer == nullptr) return false;
+
+	glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)getGLFunctionAddress("glUnmapBuffer");
+	if (glUnmapBuffer == nullptr) return false;
+
+	glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)getGLFunctionAddress("glMapBufferRange");
+	if (glMapBufferRange == nullptr) return false;
+
+	glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedBufferRange");
+	if (glFlushMappedBufferRange == nullptr) return false;
+
+	glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyBufferSubData");
+	if (glCopyBufferSubData == nullptr) return false;
+
+	glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)getGLFunctionAddress("glClearBufferData");
+	if (glClearBufferData == nullptr) return false;
+
+	glClearBufferSubData = (PFNGLCLEARBUFFERSUBDATAPROC)getGLFunctionAddress("glClearBufferSubData");
+	if (glClearBufferSubData == nullptr) return false;
+
+	glInvalidateBufferData = (PFNGLINVALIDATEBUFFERDATAPROC)getGLFunctionAddress("glInvalidateBufferData");
+	if (glInvalidateBufferData == nullptr) return false;
+
+	glInvalidateBufferSubData = (PFNGLINVALIDATEBUFFERSUBDATAPROC)getGLFunctionAddress("glInvalidateBufferSubData");
+	if (glInvalidateBufferSubData == nullptr) return false;
+
+	glBufferStorage = (PFNGLBUFFERSTORAGEPROC)getGLFunctionAddress("glBufferStorage");
+	if (glBufferStorage == nullptr) return false;
+
+	glCreateBuffers = (PFNGLCREATEBUFFERSPROC)getGLFunctionAddress("glCreateBuffers");
+	if (glCreateBuffers == nullptr) return false;
+
+	glNamedBufferData = (PFNGLNAMEDBUFFERDATAPROC)getGLFunctionAddress("glNamedBufferData");
+	if (glNamedBufferData == nullptr) return false;
+
+	glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)getGLFunctionAddress("glNamedBufferStorage");
+	if (glNamedBufferStorage == nullptr) return false;
+
+	glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glNamedBufferSubData");
+	if (glNamedBufferSubData == nullptr) return false;
+
+	glClearNamedBufferData = (PFNGLCLEARNAMEDBUFFERDATAPROC)getGLFunctionAddress("glClearNamedBufferData");
+	if (glClearNamedBufferData == nullptr) return false;
+
+	glClearNamedBufferSubData = (PFNGLCLEARNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glClearNamedBufferSubData");
+	if (glClearNamedBufferSubData == nullptr) return false;
+
+	glCopyNamedBufferSubData = (PFNGLCOPYNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glCopyNamedBufferSubData");
+	if (glCopyNamedBufferSubData == nullptr) return false;
+
+	glGetNamedBufferSubData = (PFNGLGETNAMEDBUFFERSUBDATAPROC)getGLFunctionAddress("glGetNamedBufferSubData");
+	if (glGetNamedBufferSubData == nullptr) return false;
+
+	glMapNamedBuffer = (PFNGLMAPNAMEDBUFFERPROC)getGLFunctionAddress("glMapNamedBuffer");
+	if (glMapNamedBuffer == nullptr) return false;
+
+	glUnmapNamedBuffer = (PFNGLUNMAPNAMEDBUFFERPROC)getGLFunctionAddress("glUnmapNamedBuffer");
+	if (glUnmapNamedBuffer == nullptr) return false;
+
+	glMapNamedBufferRange = (PFNGLMAPNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glMapNamedBufferRange");
+	if (glMapNamedBufferRange == nullptr) return false;
+
+	glFlushMappedNamedBufferRange = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC)getGLFunctionAddress("glFlushMappedNamedBufferRange");
+	if (glFlushMappedNamedBufferRange == nullptr) return false;
+
+	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glEnableVertexAttribArray");
+	if (glEnableVertexAttribArray == nullptr) return false;
+
+	glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)getGLFunctionAddress("glDisableVertexAttribArray");
+	if (glDisableVertexAttribArray == nullptr) return false;
+
+	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)getGLFunctionAddress("glVertexAttribPointer");
+	if (glVertexAttribPointer == nullptr) return false;
+
+	glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)getGLFunctionAddress("glBindAttribLocation");
+	if (glBindAttribLocation == nullptr) return false;
+
+	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)getGLFunctionAddress("glGenVertexArrays");
+	if (glGenVertexArrays == nullptr) return false;
+
+	glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)getGLFunctionAddress("glDeleteVertexArrays");
+	if (glDeleteVertexArrays == nullptr) return false;
+
+	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)getGLFunctionAddress("glBindVertexArray");
+	if (glBindVertexArray == nullptr) return false;
+
+	glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONPROC)getGLFunctionAddress("glBindFragDataLocation");
+	if (glBindFragDataLocation == nullptr) return false;
+
+	glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)getGLFunctionAddress("glVertexAttribIPointer");
+	if (glVertexAttribIPointer == nullptr) return false;
+
+	glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLFunctionAddress("glVertexAttribDivisor");
+	if (glVertexAttribDivisor == nullptr) return false;
+
+	glVertexAttribLPointer = (PFNGLVERTEXATTRIBLPOINTERPROC)getGLFunctionAddress("glVertexAttribLPointer");
+	if (glVertexAttribLPointer == nullptr) return false;
+
+	glBindVertexBuffer = (PFNGLBINDVERTEXBUFFERPROC)getGLFunctionAddress("glBindVertexBuffer");
+	if (glBindVertexBuffer == nullptr) return false;
+
+	glVertexAttribFormat = (PFNGLVERTEXATTRIBFORMATPROC)getGLFunctionAddress("glVertexAttribFormat");
+	if (glVertexAttribFormat == nullptr) return false;
+
+	glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC)getGLFunctionAddress("glVertexAttribBinding");
+	if (glVertexAttribBinding == nullptr) return false;
+
+	glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)getGLFunctionAddress("glCreateVertexArrays");
+	if (glCreateVertexArrays == nullptr) return false;
+
+	glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)getGLFunctionAddress("glDrawArraysInstanced");
+	if (glDrawArraysInstanced == nullptr) return false;
+
+	glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)getGLFunctionAddress("glDrawElementsInstanced");
+	if (glDrawElementsInstanced == nullptr) return false;
+
+	glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)getGLFunctionAddress("glGenerateMipmap");
+	if (glGenerateMipmap == nullptr) return false;
+
 	glCreateTextures = (PFNGLCREATETEXTURESPROC)getGLFunctionAddress("glCreateTextures");
+	if (glCreateTextures == nullptr) return false;
+
+	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)getGLFunctionAddress("glDebugMessageCallback");
+	if (glDebugMessageCallback == nullptr) return false;
+
+	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)getGLFunctionAddress("glDebugMessageControl");
+	if (glDebugMessageControl == nullptr) return false;
+
+	glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)getGLFunctionAddress("glPushDebugGroup");
+	if (glPushDebugGroup == nullptr) return false;
+
+	glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)getGLFunctionAddress("glPopDebugGroup");
+	if (glPopDebugGroup == nullptr) return false;
+
+	glGenTransformFeedbacks = (PFNGLGENTRANSFORMFEEDBACKSPROC)getGLFunctionAddress("glGenTransformFeedbacks");
+	if (glGenTransformFeedbacks == nullptr) return false;
+
+	glBindTransformFeedback = (PFNGLBINDTRANSFORMFEEDBACKPROC)getGLFunctionAddress("glBindTransformFeedback");
+	if (glBindTransformFeedback == nullptr) return false;
+
+	glIsTransformFeedback = (PFNGLISTRANSFORMFEEDBACKPROC)getGLFunctionAddress("glIsTransformFeedback");
+	if (glIsTransformFeedback == nullptr) return false;
+
+	glDeleteTransformFeedbacks = (PFNGLDELETETRANSFORMFEEDBACKSPROC)getGLFunctionAddress("glDeleteTransformFeedbacks");
+	if (glDeleteTransformFeedbacks == nullptr) return false;
+	
+	glCreateTransformFeedbacks = (PFNGLCREATETRANSFORMFEEDBACKSPROC)getGLFunctionAddress("glCreateTransformFeedbacks");
+	if (glCreateTransformFeedbacks == nullptr) return false;
+
+	glTransformFeedbackBufferBase = (PFNGLTRANSFORMFEEDBACKBUFFERBASEPROC)getGLFunctionAddress("glTransformFeedbackBufferBase");
+	if (glTransformFeedbackBufferBase == nullptr) return false;
+
+	glTransformFeedbackBufferRange = (PFNGLTRANSFORMFEEDBACKBUFFERRANGEPROC)getGLFunctionAddress("glTransformFeedbackBufferRange");
+	if (glTransformFeedbackBufferRange == nullptr) return false;
+	
+	glDepthRangef = (PFNGLDEPTHRANGEFPROC)getGLFunctionAddress("glDepthRangef");
+	if (glDepthRangef == nullptr) return false;
+
+	glBindBuffersRange = (PFNGLBINDBUFFERSRANGEPROC)getGLFunctionAddress("glBindBuffersRange");
+	if (glBindBuffersRange == nullptr) return false;
+
+	// ***************************************************************************
+
+	glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)getGLFunctionAddress("glClearBufferfv");
+	if (glClearBufferfv == nullptr) return false;
+
+	glIsVertexArray = (PFNGLISVERTEXARRAYPROC)getGLFunctionAddress("glIsVertexArray");
+	if (glIsVertexArray == nullptr) return false;
+
+	glEnableVertexArrayAttrib = (PFNGLENABLEVERTEXARRAYATTRIBPROC)getGLFunctionAddress("glEnableVertexArrayAttrib");
+	if (glEnableVertexArrayAttrib == nullptr) return false;
+
+	glDisableVertexArrayAttrib = (PFNGLDISABLEVERTEXARRAYATTRIBPROC)getGLFunctionAddress("glDisableVertexArrayAttrib");
+	if (glDisableVertexArrayAttrib == nullptr) return false;
+
+	glVertexArrayAttribFormat = (PFNGLVERTEXARRAYATTRIBFORMATPROC)getGLFunctionAddress("glVertexArrayAttribFormat");
+	if (glVertexArrayAttribFormat == nullptr) return false;
+
+	glVertexArrayVertexBuffers = (PFNGLVERTEXARRAYVERTEXBUFFERSPROC)getGLFunctionAddress("glVertexArrayVertexBuffers");
+	if (glVertexArrayVertexBuffers == nullptr) return false;
+
+	glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)getGLFunctionAddress("glDrawArraysInstancedBaseInstance");
+	if (glDrawArraysInstancedBaseInstance == nullptr) return false;
+
+	glUniform1i = (PFNGLUNIFORM1IPROC)getGLFunctionAddress("glUniform1i");
+	if (glUniform1i == nullptr) return false;
+
+	glUniform3f = (PFNGLUNIFORM3FPROC)getGLFunctionAddress("glUniform3f");
+	if (glUniform3f == nullptr) return false;
+
+	glGetStringi = (PFNGLGETSTRINGIPROC)getGLFunctionAddress("glGetStringi");
+	if (glUniformMatrix4fv == nullptr) return false;
+
+	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)getGLFunctionAddress("glPrimitiveRestartIndex");
 	glTexStorage1D = (PFNGLTEXSTORAGE1DPROC)getGLFunctionAddress("glTexStorage1D");
 	glTextureStorage1D = (PFNGLTEXTURESTORAGE1DPROC)getGLFunctionAddress("glTextureStorage1D");
 	glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)getGLFunctionAddress("glTexStorage2D");
@@ -255,111 +550,14 @@ bool kengine::getAllGLProcedures()
 	//glTexSubImage3D = (PFNGLTEXSUBIMAGE3DPROC)getGLFunctionAddress("glTexSubImage3D");
 	glTextureSubImage3D = (PFNGLTEXTURESUBIMAGE3DPROC)getGLFunctionAddress("glTextureSubImage3D");
 	glBindTextureUnit = (PFNGLBINDTEXTUREUNITPROC)getGLFunctionAddress("glBindTextureUnit");	
-	glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLFunctionAddress("glVertexAttribDivisor");
-	glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)getGLFunctionAddress("glDrawArraysInstanced");
-	glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)getGLFunctionAddress("glDrawElementsInstanced");
 	glTexBuffer = (PFNGLTEXBUFFERPROC)getGLFunctionAddress("glTexBuffer");
+	glUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)getGLFunctionAddress("glUniformBlockBinding");
 
 #if defined(_WIN32)
 	glActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC)getGLFunctionAddress("glActiveTexture");
 #endif
 
-	if (glClearBufferfv == nullptr ||
-		glCreateBuffers == nullptr ||
-		glGenBuffers == nullptr ||
-		glNamedBufferStorage == nullptr ||
-		glBufferStorage == nullptr ||
-		glNamedBufferData == nullptr ||
-		glBufferData == nullptr ||
-		glNamedBufferSubData == nullptr ||
-		glBufferSubData == nullptr ||
-		glClearNamedBufferData == nullptr ||
-		glClearBufferData == nullptr ||
-		glCopyNamedBufferSubData == nullptr ||
-		glCopyBufferSubData == nullptr ||
-		glGetNamedBufferSubData == nullptr ||
-		glGetBufferSubData == nullptr ||
-		glMapNamedBuffer == nullptr ||
-		glMapBuffer == nullptr ||
-		glUnmapNamedBuffer == nullptr ||
-		glUnmapBuffer == nullptr ||
-		glMapNamedBufferRange == nullptr ||
-		glMapBufferRange == nullptr ||
-		glFlushMappedNamedBufferRange == nullptr ||
-		glFlushMappedBufferRange == nullptr ||
-		glBindBuffer == nullptr ||
-		glIsBuffer == nullptr ||
-		glInvalidateBufferData == nullptr ||
-		glInvalidateBufferSubData == nullptr ||
-		glDeleteBuffers == nullptr ||
-		glGenVertexArrays == nullptr ||
-		glCreateVertexArrays == nullptr ||
-		glBindVertexArray == nullptr ||
-		glIsVertexArray == nullptr ||
-		glDeleteVertexArrays == nullptr ||
-		glVertexAttribPointer == nullptr ||
-		glVertexAttribIPointer == nullptr ||
-		glVertexAttribLPointer == nullptr ||
-		glEnableVertexAttribArray == nullptr ||
-		glDisableVertexAttribArray == nullptr ||
-		glEnableVertexArrayAttrib == nullptr ||
-		glDisableVertexArrayAttrib == nullptr ||
-		glVertexArrayAttribFormat == nullptr ||
-		glVertexArrayVertexBuffers == nullptr ||
-		glBindVertexBuffer == nullptr ||
-		glVertexAtttribFormat == nullptr ||
-		glVertexAttribBinding == nullptr ||
-		glBindAttribLocation == nullptr ||
-		glDrawArraysInstancedBaseInstance == nullptr ||
-		glUniform1i == nullptr ||
-		glUniform3f == nullptr ||
-		glUniformMatrix4fv == nullptr ||
-		glGetStringi == nullptr ||
-		glCreateShader == nullptr ||
-		glDeleteShader == nullptr ||
-		glShaderSource == nullptr ||
-		glCompileShader == nullptr ||
-		glGetShaderiv == nullptr ||
-		glGetShaderInfoLog == nullptr ||
-		glCreateProgram == nullptr ||
-		glDeleteProgram == nullptr ||
-		glAttachShader == nullptr ||
-		glDetachShader == nullptr ||
-		glLinkProgram == nullptr ||
-		glGetProgramiv == nullptr ||
-		glGetProgramInfoLog == nullptr ||
-		glUseProgram == nullptr ||
-		glGetProgramBinary == nullptr ||
-		glProgramBinary == nullptr ||
-		glShaderBinary == nullptr ||
-		glSpecializeShader == nullptr ||
-		glGetProgramInterfaceiv == nullptr ||
-		glGetProgramResourceiv == nullptr ||
-		glGetProgramResourceName == nullptr ||
-		glGetActiveAttrib == nullptr ||
-		glGetAttribLocation == nullptr ||
-		glGetUniformLocation == nullptr ||
-		glGetActiveUniform == nullptr ||
-		glGetActiveUniformName == nullptr ||
-		glGetUniformBlockIndex == nullptr ||
-		glGetActiveUniformBlockiv == nullptr ||
-		glGetUniformIndices == nullptr ||
-		glGetActiveUniformsiv == nullptr ||
-		glBindBufferBase == nullptr ||
-		glCreateShaderProgramv == nullptr ||
-		glCreateProgramPipelines == nullptr ||
-		glDeleteProgramPipelines == nullptr ||
-		glUseProgramStages == nullptr ||
-		glBindProgramPipeline == nullptr ||
-		glProgramUniform3f == nullptr ||
-		glActiveShaderProgram == nullptr ||
-		glProgramParameteri == nullptr ||
-		glDebugMessageCallback == nullptr ||
-		glDebugMessageControl == nullptr ||
-		glPushDebugGroup == nullptr ||
-		glPopDebugGroup == nullptr ||
-		glPrimitiveRestartIndex == nullptr ||
-		glCreateTextures == nullptr ||
+	if (glPrimitiveRestartIndex == nullptr ||
 		glTexStorage1D == nullptr ||
 		glTextureStorage1D == nullptr ||
 		glTexStorage2D == nullptr ||
@@ -372,10 +570,9 @@ bool kengine::getAllGLProcedures()
 		glTextureSubImage3D == nullptr ||
 		glBindTextureUnit == nullptr ||
 		//glActiveTexture == nullptr ||
-		glVertexAttribDivisor == nullptr ||
-		glDrawArraysInstanced == nullptr ||
-		glDrawElementsInstanced == nullptr ||
-		glTexBuffer == nullptr)
+		glTexBuffer == nullptr ||
+		glUniformBlockBinding == nullptr ||
+		glGenerateMipmap == nullptr)
 	{
 		return false;
 	}
@@ -384,582 +581,95 @@ bool kengine::getAllGLProcedures()
 }
 
 /*
-	GLSLprogram class - member class definition
+	Get OpenGL info
 */
-
-kengine::GLSLprogram::~GLSLprogram()
+std::string kengine::getGLInfo(bool extension)
 {
-	glDeleteProgram(programID);
-}
+	std::stringstream renderingInfo;
 
-bool kengine::GLSLprogram::loadShaders(const ShaderInfo* shaderInfo)
-{
-	bool ret = false;
+	const GLubyte* vendor = glGetString(GL_VENDOR);
+	renderingInfo << "> GL vendor: " << vendor << "\n";
 
-	if (shaderInfo)
-	{
-		if (programID) {
-			glDeleteProgram(programID);
-			uniformMap.clear();
-		}
+	const GLubyte* renderer = glGetString(GL_RENDERER);
+	renderingInfo << "> GL renderer: " << renderer << "\n";
 
-		GLuint shaders[6] = { 0 };
+	const GLubyte* version = glGetString(GL_VERSION);
+	renderingInfo << "> GL version: " << version << "\n";
 
-		for (int index = 0; shaderInfo[index].type != GL_NONE && index < 6; index++) {
-			shaders[index] = compileShader(shaderInfo[index].type, shaderInfo[index].filename);
-		}
+	const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+	renderingInfo << "> GLSL version: " << glslVersion << "\n";
 
-		programID = glCreateProgram();
+	GLint shaderProgramBinaryformats = 0;
+	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &shaderProgramBinaryformats);
+	renderingInfo << "> Shader program binary supported formats: " << shaderProgramBinaryformats << "\n";
 
-		if (programID) {
-			ret = true;
+	GLint maxVertexAttribs;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+	renderingInfo << "\n> Max vertex attributes: " << maxVertexAttribs;
 
-			for (int index = 0; index < 6; index++) {
-				if (shaders[index])
-					glAttachShader(programID, shaders[index]);
-			}
+	GLint maxVertexTextureImageUnits;
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
+	renderingInfo << "\n> Max vertex texture image units: " << maxVertexTextureImageUnits;
 
-			glLinkProgram(programID);
+	GLint maxCombinedTextureImageUnits;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureImageUnits);
+	renderingInfo << "\n> Max combined texture image units: " << maxCombinedTextureImageUnits;
 
-			GLint status;
-			glGetProgramiv(programID, GL_LINK_STATUS, &status);
+	GLint maxTextureSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	renderingInfo << "\n> Max texture size: " << maxTextureSize;
 
-			if (status == GL_TRUE) {
-				// query the location of a uniform variable
-				GLint numUniforms = 0;
-				glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
-				GLenum properties[] = { GL_NAME_LENGTH, GL_LOCATION };
+	GLint maxUBOBindings;
+	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxUBOBindings);
+	renderingInfo << "\n> Max uniform buffer bindings: " << maxUBOBindings;
 
-				for (GLint i = 0; i < numUniforms; i++) {
-					GLint results[2];
-					glGetProgramResourceiv(programID, GL_UNIFORM, static_cast<GLuint>(i), 2, properties, 2, nullptr, results);
-					GLint nameBufferSize = results[0] + 1;
-					char* name = new char[static_cast<size_t>(nameBufferSize)];
-					glGetProgramResourceName(programID, GL_UNIFORM, static_cast<GLuint>(i), nameBufferSize, nullptr, name);
-					uniformMap[name] = results[1];
-				}
-			} else {
-				std::string log = "It was not possible to link a shader program";
+	GLint maxTransformFeedbackBuffers;
+	glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, &maxTransformFeedbackBuffers);
+	renderingInfo << "\n> Max transform feedback buffers: " << maxTransformFeedbackBuffers << "\n";
 
-				GLint logLength;
-				glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
+	if (extension) {
+		GLint numExtensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+		renderingInfo << "\n> GL_NUM_EXTENSIONS: " << numExtensions << "\n";
 
-				if (logLength > 0) {
-					std::string infoLog(static_cast<unsigned int>(logLength), ' ');
-					GLsizei logWrittenLength;
-					glGetProgramInfoLog(programID, logLength, &logWrittenLength, &infoLog[0]);
-					log += ": " + infoLog;
-				}
-
-				K_LOG_OUTPUT_RAW(log);
-				ret = false;
-			}
-		}
-		else
-			K_LOG_OUTPUT_RAW("It was not possible to create a shader program!");
-
-		// clean up shader objects
-		for (int index = 0; index < 6; index++) {
-			if (shaders[index]) {
-				glDetachShader(programID, shaders[index]);
-				glDeleteShader(shaders[index]);
-			}
+		for (GLint i = 0; i < numExtensions; i++) {
+			renderingInfo << "> " << glGetStringi(GL_EXTENSIONS, static_cast<GLuint>(i)) << "\n";
 		}
 	}
 
-	return ret;
-}
-
-void kengine::GLSLprogram::useProgram()
-{
-	glUseProgram(programID);
-}
-
-void kengine::GLSLprogram::saveBinary(const std::string& name)
-{
-	if (programID == 0)
-		return;
-
-	GLint formats = 0;
-	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
-
-	if (formats < 1) {
-		K_LOG_OUTPUT_RAW("Driver does not support any binary formats.");
-		return;
-	}
-
-	GLint length = 0;
-	glGetProgramiv(programID, GL_PROGRAM_BINARY_LENGTH, &length);
-
-	std::vector<GLubyte> buffer(static_cast<size_t>(length));
-	glGetProgramBinary(programID, length, nullptr, &binaryFormat, buffer.data());
-
-	std::ofstream shaderBinary(name.c_str(), std::ios::binary);
-	shaderBinary.write(reinterpret_cast<char*>(buffer.data()), length);
-	shaderBinary.close();
-}
-
-void kengine::GLSLprogram::loadBinary(const std::string& name)
-{
-	GLint formats = 0;
-	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
-
-	if (formats < 1) {
-		K_LOG_OUTPUT_RAW("Driver does not support any binary formats.");
-		return;
-	}
-
-	if (programID)
-	{
-		uniformMap.clear();
-		glDeleteProgram(programID);
-	}
-
-	programID = glCreateProgram();
-
-	std::ifstream shaderBinary(name, std::ios::binary);
-	std::istreambuf_iterator<char> iter(shaderBinary), endIter;
-	std::vector<char> buffer(iter, endIter);
-	shaderBinary.close();
-
-	glProgramBinary(programID, binaryFormat, buffer.data(), static_cast<GLsizei>(buffer.size()));
-
-	GLint status;
-	glGetProgramiv(programID, GL_LINK_STATUS, &status);
-
-	if (status == GL_FALSE) {
-		std::string log = "It was not possible to link a binary shader program";
-
-		GLint logLength;
-		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
-
-		if (logLength > 0) {
-			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
-			GLsizei logWrittenLength;
-			glGetProgramInfoLog(programID, logLength, &logWrittenLength, &infoLog[0]);
-			log += ": " + infoLog;
-		}
-
-		K_LOG_OUTPUT_RAW(log);
-	}
-}
-
-void kengine::GLSLprogram::setUniform(std::string name, bool transpose, GLfloat* value)
-{
-	// It is inefficient to query the location of a uniform variable in each frame
-	// GLint location = glGetUniformLocation(programID, name.c_str());
-	GLint location = uniformMap[name];
-
-	if (location == -1) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat*): " << name);
-		return;
-	}
-
-	glUniformMatrix4fv(location, 1, transpose, value);
-}
-
-void kengine::GLSLprogram::setUniform(std::string name, GLint value)
-{
-	GLint location = uniformMap[name];
-
-	if (location == -1) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (GLboolean): " << name);
-		return;
-	}
-
-	glUniform1i(location, value);
-}
-
-void kengine::GLSLprogram::setUniform(std::string name, GLfloat x, GLfloat y, GLfloat z)
-{
-	GLint location = uniformMap[name];
-
-	if (location == -1) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat x, GLfloat y, GLfloat z): " << name);
-		return;
-	}
-
-	glUniform3f(location, x, y, z);
-}
-
-void kengine::GLSLprogram::print() const
-{
-	K_LOG_OUTPUT_RAW("> kengine::GLSLprogram object info [" << this << "]\n\n");
-	
-	// getting the list of active attribute variables
-	GLint numAttribs = 0;
-	glGetProgramInterfaceiv(programID, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
-	
-	if (numAttribs > 0)
-	{
-		K_LOG_OUTPUT_RAW("  active attribute variables:\n");
-
-		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
-
-		for (auto i = 0; i < numAttribs; i++)
-		{
-			GLint results[3];
-			glGetProgramResourceiv(programID, GL_PROGRAM_INPUT, static_cast<GLuint>(i), 3, properties, 3, nullptr, results);
-
-			GLint nameBufferSize = results[0] + 1;
-			char* name = new char[static_cast<size_t>(nameBufferSize)];
-
-			glGetProgramResourceName(programID, GL_PROGRAM_INPUT, static_cast<GLuint>(i), nameBufferSize, nullptr, name);
-
-			K_LOG_OUTPUT_RAW("	- name: " << name << "\n" << "	- type: " << getGLSLType(results[1]) << "\n" << "	- location: " << results[2] << "\n");
-			delete[] name;
-		}
-	}
-
-	// getting a list of active uniform variables
-	GLint numUniforms = 0;
-	glGetProgramInterfaceiv(programID, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
-
-	if (numUniforms > 0)
-	{
-		K_LOG_OUTPUT_RAW("\n  active uniform variables:\n");
-		
-		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
-
-		for (auto i = 0; i < numUniforms; i++)
-		{
-			GLint results[4];
-			glGetProgramResourceiv(programID, GL_UNIFORM, static_cast<GLuint>(i), 4, properties, 4, nullptr, results);
-
-			GLsizei nameBuffSize = results[0] + 1;
-			char* name = new char[static_cast<size_t>(nameBuffSize)];
-
-			glGetProgramResourceName(programID, GL_UNIFORM, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
-
-			K_LOG_OUTPUT_RAW(
-				"	- name: " << name << "\n" <<
-				"	- type: " << getGLSLType(results[1]) << "\n" <<
-				"	- location: " << results[2] << "\n" <<
-				"	- block index : " << results[3] << "\n");
-
-			delete[] name;
-		}
-
-		K_LOG_OUTPUT_RAW("\n");
-	}
+	return renderingInfo.str();
 }
 
 /*
-	kengine::render_node class - member class definition
+	This function reads a text file and return in the std::string form
 */
-
-void kengine::render_node::load(kengine::mesh& m, GLsizei instances)
+std::string kengine::readFromFile(const std::string& filename)
 {
-	clear(); // if this render_node was already loaded, it must be cleaned before
-	m_maxInstances = instances;
+	std::ifstream filestream(filename, std::ios::in | std::ios::binary);
 
-	glGenBuffers(MAX_VBO, m_vbo);
+	if (!filestream)
+		return "";
 
-	GLsizeiptr totalSizeInBytes = static_cast<GLsizeiptr>(m.getSizeInBytes());
-	const float* const data = m.getInterleavedData();
+	filestream.seekg(0, std::ios::end);
+	std::streamoff fileSize = filestream.tellg();
+	filestream.seekg(0, std::ios::beg);
+	size_t size = static_cast<size_t>(fileSize) + 1; // including space for '/0'
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, totalSizeInBytes, data, GL_STATIC_DRAW);
+	char* source = new char[size];
+	memset(source, 0, size);
+	filestream.read(reinterpret_cast<char*>(source), fileSize);
 
-	if (m.m_indices.attributeArray != nullptr) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[1]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(m.m_indices.getSizeInBytes()), m.m_indices.attributeArray, GL_STATIC_DRAW);
-		m_elements = static_cast<GLsizei>(m.m_indices.arraySize);
-	}
-
-	GLfloat* modelMatrices = new float[static_cast<size_t>(m_maxInstances) * 16LL];
-
-	for (size_t i = 0; i < static_cast<size_t>(m_maxInstances); i++) {
-		modelMatrices[ 0 + (i * 16)] = 1.0f;
-		modelMatrices[ 1 + (i * 16)] = 0.0f;
-		modelMatrices[ 2 + (i * 16)] = 0.0f;
-		modelMatrices[ 3 + (i * 16)] = 0.0f;
-		modelMatrices[ 4 + (i * 16)] = 0.0f;
-		modelMatrices[ 5 + (i * 16)] = 1.0f;
-		modelMatrices[ 6 + (i * 16)] = 0.0f;
-		modelMatrices[ 7 + (i * 16)] = 0.0f;
-		modelMatrices[ 8 + (i * 16)] = 0.0f;
-		modelMatrices[ 9 + (i * 16)] = 0.0f;
-		modelMatrices[10 + (i * 16)] = 1.0f;
-		modelMatrices[11 + (i * 16)] = 0.0f;
-		modelMatrices[12 + (i * 16)] = 0.0f;
-		modelMatrices[13 + (i * 16)] = 0.0f;
-		modelMatrices[14 + (i * 16)] = 0.0f;
-		modelMatrices[15 + (i * 16)] = 1.0f;
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
-	GLsizeiptr modelMatrixSize = static_cast<GLsizeiptr>(m_maxInstances * 16LL * sizeof(GLfloat));
-	glBufferData(GL_ARRAY_BUFFER, modelMatrixSize, modelMatrices, GL_DYNAMIC_DRAW);
-	delete[] modelMatrices;
-	
-	/*
-		Creating vertex array object (VAO)
-	*/
-
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
-
-	if (m.m_indices.attributeArray != nullptr)
-	{
-		// setting the state of the buffer object for ELEMENTS in VAO
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[1]);
-	}
-
-	/*
-		Shader plumbing
-	*/
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
-	size_t offset = 0;
-	m_count = static_cast<GLsizei>(m.m_vattributesMap[0].getSize());
-
-	for (auto it : m.m_vattributesMap) {
-		auto location = it.first;
-
-		glEnableVertexAttribArray(static_cast<GLuint>(location));
-
-		glVertexAttribPointer(
-			static_cast<GLuint>(location),
-			static_cast<GLint>(it.second.count),
-			GL_FLOAT,
-			GL_FALSE,
-			static_cast<GLsizei>(m.m_interleavedStride),
-			(const GLvoid*)offset);
-
-		offset += it.second.count * sizeof(float);
-	}
-
-	// map the vertex attribute for model matrix at: 12, 13, 14 and 15 locations
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
-
-	for (unsigned int row = 0; row < 4; row++) {
-		glVertexAttribPointer(12UL + row, 4, GL_FLOAT, GL_FALSE, static_cast<GLsizeiptr>(16 * sizeof(GLfloat)), (const GLvoid*)((sizeof(GLfloat) * 4 * row)));
-		glEnableVertexAttribArray(12UL + row);
-		glVertexAttribDivisor(12UL + row, 1);
-	}
-}
-
-void kengine::render_node::updateModelMatrix(const kengine::matrix<float>& matrix)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
-	float* data = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-	for (size_t i = 0; i < 16; i++) {
-		data[i] = matrix[i];
-	}
-
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-}
-
-void kengine::render_node::updateModelMatrices(const kengine::matrix<float>* matrices, size_t start, size_t count)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo[2]);
-	float* data = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-	for (size_t m = start; m < count; m++) {
-		for (size_t i = 0; i < 16; i++) {
-			size_t index = i + (m * 16);
-			data[index] = matrices[m][i];
-		}
-	}
-
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-}
-
-void kengine::render_node::clear()
-{
-	glDeleteBuffers(MAX_VBO, m_vbo);
-	glDeleteVertexArrays(1, &m_vao);
-	m_count = 0;
-	m_elements = 0;
-	m_maxInstances = 1;
-}
-
-void kengine::render_node::drawArrays() const
-{
-	glBindVertexArray(m_vao);
-	glDrawArrays(m_mode, 0, m_count);
-}
-
-void kengine::render_node::drawElements() const
-{
-	glBindVertexArray(m_vao);
-	glDrawElements(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0);
-}
-
-void kengine::render_node::draw() const
-{
-	glBindVertexArray(m_vao);
-
-	if(m_elements)
-		glDrawElements(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0);
-	else
-		glDrawArrays(m_mode, 0, m_count);
-}
-
-void kengine::render_node::drawInstanced(GLsizei size) const
-{
-	glBindVertexArray(m_vao);
-
-	if (m_elements)
-		glDrawElementsInstanced(m_mode, m_elements, GL_UNSIGNED_INT, (const GLvoid*)0, size);
-	else
-		glDrawArraysInstanced(m_mode, 0, m_count, size);
-}
-
-
-/*
-	kengine::texture class - member definition
-*/
-
-kengine::texture::~texture()
-{
-	clear();
-}
-
-void kengine::texture::create(TEXTURE_TYPE target, GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
-{
-	clear();
-
-	switch (target)
-	{
-	case TEXTURE_TYPE::_2D:
-		m_target = GL_TEXTURE_2D;
-		break;
-	}
-
-	glGenTextures(1, &m_name);
-	glBindTexture(m_target, m_name);
-
-	glTexImage2D(m_target, levels, internalFormat, width, height, 0, format, type, data); // OpenGL 2.0+
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-void kengine::texture::update(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
-{
-	if (m_target == GL_TEXTURE_2D)
-		glTexSubImage2D(m_target, level, xoffset, yoffset, width, height, format, type, data);
-}
-
-void kengine::texture::bindTextureUnit(GLuint textureUnit)
-{
-	//glBindTextureUnit(textureUnit, m_name); // OpenGL 4.5+
-	glActiveTexture(GL_TEXTURE0 + textureUnit); // OpenGL 2.0+
-	glBindTexture(m_target, m_name);
-}
-
-void kengine::texture::bind()
-{
-	glBindTexture(m_target, m_name);
-}
-
-void kengine::texture::unbind()
-{
-	glBindTexture(m_target, 0);
-}
-
-void kengine::texture::clear()
-{
-	glDeleteTextures(1, &m_name);
-	m_name = 0;
-	m_target = 0;
+	std::string s = source;
+	delete[] source;
+	return s;
 }
 
 /*
-	Helper function to compile GLSL shader
+	Get the shader type as string
 */
-GLuint kengine::compileShader(GLuint shaderType, std::string filename)
+std::string kengine::getShaderType(GLuint shaderType)
 {
-	GLuint shaderObject = glCreateShader(shaderType);
-
-	if (!shaderObject) {
-		K_LOG_OUTPUT_RAW("It was not possible to create [" << getShaderType(shaderType) << "] shader!");
-		return 0;
-	}
-
-	std::string sourceString = readFromFile(filename);
-
-	if (sourceString[0] == '\0') {
-		K_LOG_OUTPUT_RAW("This file " << filename << " cannot be opened.")
-		glDeleteShader(shaderObject);
-		return 0;
-	}
-
-	const GLchar* source = sourceString.c_str();
-
-	glShaderSource(shaderObject, 1, &source, nullptr);
-	glCompileShader(shaderObject);
-
-	GLint status = 0;
-	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &status);
-
-	if (status == GL_FALSE) {
-		std::string log = "It was not possible to compile a shader [" + getShaderType(shaderType) + "]";
-
-		GLint logLength;
-		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
-
-		if (logLength > 0) {
-			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
-			GLsizei logWrittenLength;
-
-			glGetShaderInfoLog(shaderObject, logLength, &logWrittenLength, &infoLog[0]);
-			log += ": " + infoLog;
-		}
-
-		glDeleteShader(shaderObject);
-		K_LOG_OUTPUT_RAW(log);
-		return 0;
-	}
-
-	return shaderObject;
-}
-
-
-GLuint kengine::compileSPIRVShader(GLuint shaderType, const std::string& name)
-{
-	GLuint shaderObject = glCreateShader(shaderType);
-
-	std::ifstream shaderBinary(name, std::ios::binary);
-	std::istreambuf_iterator<char> startIt(shaderBinary), endIt;
-	std::vector<char> buffer(startIt, endIt);
-	shaderBinary.close();
-
-	glShaderBinary(1, &shaderObject, GL_SHADER_BINARY_FORMAT_SPIR_V, buffer.data(), static_cast<GLsizei>(buffer.size()));
-	glSpecializeShader(shaderObject, "main", 0, 0, 0);
-
-	GLint status;
-	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &status);
-
-	if (status == GL_FALSE) {
-		std::string log = "It was not possible to compile a SPIRV shader";
-
-		GLint logLength;
-		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
-
-		if (logLength > 0) {
-			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
-			GLsizei logWrittenLength;
-			glGetProgramInfoLog(shaderObject, logLength, &logWrittenLength, &infoLog[0]);
-			log += ": " + infoLog;
-		}
-
-		glDeleteShader(shaderObject);
-		K_LOG_OUTPUT_RAW(log);
-		return 0;
-	}
-
-	return shaderObject;
-}
-
-std::string kengine::getShaderType(GLuint shader_type)
-{
-	switch (shader_type)
+	switch (shaderType)
 	{
 	case GL_VERTEX_SHADER:
 		return "GL_VERTEX_SHADER";
@@ -1014,25 +724,843 @@ std::string kengine::getGLSLType(GLint type)
 	}
 }
 
-std::string kengine::readFromFile(std::string filename)
+size_t kengine::getGLComponentTypeSize(GLenum type)
 {
-	std::ifstream filestream(filename, std::ios::in | std::ios::binary);
+	switch (type)
+	{
+	case GL_BYTE:
+		return sizeof(GLbyte);
+		break;
 
-	if (!filestream)
-		return "";
+	case GL_UNSIGNED_BYTE:
+		return sizeof(GLubyte);
+		break;
 
-	filestream.seekg(0, std::ios::end);
-	std::streamoff fileSize = filestream.tellg();
-	filestream.seekg(0, std::ios::beg);
-	size_t size = static_cast<size_t>(fileSize) + 1; // including space for '/0'
+	case GL_SHORT:
+		return sizeof(GLshort);
+		break;
 
-	char* source = new char[size];
-	memset(source, 0, size);
-	filestream.read(reinterpret_cast<char*>(source), fileSize);
+	case GL_UNSIGNED_SHORT:
+		return sizeof(GLushort);
+		break;
 
-	std::string s = source;
-	delete[] source;
-	return s;
+	case GL_UNSIGNED_INT:
+		return sizeof(GLuint);
+		break;
+
+	case GL_FLOAT:
+		return sizeof(GLfloat);
+		break;
+
+	default:
+		return 0;
+	}
+}
+
+/*
+	Get the number of components of the OpenGL data type (i.e. data type size of vec3, mat4, etc)
+*/
+size_t kengine::getGLDataTypeSize(const std::string& type) {
+	if (!type.compare("SCALAR")) return 1;
+	if (!type.compare("VEC2")) return 2;
+	if (!type.compare("VEC3")) return 3;
+	if (!type.compare("VEC4")) return 4;
+	if (!type.compare("MAT2")) return 4;
+	if (!type.compare("MAT3")) return 9;
+	if (!type.compare("MAT4")) return 16;
+	return 0;
+}
+
+/*
+	This function compile a GLSL shader
+*/
+GLuint kengine::compileShader(GLuint shaderType, const std::string& filename)
+{
+	GLuint shaderObject = glCreateShader(shaderType);
+
+	if (!shaderObject) {
+		K_LOG_OUTPUT_RAW("It was not possible to create [" << getShaderType(shaderType) << "] shader!");
+		return 0;
+	}
+
+	std::string sourceString = readFromFile(filename);
+
+	if (sourceString[0] == '\0') {
+		K_LOG_OUTPUT_RAW("This file " << filename << " cannot be opened.");
+		glDeleteShader(shaderObject);
+		return 0;
+	}
+
+	const GLchar* source = sourceString.c_str();
+	glShaderSource(shaderObject, 1, &source, nullptr);
+
+	glCompileShader(shaderObject);
+
+	GLint status = 0;
+	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &status);
+
+	if (status == GL_FALSE) {
+		std::string log = "It was not possible to compile a shader [" + getShaderType(shaderType) + "]";
+
+		GLint logLength;
+		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
+
+		if (logLength > 0) {
+			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+			GLsizei logWrittenLength;
+			glGetShaderInfoLog(shaderObject, logLength, &logWrittenLength, &infoLog[0]);
+			log += ": " + infoLog;
+		}
+
+		glDeleteShader(shaderObject);
+		K_LOG_OUTPUT_RAW(log);
+		return 0;
+	}
+
+	return shaderObject;
+}
+
+/*
+	Helper function to compile SPIR-V shader
+*/
+GLuint kengine::compileSPIRVShader(GLuint shaderType, const std::string& name)
+{
+	GLuint shaderObject = glCreateShader(shaderType);
+
+	std::ifstream shaderBinary(name, std::ios::binary);
+	std::istreambuf_iterator<char> startIt(shaderBinary), endIt;
+	std::vector<char> buffer(startIt, endIt);
+	shaderBinary.close();
+
+	glShaderBinary(1, &shaderObject, GL_SHADER_BINARY_FORMAT_SPIR_V, buffer.data(), static_cast<GLsizei>(buffer.size()));
+	glSpecializeShader(shaderObject, "main", 0, 0, 0);
+
+	GLint status;
+	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &status);
+
+	if (status == GL_FALSE) {
+		std::string log = "It was not possible to compile a SPIRV shader";
+
+		GLint logLength;
+		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
+
+		if (logLength > 0) {
+			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+			GLsizei logWrittenLength;
+			glGetProgramInfoLog(shaderObject, logLength, &logWrittenLength, &infoLog[0]);
+			log += ": " + infoLog;
+		}
+
+		glDeleteShader(shaderObject);
+		K_LOG_OUTPUT_RAW(log);
+		return 0;
+	}
+
+	return shaderObject;
+}
+
+/*
+	kengine::GLSLprogram class - member class definition
+*/
+
+kengine::GLSLprogram::~GLSLprogram()
+{
+	if (glDeleteProgram)
+		clear();
+}
+
+bool kengine::GLSLprogram::loadShaders(const ShaderInfo* shaderInfo)
+{
+	bool ret = false;
+
+	if (shaderInfo) {
+		if (m_programHandle) {
+			clear();
+		}
+
+		// OpenGL rendering pipeline has six stages
+		GLuint shaders[6] = { 0 };
+
+		for (int index = 0; shaderInfo[index].type != GL_NONE && index < 6; index++) {
+			shaders[index] = compileShader(shaderInfo[index].type, shaderInfo[index].filename);
+		}
+
+		m_programHandle = glCreateProgram();
+
+		if (m_programHandle) {
+			for (int index = 0; index < 6; index++) {
+				if (shaders[index])
+					glAttachShader(m_programHandle, shaders[index]);
+			}
+
+			glLinkProgram(m_programHandle);
+
+			GLint status;
+			glGetProgramiv(m_programHandle, GL_LINK_STATUS, &status);
+
+			if (status == GL_TRUE) {
+				/*
+					(!) only in OpenGL 4.3 version - need to implement alternative version for previous versions
+				*/
+
+				// query the location of a uniform variable
+				GLint numUniforms = 0;
+				glGetProgramInterfaceiv(m_programHandle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+				GLenum properties[] = { GL_NAME_LENGTH, GL_LOCATION };
+
+				for (GLint i = 0; i < numUniforms; i++) {
+					GLint results[2];
+					glGetProgramResourceiv(m_programHandle, GL_UNIFORM, static_cast<GLuint>(i), 2, properties, 2, nullptr, results);
+					GLint nameBufferSize = results[0] + 1;
+					char* name = new char[static_cast<size_t>(nameBufferSize)];
+					glGetProgramResourceName(m_programHandle, GL_UNIFORM, static_cast<GLuint>(i), nameBufferSize, nullptr, name);
+					m_uniformMap[name] = results[1];
+					delete[] name;
+				}
+
+				ret = true;
+
+			} else {
+				std::string log = "It was not possible to link a shader program";
+
+				GLint logLength;
+				glGetProgramiv(m_programHandle, GL_INFO_LOG_LENGTH, &logLength);
+
+				if (logLength > 0) {
+					std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+					GLsizei logWrittenLength;
+					glGetProgramInfoLog(m_programHandle, logLength, &logWrittenLength, &infoLog[0]);
+					log += ": " + infoLog;
+				}
+
+				K_LOG_OUTPUT_RAW(log);
+			}
+		}
+		else
+			K_LOG_OUTPUT_RAW("It was not possible to create a shader program!");
+
+		// clean up shader objects
+		for (int index = 0; index < 6; index++) {
+			if (shaders[index]) {
+				glDetachShader(m_programHandle, shaders[index]);
+				glDeleteShader(shaders[index]);
+			}
+		}
+	}
+
+	return ret;
+}
+
+void kengine::GLSLprogram::useProgram()
+{
+	glUseProgram(m_programHandle);
+}
+
+void kengine::GLSLprogram::clear()
+{
+	glDeleteProgram(m_programHandle);
+	m_programHandle = 0;
+	m_uniformMap.clear();
+}
+
+/*
+	shader program binary is supported only in 4.1 version (and Apple has deprecated OpenGL)
+*/
+void kengine::GLSLprogram::saveBinary(const std::string& filename)
+{
+	if (m_programHandle == 0)
+		return;
+
+	GLint formats = 0;
+	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
+
+	if (formats < 1) {
+		K_LOG_OUTPUT_RAW("Driver does not support any binary formats.");
+		return;
+	}
+
+	GLint length = 0;
+	glGetProgramiv(m_programHandle, GL_PROGRAM_BINARY_LENGTH, &length);
+
+	std::vector<GLubyte> buffer(static_cast<size_t>(length));
+
+	GLenum binaryFormat;
+	glGetProgramBinary(m_programHandle, length, nullptr, &binaryFormat, buffer.data());
+
+	std::ofstream shaderBinary(filename.c_str(), std::ios::binary);
+	shaderBinary.write(reinterpret_cast<char*>(&binaryFormat), sizeof(GLenum));
+	shaderBinary.write(reinterpret_cast<char*>(buffer.data()), length);
+	shaderBinary.close();
+}
+
+/*
+	shader program binary is supported only in 4.1 version (and Apple has deprecated OpenGL)
+*/
+void kengine::GLSLprogram::loadBinary(const std::string& filename)
+{
+	GLint formats = 0;
+	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
+
+	if (formats < 1) {
+		K_LOG_OUTPUT_RAW("Driver does not support any binary formats.");
+		return;
+	}
+
+	if (m_programHandle) {
+		clear();
+	}
+
+	m_programHandle = glCreateProgram();
+
+	std::ifstream shaderBinary(filename, std::ios::binary);
+
+	if (!shaderBinary) {
+		K_LOG_OUTPUT_RAW("Error to load a binary program: " << filename);
+		return;
+	}
+
+	shaderBinary.seekg(0, std::ios::end);
+	std::streamoff fileSize = shaderBinary.tellg();
+	shaderBinary.seekg(0, std::ios::beg);
+	size_t size = static_cast<size_t>(fileSize) - sizeof(GLenum);
+
+	GLenum binaryFormat;
+	shaderBinary.read(reinterpret_cast<char*>(&binaryFormat), sizeof(GLenum));
+
+	std::vector<char> buffer(size);
+	shaderBinary.read(buffer.data(), static_cast<std::streamsize>(size));
+	shaderBinary.close();
+
+	glProgramBinary(m_programHandle, binaryFormat, buffer.data(), static_cast<GLsizei>(buffer.size()));
+
+	GLint status;
+	glGetProgramiv(m_programHandle, GL_LINK_STATUS, &status);
+
+	if (status == GL_FALSE) {
+		std::string log = "It was not possible to link a binary shader program";
+
+		GLint logLength;
+		glGetProgramiv(m_programHandle, GL_INFO_LOG_LENGTH, &logLength);
+
+		if (logLength > 0) {
+			std::string infoLog(static_cast<unsigned int>(logLength), ' ');
+			GLsizei logWrittenLength;
+			glGetProgramInfoLog(m_programHandle, logLength, &logWrittenLength, &infoLog[0]);
+			log += ": " + infoLog;
+		}
+
+		K_LOG_OUTPUT_RAW(log);
+	}
+}
+
+/*
+*/
+void kengine::GLSLprogram::setUniform(const std::string& name, bool transpose, GLfloat* value)
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat*): " << name);
+		return;
+	}
+
+	glUniformMatrix4fv(it->second, 1, transpose, value);
+}
+
+void kengine::GLSLprogram::setUniform(const std::string& name, GLfloat value)
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat): " << name);
+		return;
+	}
+
+	glUniform1f(it->second, value);	
+}
+
+void kengine::GLSLprogram::print() const
+{
+	K_LOG_OUTPUT_RAW("> kengine::GLSLprogram object info [" << this << "]\n");
+	
+	// (!) only in OpenGL 4.3 version
+	GLint numAttribs = 0;
+	glGetProgramInterfaceiv(m_programHandle, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
+	
+	if (numAttribs > 0) {
+		K_LOG_OUTPUT_RAW("  active attribute variables:\n");
+
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
+
+		for (auto i = 0; i < numAttribs; i++) {
+			GLint results[3];
+			glGetProgramResourceiv(m_programHandle, GL_PROGRAM_INPUT, static_cast<GLuint>(i), 3, properties, 3, nullptr, results);
+			GLint nameBufferSize = results[0] + 1;
+			char* name = new char[static_cast<size_t>(nameBufferSize)];
+			glGetProgramResourceName(m_programHandle, GL_PROGRAM_INPUT, static_cast<GLuint>(i), nameBufferSize, nullptr, name);
+			K_LOG_OUTPUT_RAW("	- name: " << name << "\n" << "	- type: " << getGLSLType(results[1]) << "\n" << "	- location: " << results[2] << "\n");
+			delete[] name;
+		}
+	}
+	
+	GLint numUniforms = 0;
+	glGetProgramInterfaceiv(m_programHandle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+
+	if (numUniforms > 0) {
+		K_LOG_OUTPUT_RAW("\n  active uniform variables:\n");
+		
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
+
+		for (auto i = 0; i < numUniforms; i++) {
+			GLint results[4];
+			glGetProgramResourceiv(m_programHandle, GL_UNIFORM, static_cast<GLuint>(i), 4, properties, 4, nullptr, results);
+
+			GLsizei nameBuffSize = results[0] + 1;
+			char* name = new char[static_cast<size_t>(nameBuffSize)];
+
+			glGetProgramResourceName(m_programHandle, GL_UNIFORM, static_cast<GLuint>(i), nameBuffSize, nullptr, name);
+
+			K_LOG_OUTPUT_RAW(
+				"	- name: " << name << "\n" <<
+				"	- type: " << getGLSLType(results[1]) << "\n" <<
+				"	- location: " << results[2] << "\n" <<
+				"	- block index : " << results[3] << "\n");
+
+			delete[] name;
+		}
+
+		K_LOG_OUTPUT_RAW("\n");
+	}
+}
+
+
+/*
+	kengine::uniform_buffer_object class - member class definition
+*/
+
+void kengine::uniform_buffer_object::load(GLuint program, const std::string& name, const std::vector<ubo_var>& uboVars)
+{
+	if (!m_ubo)
+		clear();
+
+	GLuint blockIndex = glGetUniformBlockIndex(program, name.c_str());
+
+	if (blockIndex == GL_INVALID_INDEX) {
+		K_LOG_OUTPUT_RAW("Failed to get block index for " + name);
+		return;
+	}
+
+	GLint blockSize = 0;
+	glGetActiveUniformBlockiv(program, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+
+	if (blockSize > 0) {
+		GLubyte* blockBuffer = new GLubyte[static_cast<size_t>(blockSize)];
+
+		std::vector<const GLchar*> names;
+		for (auto& var : uboVars) {
+			names.push_back(var.name.c_str());
+		}
+
+		std::vector<GLuint> indices(uboVars.size(), -1);
+		glGetUniformIndices(program, uboVars.size(), names.data(), indices.data());
+
+		std::vector<GLint> offset(uboVars.size(), 0);
+		glGetActiveUniformsiv(program, 4, indices.data(), GL_UNIFORM_OFFSET, offset.data());
+
+		for(size_t index = 0; index < uboVars.size(); index++) {
+			memcpy(blockBuffer + offset[index], uboVars[index].data.data(), uboVars[index].data.size() * sizeof(GLfloat));
+		}
+
+		glGenBuffers(1, &m_ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
+		glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_ubo);
+		delete[] blockBuffer;
+	}
+}
+
+void kengine::uniform_buffer_object::update()
+{
+	//glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
+	//float* data = (float*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	//glUnmapBuffer(GL_UNIFORM_BUFFER);
+}
+
+void kengine::uniform_buffer_object::clear()
+{
+	glDeleteBuffers(1, &m_ubo);
+	m_ubo = 0;
+}
+
+/*
+	kengine::vattrib class - member class definition
+*/
+
+kengine::vattrib::vattrib(const unsigned char* array, size_t arraySize, size_t count, size_t type, GLenum target)
+{
+	assert("kengine::vattrib constructor | array parameter is nullptr" && array != nullptr);
+
+	if (arraySize > 0) {
+		m_arraySize = arraySize;
+		m_count = count;
+		m_type = type;
+		m_attributeArray = new unsigned char[m_arraySize];
+		m_target = target;
+
+		for (size_t i = 0; i < m_arraySize; i++) {
+			m_attributeArray[i] = array[i];
+		}
+	}
+}
+
+// copy constructor
+kengine::vattrib::vattrib(const vattrib& va)
+{
+	if (va.m_arraySize) {
+		m_arraySize = va.m_arraySize;
+		m_count = va.m_count;
+		m_type = va.m_type;
+		m_target = va.m_target;
+
+		m_attributeArray = new unsigned char[m_arraySize];
+
+		for (size_t i = 0; i < va.m_arraySize; i++) {
+			m_attributeArray[i] = va.m_attributeArray[i];
+		}
+	}
+}
+
+// copy assignment = operator
+kengine::vattrib& kengine::vattrib::operator=(const vattrib& va)
+{
+	clear();
+
+	if (va.m_arraySize) {
+		m_arraySize = va.m_arraySize;
+		m_count = va.m_count;
+		m_type = va.m_type;
+		m_target = va.m_target;
+
+		m_attributeArray = new unsigned char[m_arraySize];
+
+		for (size_t i = 0; i < va.m_arraySize; i++) {
+			m_attributeArray[i] = va.m_attributeArray[i];
+		}
+	}
+
+	/* testar caso de copia invalida */
+	return *this;
+}
+
+// move constructor
+kengine::vattrib::vattrib(vattrib&& move) noexcept
+	: m_attributeArray{ move.m_attributeArray },
+	m_arraySize{ move.m_arraySize },
+	m_count{ move.m_count },
+	m_type{ move.m_type },
+	m_target { move.m_target }
+{
+	move.m_attributeArray = nullptr;
+	move.m_arraySize = 0;
+	move.m_count = 0;
+	move.m_type = 0;
+	move.m_target = 0;
+}
+
+// move assignment = operator
+kengine::vattrib& kengine::vattrib::operator=(vattrib&& move)
+{
+	clear();
+
+	m_attributeArray = std::move(move.m_attributeArray);
+	m_arraySize = std::move(move.m_arraySize);
+	m_count = std::move(move.m_count);
+	m_type = std::move(move.m_type);
+	m_target = std::move(move.m_target);
+
+	move.m_attributeArray = nullptr;
+	move.m_arraySize = 0;
+	move.m_count = 0;
+	move.m_type = 0;
+	move.m_target = 0;
+	return *this;
+}
+
+// == operator overload
+bool kengine::vattrib::operator==(const vattrib& op) const
+{
+	if (m_arraySize != op.m_arraySize || m_count != op.m_count || m_type != op.m_type || m_target != op.m_target)
+		return false;
+
+	for (size_t i = 0; i < m_arraySize; i++) {
+		if (m_attributeArray != op.m_attributeArray)
+			return false;
+	}
+
+	return true;
+}
+
+void kengine::vattrib::clear()
+{
+	delete[] m_attributeArray;
+	m_attributeArray = nullptr;
+	m_arraySize = 0;
+	m_count = 0;
+	m_type = 0;
+	m_target = 0;
+}
+
+void kengine::vattrib::dump()
+{
+	switch (m_type) {
+	case GL_FLOAT:
+		for (size_t i = 0; i < m_arraySize / sizeof(GLfloat); i++) {
+			GLfloat data;
+			std::memcpy(&data, m_attributeArray + i * sizeof(GLfloat), sizeof(GLfloat));
+			K_LOG_OUTPUT_RAW("m_attributeArray[ " << i << "]: " << data);
+		}
+		break;
+	}
+}
+
+/*
+	kengine::gpu_buffer class - class members definition
+*/
+
+kengine::gpu_buffer::gpu_buffer(size_t size)
+{
+	assert("kengine::gpu_buffer constructor | OpenGL context was not created!" && glGenBuffers != nullptr);
+
+	m_buffers.resize(size);
+	glGenBuffers(size, m_buffers.data());
+}
+
+kengine::gpu_buffer::~gpu_buffer()
+{
+	clear();
+}
+
+kengine::gpu_buffer::gpu_buffer(gpu_buffer&& move) noexcept
+{
+	m_buffers = std::move(move.m_buffers);
+	move.m_buffers.clear();
+}
+
+void kengine::gpu_buffer::addBuffers(size_t size)
+{
+	std::vector<GLuint> buffers(size);
+	glGenBuffers(size, buffers.data());
+	m_buffers.insert(m_buffers.end(), buffers.begin(), buffers.end());
+}
+
+void kengine::gpu_buffer::clear()
+{
+	if (m_buffers.size() > 0) {
+		glDeleteBuffers(m_buffers.size(), m_buffers.data());
+	}
+
+	m_buffers.clear();
+}
+
+void kengine::gpu_buffer::load(size_t index, const kengine::vattrib& va)
+{
+	assert("kengine::gpu_buffer load | invalid vector index" && index < m_buffers.size());
+
+	glBindBuffer(va.target(), m_buffers[index]);
+	glBufferData(va.target(), va.size(), va.data(), GL_STATIC_DRAW);
+}
+
+void kengine::gpu_buffer::load(size_t index, GLenum target, size_t size, const void* data)
+{
+	assert("kengine::gpu_buffer load | invalid vector index" && index < m_buffers.size());
+
+	glBindBuffer(target, m_buffers[index]);
+	glBufferData(target, size, data, GL_STATIC_DRAW);
+}
+
+
+void kengine::gpu_buffer::update(size_t index, GLenum target, size_t size, const void* data)
+{
+	glBindBuffer(target, m_buffers[index]);
+	void* buffer = glMapBuffer(target, GL_WRITE_ONLY);
+
+	if (buffer) {
+		std::memcpy(buffer, data, size);
+	}
+
+	glUnmapBuffer(target);
+}
+
+/*
+	kengine::primitive class - member class definition
+*/
+
+kengine::primitive_render::primitive_render()
+{
+	assert("kengine::primitive_render constructor | OpenGL context was not created!" && glGenVertexArrays != nullptr);
+	
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+}
+
+
+kengine::primitive_render::primitive_render(std::unique_ptr<gpu_buffer>& buffer)
+	: m_buffer{ std::move(buffer) }
+{
+	assert("kengine::primitive_render constructor | OpenGL context was not created!" && glGenVertexArrays != nullptr);
+
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+}
+
+kengine::primitive_render::~primitive_render()
+{
+	clear();
+}
+
+void kengine::primitive_render::loadAttributeInfo(GLuint location, GLuint vbo, GLenum target, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* offset)
+{
+	glBindVertexArray(m_vao);
+	glBindBuffer(target, vbo);
+	glEnableVertexAttribArray(location);
+	glVertexAttribPointer(location, size, type, normalized, stride, offset);
+}
+
+void kengine::primitive_render::loadAttributeInfo(GLuint location, GLuint vbo, const kengine::vattrib& va)
+{
+	GLuint buffer = vbo;
+
+	if (m_buffer)
+		buffer = (*m_buffer)[vbo];
+
+	loadAttributeInfo(location, buffer, va.target(), va.count(), va.type(), GL_FALSE, 0, nullptr);
+}
+
+void kengine::primitive_render::bindBuffer(GLuint vbo, const kengine::vattrib& va)
+{
+	GLuint buffer = vbo;
+
+	if (m_buffer)
+		buffer = (*m_buffer)[vbo];
+
+	glBindBuffer(va.target(), buffer);
+}
+
+void kengine::primitive_render::drawArrays(GLint start, GLsizei count)
+{
+	glBindVertexArray(m_vao);
+	glDrawArrays(m_mode, start, count);
+}
+
+void kengine::primitive_render::drawArraysInstanced(GLint start, GLsizei count, GLsizei instanceCount)
+{
+	glDrawArraysInstanced(m_mode, start, count, instanceCount);
+}
+
+void kengine::primitive_render::drawElements(GLsizei count, const void* offset)
+{
+	glBindVertexArray(m_vao);
+	glDrawElements(m_mode, count, GL_UNSIGNED_SHORT, offset);
+}
+
+void kengine::primitive_render::draw()
+{
+	glBindVertexArray(m_vao);
+
+	if (m_elements)
+		glDrawElements(m_mode, m_elements, GL_UNSIGNED_SHORT, (const GLvoid*)0);
+	else
+		glDrawArrays(m_mode, 0, m_count);
+}
+
+void kengine::primitive_render::drawInstanced(GLsizei instanceCount)
+{
+	glBindVertexArray(m_vao);
+
+	if (m_elements)
+		glDrawElementsInstanced(m_mode, m_elements, GL_UNSIGNED_SHORT, (const GLvoid*)0, instanceCount);
+	else
+		glDrawArraysInstanced(m_mode, 0, m_count, instanceCount);
+
+}
+
+void kengine::primitive_render::clear()
+{
+	glDeleteVertexArrays(1, &m_vao);
+	m_vao = 0;
+	m_count = 0;
+	m_elements = 0;
+	m_mode = GL_TRIANGLES;
+	m_buffer.reset();
+}
+
+
+/*
+	kengine::texture class - member definition
+*/
+
+kengine::texture::~texture()
+{
+	clear();
+}
+
+void kengine::texture::create(TEXTURE_TYPE target, GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+{
+	clear();
+
+	switch (target)
+	{
+	case TEXTURE_TYPE::_2D:
+		m_target = GL_TEXTURE_2D;
+		break;
+	}
+
+	glGenTextures(1, &m_name);
+	glBindTexture(m_target, m_name);
+
+	glTexImage2D(m_target, levels, internalFormat, width, height, 0, format, type, data); // OpenGL 2.0+
+
+	/*
+		MIPMAP -> high resoltion to smaller scale
+		- GL_NEAREST_MIPMAP_NEAREST
+	*/
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void kengine::texture::update(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+{
+	if (m_target == GL_TEXTURE_2D)
+		glTexSubImage2D(m_target, level, xoffset, yoffset, width, height, format, type, data);
+}
+
+void kengine::texture::bindTextureUnit(GLuint textureUnit)
+{
+	//glBindTextureUnit(textureUnit, m_name); // OpenGL 4.5+
+	glActiveTexture(GL_TEXTURE0 + textureUnit); // OpenGL 2.0+
+	glBindTexture(m_target, m_name);
+}
+
+void kengine::texture::bind()
+{
+	glBindTexture(m_target, m_name);
+}
+
+void kengine::texture::unbind()
+{
+	glBindTexture(m_target, 0);
+}
+
+void kengine::texture::clear()
+{
+	glDeleteTextures(1, &m_name);
+	m_name = 0;
+	m_target = 0;
 }
 
 /*
@@ -1130,4 +1658,287 @@ void kengine::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 
 	messageString += "\n\t- id: " + std::to_string(id);
 	std::cout << messageString << "\n\n\t" << message << "\n" << std::endl;
+}
+
+/*
+*/
+std::unique_ptr<kengine::primitive_render> kengine::point(GLfloat x, GLfloat y, GLfloat z, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat positions[] = {
+		x, y, z,
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 3 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(1);
+	vbo->load(0, vPositions);
+
+	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.count());
+	prim->setMode(GL_POINTS);
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::triangle(float size, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat half = size / 2.0f;
+
+	GLfloat positions[] = {
+		-half,  half, 0.0f,
+		-half, -half, 0.0f,
+		 half, -half, 0.0f
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 9 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat colors[] = {
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f
+	};
+
+	kengine::vattrib vColors(VATTRIB_CAST(colors), 12 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	// creating the vbo
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(2);
+	vbo->load(0, vPositions);
+	vbo->load(1, vColors);
+
+	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.count());
+
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::quad(float width, float height, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat halfX = width / 2.0f;
+	GLfloat halfY = height / 2.0f;
+
+	GLfloat positions[] = {
+		-halfX,  halfY, 0.0f,
+		-halfX, -halfY, 0.0f,
+		 halfX, -halfY, 0.0f,
+		 halfX,  halfY, 0.0f
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 12 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat textureCoordinates[] = {
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f
+	};
+
+	kengine::vattrib vTexCoordinates(VATTRIB_CAST(textureCoordinates), 8 * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLushort indices[] = {
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	kengine::vattrib vIndices(VATTRIB_CAST(indices), 6 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ELEMENT_ARRAY_BUFFER);
+
+	// creating the vbo
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(3);
+	vbo->load(0, vPositions);
+	vbo->load(1, vTexCoordinates);
+	vbo->load(2, vIndices);
+
+	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+
+	prim->loadAttributeInfo(shaderInfo["TEXTURE"], 1, vTexCoordinates);
+	prim->bindBuffer(2, vIndices);
+	prim->setElements(vIndices.getVertexCount());
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::cube(float size, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat half = size / 2.0f;
+
+	GLfloat positions[] = {
+		-half,  half,  half, // 0
+		-half, -half,  half, // 1
+		 half, -half,  half, // 2
+		 half,  half,  half, // 3
+		-half, -half, -half, // 4
+		-half,  half, -half, // 5
+		 half,  half, -half, // 6
+		 half, -half, -half  // 7
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 24 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat colors[] = {
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f
+	};
+
+	kengine::vattrib vColors(VATTRIB_CAST(colors), 32 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLushort indices[] = {
+		0, 1, 2, // front
+		0, 2, 3, // front
+		4, 5, 6, // back
+		4, 6, 7, // back
+		3, 2, 7, // right
+		3, 7, 6, // right
+		5, 4, 1, // left
+		5, 1, 0, // left
+		5, 0, 3, // top
+		5, 3, 6, // top
+		1, 4, 7, // bottom
+		1, 7, 2  // bottom
+	};
+
+	kengine::vattrib vIndices(VATTRIB_CAST(indices), 36 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ELEMENT_ARRAY_BUFFER);
+
+	// creating the vbo
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(3);
+	vbo->load(0, vPositions);
+	vbo->load(1, vColors);
+	vbo->load(2, vIndices);
+
+	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+	
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
+
+	prim->bindBuffer(2, vIndices);
+	prim->setElements(vIndices.getVertexCount());
+
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::grid3D(std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat positions[] = {
+		-5000.0f, 0.0f, 0.0f,
+		 5000.0f, 0.0f, 0.0f,
+		 0.0f, -5000.0f, 0.0f,
+		 0.0f, 5000.0f, 0.0f,
+		 0.0f, 0.0f, -5000.0f,
+		 0.0f, 0.0f, 5000.0f
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 18 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat gridColors[] = {
+		1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f
+	};
+
+	kengine::vattrib vColors(VATTRIB_CAST(gridColors), 24 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(2);
+	vbo->load(0, vPositions);
+	vbo->load(1, vColors);
+
+	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+	prim->setMode(GL_LINES);
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
+
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::frustum3D(const projection_info<float>& projInfo, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	GLfloat left = projInfo.left;
+	GLfloat right = projInfo.right;
+	GLfloat bottom = projInfo.bottom;
+	GLfloat top = projInfo.top;
+	GLfloat zNear = projInfo.zNear;
+	GLfloat zFar = projInfo.zFar;
+	GLfloat scale = projInfo.zFar / projInfo.zNear;
+	GLfloat leftFar = projInfo.left * scale;
+	GLfloat rightFar = projInfo.right * scale;
+	GLfloat topFar = projInfo.top * scale;
+	GLfloat bottomFar = projInfo.bottom * scale;
+
+	GLfloat positions[] = {
+		0.0f, 0.0f, 0.0f, // 0
+		left,  top,    -zNear, // 1
+		left,  bottom, -zNear, // 2
+		right, bottom, -zNear, // 3
+		right, top,    -zNear, // 4
+		leftFar,  topFar,    -zFar, // 5
+		leftFar,  bottomFar, -zFar, // 6
+		rightFar, bottomFar, -zFar, // 7
+		rightFar, topFar,    -zFar // 8
+	};
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 9 * 3 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat colors[] = {
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f,
+		0.6f, 0.8f, 1.0f, 1.0f
+	};
+
+	kengine::vattrib vColors(VATTRIB_CAST(colors), 9 * 4 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLushort indices[] = {
+		0, 5,
+		0, 6,
+		0, 7,
+		0, 8,
+		1, 2,
+		4, 3,
+		1, 4,
+		2, 3,
+		5, 6,
+		8, 7,
+		5, 8,
+		6, 7,
+
+		0, 1, 2, 3, 4, 5, 6, 7, 8
+	};
+
+	kengine::vattrib vIndices(VATTRIB_CAST(indices), 33 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ELEMENT_ARRAY_BUFFER);
+
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(3);
+	vbo->load(0, vPositions);
+	vbo->load(1, vColors);
+	vbo->load(2, vIndices);
+
+	std::unique_ptr<primitive_render> prim = std::make_unique<kengine::primitive_render>(vbo);
+
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
+
+	prim->bindBuffer(2, vIndices);
+	prim->setElements(vIndices.getVertexCount());
+
+	prim->setMode(GL_LINES);
+	return prim;
 }

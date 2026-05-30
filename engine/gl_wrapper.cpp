@@ -31,6 +31,7 @@
 #include <cstring>
 #include <sstream>
 #include <cassert>
+#include <iomanip>
 
 /*
 	OpenGL extension: GLSL shaders
@@ -55,6 +56,10 @@ PFNGLUSEPROGRAMPROC glUseProgram = 0;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = 0;
 PFNGLGETACTIVEUNIFORMPROC glGetActiveUniform = 0;
 PFNGLUNIFORM1FPROC glUniform1f = 0;
+PFNGLUNIFORM3FPROC glUniform3f = 0;
+PFNGLUNIFORM4FPROC glUniform4f = 0;
+PFNGLUNIFORM4FVPROC glUniform4fv = 0;
+PFNGLUNIFORM1IPROC glUniform1i = 0;
 PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv = 0;
 PFNGLBINDBUFFERBASEPROC glBindBufferBase = 0;
 PFNGLPROGRAMPARAMETERIPROC glProgramParameteri = 0;
@@ -123,8 +128,9 @@ PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
 PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays = 0;
 PFNGLBINDVERTEXARRAYPROC glBindVertexArray = 0;
-PFNGLBINDFRAGDATALOCATIONPROC glBindFragDataLocation;
+PFNGLBINDFRAGDATALOCATIONPROC glBindFragDataLocation = 0;
 PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer = 0;
+PFNGLPROVOKINGVERTEXPROC glProvokingVertex = 0;
 PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor = 0;
 PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer = 0;
 PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer = 0;
@@ -176,8 +182,6 @@ PFNGLDISABLEVERTEXARRAYATTRIBPROC glDisableVertexArrayAttrib = 0;
 PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat = 0;
 PFNGLVERTEXARRAYVERTEXBUFFERSPROC glVertexArrayVertexBuffers = 0;
 PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance = 0;
-PFNGLUNIFORM1IPROC glUniform1i = 0;
-PFNGLUNIFORM3FPROC glUniform3f = 0;
 PFNGLGETSTRINGIPROC glGetStringi = 0;
 PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex = 0;
 PFNGLTEXSTORAGE1DPROC glTexStorage1D = 0;
@@ -256,6 +260,18 @@ bool kengine::getGLProcedures()
 
 	glUniform1f = (PFNGLUNIFORM1FPROC)getGLFunctionAddress("glUniform1f");
 	if (glUniform1f == nullptr) return false;
+
+	glUniform3f = (PFNGLUNIFORM3FPROC)getGLFunctionAddress("glUniform3f");
+	if (glUniform3f == nullptr) return false;
+
+	glUniform4f = (PFNGLUNIFORM4FPROC)getGLFunctionAddress("glUniform4f");
+	if (glUniform4f == nullptr) return false;
+
+	glUniform4fv = (PFNGLUNIFORM4FVPROC)getGLFunctionAddress("glUniform4fv");
+	if (glUniform4fv == nullptr) return false;
+
+	glUniform1i = (PFNGLUNIFORM1IPROC)getGLFunctionAddress("glUniform1i");
+	if (glUniform1i == nullptr) return false;
 
 	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)getGLFunctionAddress("glUniformMatrix4fv");
 	if (glUniformMatrix4fv == nullptr) return false;
@@ -437,6 +453,9 @@ bool kengine::getGLProcedures()
 	glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)getGLFunctionAddress("glVertexAttribIPointer");
 	if (glVertexAttribIPointer == nullptr) return false;
 
+	glProvokingVertex = (PFNGLPROVOKINGVERTEXPROC)getGLFunctionAddress("glProvokingVertex");
+	if (glProvokingVertex == nullptr) return false;
+
 	glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLFunctionAddress("glVertexAttribDivisor");
 	if (glVertexAttribDivisor == nullptr) return false;
 
@@ -529,14 +548,8 @@ bool kengine::getGLProcedures()
 	glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)getGLFunctionAddress("glDrawArraysInstancedBaseInstance");
 	if (glDrawArraysInstancedBaseInstance == nullptr) return false;
 
-	glUniform1i = (PFNGLUNIFORM1IPROC)getGLFunctionAddress("glUniform1i");
-	if (glUniform1i == nullptr) return false;
-
-	glUniform3f = (PFNGLUNIFORM3FPROC)getGLFunctionAddress("glUniform3f");
-	if (glUniform3f == nullptr) return false;
-
 	glGetStringi = (PFNGLGETSTRINGIPROC)getGLFunctionAddress("glGetStringi");
-	if (glUniformMatrix4fv == nullptr) return false;
+	if (glGetStringi == nullptr) return false;
 
 	glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)getGLFunctionAddress("glPrimitiveRestartIndex");
 	glTexStorage1D = (PFNGLTEXSTORAGE1DPROC)getGLFunctionAddress("glTexStorage1D");
@@ -724,7 +737,7 @@ std::string kengine::getGLSLType(GLint type)
 	}
 }
 
-size_t kengine::getGLComponentTypeSize(GLenum type)
+size_t kengine::getGLTypeSize(GLenum type)
 {
 	switch (type)
 	{
@@ -760,7 +773,7 @@ size_t kengine::getGLComponentTypeSize(GLenum type)
 /*
 	Get the number of components of the OpenGL data type (i.e. data type size of vec3, mat4, etc)
 */
-size_t kengine::getGLDataTypeSize(const std::string& type) {
+size_t kengine::getGLTypeComponents(const std::string& type) {
 	if (!type.compare("SCALAR")) return 1;
 	if (!type.compare("VEC2")) return 2;
 	if (!type.compare("VEC3")) return 3;
@@ -785,7 +798,7 @@ GLuint kengine::compileShader(GLuint shaderType, const std::string& filename)
 
 	std::string sourceString = readFromFile(filename);
 
-	if (sourceString[0] == '\0') {
+	if (sourceString.empty()) {
 		K_LOG_OUTPUT_RAW("This file " << filename << " cannot be opened.");
 		glDeleteShader(shaderObject);
 		return 0;
@@ -1055,28 +1068,76 @@ void kengine::GLSLprogram::loadBinary(const std::string& filename)
 
 /*
 */
-void kengine::GLSLprogram::setUniform(const std::string& name, bool transpose, GLfloat* value)
+void kengine::GLSLprogram::setUniform(const std::string& name, bool transpose, GLfloat* value) const
 {
 	auto it = m_uniformMap.find(name);
 
 	if (it == m_uniformMap.end()) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat*): " << name);
+		K_LOG_OUTPUT_RAW("Failed to set glUniformMatrix4fv: " << name << " for [" << this << "]");
 		return;
 	}
 
 	glUniformMatrix4fv(it->second, 1, transpose, value);
 }
 
-void kengine::GLSLprogram::setUniform(const std::string& name, GLfloat value)
+void kengine::GLSLprogram::setUniform(const std::string& name, GLsizei count, bool transpose, void* data)
 {
 	auto it = m_uniformMap.find(name);
 
 	if (it == m_uniformMap.end()) {
-		K_LOG_OUTPUT_RAW("Failed to set uniform (GLfloat): " << name);
+		K_LOG_OUTPUT_RAW("Failed to set glUniformMatrix4fv: " << name << " for [" << this << "]");
+		return;
+	}
+
+	glUniformMatrix4fv(it->second, count, transpose, reinterpret_cast<GLfloat*>(data));
+}
+
+void kengine::GLSLprogram::setUniform(const std::string& name, GLfloat value) const
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set glUniform1f: " << name << " for [" << this << "]");
 		return;
 	}
 
 	glUniform1f(it->second, value);	
+}
+
+void kengine::GLSLprogram::setUniform(const std::string& name, GLfloat x, GLfloat y, GLfloat z) const
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set glUniform3f: " << name << " for [" << this << "]");
+		return;
+	}
+
+	glUniform3f(it->second, x, y, z);
+}
+
+void kengine::GLSLprogram::setUniform(const std::string& name, GLfloat x, GLfloat y, GLfloat z, GLfloat w) const
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set glUniform4f: " << name << " for [" << this << "]");
+		return;
+	}
+
+	glUniform4f(it->second, x, y, z, w);
+}
+
+void kengine::GLSLprogram::setUniform(const std::string& name, int value) const
+{
+	auto it = m_uniformMap.find(name);
+
+	if (it == m_uniformMap.end()) {
+		K_LOG_OUTPUT_RAW("Failed to set glUniform1i: " << name << " for [" << this << "]");
+		return;
+	}
+
+	glUniform1i(it->second, value);
 }
 
 void kengine::GLSLprogram::print() const
@@ -1140,7 +1201,7 @@ void kengine::GLSLprogram::print() const
 
 void kengine::uniform_buffer_object::load(GLuint program, const std::string& name, const std::vector<ubo_var>& uboVars)
 {
-	if (!m_ubo)
+	if (m_ubo)
 		clear();
 
 	GLuint blockIndex = glGetUniformBlockIndex(program, name.c_str());
@@ -1165,7 +1226,7 @@ void kengine::uniform_buffer_object::load(GLuint program, const std::string& nam
 		glGetUniformIndices(program, uboVars.size(), names.data(), indices.data());
 
 		std::vector<GLint> offset(uboVars.size(), 0);
-		glGetActiveUniformsiv(program, 4, indices.data(), GL_UNIFORM_OFFSET, offset.data());
+		glGetActiveUniformsiv(program, uboVars.size(), indices.data(), GL_UNIFORM_OFFSET, offset.data());
 
 		for(size_t index = 0; index < uboVars.size(); index++) {
 			memcpy(blockBuffer + offset[index], uboVars[index].data.data(), uboVars[index].data.size() * sizeof(GLfloat));
@@ -1293,7 +1354,7 @@ bool kengine::vattrib::operator==(const vattrib& op) const
 		return false;
 
 	for (size_t i = 0; i < m_arraySize; i++) {
-		if (m_attributeArray != op.m_attributeArray)
+		if (m_attributeArray[i] != op.m_attributeArray[i])
 			return false;
 	}
 
@@ -1378,17 +1439,17 @@ void kengine::gpu_buffer::load(size_t index, GLenum target, size_t size, const v
 	glBufferData(target, size, data, GL_STATIC_DRAW);
 }
 
-
 void kengine::gpu_buffer::update(size_t index, GLenum target, size_t size, const void* data)
 {
+	assert("kengine::gpu_buffer update | invalid vector index" && index < m_buffers.size());
+
 	glBindBuffer(target, m_buffers[index]);
 	void* buffer = glMapBuffer(target, GL_WRITE_ONLY);
 
 	if (buffer) {
 		std::memcpy(buffer, data, size);
+		glUnmapBuffer(target);
 	}
-
-	glUnmapBuffer(target);
 }
 
 /*
@@ -1404,7 +1465,7 @@ kengine::primitive_render::primitive_render()
 }
 
 
-kengine::primitive_render::primitive_render(std::unique_ptr<gpu_buffer>& buffer)
+kengine::primitive_render::primitive_render(std::unique_ptr<gpu_buffer>&& buffer)
 	: m_buffer{ std::move(buffer) }
 {
 	assert("kengine::primitive_render constructor | OpenGL context was not created!" && glGenVertexArrays != nullptr);
@@ -1436,6 +1497,17 @@ void kengine::primitive_render::loadAttributeInfo(GLuint location, GLuint vbo, c
 	loadAttributeInfo(location, buffer, va.target(), va.count(), va.type(), GL_FALSE, 0, nullptr);
 }
 
+void kengine::primitive_render::bindBuffer(GLenum target, GLuint vbo)
+{
+	GLuint buffer = vbo;
+
+	if (m_buffer)
+		buffer = (*m_buffer)[vbo];
+
+	glBindVertexArray(m_vao);
+	glBindBuffer(target, buffer);
+}
+
 void kengine::primitive_render::bindBuffer(GLuint vbo, const kengine::vattrib& va)
 {
 	GLuint buffer = vbo;
@@ -1443,6 +1515,7 @@ void kengine::primitive_render::bindBuffer(GLuint vbo, const kengine::vattrib& v
 	if (m_buffer)
 		buffer = (*m_buffer)[vbo];
 
+	glBindVertexArray(m_vao);
 	glBindBuffer(va.target(), buffer);
 }
 
@@ -1454,13 +1527,14 @@ void kengine::primitive_render::drawArrays(GLint start, GLsizei count)
 
 void kengine::primitive_render::drawArraysInstanced(GLint start, GLsizei count, GLsizei instanceCount)
 {
+	glBindVertexArray(m_vao);
 	glDrawArraysInstanced(m_mode, start, count, instanceCount);
 }
 
 void kengine::primitive_render::drawElements(GLsizei count, const void* offset)
 {
 	glBindVertexArray(m_vao);
-	glDrawElements(m_mode, count, GL_UNSIGNED_SHORT, offset);
+	glDrawElements(m_mode, count, m_indexType, offset);
 }
 
 void kengine::primitive_render::draw()
@@ -1468,7 +1542,7 @@ void kengine::primitive_render::draw()
 	glBindVertexArray(m_vao);
 
 	if (m_elements)
-		glDrawElements(m_mode, m_elements, GL_UNSIGNED_SHORT, (const GLvoid*)0);
+		glDrawElements(m_mode, m_elements, m_indexType, (const GLvoid*)m_elementsOffset);
 	else
 		glDrawArrays(m_mode, 0, m_count);
 }
@@ -1478,7 +1552,7 @@ void kengine::primitive_render::drawInstanced(GLsizei instanceCount)
 	glBindVertexArray(m_vao);
 
 	if (m_elements)
-		glDrawElementsInstanced(m_mode, m_elements, GL_UNSIGNED_SHORT, (const GLvoid*)0, instanceCount);
+		glDrawElementsInstanced(m_mode, m_elements, m_indexType, (const GLvoid*)m_elementsOffset, instanceCount);
 	else
 		glDrawArraysInstanced(m_mode, 0, m_count, instanceCount);
 
@@ -1491,6 +1565,7 @@ void kengine::primitive_render::clear()
 	m_count = 0;
 	m_elements = 0;
 	m_mode = GL_TRIANGLES;
+	m_indexType = GL_UNSIGNED_SHORT;
 	m_buffer.reset();
 }
 
@@ -1554,6 +1629,13 @@ void kengine::texture::bind()
 void kengine::texture::unbind()
 {
 	glBindTexture(m_target, 0);
+}
+
+void kengine::texture::setWrappingMode(GLint sParam, GLint tParam)
+{
+	glBindTexture(m_target, m_name);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sParam);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tParam);
 }
 
 void kengine::texture::clear()
@@ -1662,24 +1744,6 @@ void kengine::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 
 /*
 */
-std::unique_ptr<kengine::primitive_render> kengine::point(GLfloat x, GLfloat y, GLfloat z, std::unordered_map<std::string, GLuint>& shaderInfo)
-{
-	GLfloat positions[] = {
-		x, y, z,
-	};
-
-	kengine::vattrib vPositions(VATTRIB_CAST(positions), 3 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
-
-	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(1);
-	vbo->load(0, vPositions);
-
-	auto prim = std::make_unique<kengine::primitive_render>(vbo);
-	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
-	prim->setCount(vPositions.count());
-	prim->setMode(GL_POINTS);
-	return prim;
-}
-
 std::unique_ptr<kengine::primitive_render> kengine::triangle(float size, std::unordered_map<std::string, GLuint>& shaderInfo)
 {
 	GLfloat half = size / 2.0f;
@@ -1692,6 +1756,22 @@ std::unique_ptr<kengine::primitive_render> kengine::triangle(float size, std::un
 
 	kengine::vattrib vPositions(VATTRIB_CAST(positions), 9 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
 
+	GLfloat textureCoordinates[] = {
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+	};
+
+	kengine::vattrib vTextureCoordinates(VATTRIB_CAST(textureCoordinates), 6 * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat normals[] = {
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+	};
+
+	kengine::vattrib vNormals(VATTRIB_CAST(normals), 9 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
 	GLfloat colors[] = {
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
@@ -1701,15 +1781,26 @@ std::unique_ptr<kengine::primitive_render> kengine::triangle(float size, std::un
 	kengine::vattrib vColors(VATTRIB_CAST(colors), 12 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
 
 	// creating the vbo
-	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(2);
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(4);
 	vbo->load(0, vPositions);
-	vbo->load(1, vColors);
+	vbo->load(1, vTextureCoordinates);
+	vbo->load(2, vNormals);
+	vbo->load(3, vColors);
 
-	auto prim = std::make_unique<kengine::primitive_render>(vbo);
-	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("POSITION"), 0, vPositions);
 	prim->setCount(vPositions.count());
 
-	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
+	assert(!(shaderInfo.find("TEXCOORD_0") == shaderInfo.end()) && "shaderInfor key [TEXCOORD_0] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("TEXCOORD_0"), 1, vTextureCoordinates);
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("NORMAL"), 2, vNormals);
+
+	assert(!(shaderInfo.find("COLOR") == shaderInfo.end()) && "shaderInfor key [COLOR] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("COLOR"), 3, vColors);
+
 	return prim;
 }
 
@@ -1736,26 +1827,59 @@ std::unique_ptr<kengine::primitive_render> kengine::quad(float width, float heig
 
 	kengine::vattrib vTexCoordinates(VATTRIB_CAST(textureCoordinates), 8 * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
 
+	GLfloat normals[] = {
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+	};
+
+	kengine::vattrib vNormals(VATTRIB_CAST(normals), 12 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat colors[] = {
+		1.0f, 0.0, 0.0, 1.0f,
+		0.0f, 1.0, 0.0, 1.0f,
+		0.0f, 0.0, 1.0, 1.0f,
+		1.0f, 1.0, 0.0, 1.0f,
+	};
+
+	kengine::vattrib vColors(VATTRIB_CAST(colors), 16 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
 	GLushort indices[] = {
 		0, 1, 2,
 		0, 2, 3
 	};
 
-	kengine::vattrib vIndices(VATTRIB_CAST(indices), 6 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ELEMENT_ARRAY_BUFFER);
+	kengine::vattrib vIndices(VATTRIB_CAST(indices), 6 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ARRAY_BUFFER);
 
 	// creating the vbo
-	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(3);
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(5);
 	vbo->load(0, vPositions);
 	vbo->load(1, vTexCoordinates);
-	vbo->load(2, vIndices);
+	vbo->load(2, vNormals);
+	vbo->load(3, vColors);
+	vbo->load(4, vIndices);
 
-	auto prim = std::make_unique<kengine::primitive_render>(vbo);
-	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
+	
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("POSITION"), 0, vPositions);
 	prim->setCount(vPositions.getVertexCount());
 
-	prim->loadAttributeInfo(shaderInfo["TEXTURE"], 1, vTexCoordinates);
-	prim->bindBuffer(2, vIndices);
+	// TEXCOORD_0 is the default name in GLTF files
+	assert(!(shaderInfo.find("TEXCOORD_0") == shaderInfo.end()) && "shaderInfor key [TEXCOORD_0] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("TEXCOORD_0"), 1, vTexCoordinates);
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("NORMAL"), 2, vTexCoordinates);
+
+	assert(!(shaderInfo.find("COLOR") == shaderInfo.end()) && "shaderInfor key [COLOR] not found!");
+	prim->loadAttributeInfo(shaderInfo.at("COLOR"), 3, vTexCoordinates);
+
+	vIndices.setTarget(GL_ELEMENT_ARRAY_BUFFER);
+	prim->bindBuffer(4, vIndices);
 	prim->setElements(vIndices.getVertexCount());
+
 	return prim;
 }
 
@@ -1764,62 +1888,416 @@ std::unique_ptr<kengine::primitive_render> kengine::cube(float size, std::unorde
 	GLfloat half = size / 2.0f;
 
 	GLfloat positions[] = {
-		-half,  half,  half, // 0
-		-half, -half,  half, // 1
-		 half, -half,  half, // 2
-		 half,  half,  half, // 3
-		-half, -half, -half, // 4
-		-half,  half, -half, // 5
-		 half,  half, -half, // 6
-		 half, -half, -half  // 7
+		-half,  half,  half, // front face - 0
+		-half, -half,  half, // front face - 1
+		 half, -half,  half, // front face - 2
+		 half,  half,  half, // front face - 3
+		-half, -half,  half, // down face - 4
+		-half, -half, -half, // down face - 5
+		 half, -half, -half, // down face - 6
+		 half, -half,  half, // down face - 7
+		-half, -half, -half, // back face - 8
+		-half,  half, -half, // back face - 9
+		 half,  half, -half, // back face - 10
+		 half, -half, -half, // back face - 11
+		-half,  half, -half, // top face - 12
+		-half,  half,  half, // top face - 13
+		 half,  half,  half, // top face - 14
+		 half,  half, -half, // top face - 15
+		 half,  half,  half, // right face - 16
+		 half, -half,  half, // right face - 17
+		 half, -half, -half, // right face - 18
+		 half,  half, -half,  // right face - 19
+		-half,  half, -half, // left face - 20
+		-half, -half, -half, // left face - 21
+		-half, -half,  half, // left face - 22
+		-half,  half,  half  // left face - 23
 	};
 
-	kengine::vattrib vPositions(VATTRIB_CAST(positions), 24 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vPositions(VATTRIB_CAST(positions), 24 * 3 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat textureCoordinates[] = {
+		0.0f, 1.0f, // front face
+		0.0f, 0.0f, // front face
+		1.0f, 0.0f, // front face
+		1.0f, 1.0f, // front face
+		0.0f, 1.0f, // down face
+		0.0f, 0.0f, // down face
+		1.0f, 0.0f, // down face
+		1.0f, 1.0f, // down face
+		0.0f, 1.0f, // back face
+		0.0f, 0.0f, // back face
+		1.0f, 0.0f, // back face
+		1.0f, 1.0f, // back face
+		0.0f, 1.0f, // top face
+		0.0f, 0.0f, // top face
+		1.0f, 0.0f, // top face
+		1.0f, 1.0f, // top face
+		0.0f, 1.0f, // right face
+		0.0f, 0.0f, // right face
+		1.0f, 0.0f, // right face
+		1.0f, 1.0f, // right face
+		0.0f, 1.0f, // left face
+		0.0f, 0.0f, // left face
+		1.0f, 0.0f, // left face
+		1.0f, 1.0f  // left face
+	};
+
+	kengine::vattrib vTextureCoordinates(VATTRIB_CAST(textureCoordinates), 24 * 2 * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	GLfloat normals[] = {
+		 0.0f,  0.0f,  1.0f, // front face
+		 0.0f,  0.0f,  1.0f, // front face
+		 0.0f,  0.0f,  1.0f, // front face
+		 0.0f,  0.0f,  1.0f, // front face
+		 0.0f, -1.0f,  0.0f, // down face
+		 0.0f, -1.0f,  0.0f, // down face
+		 0.0f, -1.0f,  0.0f, // down face
+		 0.0f, -1.0f,  0.0f, // down face
+		 0.0f,  0.0f, -1.0f, // back face
+		 0.0f,  0.0f, -1.0f, // back face
+		 0.0f,  0.0f, -1.0f, // back face
+		 0.0f,  0.0f, -1.0f, // back face
+		 0.0f,  1.0f,  0.0f, // top face
+		 0.0f,  1.0f,  0.0f, // top face
+		 0.0f,  1.0f,  0.0f, // top face
+		 0.0f,  1.0f,  0.0f, // top face
+		 1.0f,  0.0f,  0.0f, // right face
+		 1.0f,  0.0f,  0.0f, // right face
+		 1.0f,  0.0f,  0.0f, // right face
+		 1.0f,  0.0f,  0.0f, // right face
+		-1.0f,  0.0f, 0.0f, // left face
+		-1.0f,  0.0f, 0.0f, // left face
+		-1.0f,  0.0f, 0.0f, // left face
+		-1.0f,  0.0f, 0.0f  // left face
+	};
+
+	kengine::vattrib vNormals(VATTRIB_CAST(normals), 24 * 3 * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
 
 	GLfloat colors[] = {
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f
 	};
 
-	kengine::vattrib vColors(VATTRIB_CAST(colors), 32 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vColors(VATTRIB_CAST(colors), 24 * 4 * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
 
 	GLushort indices[] = {
-		0, 1, 2, // front
-		0, 2, 3, // front
-		4, 5, 6, // back
-		4, 6, 7, // back
-		3, 2, 7, // right
-		3, 7, 6, // right
-		5, 4, 1, // left
-		5, 1, 0, // left
-		5, 0, 3, // top
-		5, 3, 6, // top
-		1, 4, 7, // bottom
-		1, 7, 2  // bottom
+		 0,  1,  2,  0,  2,  3, // front
+		 4,  5,  6,  4,  6,  7, // bottom
+		 8,  9, 10,  8, 10, 11, // back
+		12, 13, 14, 12, 14, 15, // top
+		16, 17, 18, 16, 18, 19, // right
+		20, 21, 22, 20, 22, 23  // left
 	};
 
-	kengine::vattrib vIndices(VATTRIB_CAST(indices), 36 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ELEMENT_ARRAY_BUFFER);
+	kengine::vattrib vIndices(VATTRIB_CAST(indices), 6 * 6 * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ARRAY_BUFFER);
 
 	// creating the vbo
-	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(3);
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(5);
 	vbo->load(0, vPositions);
-	vbo->load(1, vColors);
-	vbo->load(2, vIndices);
+	vbo->load(1, vTextureCoordinates);
+	vbo->load(2, vNormals);
+	vbo->load(3, vColors);
+	vbo->load(4, vIndices);
 
-	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
 
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
 	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
 	prim->setCount(vPositions.getVertexCount());
-	
-	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
 
-	prim->bindBuffer(2, vIndices);
+	assert(!(shaderInfo.find("TEXCOORD_0") == shaderInfo.end()) && "shaderInfor key [TEXCOORD_0] not found!");
+	prim->loadAttributeInfo(shaderInfo["TEXCOORD_0"], 1, vTextureCoordinates);
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo["NORMAL"], 2, vNormals);
+
+	assert(!(shaderInfo.find("COLOR") == shaderInfo.end()) && "shaderInfor key [COLOR] not found!");
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 3, vColors);
+
+	vIndices.setTarget(GL_ELEMENT_ARRAY_BUFFER);
+	prim->bindBuffer(4, vIndices);
+	prim->setElements(vIndices.getVertexCount());
+
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::circle(float radius, size_t points, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	std::vector<GLfloat> positions;
+	std::vector<GLfloat> normals;
+
+	for (size_t i = 0; i < points; i++) {
+		GLfloat theta = 2.0f * M_PI * i / points;
+		GLfloat x = std::cos(theta);
+		GLfloat y = std::sin(theta);
+
+		positions.push_back(x * radius);
+		positions.push_back(y * radius);
+		positions.push_back(0.0f);
+
+		normals.push_back(0.0f);
+		normals.push_back(0.0f);
+		normals.push_back(1.0f);
+	}
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions.data()), positions.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vNormals(VATTRIB_CAST(normals.data()), normals.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(2);
+	vbo->load(0, vPositions);
+	vbo->load(1, vNormals);
+
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
+
+	prim->setMode(GL_LINE_LOOP);
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo["NORMAL"], 1, vNormals);
+
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::sphere(GLfloat radius, size_t slices, size_t points, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	std::vector<GLfloat> positions;
+	std::vector<GLfloat> textureCoordiantes;
+	std::vector<GLfloat> normals;
+	std::vector<GLfloat> colors;
+
+	for (size_t i = 0; i <= slices; i++) {
+		GLfloat theta = M_PI - (M_PI * i / slices);
+		GLfloat r = std::sin(theta);
+		GLfloat y = std::cos(theta);
+
+		for (size_t j = 0; j <= points; j++) {
+			GLfloat phi = 2.0f * M_PI * j / points;
+			GLfloat x = r * std::cos(phi);
+			GLfloat z = r * std::sin(phi);
+
+			positions.push_back(radius * x);
+			positions.push_back(radius * y);
+			positions.push_back(radius * z);
+
+			colors.push_back(0.1f);
+			colors.push_back(1.0f);
+			colors.push_back(0.1f);
+			colors.push_back(1.0f);
+
+			textureCoordiantes.push_back(static_cast<GLfloat>(j) / static_cast<GLfloat>(points));
+			textureCoordiantes.push_back(static_cast<GLfloat>(i) / static_cast<GLfloat>(slices));
+
+			normals.push_back(x);
+			normals.push_back(y);
+			normals.push_back(z);
+		}
+	}
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions.data()), positions.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vTextureCoordinates(VATTRIB_CAST(textureCoordiantes.data()), textureCoordiantes.size() * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vNormals(VATTRIB_CAST(normals.data()), normals.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vColors(VATTRIB_CAST(colors.data()), colors.size() * sizeof(GLfloat), 4, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	// calculating indices
+	std::vector<GLushort> indices;
+
+	for (int i = 0; i < slices; i++) {
+		for (int j = 0; j < points; j++) {
+			GLushort row = i * (points + 1);
+			GLushort next_row = (i + 1) * (points + 1);
+
+			// first triangle (CCW visto de fora)
+			indices.push_back(row + j);
+			indices.push_back(next_row + j);
+			indices.push_back(row + j + 1);
+			// second triangle
+			indices.push_back(row + j + 1);
+			indices.push_back(next_row + j);
+			indices.push_back(next_row + j + 1);
+		}
+	}
+
+	kengine::vattrib vIndices(VATTRIB_CAST(indices.data()), indices.size() * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ARRAY_BUFFER);
+
+	// creating the vbo
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(5);
+	vbo->load(0, vPositions);
+	vbo->load(1, vTextureCoordinates);
+	vbo->load(2, vNormals);
+	vbo->load(3, vColors);
+	vbo->load(4, vIndices);
+
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
+
+	prim->setMode(GL_TRIANGLES);
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+
+	assert(!(shaderInfo.find("TEXCOORD_0") == shaderInfo.end()) && "shaderInfor key [TEXCOORD_0] not found!");
+	prim->loadAttributeInfo(shaderInfo["TEXCOORD_0"], 1, vTextureCoordinates);
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo["NORMAL"], 2, vNormals);
+
+	assert(!(shaderInfo.find("COLOR") == shaderInfo.end()) && "shaderInfor key [COLOR] not found!");
+	prim->loadAttributeInfo(shaderInfo["COLOR"], 3, vColors);
+
+	vIndices.setTarget(GL_ELEMENT_ARRAY_BUFFER);
+	prim->bindBuffer(4, vIndices);
+	prim->setElements(vIndices.getVertexCount());
+
+	return prim;
+}
+
+std::unique_ptr<kengine::primitive_render> kengine::torus(size_t precision, GLfloat inner, GLfloat outer, std::unordered_map<std::string, GLuint>& shaderInfo)
+{
+	std::vector<GLfloat> positions;
+	std::vector<GLfloat> textureCoordiantes;
+	std::vector<GLfloat> tTangents;
+	std::vector<GLfloat> sTangents;
+	std::vector<GLfloat> normals;
+
+	for (size_t i = 0; i < precision + 1; i++) {
+		GLfloat angle = i * 360.0f / static_cast<GLfloat>(precision);
+		kengine::matrix<GLfloat> r = kengine::rotate(0.0f, 0.0f, angle);
+
+		kengine::vec3<GLfloat> startPos = r * kengine::vec3<GLfloat>(0.0f, outer, 0.0f);
+		kengine::vec3<GLfloat> vertex(startPos + kengine::vec3<GLfloat>(inner, 0.0f, 0.0f));
+
+		positions.push_back(vertex.x);
+		positions.push_back(vertex.y);
+		positions.push_back(vertex.z);
+
+		textureCoordiantes.push_back(0.0f);
+		textureCoordiantes.push_back(static_cast<GLfloat>(i) / static_cast<GLfloat>(precision));
+
+		r = kengine::rotate(0.0f, 0.0f, angle + 90.0f);
+
+		kengine::vec3<GLfloat> t = r * kengine::vec3<GLfloat>(0.0f, -1.0f, 0.0f);
+		tTangents.push_back(t.x);
+		tTangents.push_back(t.y);
+		tTangents.push_back(t.z);
+
+		kengine::vec3<GLfloat> s = kengine::vec3<GLfloat>(0.0f, 0.0f, -1.0f);
+		sTangents.push_back(s.x);
+		sTangents.push_back(s.y);
+		sTangents.push_back(s.z);
+
+		kengine::vec3<GLfloat> n = kengine::crossProduct(t, s);
+		normals.push_back(n.x);
+		normals.push_back(n.y);
+		normals.push_back(n.z);
+	}
+
+	// rotate the first ring about Y to get the other rings
+	for (size_t ring = 1; ring < precision + 1; ring++) {
+		for (size_t vert = 0; vert < precision + 1; vert++) {
+			GLfloat angle = static_cast<GLfloat>(ring * 360.0f / static_cast<GLfloat>(precision));
+			kengine::matrix<GLfloat> r = kengine::rotate(0.0f, angle, 0.0f);
+
+			kengine::vec3<GLfloat> vertex = r * vec3<GLfloat>(positions[vert * 3], positions[vert * 3 + 1], positions[vert * 3 + 2]);
+
+			positions.push_back(vertex.x);
+			positions.push_back(vertex.y);
+			positions.push_back(vertex.z);
+
+			float u = static_cast<GLfloat>(ring) * 2.0f / static_cast<GLfloat>(precision);
+			float v = textureCoordiantes[vert * 2 + 1];
+
+			textureCoordiantes.push_back(u);
+			textureCoordiantes.push_back(v);
+
+			r = kengine::rotate(0.0f, angle, 0.0f);
+			kengine::vec3<GLfloat> sTangent = r * kengine::vec3<GLfloat>(sTangents[vert * 3], sTangents[vert * 3 + 1], sTangents[vert * 3 + 2]);
+			sTangents.push_back(sTangent.x);
+			sTangents.push_back(sTangent.y);
+			sTangents.push_back(sTangent.z);
+
+			kengine::vec3<GLfloat> tTangent = r * kengine::vec3<GLfloat>(tTangents[vert * 3], tTangents[vert * 3 + 1], tTangents[vert * 3 + 2]);
+			tTangents.push_back(tTangent.x);
+			tTangents.push_back(tTangent.y);
+			tTangents.push_back(tTangent.z);
+
+			kengine::vec3<GLfloat> n = r * kengine::vec3<GLfloat>(normals[vert * 3], normals[vert * 3 + 1], normals[vert * 3 + 2]);
+			normals.push_back(n.x);
+			normals.push_back(n.y);
+			normals.push_back(n.z);
+		}
+	}
+
+	kengine::vattrib vPositions(VATTRIB_CAST(positions.data()), positions.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vTextureCoordinates(VATTRIB_CAST(textureCoordiantes.data()), textureCoordiantes.size() * sizeof(GLfloat), 2, GL_FLOAT, GL_ARRAY_BUFFER);
+	kengine::vattrib vNormals(VATTRIB_CAST(normals.data()), normals.size() * sizeof(GLfloat), 3, GL_FLOAT, GL_ARRAY_BUFFER);
+
+	// calculating indices
+	std::vector<GLushort> indices;
+
+	for (int ring = 0; ring < precision; ring++) {
+		for (int vert = 0; vert < precision; vert++) {
+
+			GLushort row = ring * (precision + 1);
+			GLushort next_row = (ring + 1) * (precision + 1);
+
+			// first triangle (CCW visto de fora)
+			indices.push_back(row + vert);
+			indices.push_back(next_row + vert);
+			indices.push_back(row + vert + 1);
+			// second triangle
+			indices.push_back(row + vert + 1);
+			indices.push_back(next_row + vert);
+			indices.push_back(next_row + vert + 1);
+		}
+	}
+
+	kengine::vattrib vIndices(VATTRIB_CAST(indices.data()), indices.size() * sizeof(GLushort), 1, GL_UNSIGNED_SHORT, GL_ARRAY_BUFFER);
+
+	std::unique_ptr<kengine::gpu_buffer> vbo = std::make_unique<kengine::gpu_buffer>(4);
+	vbo->load(0, vPositions);
+	vbo->load(1, vTextureCoordinates);
+	vbo->load(2, vNormals);
+	vbo->load(3, vIndices);
+
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
+
+	prim->setMode(GL_TRIANGLES);
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
+	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
+	prim->setCount(vPositions.getVertexCount());
+
+	assert(!(shaderInfo.find("TEXCOORD_0") == shaderInfo.end()) && "shaderInfor key [TEXCOORD_0] not found!");
+	prim->loadAttributeInfo(shaderInfo["TEXCOORD_0"], 1, vTextureCoordinates);
+
+	assert(!(shaderInfo.find("NORMAL") == shaderInfo.end()) && "shaderInfor key [NORMAL] not found!");
+	prim->loadAttributeInfo(shaderInfo["NORMAL"], 2, vNormals);
+
+	vIndices.setTarget(GL_ELEMENT_ARRAY_BUFFER);
+	prim->bindBuffer(3, vIndices);
 	prim->setElements(vIndices.getVertexCount());
 
 	return prim;
@@ -1853,11 +2331,13 @@ std::unique_ptr<kengine::primitive_render> kengine::grid3D(std::unordered_map<st
 	vbo->load(0, vPositions);
 	vbo->load(1, vColors);
 
-	auto prim = std::make_unique<kengine::primitive_render>(vbo);
+	auto prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
 
+	assert(!(shaderInfo.find("POSITION") == shaderInfo.end()) && "shaderInfor key [POSITION] not found!");
 	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
 	prim->setCount(vPositions.getVertexCount());
 	prim->setMode(GL_LINES);
+	assert(!(shaderInfo.find("COLOR") == shaderInfo.end()) && "shaderInfor key [COLOR] not found!");
 	prim->loadAttributeInfo(shaderInfo["COLOR"], 1, vColors);
 
 	return prim;
@@ -1929,7 +2409,7 @@ std::unique_ptr<kengine::primitive_render> kengine::frustum3D(const projection_i
 	vbo->load(1, vColors);
 	vbo->load(2, vIndices);
 
-	std::unique_ptr<primitive_render> prim = std::make_unique<kengine::primitive_render>(vbo);
+	std::unique_ptr<primitive_render> prim = std::make_unique<kengine::primitive_render>(std::move(vbo));
 
 	prim->loadAttributeInfo(shaderInfo["POSITION"], 0, vPositions);
 	prim->setCount(vPositions.getVertexCount());

@@ -52,6 +52,7 @@ void kengine::core::startMainLoop()
 	mainLoopState = K_RUNTIME_STATE::RUNNING;
 
 	int64_t frameTime = 0;
+	m_frameTime = 0.0f;
 	//int64_t frequency = getHighResolutionTimerFrequency();
 
 	userEventsCallback->beforeMainLoopEvent();
@@ -65,6 +66,7 @@ void kengine::core::startMainLoop()
 	while (mainLoopState != K_RUNTIME_STATE::STOPPED) {
 		startTime = getHighResolutionTimerCounter();
 
+		m_frameTime = static_cast<float>(frameTime) / static_cast<float>(kengine::getHighResolutionTimerFrequency());
 		m_profile.update(frameTime);
 
 		/*

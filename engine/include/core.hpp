@@ -62,12 +62,15 @@ namespace kengine
 		void pauseMainLoop();
 		void resumeMainLoop();
 
+		float getFrameTime() const { return m_frameTime; }
+
 		void setEventsCallback(events_callback* eventsCallback);
 		// void setFrameRate(unsigned int framesPerSecond);
 
 		profile* getProfile() { return &m_profile; };
 
 	private:
+		float m_frameTime = 0.0f;
 		K_RUNTIME_STATE mainLoopState = K_RUNTIME_STATE::STOPPED;
 		events_callback* userEventsCallback = nullptr;
 		profile m_profile;

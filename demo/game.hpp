@@ -31,22 +31,16 @@
 // k-engine headers
 #include <core.hpp>
 #include <rendering_system.hpp>
+#include <lighting.hpp>
+#include <gltf_wrapper.hpp>
 
 #include <memory>
 
-#define TOTAL_TRIANGLES 150
+#define TOTAL_TRIANGLES 300
 #define TOTAL_ENTITY 3
 
 namespace demo
 {
-	/*
-	*/
-	class Entity {
-	public:
-	private:
-		kengine::vec3<float> position;
-	};
-
 	/*
 	*/
 	class game : public kengine::events_callback
@@ -63,6 +57,8 @@ namespace demo
 		void start();
 		void createWindow();
 		void showWindow();
+		void setCameraShaders();
+		void setLightingShaders(kengine::GLSLprogram* shaderProgram);
 
 		/*
 			Callback event called when the window is ready for use
@@ -149,18 +145,31 @@ namespace demo
 		kengine::core* m_engine = nullptr;
 		std::unique_ptr<kengine::window> m_window;
 		std::unique_ptr<kengine::rendering_system> m_renderingSystem;
+
 		std::unique_ptr<kengine::primitive_render> m_primitive;
 		std::unique_ptr<kengine::primitive_render> m_cube;
+		std::unique_ptr<kengine::primitive_render> m_lamp;
 		std::unique_ptr<kengine::primitive_render> m_grid;
+		std::unique_ptr<kengine::primitive_render> m_sphere;
+		std::unique_ptr<kengine::primitive_render> m_torus;
+		std::unique_ptr<kengine::gltf_render> m_gltfModel;
+
 		std::unique_ptr<float[]> m_modelTransforms;
 	
 		kengine::GLSLprogram m_particleShader;
-		kengine::GLSLprogram m_orbitShader;
-		kengine::gpu_buffer m_gpuBuffer;	
+		kengine::GLSLprogram m_lightingShader;
+		kengine::GLSLprogram m_lightingWithTexture;
+		kengine::GLSLprogram m_skeletalShader;
+		kengine::GLSLprogram m_simpleShader;
+
+		kengine::gpu_buffer m_gpuBuffer;
 		kengine::camera m_cam;
+		kengine::camera_control m_cameraControl;
+		kengine::phong_light m_light;
+		kengine::phong_material m_material;
 		kengine::gui m_gui;
 
-		bool isKey_1 = false; // just for test
+		bool m_isMouseButtonPressed = false;
 	};
 }
 

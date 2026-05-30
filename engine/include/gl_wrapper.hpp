@@ -77,6 +77,10 @@ extern PFNGLUSEPROGRAMPROC glUseProgram; // OpenGL 2.0
 extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation; // OpenGL 2.0
 extern PFNGLGETACTIVEUNIFORMPROC glGetActiveUniform; // OpenGL 2.0
 extern PFNGLUNIFORM1FPROC glUniform1f; // OpenGL 2.0
+extern PFNGLUNIFORM3FPROC glUniform3f; // OpenGL 2.0
+extern PFNGLUNIFORM4FPROC glUniform4f; // OpenGL 2.0
+extern PFNGLUNIFORM4FVPROC glUniform4fv; // OpenGL 2.0
+extern PFNGLUNIFORM1IPROC glUniform1i; // OpenGL 2.0
 extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv; // OpenGL 2.0
 extern PFNGLBINDBUFFERBASEPROC glBindBufferBase; // OpenGL 3.0
 extern PFNGLPROGRAMPARAMETERIPROC glProgramParameteri; // OpenGL 3.0
@@ -147,6 +151,7 @@ extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays; // OpenGL 3.0
 extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray; // OpenGL 3.0
 extern PFNGLBINDFRAGDATALOCATIONPROC glBindFragDataLocation; // OpenGL 3.0
 extern PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer; // OpenGL 3.0
+extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex; // OpenGL 3.2
 extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor; // OpenGL 3.3
 extern PFNGLVERTEXATTRIBLPOINTERPROC glVertexAttribLPointer; // OpenGL 4.1
 extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer; // OpenGL 4.3
@@ -198,8 +203,6 @@ extern PFNGLDISABLEVERTEXARRAYATTRIBPROC glDisableVertexArrayAttrib; // OpenGL 4
 extern PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat; // OpenGL 4.5
 extern PFNGLVERTEXARRAYVERTEXBUFFERSPROC glVertexArrayVertexBuffers; // OpenGL 4.5
 extern PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance; // OpenGL 4.2
-extern PFNGLUNIFORM1IPROC glUniform1i; // OpenGL 2.0
-extern PFNGLUNIFORM3FPROC glUniform3f; // OpenGL 2.0
 extern PFNGLGETSTRINGIPROC glGetStringi; // OpenGL 3.0
 extern PFNGLPRIMITIVERESTARTINDEXPROC glPrimitiveRestartIndex; // OpenGL 3.1
 extern PFNGLTEXSTORAGE1DPROC glTexStorage1D; // OpenGL 4.2
@@ -207,7 +210,7 @@ extern PFNGLTEXTURESTORAGE1DPROC glTextureStorage1D; // OpenGL 4.5
 extern PFNGLTEXSTORAGE2DPROC glTexStorage2D; // OpenGL 4.2
 extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D; // OpenGL 4.5
 extern PFNGLTEXSTORAGE3DPROC glTexStorage3D; // OpenGL 4.2
-extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;; // OpenGL 4.5
+extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D; // OpenGL 4.5
 extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D; // OpenGL 4.5
 extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D; // OpenGL 4.5
 //extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D; // OpenGL 2.0+
@@ -225,7 +228,7 @@ namespace kengine {
 #if defined(_WIN32)
 		CONTEXT_DEBUG_BIT_ARB = WGL_CONTEXT_DEBUG_BIT_ARB,
 		CONTEXT_FORWARD_COMPATIBLE_BIT_ARB = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-		CONTEXT_CORE_PROFILE_BIT_ABR = WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+		CONTEXT_CORE_PROFILE_BIT_ARB = WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 		CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB
 #elif(__ANDROID__)
 		CONTEXT_DEBUG_BIT_ARB = EGL_CONTEXT_OPENGL_DEBUG,
@@ -289,12 +292,12 @@ namespace kengine {
 	/*
 		Get the OpenGL component data type size (i.e. data size of GLfloat, GLint, etc)
 	*/
-	size_t getGLComponentTypeSize(GLenum type);
+	size_t getGLTypeSize(GLenum type);
 
 	/*
 		Get the number of components of the OpenGL data type (i.e. data type size of vec3, mat4, etc)
 	*/
-	size_t getGLDataTypeSize(const std::string& type);
+	size_t getGLTypeComponents(const std::string& type);
 
 	/*
 		This function compile a GLSL shader
@@ -350,8 +353,12 @@ namespace kengine {
 		*/
 		void loadBinary(const std::string& filename);
 
-		void setUniform(const std::string& name, bool transpose, GLfloat* value);
-		void setUniform(const std::string& name, GLfloat value);
+		void setUniform(const std::string& name, bool transpose, GLfloat* value) const;
+		void setUniform(const std::string& name, GLsizei count, bool transpose, void* data);
+		void setUniform(const std::string& name, GLfloat value) const;
+		void setUniform(const std::string& name, GLfloat x, GLfloat y, GLfloat z) const;
+		void setUniform(const std::string& name, GLfloat x, GLfloat y, GLfloat z, GLfloat w) const;
+		void setUniform(const std::string& name, int value) const;
 
 		GLuint getProgram() const { return m_programHandle; }
 		void print() const;
@@ -375,7 +382,7 @@ namespace kengine {
 	class uniform_buffer_object {
 	public:
 		uniform_buffer_object() {}
-		~uniform_buffer_object() {}
+		~uniform_buffer_object() { clear(); }
 
 		uniform_buffer_object(const uniform_buffer_object& copy) = delete; // copy constructor
 		uniform_buffer_object(uniform_buffer_object&& move) noexcept = delete; // move constructor
@@ -445,6 +452,7 @@ namespace kengine {
 		/*
 		*/
 		GLenum target() const { return m_target; }
+		void setTarget(GLenum target) { m_target = target; }
 
 		/*
 		*/
@@ -514,12 +522,16 @@ namespace kengine {
 
 	/*
 		This class is the fundamental unit of rendering - the data required for GPU draw calls
+
+		Note: This class object can't be copied neither moved
+		Note: VAO is created in the constructor. So, a public method for clear don't make sense because is there no situation to clear the primitive_render after it has been created.
+		Note: primitive_render pode referenciar seu próprio gpu_buffer (local) ou um gpu_buffer que foi alocado externamente (global). Quando estiver utilizando gpu_buffer global, gpu_buffer deve ser nullptr.
 	*/
 	class primitive_render
 	{
 	public:
 		primitive_render();
-		explicit primitive_render(std::unique_ptr<gpu_buffer>& buffer);
+		explicit primitive_render(std::unique_ptr<gpu_buffer>&& buffer);
 		~primitive_render();
 
 		primitive_render(const primitive_render& copy) = delete; // copy constructor
@@ -530,6 +542,7 @@ namespace kengine {
 		void loadAttributeInfo(GLuint location, GLuint vbo, GLenum target, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* offset);
 		void loadAttributeInfo(GLuint location, GLuint vbo, const kengine::vattrib& va);
 
+		void bindBuffer(GLenum target, GLuint buffer);
 		void bindBuffer(GLuint vbo, const kengine::vattrib& va);
 
 		void drawArrays(GLint start, GLsizei count);
@@ -537,29 +550,53 @@ namespace kengine {
 		void drawElements(GLsizei count, const void* offset);
 		void draw();
 		void drawInstanced(GLsizei instanceCount);
-		void clear();
 
 		void setMode(GLenum mode) { m_mode = mode; }
 		void setCount(GLsizei count) { m_count = count; }
 		void setElements(GLsizei elements) { m_elements = elements; }
+		void setElementsOffset(GLsizei offset) { m_elementsOffset = offset; }
+		void setIndexType(GLenum type) { m_indexType = type; }
 	
+
 	private:
 		GLsizei m_count = 0;
 		GLsizei m_elements = 0;
+		GLsizei m_elementsOffset = 0;
 		GLuint m_vao = 0;
 		GLenum m_mode = GL_TRIANGLES;
-		std::unique_ptr<gpu_buffer> m_buffer;
+		GLenum m_indexType = GL_UNSIGNED_SHORT;
+		std::unique_ptr<gpu_buffer> m_buffer; // local gpu buffer or global gpu buffer
+		
+		void clear();
 	};
 
-
 	/*
-		This class store array of primitive_render
+		This class stores array of primitive_render
 	*/
 	class mesh_render
 	{
 	public:
+		mesh_render() {}
+		~mesh_render() {}
+
+		mesh_render(const mesh_render& copy) = delete; // copy constructor
+		mesh_render(mesh_render&& move) = delete; // move constructor
+		mesh_render& operator=(const mesh_render& copy) = delete; // copy assignment
+		mesh_render& operator=(mesh_render&& move) = delete; // move assigment
+
+		void draw() {
+			for (auto& prim : m_primitives) {
+				prim->draw();
+			}
+		}
+
+		void pushPrimitive(std::unique_ptr<kengine::primitive_render>&& primitive) { m_primitives.push_back(std::move(primitive)); }
+		void setName(const std::string& name) { m_name = name; }
+		std::string getName() const { return m_name; }
+
 	private:
-		std::vector<primitive_render> m_prims;
+		std::vector<std::unique_ptr<kengine::primitive_render>> m_primitives;
+		std::string m_name;
 	};
 
 
@@ -587,6 +624,7 @@ namespace kengine {
 		void bindTextureUnit(GLuint textureUnit);
 		void bind();
 		void unbind();
+		void setWrappingMode(GLint sParam, GLint tParam);
 		void clear();
 	
 	private:
@@ -602,12 +640,18 @@ namespace kengine {
 
 	/*
 	*/
-	std::unique_ptr<primitive_render> point(GLfloat x, GLfloat y, GLfloat z, std::unordered_map<std::string, GLuint>& shaderInfo);
 	std::unique_ptr<primitive_render> triangle(float size, std::unordered_map<std::string, GLuint>& shaderInfo);
 	std::unique_ptr<primitive_render> quad(float width, float height, std::unordered_map<std::string, GLuint>& shaderInfo);
 	std::unique_ptr<primitive_render> cube(float size, std::unordered_map<std::string, GLuint>& shaderInfo);
+	std::unique_ptr<primitive_render> circle(float radius, size_t points, std::unordered_map<std::string, GLuint>& shaderInfo);
+	// circle solid with triangles
+	std::unique_ptr<primitive_render> sphere(GLfloat radius, size_t slices, size_t points, std::unordered_map<std::string, GLuint>& shaderInfo);
+
+	std::unique_ptr<primitive_render> torus(size_t precision, GLfloat inner, GLfloat outer, std::unordered_map<std::string, GLuint>& shaderInfo);
+
 	std::unique_ptr<primitive_render> grid3D(std::unordered_map<std::string, GLuint>& shaderInfo);
 	std::unique_ptr<primitive_render> frustum3D(const projection_info<float>& projInfo, std::unordered_map<std::string, GLuint>& shaderInfo);
+
 }
 
 #endif

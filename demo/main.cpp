@@ -59,7 +59,7 @@ int main()
 	/*
 		If the execution has reached this point, the splash screen's window was destroyed...
 	*/
-	splashScene.reset();
+ 	splashScene.reset();
 
 	/*
 		Setting up the game scene

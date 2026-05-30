@@ -63,26 +63,31 @@ namespace kengine
 		projection_info<float> getProjectionInfo() const { return m_projectionInfo; }
 		projection_info<float>* getProjectionInfo() { return &m_projectionInfo; }
 
-		void setEye(float v[4]) {
+		void setEye(float v[3]) {
 			m_eye.x = v[0];
 			m_eye.y = v[1];
 			m_eye.z = v[2];
 		}
 
-		void setCenter(float v[4]) {
+		void setCenter(float v[3]) {
 			m_center.x = v[0];
 			m_center.y = v[1];
 			m_center.z = v[2];
 		}
 
-		void setUp(float v[4]) {
+		void setUp(float v[3]) {
 			m_up.x = v[0];
 			m_up.y = v[1];
 			m_up.z = v[2];
 		}
 
+		void setEye(const vec3<float>& eye) { m_eye = eye; }
 		vec3<float> getEye() const { return m_eye; }
+
+		void setCenter(const vec3<float>& center) { m_center = center; }
 		vec3<float> getCenter() const { return m_center; }
+
+		void setUp(const vec3<float>& up) { m_up = up; }
 		vec3<float> getUp() const { return m_up; }
 
 		void setCamera(const vec3<float>& eye, const vec3<float>& center, const vec3<float>& up)
@@ -95,10 +100,27 @@ namespace kengine
 	private:
 		PROJECTION_TYPE m_projectionType = PROJECTION_TYPE::_3D_FRUSTUM;
 		projection_info<float> m_projectionInfo;
+
 		vec3<float> m_eye;
 		vec3<float> m_center;
 		vec3<float> m_up;
-		
+	};
+
+	/*
+	*/
+	class camera_control
+	{
+	public:
+		int m_lastMouseX = 0;
+		int m_lastMouseY = 0;
+		float m_sensitivity = 0.1f;
+		float m_yaw = -90.0f;
+		float m_pitch = 0.0f;
+		float m_roll = 0.0f;
+		float m_xoffset = 0.0f;
+		float m_yoffset = 0.0f;
+
+		vec3<float> m_forward;
 	};
 }
 

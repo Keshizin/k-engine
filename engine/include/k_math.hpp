@@ -40,7 +40,7 @@
 #include <string>
 
 // (!) constant used to convert angle to radian (PI / 180º)
-#define K_PI_TO_RADIAN 0.0174532925f
+#define K_ANGLE_TO_RADIAN 0.0174532925f
 
 namespace kengine
 {
@@ -76,6 +76,9 @@ namespace kengine
 		template <class T> friend matrix<T> scale(T x, T y, T z);
 		template <class T> friend matrix<T> rotate(T angle, T x, T y, T z);
 		template <class T> friend matrix<T> rotate(T x, T y, T z);
+
+		template <class T> friend matrix<T> quaternion(T x, T y, T z, T w);
+
 		template <class T> friend matrix<T> frustum(const T left, const T right, const T bottom, const T top, const T near, const T far);
 		template <class T> friend matrix<T> frustum(const projection_info<T>& projInfo);
 		template <class T> friend matrix<T> perspective(T fovy, T aspectRatio, T near, T far);
@@ -236,7 +239,7 @@ namespace kengine
 		T x2 = x * x;
 		T y2 = y * y;
 		T z2 = z * z;
-		T rad = angle * K_PI_TO_RADIAN;
+		T rad = angle * K_ANGLE_TO_RADIAN;
 		T cos_angle = std::cos(rad);
 		T sin_angle = std::sin(rad);
 		T omc = 1.0f - cos_angle;
@@ -300,7 +303,7 @@ namespace kengine
 		if (x > 0.0f)
 		{
 			matrix<T> rx(1);
-			x *= K_PI_TO_RADIAN; // convert to radians
+			x *= K_ANGLE_TO_RADIAN; // convert to radians
 			rx[5] = std::cos(x);
 			rx[6] = std::sin(x);
 			rx[9] = -std::sin(x);
@@ -311,7 +314,7 @@ namespace kengine
 		if (y > 0.0f)
 		{
 			matrix<T> ry(1);
-			y *= K_PI_TO_RADIAN; // convert to radians
+			y *= K_ANGLE_TO_RADIAN; // convert to radians
 			ry[0] = std::cos(y);
 			ry[2] = -std::sin(y);
 			ry[8] = std::sin(y);
@@ -322,7 +325,7 @@ namespace kengine
 		if (z > 0.0f)
 		{
 			matrix<T> rz(1);
-			z *= K_PI_TO_RADIAN; // convert to radians
+			z *= K_ANGLE_TO_RADIAN; // convert to radians
 			r[0] = std::cos(z);
 			r[1] = std::sin(z);
 			r[4] = -std::sin(z);
@@ -331,6 +334,66 @@ namespace kengine
 		}
 
 		return  r;
+	}
+
+	template <typename T>
+	matrix<T> quaternion(T x, T y, T z, T w)
+	{
+		T xx = x * x;
+		T yy = y * y;
+		T zz = z * z;
+		T xy = x * y;
+		T xz = x * z;
+		T yz = y * z;
+		T wx = w * x;
+		T wy = w * y;
+		T wz = w * z;
+
+		matrix<T> q;
+
+		q[0] = 1 - 2 * y * y - 2 * z * z;
+		q[1] = 2 * x * y + 2 * z * w;
+		q[2] = 2 * x * z - 2 * y * w;
+		q[3] = 0;
+
+		q[4] = 2 * x * y - 2 * z * w;
+		q[5] = 1 - 2 * x * x - 2 * z * z;
+		q[6] = 2 * y * z + 2 * x * w;
+		q[7] = 0;
+
+		q[8] = 2 * x * z + 2 * y * w;
+		q[9] = 2 * y * z - 2 * x * w;
+		q[10] = 1 - 2 * x * x - 2 * y * y;
+		q[11] = 0;
+
+		q[12] = 0;
+		q[13] = 0;
+		q[14] = 0;
+		q[15] = 1;
+
+		/*
+			return matrix<T>(
+				// Coluna 0
+				T(1) - T(2) * (yy + zz),
+				T(2) * (xy + wz),
+				T(2) * (xz - wy),
+				T(0),
+			// Coluna 1
+			T(2) * (xy - wz),
+			T(1) - T(2) * (xx + zz),
+			T(2) * (yz + wx),
+			T(0),
+			// Coluna 2
+			T(2) * (xz + wy),
+			T(2) * (yz - wx),
+			T(1) - T(2) * (xx + yy),
+			T(0),
+			// Coluna 3
+			T(0), T(0), T(0), T(1)
+    );
+		*/
+
+		return q;
 	}
 
 	template <typename T>
@@ -396,7 +459,7 @@ namespace kengine
 	}
 
 	template <class T>
-	matrix<T> lookAt(vec3<T>& eye, vec3<T>& center, vec3<T>& up)
+	matrix<T> lookAt(const vec3<T>& eye, const vec3<T>& center, const vec3<T>& up)
 	{
 		/*
 			(!) The look-at matrix is:
@@ -442,8 +505,8 @@ namespace kengine
 		vec3(T a, T b, T c) : x{ a }, y{ b }, z{ c }, w{ 1 } {}
 		vec3(T a, T b, T c, T d) : x{ a }, y{ b }, z{ c }, w{ d } {}
 
-		vec3 operator+(const vec3& v);
-		vec3 operator-(const vec3& v);
+		vec3 operator+(const vec3& v) const;
+		vec3 operator-(const vec3& v) const;
 		constexpr vec3 operator-() const noexcept;
 		vec3 operator*(const vec3& v);
 		vec3 operator*(const T& scalar);
@@ -467,6 +530,10 @@ namespace kengine
 
 		/*
 		*/
+		vec3& normalizeAll();
+
+		/*
+		*/
 		void addAndScale(const vec3& v, T scale);
 
 		/*
@@ -481,6 +548,10 @@ namespace kengine
 		*/
 		void copy(T c[4]);
 
+		/*
+		*/
+		void set(size_t index, T value);
+
 		T x = 0;
 		T y = 0;
 		T z = 0;
@@ -488,13 +559,13 @@ namespace kengine
 	};
 
 	template <class T>
-	vec3<T> vec3<T>::operator+(const vec3<T>& v)
+	vec3<T> vec3<T>::operator+(const vec3<T>& v) const
 	{
 		return vec3<T>(x + v.x, y + v.y, z + v.z);
 	}
 
 	template <class T>
-	vec3<T> vec3<T>::operator-(const vec3<T>& v)
+	vec3<T> vec3<T>::operator-(const vec3<T>& v) const
 	{
 		return vec3<T>(x - v.x, y - v.y, z - v.z);
 	}
@@ -515,6 +586,12 @@ namespace kengine
 	vec3<T> vec3<T>::operator*(const T& scalar)
 	{
 		return vec3<T>(x * scalar, y * scalar, z * scalar);
+	}
+
+	template<typename T>
+	vec3<T> operator*(T scalar, const vec3<T>& v)
+	{
+		return vec3<T>(v.x * scalar, v.y * scalar, v.z * scalar);
 	}
 
 	template <class T>
@@ -574,6 +651,21 @@ namespace kengine
 		return *this;
 	}
 
+	template <class T>
+	vec3<T>& vec3<T>::normalizeAll()
+	{
+		T magnitude = std::sqrt(x * x + y * y + z * z + w * w);
+
+		if (magnitude > 0) {
+			x /= magnitude;
+			y /= magnitude;
+			z /= magnitude;
+			w /= magnitude;
+
+		}
+		
+		return *this;
+	}
 
 	template <class T>
 	void vec3<T>::addAndScale(const vec3<T>& v, T scale)
@@ -611,6 +703,23 @@ namespace kengine
 		return r;
 	}
 
+	template <typename T>
+	vec3<T> normalizeAll(const vec3<T>& v1)
+	{
+		vec3<T> r = v1;
+		T magnitude = std::sqrt(r.x * r.x + r.y * r.y + r.z * r.z + r.w * r.w);
+
+		if (magnitude > 0) {
+			r.x /= magnitude;
+			r.y /= magnitude;
+			r.z /= magnitude;
+			r.w /= magnitude;
+		}
+
+		// (!) must log if magnitude is 0 (!)
+		return r;
+	}
+
 	template <class T>
 	vec3<T>& vec3<T>::crossProduct(const vec3& v)
 	{
@@ -631,13 +740,118 @@ namespace kengine
 	}
 
 	template <typename T>
-	void vec3<T>::copy(T c[4])
+	void vec3<T>::copy(T c[3])
 	{
 		c[0] = x;
 		c[1] = y;
 		c[2] = z;
-		c[3] = w;
 	}
+
+	template <typename T>
+	void vec3<T>::set(size_t index, T value)
+	{
+		switch (index) {
+		case 0:
+			x = value;
+			break;
+
+		case 1:
+			y = value;
+			break;
+
+		case 2:
+			z = value;
+			break;
+
+		case 3:
+			w = value;
+			break;
+		}
+	}
+
+	// ----------------------------------------------------------------------------------------------------------------
+
+	template <typename TYPEA, typename TYPEB>
+	TYPEA lerp(TYPEA a, TYPEA b, TYPEB t)
+	{
+		return a + t * (b - a);
+	}
+
+	template <typename TYPE>
+	vec3<TYPE> slerp(vec3<TYPE> a, vec3<TYPE> b, TYPE t)
+	{
+		TYPE dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+
+		if (dot < TYPE(0)) {
+			b.x = -b.x; b.y = -b.y; b.z = -b.z; b.w = -b.w;
+			dot = -dot;
+		}
+
+		if (dot > TYPE(0.9995)) {
+			vec3<TYPE> result = {
+				a.x + t * (b.x - a.x),
+				a.y + t * (b.y - a.y),
+				a.z + t * (b.z - a.z),
+				a.w + t * (b.w - a.w)
+			};
+			return normalizeAll(result);
+		}
+
+		TYPE theta0 = std::acos(dot);
+		TYPE theta = theta0 * t;
+		TYPE sinTheta0 = std::sin(theta0);
+
+		TYPE sa = std::sin(theta0 - theta) / sinTheta0;
+		TYPE sb = std::sin(theta) / sinTheta0;
+
+		return {
+			sa * a.x + sb * b.x,
+			sa * a.y + sb * b.y,
+			sa * a.z + sb * b.z,
+			sa * a.w + sb * b.w
+		};
+	}
+
+	//template <typename TYPE>
+	//vec3<TYPE> slerp(vec3<TYPE> a, vec3<TYPE> b, TYPE t)
+	//{
+	//	// Dot product = cosseno do ângulo entre os quaternions
+	//	TYPE dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+
+	//	// Se dot negativo, os quaternions estão em hemisférios opostos.
+	//	// Nega b para garantir o caminho mais curto na esfera.
+	//	if (dot < TYPE(0)) {
+	//		b.x = -b.x; b.y = -b.y;
+	//		b.z = -b.z; b.w = -b.w;
+	//		dot = -dot;
+	//	}
+
+	//	// Se muito próximos, usa LERP para evitar divisão por zero no sin(theta)
+	//	if (dot > TYPE(0.9995)) {
+	//		vec3<TYPE> result = {
+	//			a.x + t * (b.x - a.x),
+	//			a.y + t * (b.y - a.y),
+	//			a.z + t * (b.z - a.z),
+	//			a.w + t * (b.w - a.w)
+	//		};
+	//		return normalize(result); // LERP não preserva magnitude — normaliza
+	//	}
+
+	//	TYPE theta0 = std::acos(dot);        // ângulo total entre a e b
+	//	TYPE theta = theta0 * t;            // ângulo para o instante t
+	//	TYPE sinTheta0 = std::sin(theta0);
+	//	TYPE sinTheta = std::sin(theta);
+
+	//	TYPE sa = std::cos(theta) - dot * sinTheta / sinTheta0; // peso de a
+	//	TYPE sb = sinTheta / sinTheta0;                          // peso de b
+
+	//	return {
+	//		sa * a.x + sb * b.x,
+	//		sa * a.y + sb * b.y,
+	//		sa * a.z + sb * b.z,
+	//		sa * a.w + sb * b.w
+	//	};
+	//}
 
 	/*
 		min returns the minimum of the two parameters. It returns y if y is less than x, otherwise it returns x.

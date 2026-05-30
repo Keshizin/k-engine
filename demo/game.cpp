@@ -24,9 +24,9 @@
 */
 
 #include <game.hpp>
-
-#include <logger.hpp>
 #include <media.hpp>
+#include <gltf_wrapper.hpp>
+#include <logger.hpp>
 
 #include <cassert>
 
@@ -81,7 +81,7 @@ void demo::game::onWindowReady(kengine::window* window)
 
 	kengine::compatibility_profile profile;
 	profile.contextFlag = kengine::CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB;
-	profile.profileMask = kengine::CONTEXT_FLAG::CONTEXT_CORE_PROFILE_BIT_ABR;
+	profile.profileMask = kengine::CONTEXT_FLAG::CONTEXT_CORE_PROFILE_BIT_ARB;
 
 	if (m_renderingSystem != nullptr)
 		m_renderingSystem.reset();
@@ -99,9 +99,13 @@ void demo::game::onWindowReady(kengine::window* window)
 	glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
+	/*
+		Creating shader programs
+	*/
+
 	kengine::ShaderInfo particleShaders[] = {
 		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/particle.vert"},
-		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/particle.frag"},
+		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/minimal.frag"},
 		{GL_NONE, ""}
 	};
 
@@ -109,21 +113,45 @@ void demo::game::onWindowReady(kengine::window* window)
 		assert(false && "Failed to load particle shaders!");
 	}
 
-	m_particleShader.useProgram();
-	m_particleShader.print();
-
-	kengine::ShaderInfo entityShaders[] = {
-		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/test.vert"},
-		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/test.frag"},
+	kengine::ShaderInfo lightingShaders[] = {
+		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/phong_instanced.vert"},
+		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/phong.frag"},
 		{GL_NONE, ""}
 	};
 
-	if(!m_orbitShader.loadShaders(entityShaders)) {
-		assert(false && "Failed to load test shaders");
+	if(!m_lightingShader.loadShaders(lightingShaders)) {
+		assert(false && "Failed to load phong shaders");
 	}
 
-	m_orbitShader.useProgram();
-	m_orbitShader.print();
+	kengine::ShaderInfo simpleShaderInfo[] = {
+		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/minimal.vert"},
+		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/minimal.frag"},
+		{GL_NONE, ""}
+	};
+
+	if (!m_simpleShader.loadShaders(simpleShaderInfo)) {
+		assert(false && "Failed to load trigonometry shaders");
+	}
+
+	kengine::ShaderInfo shaderInfo[] = {
+		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/phong.vert"},
+		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/phong.frag"},
+		{GL_NONE, ""}
+	};
+
+	if (!m_lightingWithTexture.loadShaders(shaderInfo)) {
+		assert(false && "Failed to load simple shaders");
+	}
+
+	kengine::ShaderInfo skeletalShaderInfo[] = {
+		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/skeletal.vert"},
+		{GL_FRAGMENT_SHADER, std::string(K_PROJECT_PATH) + "/shaders/skeletal.frag"},
+		{GL_NONE, ""}
+	};
+
+	if (!m_skeletalShader.loadShaders(skeletalShaderInfo)) {
+		assert(false && "Failed to load trigonometry shaders");
+	}
 
 	/*
 		Camera settings
@@ -144,7 +172,7 @@ void demo::game::onWindowReady(kengine::window* window)
 		projectionInfo.fovy = 60.0f;
 		m_cam.setProjectionInfo(projectionInfo);
 
-		kengine::vec3<float> eye{ 0.0f, 0.0f, 50.0f };
+		kengine::vec3<float> eye{ 0.0f, 5.0f, 50.0f };
 		kengine::vec3<float> center{ 0.0f, 0.0f, 0.0f };
 		kengine::vec3<float> up{ 0.0f, 1.0f, 0.0f };
 		m_cam.setCamera(eye, center, up);
@@ -152,13 +180,7 @@ void demo::game::onWindowReady(kengine::window* window)
 		kengine::saveCameraConfig(&m_cam);
 	}
 
-	m_particleShader.useProgram();
-	m_particleShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-	m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
-
-	m_orbitShader.useProgram();
-	m_orbitShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-	m_orbitShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+	setCameraShaders();
 
 	/*
 		GUI initializing
@@ -166,21 +188,23 @@ void demo::game::onWindowReady(kengine::window* window)
 	m_gui.init(m_window->getHandle());
 	m_gui.setWindowSize(m_window->getWidth(), m_window->getHeight());
 	m_gui.setProfile(m_engine->getProfile());
-	m_gui.setCameraWidget(&m_cam);
+	m_gui.setCameraWidget(&m_cam, &m_cameraControl);
+	m_gui.setPhongLighting(&m_light, &m_material);
 
 	glViewport(0, 0, m_window->getWidth(), m_window->getHeight());
 	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	kengine::setVSync(0);
-	
-	float red = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0xFF000000) >> 24) / 256.0f;
-	float green = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x00FF0000) >> 16) / 256.0f;
-	float blue = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x0000FF00) >> 8) / 256.0f;
-	float alpha = (kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x000000FF) / 256.0f;
+
+	float red = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0xFF000000) >> 24) / 255.0f;
+	float green = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x00FF0000) >> 16) / 255.0f;
+	float blue = ((kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x0000FF00) >> 8) / 255.0f;
+	float alpha = (kengine::BACKGROUND_COLOR_DARK_AUBERGINE_UBUNTU & 0x000000FF) / 255.0f;
 	glClearColor(red, green, blue, alpha);
 }
 
@@ -192,13 +216,56 @@ void demo::game::beforeMainLoopEvent()
 
 	std::unordered_map<std::string, GLuint> shaderLocations = {
 		{"POSITION", 0 },
-		{"COLOR", 1 },
+		{"TEXCOORD_0", 1 },
+		{"NORMAL", 2 },
+		{"COLOR", 3 },
 		{"MODEL_TRANSFORM", 12 }
 	};
 
-	m_primitive = kengine::triangle(1.0f, shaderLocations);
-	m_cube = kengine::cube(8.0f, shaderLocations);
+	m_primitive = kengine::quad(1.0f, 1.0f, shaderLocations);
+
+	std::unordered_map<std::string, GLuint> gltfShaderLocations = {
+		{"POSITION", 0 },
+		{"TEXCOORD_0", 1 },
+		{"TEXCOORD_1", 6 },
+		{"TEXCOORD_2", 7 },
+		{"NORMAL", 2 },
+		{"COLOR_0", 3 },
+		{"JOINTS_0", 4 },
+		{"WEIGHTS_0", 5 },
+		{"MODEL_TRANSFORM", 12 }
+	};
+
 	m_grid = kengine::grid3D(shaderLocations);
+	m_cube = kengine::cube(8.0f, shaderLocations);
+	m_lamp = kengine::sphere(1.0f, 16, 16, shaderLocations);
+	m_sphere = kengine::sphere(10.0f, 32, 32, shaderLocations);
+	m_torus = kengine::torus(48, 20.0f, 5.0f, shaderLocations);
+
+	/*
+		Phong lighting
+	*/
+
+	m_light.m_position = kengine::vec3(15.0f, 5.0f, 10.0f);
+	m_light.La = kengine::vec3(0.1f, 0.1f, 0.1f);
+	m_light.Ld = kengine::vec3(1.0f, 1.0f, 1.0f);
+	m_light.Ls = kengine::vec3(0.8f, 0.8f, 0.8f);
+
+	m_material.Ka = kengine::vec3(0.1f, 0.1f, 0.1f);
+	m_material.Kd = kengine::vec3(0.5f, 0.0f, 0.0f);
+	m_material.Ks = kengine::vec3(0.8f, 0.8f, 0.8f);
+
+	setLightingShaders(&m_lightingShader);
+	setLightingShaders(&m_lightingWithTexture);
+
+	/*
+		GLTF
+	*/
+	//auto startTime = kengine::getHighResolutionTimerCounter();
+	//m_gltfModel = kengine::loadGLTF(std::string(K_PROJECT_PATH) + "/assets/" , "scene.gltf", gltfShaderLocations, &m_skeletalShader);
+	//auto endTime = kengine::getHighResolutionTimerCounter();
+	//K_LOG_OUTPUT_RAW("> GLTF file loading time: " << static_cast<double>(endTime - startTime) / static_cast<double>(kengine::getHighResolutionTimerFrequency()));
+	//m_gltfModel->setShader(&m_skeletalShader);
 
 	/*
 		setting vbo for instancing model transform
@@ -218,9 +285,9 @@ void demo::game::beforeMainLoopEvent()
 
 void demo::game::update(int64_t frameTime)
 {
+	float slowTime = 0.5;
 	static float currentTime = 0.0f;
-	float deltaTime = static_cast<float>(frameTime) / static_cast<float>(kengine::getHighResolutionTimerFrequency());
-	currentTime += deltaTime;
+	currentTime += m_engine->getFrameTime() * slowTime;
 
 	m_particleShader.useProgram();
 	m_particleShader.setUniform("currentTime", currentTime);
@@ -239,13 +306,40 @@ void demo::game::update(int64_t frameTime)
 	
 	m_gpuBuffer.update(0, GL_ARRAY_BUFFER, 16 * TOTAL_ENTITY * sizeof(float), m_modelTransforms.get());
 
+	//m_gltfModel->updateAnimation(m_engine->getFrameTime());
+
+	// ***************************************************************************
+	//	rendering the scene
+	// ***************************************************************************
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_simpleShader.useProgram();
+	m_simpleShader.setUniform("modelTransform", false, kengine::matrix<float>(1.0f).data());
+	m_grid->draw();
 
 	m_particleShader.useProgram();
 	m_primitive->drawInstanced(TOTAL_TRIANGLES);
 
-	m_orbitShader.useProgram();
+	m_simpleShader.useProgram();
+	m_simpleShader.setUniform("modelTransform", false, kengine::translate<float>(m_light.m_position.x, m_light.m_position.y, m_light.m_position.z).data());
+	m_lamp->draw();
+
+	m_lightingShader.useProgram();
 	m_cube->drawInstanced(TOTAL_ENTITY);
+
+	m_lightingWithTexture.useProgram();
+	m_lightingWithTexture.setUniform("modelTransform", false, kengine::translate<float>(std::sin(currentTime * 0.75f) * 30.0f, 0.0f, 0.0f).data());
+	m_sphere->draw();
+
+	m_lightingWithTexture.useProgram();
+	m_lightingWithTexture.setUniform("modelTransform", false, kengine::rotate<float>(currentTime * 15.0f, 0.0f, 0.0f).data());
+	m_torus->draw();
+	
+	//auto rootNode = m_gltfModel->getRootNode(-1, -1);
+
+	//if (rootNode != -1)
+	//	m_gltfModel->traverseScene(rootNode, kengine::matrix<GLfloat>(1.0f));
 
 	/*
 		drawing GUI 
@@ -253,15 +347,14 @@ void demo::game::update(int64_t frameTime)
 	m_gui.draw();
 
 	if (m_gui.getCameraWidget()->mustBeUpdate()) {
-		m_particleShader.useProgram();
-		m_particleShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-		m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
-
-		m_orbitShader.useProgram();
-		m_orbitShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-		m_orbitShader.setUniform("viewTransform", false, m_cam.lookAt().data());
-
+		setCameraShaders();
 		m_gui.getCameraWidget()->setUpdate(false);
+	}
+
+	if (m_gui.getPhongLightingWidget()->mustBeUpdate()) {
+		setLightingShaders(&m_lightingShader);
+		setLightingShaders(&m_lightingWithTexture);
+		m_gui.getPhongLightingWidget()->setUpdate(false);
 	}
 
 // (!) Unificar a chamada abaixo de SwapBuffer para facilitar o usuário
@@ -294,6 +387,7 @@ void demo::game::closeButtonEvent()
 {
 	assert(!(m_engine == nullptr));
 	m_gui.destroy();
+	// Todo: destruir os objetos OpenGL antes de destruir o contexto
 	m_renderingSystem->finish();
 	m_window->destroy();
 }
@@ -304,13 +398,7 @@ void demo::game::onResizeWindowEvent(const int width, const int height)
 	m_cam.getProjectionInfo()->width = static_cast<float>(width);
 	m_cam.getProjectionInfo()->height = static_cast<float>(height);
 
-	m_particleShader.useProgram();
-	m_particleShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-	m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
-
-	m_orbitShader.useProgram();
-	m_orbitShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
-	m_orbitShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+	setCameraShaders();
 
 	glViewport(0, 0, width, height);
 }
@@ -321,10 +409,53 @@ void demo::game::onMoveWindowEvent(const int x, const int y)
 
 void demo::game::onMouseMotionEvent(const int x, const int y)
 {
+	if (m_isMouseButtonPressed) {
+
+		m_cameraControl.m_xoffset = x - m_cameraControl.m_lastMouseX;
+		m_cameraControl.m_yoffset = m_cameraControl.m_lastMouseY - y;
+		m_cameraControl.m_yaw += (m_cameraControl.m_xoffset * m_cameraControl.m_sensitivity);
+
+		m_cameraControl.m_yaw = std::fmod(m_cameraControl.m_yaw, 360.0f);
+		m_cameraControl.m_pitch += (m_cameraControl.m_yoffset * m_cameraControl.m_sensitivity * 0.1f);
+
+		if (m_cameraControl.m_pitch > 89.0f)
+			m_cameraControl.m_pitch = 89.0f;
+
+		if (m_cameraControl.m_pitch < -89.0f)
+			m_cameraControl.m_pitch = -89.0f;
+
+		m_cameraControl.m_forward.x = std::cos(m_cameraControl.m_yaw * K_ANGLE_TO_RADIAN) * std::cos(m_cameraControl.m_pitch);
+		m_cameraControl.m_forward.y = std::sin(m_cameraControl.m_pitch);
+		m_cameraControl.m_forward.z = std::sin(m_cameraControl.m_yaw * K_ANGLE_TO_RADIAN) * std::cos(m_cameraControl.m_pitch);
+		m_cameraControl.m_forward.normalize();
+
+		m_cam.setCenter(m_cam.getEye() + m_cameraControl.m_forward);
+
+		m_particleShader.useProgram();
+		m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_lightingShader.useProgram();
+		m_lightingShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_simpleShader.useProgram();
+		m_simpleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_lightingWithTexture.useProgram();
+		m_lightingWithTexture.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_skeletalShader.useProgram();
+		m_skeletalShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+	}
+
+	m_cameraControl.m_lastMouseX = x;
+	m_cameraControl.m_lastMouseY = y;
 }
 
 void demo::game::onMouseButtonEvent(const int button, const kengine::MOUSE_ACTION& state, const int x, const int y)
 {
+	if (button == kengine::MOUSE_BUTTON::RIGHT) {
+
+		if (state == kengine::MOUSE_ACTION::DOWN)
+			m_isMouseButtonPressed = true;
+		else
+			m_isMouseButtonPressed = false;
+	}
 }
 
 void demo::game::onKeyboardEvent(const unsigned long long key, const int state)
@@ -337,17 +468,64 @@ void demo::game::onKeyboardEvent(const unsigned long long key, const int state)
 		m_gui.setDemoExample(!m_gui.getDemoExample());
 	}
 
-	if (key == 'W' && state) {
-		isKey_1 = !isKey_1;
+	bool isPressed = false;
+	float speed = 10.0f;
+	kengine::vec3<float> forward = kengine::normalize(m_cam.getCenter() - m_cam.getEye());
 
-		if (isKey_1)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (key == 'W' && state) {
+		kengine::vec3<float> pos = m_cam.getEye() + (forward * speed);
+		m_cam.setEye(pos);
+		m_cam.setCenter(pos + forward);
+		isPressed = true;
+	}
+	
+	if (key == 'A' && state) {
+		kengine::vec3<float> right = kengine::normalize(kengine::crossProduct(forward, m_cam.getUp()));
+
+		kengine::vec3<float> pos = m_cam.getEye() - (right * speed);
+		m_cam.setEye(pos);
+		m_cam.setCenter(pos + forward);
+		isPressed = true;
 	}
 
 	if (key == 'S' && state) {
+		kengine::vec3<float> pos = m_cam.getEye() - (forward * speed);
+		m_cam.setEye(pos);
+		m_cam.setCenter(pos + forward);
+		isPressed = true;
+	}
+
+	if (key == 'D' && state) {
+		kengine::vec3<float> right = kengine::normalize(kengine::crossProduct(forward, m_cam.getUp()));
+
+		kengine::vec3<float> pos = m_cam.getEye() + (right * speed);
+		m_cam.setEye(pos);
+		m_cam.setCenter(pos + forward);
+		isPressed = true;
+	}
+
+	if (key == 'P' && state) {
 		kengine::saveCameraConfig(&m_cam);
+	}
+
+	if (key == 'Z' && state) {
+		static bool b = false;
+
+		b ? glPolygonMode(GL_FRONT_AND_BACK, GL_FILL) : glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		b = !b;
+	}
+
+	if (isPressed) {
+		m_particleShader.useProgram();
+		m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_lightingShader.useProgram();
+		m_lightingShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_simpleShader.useProgram();
+		m_simpleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_lightingWithTexture.useProgram();
+		m_lightingWithTexture.setUniform("viewTransform", false, m_cam.lookAt().data());
+		m_skeletalShader.useProgram();
+		m_skeletalShader.setUniform("viewTransform", false, m_cam.lookAt().data());
 	}
 }
 
@@ -364,4 +542,42 @@ void demo::game::debugMessage(const std::string& msg)
 int demo::game::customWindowProcedure(void* param1, void* param2, void* param3, void* param4)
 {
 	return kengine::customWndProcHandler(param1, param2, param3, param4);
+}
+
+void demo::game::setCameraShaders()
+{
+	m_particleShader.useProgram();
+	m_particleShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
+	m_particleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+
+	m_lightingShader.useProgram();
+	m_lightingShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
+	m_lightingShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+
+	m_simpleShader.useProgram();
+	m_simpleShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
+	m_simpleShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+
+	m_lightingWithTexture.useProgram();
+	m_lightingWithTexture.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
+	m_lightingWithTexture.setUniform("viewTransform", false, m_cam.lookAt().data());
+
+	m_skeletalShader.useProgram();
+	m_skeletalShader.setUniform("projectionTransform", false, m_cam.getProjection(true).data());
+	m_skeletalShader.setUniform("viewTransform", false, m_cam.lookAt().data());
+
+
+}
+
+void demo::game::setLightingShaders(kengine::GLSLprogram* shaderProgram)
+{
+	shaderProgram->useProgram();
+	shaderProgram->setUniform("Light.position", m_light.m_position.x, m_light.m_position.y, m_light.m_position.z);
+	shaderProgram->setUniform("Light.La", m_light.La.x, m_light.La.y, m_light.La.x);
+	shaderProgram->setUniform("Light.Ld", m_light.Ld.x, m_light.Ld.y, m_light.Ld.x);
+	shaderProgram->setUniform("Light.Ls", m_light.Ls.x, m_light.Ls.y, m_light.Ls.x);
+	shaderProgram->setUniform("Material.shininess", m_material.shininess);
+	shaderProgram->setUniform("Material.Ka", m_material.Ka.x, m_material.Ka.y, m_material.Ka.z);
+	shaderProgram->setUniform("Material.Kd", m_material.Kd.x, m_material.Kd.y, m_material.Kd.z);
+	shaderProgram->setUniform("Material.Ks", m_material.Ks.x, m_material.Ks.y, m_material.Ks.z);
 }

@@ -24,14 +24,10 @@
 */
 
 #include <splash.hpp>
+#include <media.hpp>
 #include <logger.hpp>
 
 #include <cassert>
-
-#pragma warning(push, 0)
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-#pragma warning(pop)
 
 demo::splash::splash(kengine::core* engine)
 	: m_engine{ engine }, m_window{ kengine::windowInstance() }
@@ -49,7 +45,7 @@ void demo::splash::start()
 }
 
 void demo::splash::createWindow() {
-	// se a janela foi criada anteriormente, deve ser destruida antes de chamar ela novamente
+	// todo: se a janela foi criada anteriormente, deve ser destruida antes de chamar ela novamente
 	m_window->create(
 		kengine::getDisplayCenterPosX(640),
 		kengine::getDisplayCenterPosY(480),
@@ -73,8 +69,8 @@ void demo::splash::onWindowReady(kengine::window* window)
 	*/
 
 	kengine::compatibility_profile profile;
-	//profile.contextFlag = kengine::CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB;
-	profile.profileMask = kengine::CONTEXT_FLAG::CONTEXT_CORE_PROFILE_BIT_ABR;
+	profile.contextFlag = kengine::CONTEXT_FLAG::CONTEXT_DEBUG_BIT_ARB;
+	profile.profileMask = kengine::CONTEXT_FLAG::CONTEXT_CORE_PROFILE_BIT_ARB;
 
 	if (m_renderingSystem != nullptr)
 		m_renderingSystem.reset();
@@ -85,21 +81,19 @@ void demo::splash::onWindowReady(kengine::window* window)
 		assert(false && "splash::onWindowReady can't init rendering system!");
 	}
 
-	//glEnable(GL_DEBUG_OUTPUT);
-	//glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
-	//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(kengine::debugMessageCallback, nullptr);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
 	kengine::ShaderInfo shaders[] = {
-		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/splash.vert"},
-		{GL_FRAGMENT_SHADER,  std::string(K_PROJECT_PATH) + "/shaders/splash.frag"},
+		{GL_VERTEX_SHADER, std::string(K_PROJECT_PATH) + "/shaders/minimal_with_tex.vert"},
+		{GL_FRAGMENT_SHADER,  std::string(K_PROJECT_PATH) + "/shaders/minimal_with_tex.frag"},
 		{GL_NONE, ""}
 	};
 
 	if (!m_shader.loadShaders(shaders)) {
 		assert(false && "(!) SHOWSTOPPER - FAILED TO LOAD SHADERS!");
 	}
-
-	m_shader.useProgram();
 
 	/*
 		projection and camera settings
@@ -126,6 +120,7 @@ void demo::splash::onWindowReady(kengine::window* window)
 	kengine::vec3<float> up{ 0.0f, 1.0f, 0.0f };
 	m_cam.setCamera(eye, center, up);
 
+	m_shader.useProgram();
 	m_shader.setUniform("projectionTransform", false, m_cam.getProjection(false).data());
 	m_shader.setUniform("viewTransform", false, m_cam.lookAt().data());
 
@@ -149,46 +144,19 @@ void demo::splash::beforeMainLoopEvent()
 {
 	std::unordered_map<std::string, GLuint> shaderLocations = {
 		{"POSITION", 0 },
-		{"TEXTURE", 1 },
+		{"TEXCOORD_0", 1 },
+		{"NORMAL", 2 },
+		{"COLOR", 3 }
 	};
 
 	m_primitive = kengine::quad(324.0f, 324.0f, shaderLocations);
 
-	int width, height, channels;
-	stbi_set_flip_vertically_on_load(true);
-	//std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisabranco1080_fullhd.png";
-	std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisacolorido1080_fullhd.png";
-	//std::string filename = std::string(K_PROJECT_PATH) + "/assets/shisapreto1080_fullhd.png";
-	unsigned char* imageData = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+	kengine::img shisaImage(std::string(K_PROJECT_PATH) + "/assets/shisacolorido1080_fullhd.png");
 
-	if (imageData) {
-		GLint internalFormat = 0;
-		GLenum format = 0;
-
-		switch (channels) {
-		case 1:
-			internalFormat = GL_R8;
-			format = GL_RED;
-			break;
-
-		case 3:
-			internalFormat = GL_RGB8;
-			format = GL_RGB;
-			break;
-
-		case 4:
-			internalFormat = GL_RGBA8;
-			format = GL_RGBA;
-			break;
-		}
-
-		m_texture.create(kengine::TEXTURE_TYPE::_2D, 0, internalFormat, width, height, format, GL_UNSIGNED_BYTE, imageData);
+	if (shisaImage.m_imageData) {
+		m_texture.create(kengine::TEXTURE_TYPE::_2D, 0, shisaImage.m_internalFormat, shisaImage.m_width, shisaImage.m_height, shisaImage.m_format, GL_UNSIGNED_BYTE, shisaImage.m_imageData);
 		m_texture.bindTextureUnit(0);
-	} else {
-		std::cout << stbi_failure_reason() << std::endl;
 	}
-
-	stbi_image_free(imageData);
 
 	m_sceneTimer.setTimerInMs(5000); // 5 seconds
 	m_sceneTimer.start();
@@ -205,9 +173,7 @@ void demo::splash::update(int64_t frameTime)
 	static float currentTime = 0.0f;
 	currentTime += static_cast<float>(frameTime) / static_cast<float>(kengine::getHighResolutionTimerFrequency());
 
-	float circlePoints = static_cast<float>(M_PI) * 2.0f / 16.0f;
-	circlePoints = 1.0f;
-	
+	float circlePoints = static_cast<float>(M_PI) * 2.0f / 16.0f;	
 	float speed = 10.0f;
 	float x = std::cos(circlePoints * currentTime * speed) * 1.5f;
 	float y = std::sin(circlePoints * currentTime * speed) * 1.5f;

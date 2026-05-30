@@ -28,6 +28,7 @@
 
 #include <profile.hpp>
 #include <camera.hpp>
+#include <lighting.hpp>
 
 #include <vector>
 
@@ -53,7 +54,7 @@ namespace kengine {
 		void setProfile(kengine::profile* p) { m_profile = p; }
 
 	private:
-		int m_comboFlags = 0;
+		bool m_isSelected = true;
 		kengine::profile* m_profile = nullptr;
 	};
 
@@ -64,34 +65,50 @@ namespace kengine {
 		~camera_widget() {}
 
 		void draw();
+		void drawMenu();
 
 		void setCamera(kengine::camera* cam) { m_camera = cam; }
+		void setCameraControl(kengine::camera_control* camControl) { m_cameraControl = camControl; }
+
 		void setUpdate(bool update) { m_update = update; }
 		bool mustBeUpdate() const { return m_update; }
 
 	private:
+		bool m_isCameraSelected = false;
+		bool m_isCameraControlSelected = false;
 		bool m_update = false;
+
 		kengine::camera* m_camera = nullptr;
+		kengine::camera_control* m_cameraControl = nullptr;
 	};
 
 	/*
 	*/
-	class vectors_widget : public widget {
+	class PhongLightingWidget : public widget {
 	public:
-		~vectors_widget() {}
+		~PhongLightingWidget() {}
 
-		void drawMenu();
 		void draw();
+		void drawMenu();
+
+		void set(kengine::phong_light* l, kengine::phong_material* m) { m_light = l; m_material = m; }
+
+		void setUpdate(bool update) { m_update = update; }
+		bool mustBeUpdate() const { return m_update; }
 
 	private:
 		bool m_isSelected = false;
+		bool m_update = false;
+
+		kengine::phong_light* m_light = nullptr;
+		kengine::phong_material* m_material = nullptr;
 	};
 
 	/*
 	*/
-	class projection_widget : public widget {
+	class inspector_widget : public widget {
 	public:
-		~projection_widget() {}
+		~inspector_widget() {}
 
 		void drawMenu();
 		void draw();
@@ -123,9 +140,12 @@ namespace kengine {
 
 		void setProfile(kengine::profile* p) { m_profileWidget.setProfile(p); }
 
-		void setCameraWidget(kengine::camera* cam) { m_cameraWidget.setCamera(cam); }
+		void setCameraWidget(kengine::camera* cam, kengine::camera_control* camControl) { m_cameraWidget.setCamera(cam); m_cameraWidget.setCameraControl(camControl); }
 		camera_widget* getCameraWidget() { return &m_cameraWidget; }
 
+		void setPhongLighting(kengine::phong_light* l, kengine::phong_material* m) { m_phongLightingWidget.set(l, m); }
+		PhongLightingWidget* getPhongLightingWidget() { return &m_phongLightingWidget; }
+		
 		// ** test **
 		void setDemoExample(bool b) { m_demoExample = b; }
 		bool getDemoExample() const { return m_demoExample; }
@@ -137,8 +157,8 @@ namespace kengine {
 
 		profile_widget m_profileWidget;
 		camera_widget m_cameraWidget;
-		vectors_widget m_vectorsWidget;
-		projection_widget m_projectionWidget;
+		PhongLightingWidget m_phongLightingWidget;
+		inspector_widget m_inspectorWidget;
 
 		// ** test **
 		bool m_demoExample = false;

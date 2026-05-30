@@ -24,13 +24,23 @@
 */
 
 #include <media.hpp>
+#include <gl_wrapper.hpp>
 #include <logger.hpp>
 
 #include <string>
 #include <fstream>
 
+
+
 #include <nlohmann/json.hpp>
 
+#pragma warning(push, 0)
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+#pragma warning(pop)
+
+/*
+*/
 bool kengine::loadCameraConfig(camera* cam) {
 	nlohmann::json configJson;
 	
@@ -92,6 +102,8 @@ bool kengine::loadCameraConfig(camera* cam) {
 	return false;
 }
 
+/*
+*/
 bool kengine::saveCameraConfig(const camera* cam) {
 	nlohmann::json configJson;
 
@@ -136,4 +148,63 @@ bool kengine::saveCameraConfig(const camera* cam) {
 	}
 
 	return false;
+}
+
+/*
+*/
+kengine::img::img(const std::string& filename)
+{
+	load(filename);
+}
+
+kengine::img::~img()
+{
+	clear();
+
+	if(m_imageData)
+		stbi_image_free(m_imageData);
+}
+
+void kengine::img::load(const std::string& filename)
+{
+	clear();
+
+	stbi_set_flip_vertically_on_load(true);
+	m_imageData = stbi_load(filename.c_str(), &m_width, &m_height, &m_channels, 0);
+
+	if (m_imageData) {
+		switch (m_channels) {
+		case 1:
+			m_internalFormat = GL_R8;
+			m_format = GL_RED;
+			break;
+
+		case 3:
+			m_internalFormat = GL_RGB8;
+			m_format = GL_RGB;
+			break;
+
+		case 4:
+			m_internalFormat = GL_RGBA8;
+			m_format = GL_RGBA;
+			break;
+		}
+	}
+	else {
+		K_LOG_OUTPUT_RAW(stbi_failure_reason());
+	}
+}
+
+void kengine::img::clear()
+{
+	m_width = 0;
+	m_height = 0;
+	m_channels = 0;
+	m_internalFormat = 0;
+	m_format = 0;
+
+	if (m_imageData) {
+		stbi_image_free(m_imageData);
+		m_imageData = nullptr;
+	}
 }

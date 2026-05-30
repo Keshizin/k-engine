@@ -32,6 +32,27 @@ namespace kengine
 {
 	bool loadCameraConfig(camera* cam);
 	bool saveCameraConfig(const camera* cam);
+
+	class img {
+	public:
+		explicit img(const std::string& filename);
+		~img();
+
+		img(const img& copy) = delete; // copy constructor
+		img(img&& move) noexcept = delete; // move constructor
+		img& operator=(const img& copy) = delete; // copy assignment
+		img& operator=(img&&) = delete; // move assigment
+
+		void load(const std::string& filename);
+		void clear();
+
+		int m_width = 0;
+		int m_height = 0;
+		int m_channels = 0;
+		int m_internalFormat = 0;
+		unsigned int m_format = 0;
+		unsigned char* m_imageData = nullptr;
+	};
 }
 
 #endif
